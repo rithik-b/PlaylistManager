@@ -1,0 +1,10 @@
+﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
+	<icon-button id='add-button' icon='PlaylistManager.Icons.AddToPlaylist.png' anchor-pos-x='65' anchor-pos-y='40' pref-width='12' pref-height='9' click-event='open-modal' on-click='button-click' />
+	<modal id='modal' show-event='open-modal' hide-event='close-modal' clickerino-offerino-closerino="true" anchor-pos-y='15' size-delta-x='65' size-delta-y='75' move-to-center='false'>
+		<vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' anchor-pos-y='3' size-delta-y='0'>
+			<page-button event-click='list#PageUp' direction='Up' ignore-layout='true' anchor-min-y='0.8' anchor-pos-x='25' anchor-pos-y='9' pref-width='12'></page-button>
+			<list id='list' pref-height='50' select-cell='select-cell' list-style='List'></list>
+			<page-button event-click='list#PageDown' direction='Down' ignore-layout='true' anchor-min-y='-0.8' anchor-pos-x='25' anchor-pos-y='-16' pref-width='12'></page-button>
+		</vertical>
+	</modal>
+</bg>
