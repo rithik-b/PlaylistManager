@@ -9,6 +9,8 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using IPALogger = IPA.Logging.Logger;
 using PlaylistManager.UI;
+using HarmonyLib;
+using System.Reflection;
 
 namespace PlaylistManager
 {
@@ -17,6 +19,9 @@ namespace PlaylistManager
     {
         internal static Plugin Instance { get; private set; }
         internal static IPALogger Log { get; private set; }
+
+        public const string HarmonyId = "com.github.rithik-b.PlaylistManager";
+        internal static Harmony harmony;
 
         [Init]
         /// <summary>
@@ -29,6 +34,7 @@ namespace PlaylistManager
             Instance = this;
             Log = logger;
             Log.Info("PlaylistManager initialized.");
+            harmony = new Harmony(HarmonyId);
         }
 
         #region BSIPA Config
@@ -46,6 +52,7 @@ namespace PlaylistManager
         [OnStart]
         public void OnApplicationStart()
         {
+            ApplyHarmonyPatches();
             BS_Utils.Utilities.BSEvents.lateMenuSceneLoadedFresh += BSEvents_menuSceneLoadedFresh;
             BS_Utils.Utilities.BSEvents.levelSelected += BSEvents_levelSelected;
         }
@@ -53,12 +60,29 @@ namespace PlaylistManager
         private void BSEvents_menuSceneLoadedFresh(ScenesTransitionSetupDataSO data)
         {
             AddPlaylistController.instance.Setup();
+            PlaylistViewController.instance.Setup();
         }
 
         private void BSEvents_levelSelected(LevelCollectionViewController viewController, IPreviewBeatmapLevel beatmapLevel)
         {
             AddPlaylistController.instance.LevelSelected(beatmapLevel);
+            PlaylistViewController.instance.LevelSelected(beatmapLevel);
         }
+
+        public static void ApplyHarmonyPatches()
+        {
+            try
+            {
+                Log.Debug("Applying Harmony patches.");
+                harmony.PatchAll(Assembly.GetExecutingAssembly());
+            }
+            catch (Exception ex)
+            {
+                Log.Critical("Error applying Harmony patches: " + ex.Message);
+                Log.Debug(ex);
+            }
+        }
+
 
         [OnExit]
         public void OnApplicationQuit()

@@ -15,6 +15,7 @@ namespace PlaylistManager.UI
     class AddPlaylistController : NotifiableSingleton<AddPlaylistController>
     {
         private StandardLevelDetailViewController standardLevel;
+        private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
 
         [UIComponent("list")]
         public CustomListTableData customListTableData;
@@ -32,6 +33,7 @@ namespace PlaylistManager.UI
         internal void Setup()
         {
             standardLevel = Resources.FindObjectsOfTypeAll<StandardLevelDetailViewController>().First();
+            annotatedBeatmapLevelCollectionsViewController = Resources.FindObjectsOfTypeAll<AnnotatedBeatmapLevelCollectionsViewController>().First();
             BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.AddPlaylist.bsml"), standardLevel.transform.Find("LevelDetail").gameObject, this);
             addButtonTransform.localScale *= 0.7f;
         }
@@ -39,7 +41,7 @@ namespace PlaylistManager.UI
         internal void LevelSelected(IPreviewBeatmapLevel level)
         {
             this.level = level;
-            if (level.levelID.EndsWith(" WIP"))
+            if (level.levelID.EndsWith(" WIP") || (annotatedBeatmapLevelCollectionsViewController.isActiveAndEnabled && annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection is CustomPlaylistSO))
             {
                 addButtonTransform.gameObject.SetActive(false);
             }
@@ -70,6 +72,10 @@ namespace PlaylistManager.UI
         {
             loadedplaylists[index].editBeatMapLevels(loadedplaylists[index].beatmapLevelCollection.beatmapLevels.Append<IPreviewBeatmapLevel>(level).ToArray());
             customListTableData.tableView.ClearSelection();
+            if(annotatedBeatmapLevelCollectionsViewController.isActiveAndEnabled)
+            {
+                annotatedBeatmapLevelCollectionsViewController.SetData(HarmonyPatches.PlaylistCollectionOverride.otherCustomBeatmapLevelCollections, annotatedBeatmapLevelCollectionsViewController.selectedItemIndex, false);
+            }
             modal.Hide(true);
         }
 
