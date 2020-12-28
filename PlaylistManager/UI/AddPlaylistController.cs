@@ -8,6 +8,7 @@ using System.Reflection;
 using UnityEngine;
 using PlaylistLoaderLite;
 using HMUI;
+using System.Collections.Generic;
 
 namespace PlaylistManager.UI
 {
@@ -27,7 +28,7 @@ namespace PlaylistManager.UI
         [UIComponent("modal")]
         private ModalView modal;
 
-        private Playlist[] loadedplaylists;
+        private List<Playlist> loadedplaylists;
         internal void Setup()
         {
             standardLevel = Resources.FindObjectsOfTypeAll<StandardLevelDetailViewController>().First();
@@ -35,10 +36,22 @@ namespace PlaylistManager.UI
             addButtonTransform.localScale *= 0.7f;
         }
 
+        internal void LevelSelected(IPreviewBeatmapLevel level)
+        {
+            this.level = level;
+            if (level.levelID.EndsWith(" WIP"))
+            {
+                addButtonTransform.gameObject.SetActive(false);
+            }
+            else
+            {
+                addButtonTransform.gameObject.SetActive(true);
+            }
+        }
+
         [UIAction("button-click")]
         internal void ShowPlaylists()
         {
-            level = standardLevel.selectedDifficultyBeatmap.level;
             customListTableData.data.Clear();
             loadedplaylists = LoadPlaylistScript.loadedPlaylists;
 
@@ -58,6 +71,13 @@ namespace PlaylistManager.UI
             loadedplaylists[index].editBeatMapLevels(loadedplaylists[index].beatmapLevelCollection.beatmapLevels.Append<IPreviewBeatmapLevel>(level).ToArray());
             customListTableData.tableView.ClearSelection();
             modal.Hide(true);
+        }
+
+        [UIAction("keyboard-enter")]
+        internal void CreatePlaylist(string playlistName)
+        {
+            Playlist.CreatePlaylist(playlistName, "PlaylistManager");
+            ShowPlaylists();
         }
     }
 }

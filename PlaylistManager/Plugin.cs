@@ -47,11 +47,17 @@ namespace PlaylistManager
         public void OnApplicationStart()
         {
             BS_Utils.Utilities.BSEvents.lateMenuSceneLoadedFresh += BSEvents_menuSceneLoadedFresh;
+            BS_Utils.Utilities.BSEvents.levelSelected += BSEvents_levelSelected;
         }
 
         private void BSEvents_menuSceneLoadedFresh(ScenesTransitionSetupDataSO data)
         {
             AddPlaylistController.instance.Setup();
+        }
+
+        private void BSEvents_levelSelected(LevelCollectionViewController viewController, IPreviewBeatmapLevel beatmapLevel)
+        {
+            AddPlaylistController.instance.LevelSelected(beatmapLevel);
         }
 
         [OnExit]
