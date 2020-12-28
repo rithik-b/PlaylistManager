@@ -66,9 +66,9 @@ namespace PlaylistManager.UI
             Playlist selectedPlaylist = LoadPlaylistScript.loadedPlaylists[annotatedBeatmapLevelCollectionsViewController.selectedItemIndex - 2];
             List<IPreviewBeatmapLevel> newBeatmapList = selectedPlaylist.beatmapLevelCollection.beatmapLevels.ToList();
             newBeatmapList.Remove(level);
-            LoadPlaylistScript.loadedPlaylists[annotatedBeatmapLevelCollectionsViewController.selectedItemIndex - 2].editBeatMapLevels(newBeatmapList.ToArray());
+            selectedPlaylist.editBeatMapLevels(newBeatmapList.ToArray());
             annotatedBeatmapLevelCollectionsViewController.SetData(HarmonyPatches.PlaylistCollectionOverride.otherCustomBeatmapLevelCollections, annotatedBeatmapLevelCollectionsViewController.selectedItemIndex, false);
-            levelCollectionTableView.RefreshLevelsAvailability();
+            levelCollectionViewController.SetData(selectedPlaylist.beatmapLevelCollection, "", null, false, null);
         }
     }
 }
