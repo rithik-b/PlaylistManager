@@ -1,12 +1,23 @@
 ﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
-	<icon-button id='remove-button' icon='PlaylistManager.Icons.RemoveFromPlaylist.png' anchor-pos-x='65' anchor-pos-y='42' pref-width='10' pref-height='10' click-event='open-modal' on-click='button-click'/>
-	<modal id='modal' show-event='open-modal' hide-event='close-modal' clickerino-offerino-closerino="true" anchor-pos-y='15' size-delta-x='60' size-delta-y='30' move-to-center='false'>
-		<vertical>
-			<text id='warning-message' word-wrapping='true' />
-			<horizontal>
-				<button id='yes' text='Yes' on-click='delete-confirm' click-event='close-modal'/>
-				<button id='no' text='No' click-event='close-modal'/>
-			</horizontal>
-		</vertical>
-	</modal>
+  <background id='bg' bg='panel-fade-gradient' bg-color='black'>
+      <vertical>
+        <button id='download'  text='Download All Songs' />
+        <button id='delete'  text='Delete Playlist' on-click='delete-click' click-event='open-delete'/>
+    </vertical>
+    <modal id='delete-modal' show-event='open-delete' hide-event='close-delete' clickerino-offerino-closerino="true" anchor-pos-y='15' size-delta-x='60' size-delta-y='30' move-to-center='false'>
+      <vertical>
+        <text id='warning-message' word-wrapping='true' />
+        <horizontal>
+          <button id='yes' text='Yes' on-click='delete-confirm' click-event='close-delete'/>
+          <button id='no' text='No' click-event='close-delete'/>
+        </horizontal>
+      </vertical>
+    </modal>
+    <modal id='ok-modal' show-event='open-ok' hide-event='close-ok' clickerino-offerino-closerino="true" anchor-pos-y='15' size-delta-x='60' size-delta-y='30' move-to-center='false'>
+      <vertical>
+        <text id='ok-message' word-wrapping='true' />
+        <button id='ok' text='Ok' click-event='close-ok'/>
+      </vertical>
+    </modal>
+  </background>
 </bg>

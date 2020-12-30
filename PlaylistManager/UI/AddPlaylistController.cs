@@ -55,7 +55,7 @@ namespace PlaylistManager.UI
         internal void ShowPlaylists()
         {
             customListTableData.data.Clear();
-            loadedplaylists = LoadPlaylistScript.loadedPlaylists;
+            loadedplaylists = Playlist.loadedPlaylists;
 
             foreach (Playlist playlist in loadedplaylists)
             {

@@ -55,18 +55,25 @@ namespace PlaylistManager
             ApplyHarmonyPatches();
             BS_Utils.Utilities.BSEvents.lateMenuSceneLoadedFresh += BSEvents_menuSceneLoadedFresh;
             BS_Utils.Utilities.BSEvents.levelSelected += BSEvents_levelSelected;
+            BS_Utils.Utilities.BSEvents.levelPackSelected += BSEvents_levelPackSelected;
         }
 
         private void BSEvents_menuSceneLoadedFresh(ScenesTransitionSetupDataSO data)
         {
             AddPlaylistController.instance.Setup();
+            RemoveFromPlaylistController.instance.Setup();
             PlaylistViewController.instance.Setup();
         }
 
         private void BSEvents_levelSelected(LevelCollectionViewController viewController, IPreviewBeatmapLevel beatmapLevel)
         {
             AddPlaylistController.instance.LevelSelected(beatmapLevel);
-            PlaylistViewController.instance.LevelSelected(beatmapLevel);
+            RemoveFromPlaylistController.instance.LevelSelected(beatmapLevel);
+        }
+
+        private void BSEvents_levelPackSelected(LevelSelectionNavigationController navigationController, IBeatmapLevelPack levelPack)
+        {
+            PlaylistViewController.instance.LevelPackSelected();
         }
 
         public static void ApplyHarmonyPatches()

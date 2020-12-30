@@ -3,7 +3,6 @@ using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using HMUI;
 using PlaylistLoaderLite;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using TMPro;
@@ -13,62 +12,68 @@ namespace PlaylistManager.UI
 {
     class PlaylistViewController : NotifiableSingleton<PlaylistViewController>
     {
-        private StandardLevelDetailViewController standardLevel;
+        LevelPackDetailViewController levelPackDetailViewController;
         private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
-        private LevelCollectionTableView levelCollectionTableView;
         private LevelCollectionViewController levelCollectionViewController;
 
-        //Currently selected song data
-        public IPreviewBeatmapLevel level;
+        // Currently selected map pack
+        private IAnnotatedBeatmapLevelCollection levelCollection;
 
-        [UIComponent("remove-button")]
-        private Transform removeButtonTransform;
-
-        [UIComponent("modal")]
-        private ModalView modal;
+        [UIComponent("bg")]
+        private Transform bgTransform;
 
         [UIComponent("warning-message")]
         private TextMeshProUGUI warningMessage;
 
+        [UIComponent("ok-message")]
+        private TextMeshProUGUI okMessage;
+
+        [UIComponent("ok-modal")]
+        private ModalView okModal;
+
         internal void Setup()
         {
-            standardLevel = Resources.FindObjectsOfTypeAll<StandardLevelDetailViewController>().First();
+            levelPackDetailViewController = Resources.FindObjectsOfTypeAll<LevelPackDetailViewController>().First();
             annotatedBeatmapLevelCollectionsViewController = Resources.FindObjectsOfTypeAll<AnnotatedBeatmapLevelCollectionsViewController>().First();
-            levelCollectionTableView = Resources.FindObjectsOfTypeAll<LevelCollectionTableView>().First();
             levelCollectionViewController = Resources.FindObjectsOfTypeAll<LevelCollectionViewController>().First();
-            BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.PlaylistView.bsml"), standardLevel.transform.Find("LevelDetail").gameObject, this);
-            removeButtonTransform.localScale *= 0.7f;
+            BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.PlaylistView.bsml"), levelPackDetailViewController.transform.Find("Detail").gameObject, this);
         }
 
-        internal void LevelSelected(IPreviewBeatmapLevel level)
+        internal void LevelPackSelected()
         {
-            this.level = level;
-            if (annotatedBeatmapLevelCollectionsViewController.isActiveAndEnabled && annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection is CustomPlaylistSO)
+            levelCollection = annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection;
+            if (annotatedBeatmapLevelCollectionsViewController.isActiveAndEnabled && levelCollection is CustomPlaylistSO)
             {
-                removeButtonTransform.gameObject.SetActive(true);
+                bgTransform.gameObject.SetActive(true);
             }
             else
             {
-                removeButtonTransform.gameObject.SetActive(false);
+                bgTransform.gameObject.SetActive(false);
             }
         }
 
-        [UIAction("button-click")]
+        [UIAction("delete-click")]
         internal void DisplayWarning()
         {
-            warningMessage.text = string.Format("Are you sure you would like to remove \n{0}\n from the playlist?", level.songName);
+            warningMessage.text = string.Format("Are you sure you would like to delete \n{0}?", levelCollection.collectionName);
         }
 
         [UIAction("delete-confirm")]
-        internal void RemoveSong()
+        internal void DeletePlaylist()
         {
-            levelCollectionTableView.ClearSelection();
-            Playlist selectedPlaylist = LoadPlaylistScript.loadedPlaylists[annotatedBeatmapLevelCollectionsViewController.selectedItemIndex - 2];
-            List<IPreviewBeatmapLevel> newBeatmapList = selectedPlaylist.beatmapLevelCollection.beatmapLevels.ToList();
-            newBeatmapList.Remove(level);
-            selectedPlaylist.editBeatMapLevels(newBeatmapList.ToArray());
-            annotatedBeatmapLevelCollectionsViewController.SetData(HarmonyPatches.PlaylistCollectionOverride.otherCustomBeatmapLevelCollections, annotatedBeatmapLevelCollectionsViewController.selectedItemIndex, false);
-            levelCollectionViewController.SetData(selectedPlaylist.beatmapLevelCollection, "", null, false, null);
+            if (Playlist.DeletePlaylist(annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection))
+            {
+                annotatedBeatmapLevelCollectionsViewController.SetData(HarmonyPatches.PlaylistCollectionOverride.otherCustomBeatmapLevelCollections, annotatedBeatmapLevelCollectionsViewController.selectedItemIndex - 1, false);
+                IAnnotatedBeatmapLevelCollection selectedCollection = annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection;
+                levelCollectionViewController.SetData(selectedCollection.beatmapLevelCollection, selectedCollection.collectionName, selectedCollection.coverImage, false, null);
+                levelPackDetailViewController.SetData((IBeatmapLevelPack)selectedCollection);
+                LevelPackSelected();
+            }
+            else
+            {
+                okMessage.text = "There was an error deleting the Playlist";
+                okModal.Show(true);
+            }
         }
     }
 }
