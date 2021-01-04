@@ -9,19 +9,17 @@ using UnityEngine;
 using PlaylistLoaderLite;
 using HMUI;
 using System.Collections.Generic;
+using PlaylistManager.Interfaces;
 
 namespace PlaylistManager.UI
 {
-    class AddPlaylistController : NotifiableSingleton<AddPlaylistController>
+    class AddPlaylistController: ILevelCollectionUpdater
     {
         private StandardLevelDetailViewController standardLevel;
         private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
 
         [UIComponent("list")]
         public CustomListTableData customListTableData;
-
-        //Currently selected song data
-        public IPreviewBeatmapLevel level;
 
         [UIComponent("add-button")]
         private Transform addButtonTransform;
@@ -30,25 +28,12 @@ namespace PlaylistManager.UI
         private ModalView modal;
 
         private List<Playlist> loadedplaylists;
-        internal void Setup()
+        AddPlaylistController(StandardLevelDetailViewController standardLevel, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController)
         {
-            standardLevel = Resources.FindObjectsOfTypeAll<StandardLevelDetailViewController>().First();
-            annotatedBeatmapLevelCollectionsViewController = Resources.FindObjectsOfTypeAll<AnnotatedBeatmapLevelCollectionsViewController>().First();
+            this.standardLevel = standardLevel;
+            this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
             BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.AddPlaylist.bsml"), standardLevel.transform.Find("LevelDetail").gameObject, this);
             addButtonTransform.localScale *= 0.7f;
-        }
-
-        internal void LevelSelected(IPreviewBeatmapLevel level)
-        {
-            this.level = level;
-            if (level.levelID.EndsWith(" WIP") || (annotatedBeatmapLevelCollectionsViewController.isActiveAndEnabled && annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection is CustomPlaylistSO))
-            {
-                addButtonTransform.gameObject.SetActive(false);
-            }
-            else
-            {
-                addButtonTransform.gameObject.SetActive(true);
-            }
         }
 
         [UIAction("button-click")]
@@ -70,7 +55,7 @@ namespace PlaylistManager.UI
         [UIAction("select-cell")]
         internal void OnCellSelect(TableView tableView, int index)
         {
-            loadedplaylists[index].editBeatMapLevels(loadedplaylists[index].beatmapLevelCollection.beatmapLevels.Append<IPreviewBeatmapLevel>(level).ToArray());
+            loadedplaylists[index].editBeatMapLevels(loadedplaylists[index].beatmapLevelCollection.beatmapLevels.Append<IPreviewBeatmapLevel>(standardLevel.selectedDifficultyBeatmap.level).ToArray());
             customListTableData.tableView.ClearSelection();
             if(annotatedBeatmapLevelCollectionsViewController.isActiveAndEnabled)
             {
@@ -84,6 +69,19 @@ namespace PlaylistManager.UI
         {
             Playlist.CreatePlaylist(playlistName, "PlaylistManager");
             ShowPlaylists();
+        }
+
+        public void LevelCollectionUpdated(IAnnotatedBeatmapLevelCollection beatmapLevelCollection)
+        {
+            IPreviewBeatmapLevel level = standardLevel.selectedDifficultyBeatmap.level;
+            if (level.levelID.EndsWith(" WIP") || (annotatedBeatmapLevelCollectionsViewController.isActiveAndEnabled && beatmapLevelCollection is CustomPlaylistSO))
+            {
+                addButtonTransform.gameObject.SetActive(false);
+            }
+            else
+            {
+                addButtonTransform.gameObject.SetActive(true);
+            }
         }
     }
 }

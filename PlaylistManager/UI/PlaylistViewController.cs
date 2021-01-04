@@ -7,12 +7,13 @@ using System.Linq;
 using System.Reflection;
 using TMPro;
 using UnityEngine;
+using PlaylistManager.Interfaces;
 
 namespace PlaylistManager.UI
 {
-    class PlaylistViewController : NotifiableSingleton<PlaylistViewController>
+    class PlaylistViewController : ILevelPackUpdater
     {
-        LevelPackDetailViewController levelPackDetailViewController;
+        private LevelPackDetailViewController levelPackDetailViewController;
         private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
         private LevelCollectionViewController levelCollectionViewController;
 
@@ -30,26 +31,12 @@ namespace PlaylistManager.UI
 
         [UIComponent("ok-modal")]
         private ModalView okModal;
-
-        internal void Setup()
+        PlaylistViewController(LevelPackDetailViewController levelPackDetailViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, LevelCollectionViewController levelCollectionViewController)
         {
-            levelPackDetailViewController = Resources.FindObjectsOfTypeAll<LevelPackDetailViewController>().First();
-            annotatedBeatmapLevelCollectionsViewController = Resources.FindObjectsOfTypeAll<AnnotatedBeatmapLevelCollectionsViewController>().First();
-            levelCollectionViewController = Resources.FindObjectsOfTypeAll<LevelCollectionViewController>().First();
+            this.levelPackDetailViewController = levelPackDetailViewController;
+            this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
+            this.levelCollectionViewController = levelCollectionViewController;
             BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.PlaylistView.bsml"), levelPackDetailViewController.transform.Find("Detail").gameObject, this);
-        }
-
-        internal void LevelPackSelected()
-        {
-            levelCollection = annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection;
-            if (annotatedBeatmapLevelCollectionsViewController.isActiveAndEnabled && levelCollection is CustomPlaylistSO)
-            {
-                bgTransform.gameObject.SetActive(true);
-            }
-            else
-            {
-                bgTransform.gameObject.SetActive(false);
-            }
         }
 
         [UIAction("delete-click")]
@@ -67,12 +54,25 @@ namespace PlaylistManager.UI
                 IAnnotatedBeatmapLevelCollection selectedCollection = annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection;
                 levelCollectionViewController.SetData(selectedCollection.beatmapLevelCollection, selectedCollection.collectionName, selectedCollection.coverImage, false, null);
                 levelPackDetailViewController.SetData((IBeatmapLevelPack)selectedCollection);
-                LevelPackSelected();
+                LevelPackUpdated();
             }
             else
             {
                 okMessage.text = "There was an error deleting the Playlist";
                 okModal.Show(true);
+            }
+        }
+
+        public void LevelPackUpdated()
+        {
+            levelCollection = annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection;
+            if (annotatedBeatmapLevelCollectionsViewController.isActiveAndEnabled && levelCollection is CustomPlaylistSO)
+            {
+                bgTransform.gameObject.SetActive(true);
+            }
+            else
+            {
+                bgTransform.gameObject.SetActive(false);
             }
         }
     }

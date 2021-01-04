@@ -1,20 +1,13 @@
 ﻿using IPA;
-using IPA.Config;
-using IPA.Config.Stores;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
-using UnityEngine.SceneManagement;
 using IPALogger = IPA.Logging.Logger;
-using PlaylistManager.UI;
 using HarmonyLib;
 using System.Reflection;
+using SiraUtil.Zenject;
+using PlaylistManager.Installers;
 
 namespace PlaylistManager
 {
-    [Plugin(RuntimeOptions.SingleStartInit)]
+    [Plugin(RuntimeOptions.DynamicInit)]
     public class Plugin
     {
         internal static Plugin Instance { get; private set; }
@@ -29,12 +22,13 @@ namespace PlaylistManager
         /// [Init] methods that use a Constructor or called before regular methods like InitWithConfig.
         /// Only use [Init] with one Constructor.
         /// </summary>
-        public void Init(IPALogger logger)
+        public Plugin(IPALogger logger, Zenjector zenjector)
         {
             Instance = this;
             Log = logger;
             Log.Info("PlaylistManager initialized.");
             harmony = new Harmony(HarmonyId);
+            zenjector.OnMenu<PlaylistViewInstaller>();
         }
 
         #region BSIPA Config
@@ -49,53 +43,16 @@ namespace PlaylistManager
         */
         #endregion
 
-        [OnStart]
-        public void OnApplicationStart()
+        [OnEnable]
+        public void OnEnable()
         {
-            ApplyHarmonyPatches();
-            BS_Utils.Utilities.BSEvents.lateMenuSceneLoadedFresh += BSEvents_menuSceneLoadedFresh;
-            BS_Utils.Utilities.BSEvents.levelSelected += BSEvents_levelSelected;
-            BS_Utils.Utilities.BSEvents.levelPackSelected += BSEvents_levelPackSelected;
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
         }
 
-        private void BSEvents_menuSceneLoadedFresh(ScenesTransitionSetupDataSO data)
+        [OnDisable]
+        public void OnDisable()
         {
-            AddPlaylistController.instance.Setup();
-            RemoveFromPlaylistController.instance.Setup();
-            PlaylistViewController.instance.Setup();
-        }
-
-        private void BSEvents_levelSelected(LevelCollectionViewController viewController, IPreviewBeatmapLevel beatmapLevel)
-        {
-            AddPlaylistController.instance.LevelSelected(beatmapLevel);
-            RemoveFromPlaylistController.instance.LevelSelected(beatmapLevel);
-        }
-
-        private void BSEvents_levelPackSelected(LevelSelectionNavigationController navigationController, IBeatmapLevelPack levelPack)
-        {
-            PlaylistViewController.instance.LevelPackSelected();
-        }
-
-        public static void ApplyHarmonyPatches()
-        {
-            try
-            {
-                Log.Debug("Applying Harmony patches.");
-                harmony.PatchAll(Assembly.GetExecutingAssembly());
-            }
-            catch (Exception ex)
-            {
-                Log.Critical("Error applying Harmony patches: " + ex.Message);
-                Log.Debug(ex);
-            }
-        }
-
-
-        [OnExit]
-        public void OnApplicationQuit()
-        {
-            Log.Debug("OnApplicationQuit");
-
+            harmony.UnpatchAll(HarmonyId);
         }
     }
 }
