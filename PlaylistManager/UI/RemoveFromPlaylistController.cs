@@ -1,22 +1,18 @@
 ﻿using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
-using BeatSaberMarkupLanguage.Components;
-using HMUI;
-using PlaylistLoaderLite;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using TMPro;
 using UnityEngine;
-using Zenject;
-using System;
 using PlaylistManager.Interfaces;
+using BeatSaberPlaylistsLib.Types;
+using System;
+using PlaylistManager.Utilities;
 
 namespace PlaylistManager.UI
 {
     class RemoveFromPlaylistController : ILevelCollectionUpdater
     {
-        private StandardLevelDetailViewController standardLevel;
+        private StandardLevelDetailViewController standardLevelDetailViewController;
         private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
         private LevelCollectionViewController levelCollectionViewController;
 
@@ -26,9 +22,11 @@ namespace PlaylistManager.UI
         [UIComponent("warning-message")]
         private TextMeshProUGUI warningMessage;
 
+        private bool buttonActive;
+
         RemoveFromPlaylistController(StandardLevelDetailViewController standardLevel, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, LevelCollectionViewController levelCollectionViewController)
         {
-            this.standardLevel = standardLevel;
+            this.standardLevelDetailViewController = standardLevel;
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
             this.levelCollectionViewController = levelCollectionViewController;
             BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.RemoveFromPlaylist.bsml"), standardLevel.transform.Find("LevelDetail").gameObject, this);
@@ -38,30 +36,19 @@ namespace PlaylistManager.UI
         [UIAction("button-click")]
         internal void DisplayWarning()
         {
-            warningMessage.text = string.Format("Are you sure you would like to remove \n{0}\n from the playlist?", standardLevel.selectedDifficultyBeatmap.level.songName);
+            warningMessage.text = string.Format("Are you sure you would like to remove \n{0}\n from the playlist?", standardLevelDetailViewController.selectedDifficultyBeatmap.level.songName);
         }
 
         [UIAction("delete-confirm")]
         internal void RemoveSong()
-        {
-            Playlist selectedPlaylist = Playlist.loadedPlaylists[annotatedBeatmapLevelCollectionsViewController.selectedItemIndex - 2];
-            List<IPreviewBeatmapLevel> newBeatmapList = selectedPlaylist.beatmapLevelCollection.beatmapLevels.ToList();
-            newBeatmapList.Remove(standardLevel.selectedDifficultyBeatmap.level);
-            selectedPlaylist.editBeatMapLevels(newBeatmapList.ToArray());
+        {   
+            BeatSaberPlaylistsLib.Types.IPlaylist selectedPlaylist = PlaylistLibUtils.LibDefaultManager.GetAllPlaylists()[annotatedBeatmapLevelCollectionsViewController.selectedItemIndex - 2];
+            selectedPlaylist.Remove((IPlaylistSong)standardLevelDetailViewController.selectedDifficultyBeatmap.level);
             annotatedBeatmapLevelCollectionsViewController.SetData(HarmonyPatches.PlaylistCollectionOverride.otherCustomBeatmapLevelCollections, annotatedBeatmapLevelCollectionsViewController.selectedItemIndex, false);
             levelCollectionViewController.SetData(selectedPlaylist.beatmapLevelCollection, selectedPlaylist.collectionName, selectedPlaylist.coverImage, false, null);
         }
 
-        public void LevelCollectionUpdated(IAnnotatedBeatmapLevelCollection beatmapLevelCollection)
-        {
-            if (annotatedBeatmapLevelCollectionsViewController.isActiveAndEnabled && beatmapLevelCollection is CustomPlaylistSO)
-            {
-                removeButtonTransform.gameObject.SetActive(true);
-            }
-            else
-            {
-                removeButtonTransform.gameObject.SetActive(false);
-            }
-        }
+        public void LevelCollectionUpdated(IAnnotatedBeatmapLevelCollection beatmapLevelCollection) =>
+            removeButtonTransform.gameObject.SetActive(annotatedBeatmapLevelCollectionsViewController.isActiveAndEnabled && beatmapLevelCollection is Playlist);
     }
 }

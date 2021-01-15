@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using HarmonyLib;
+using PlaylistManager.Utilities;
 
 namespace PlaylistManager.HarmonyPatches
 {
@@ -10,7 +10,17 @@ namespace PlaylistManager.HarmonyPatches
         typeof(IReadOnlyList<IAnnotatedBeatmapLevelCollection>), typeof(int), typeof(bool)})]
     public class PlaylistCollectionOverride
     {
+        private static IAnnotatedBeatmapLevelCollection[] loadedPlaylists
+        {
+            get
+            {
+                return (IAnnotatedBeatmapLevelCollection[]) PlaylistLibUtils.LibDefaultManager.GetAllPlaylists(true);
+            }
+        }
+
         internal static IAnnotatedBeatmapLevelCollection[] otherCustomBeatmapLevelCollections;
+        internal static bool isCustomBeatmapLevelPack = false;
+
         internal static void Prefix(ref IAnnotatedBeatmapLevelCollection[] annotatedBeatmapLevelCollections)
         {
             // Check if annotatedBeatmapLevelCollections is empty (Versus Tab)
@@ -19,10 +29,33 @@ namespace PlaylistManager.HarmonyPatches
             // Checks if this is the playlists view
             if (annotatedBeatmapLevelCollections[0] is CustomBeatmapLevelPack)
             {
-                otherCustomBeatmapLevelCollections = new IAnnotatedBeatmapLevelCollection[2];
-                otherCustomBeatmapLevelCollections[0] = annotatedBeatmapLevelCollections[0];
-                otherCustomBeatmapLevelCollections[1] = annotatedBeatmapLevelCollections[1];
+                isCustomBeatmapLevelPack = true;
+                IAnnotatedBeatmapLevelCollection[] allCustomBeatmapLevelCollections = new IAnnotatedBeatmapLevelCollection[loadedPlaylists.Length + annotatedBeatmapLevelCollections.Length];
+                otherCustomBeatmapLevelCollections = new IAnnotatedBeatmapLevelCollection[annotatedBeatmapLevelCollections.Length];
+                for (int i = 0; i < annotatedBeatmapLevelCollections.Length; i++)
+                {
+                    allCustomBeatmapLevelCollections[i] = annotatedBeatmapLevelCollections[i];
+                    otherCustomBeatmapLevelCollections[i] = annotatedBeatmapLevelCollections[i];
+                }
+
+                int j = 0;
+                for (int i = annotatedBeatmapLevelCollections.Length; i < allCustomBeatmapLevelCollections.Length; i++)
+                {
+                    allCustomBeatmapLevelCollections[i] = loadedPlaylists[j++];
+                }
+
+                annotatedBeatmapLevelCollections = allCustomBeatmapLevelCollections;
             }
+            else
+            {
+                isCustomBeatmapLevelPack = false;
+            }
+        }
+
+        public static int RefreshPlaylists()
+        {
+            BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.RequestRefresh("PlaylistManager (Plugin)");
+            return loadedPlaylists.Length;
         }
     }
 }

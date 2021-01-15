@@ -1,17 +1,16 @@
 ﻿using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
-using BeatSaberMarkupLanguage.Components;
 using HMUI;
-using PlaylistLoaderLite;
-using System.Linq;
 using System.Reflection;
 using TMPro;
 using UnityEngine;
 using PlaylistManager.Interfaces;
+using BeatSaberPlaylistsLib.Types;
+using IPA.Utilities;
 
 namespace PlaylistManager.UI
 {
-    class PlaylistViewController : ILevelPackUpdater
+    class PlaylistViewController : ILevelCollectionUpdater
     {
         private LevelPackDetailViewController levelPackDetailViewController;
         private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
@@ -31,12 +30,14 @@ namespace PlaylistManager.UI
 
         [UIComponent("ok-modal")]
         private ModalView okModal;
+
         PlaylistViewController(LevelPackDetailViewController levelPackDetailViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, LevelCollectionViewController levelCollectionViewController)
         {
             this.levelPackDetailViewController = levelPackDetailViewController;
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
             this.levelCollectionViewController = levelCollectionViewController;
             BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.PlaylistView.bsml"), levelPackDetailViewController.transform.Find("Detail").gameObject, this);
+            bgTransform.gameObject.SetActive(false);
         }
 
         [UIAction("delete-click")]
@@ -48,6 +49,7 @@ namespace PlaylistManager.UI
         [UIAction("delete-confirm")]
         internal void DeletePlaylist()
         {
+            /*
             if (Playlist.DeletePlaylist(annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection))
             {
                 annotatedBeatmapLevelCollectionsViewController.SetData(HarmonyPatches.PlaylistCollectionOverride.otherCustomBeatmapLevelCollections, annotatedBeatmapLevelCollectionsViewController.selectedItemIndex - 1, false);
@@ -61,12 +63,12 @@ namespace PlaylistManager.UI
                 okMessage.text = "There was an error deleting the Playlist";
                 okModal.Show(true);
             }
+            */
         }
 
-        public void LevelPackUpdated()
+        public void LevelCollectionUpdated(IAnnotatedBeatmapLevelCollection beatmapLevelCollection)
         {
-            levelCollection = annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection;
-            if (annotatedBeatmapLevelCollectionsViewController.isActiveAndEnabled && levelCollection is CustomPlaylistSO)
+            if (annotatedBeatmapLevelCollectionsViewController.isActiveAndEnabled && beatmapLevelCollection is Playlist)
             {
                 bgTransform.gameObject.SetActive(true);
             }

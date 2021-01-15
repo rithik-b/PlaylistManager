@@ -1,21 +1,21 @@
 ﻿using System;
-using System.Linq;
 using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using static BeatSaberMarkupLanguage.Components.CustomListTableData;
 using System.Reflection;
 using UnityEngine;
-using PlaylistLoaderLite;
 using HMUI;
-using System.Collections.Generic;
 using PlaylistManager.Interfaces;
+using PlaylistManager.HarmonyPatches;
+using BeatSaberPlaylistsLib.Types;
+using PlaylistManager.Utilities;
 
 namespace PlaylistManager.UI
 {
-    class AddPlaylistController: ILevelCollectionUpdater
+    class AddPlaylistController: ILevelCollectionUpdater, IPreviewBeatmapLevelUpdater
     {
-        private StandardLevelDetailViewController standardLevel;
+        private StandardLevelDetailViewController standardLevelDetailViewController;
         private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
 
         [UIComponent("list")]
@@ -27,22 +27,25 @@ namespace PlaylistManager.UI
         [UIComponent("modal")]
         private ModalView modal;
 
-        private List<Playlist> loadedplaylists;
+        private BeatSaberPlaylistsLib.Types.IPlaylist[] loadedplaylists;
+        private bool buttonActive;
+
         AddPlaylistController(StandardLevelDetailViewController standardLevel, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController)
         {
-            this.standardLevel = standardLevel;
+            this.standardLevelDetailViewController = standardLevel;
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
             BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.AddPlaylist.bsml"), standardLevel.transform.Find("LevelDetail").gameObject, this);
             addButtonTransform.localScale *= 0.7f;
+            buttonActive = false;
         }
 
         [UIAction("button-click")]
         internal void ShowPlaylists()
         {
             customListTableData.data.Clear();
-            loadedplaylists = Playlist.loadedPlaylists;
+            loadedplaylists = PlaylistLibUtils.LibDefaultManager.GetAllPlaylists(true);
 
-            foreach (Playlist playlist in loadedplaylists)
+            foreach (BeatSaberPlaylistsLib.Types.IPlaylist playlist in loadedplaylists)
             {
                 String subName = String.Format("{0} songs", playlist.beatmapLevelCollection.beatmapLevels.Length);
                 customListTableData.data.Add(new CustomCellInfo(playlist.collectionName, subName, playlist.coverImage));
@@ -55,32 +58,35 @@ namespace PlaylistManager.UI
         [UIAction("select-cell")]
         internal void OnCellSelect(TableView tableView, int index)
         {
-            loadedplaylists[index].editBeatMapLevels(loadedplaylists[index].beatmapLevelCollection.beatmapLevels.Append<IPreviewBeatmapLevel>(standardLevel.selectedDifficultyBeatmap.level).ToArray());
+            loadedplaylists[index].Add(standardLevelDetailViewController.selectedDifficultyBeatmap.level);
             customListTableData.tableView.ClearSelection();
-            if(annotatedBeatmapLevelCollectionsViewController.isActiveAndEnabled)
+            if(annotatedBeatmapLevelCollectionsViewController.isActiveAndEnabled && PlaylistCollectionOverride.isCustomBeatmapLevelPack)
             {
-                annotatedBeatmapLevelCollectionsViewController.SetData(HarmonyPatches.PlaylistCollectionOverride.otherCustomBeatmapLevelCollections, annotatedBeatmapLevelCollectionsViewController.selectedItemIndex, false);
+                annotatedBeatmapLevelCollectionsViewController.SetData(PlaylistCollectionOverride.otherCustomBeatmapLevelCollections, annotatedBeatmapLevelCollectionsViewController.selectedItemIndex, false);
             }
+            PlaylistLibUtils.LibDefaultManager.StorePlaylist(loadedplaylists[index]);
             modal.Hide(true);
         }
 
         [UIAction("keyboard-enter")]
         internal void CreatePlaylist(string playlistName)
         {
-            Playlist.CreatePlaylist(playlistName, "PlaylistManager");
+            PlaylistLibUtils.CreatePlaylist(playlistName, "PlaylistManager");
             ShowPlaylists();
         }
 
-        public void LevelCollectionUpdated(IAnnotatedBeatmapLevelCollection beatmapLevelCollection)
+        public void LevelCollectionUpdated(IAnnotatedBeatmapLevelCollection beatmapLevelCollection) =>
+            buttonActive = !(annotatedBeatmapLevelCollectionsViewController.isActiveAndEnabled && beatmapLevelCollection is Playlist);
+
+        public void PreviewBeatmapLevelUpdated(IPreviewBeatmapLevel beatmapLevel)
         {
-            IPreviewBeatmapLevel level = standardLevel.selectedDifficultyBeatmap.level;
-            if (level.levelID.EndsWith(" WIP") || (annotatedBeatmapLevelCollectionsViewController.isActiveAndEnabled && beatmapLevelCollection is CustomPlaylistSO))
+            if (beatmapLevel.levelID.EndsWith(" WIP"))
             {
                 addButtonTransform.gameObject.SetActive(false);
             }
             else
             {
-                addButtonTransform.gameObject.SetActive(true);
+                addButtonTransform.gameObject.SetActive(buttonActive);
             }
         }
     }

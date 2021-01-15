@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System;
 using Zenject;
 using PlaylistManager.Interfaces;
+using PlaylistManager.HarmonyPatches;
 
 namespace PlaylistManager.Managers
 {
@@ -14,38 +11,39 @@ namespace PlaylistManager.Managers
         AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
         List<ILevelCollectionUpdater> levelCollectionUpdaters;
 
-        LevelSelectionNavigationController levelSelectionNavigationController;
-        ILevelPackUpdater levelPackUpdater;
+        LevelCollectionViewController levelCollectionViewController;
+        IPreviewBeatmapLevelUpdater previewBeatmapLevelUpdater;
 
-        PlaylistUIManager(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, List<ILevelCollectionUpdater> levelCollectionUpdaters, LevelSelectionNavigationController levelSelectionNavigationController, ILevelPackUpdater levelPackUpdater)
+        PlaylistUIManager(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, List<ILevelCollectionUpdater> levelCollectionUpdaters, LevelCollectionViewController levelCollectionViewController, IPreviewBeatmapLevelUpdater previewBeatmapLevelUpdater)
         {
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
             this.levelCollectionUpdaters = levelCollectionUpdaters;
-            this.levelSelectionNavigationController = levelSelectionNavigationController;
-            this.levelPackUpdater = levelPackUpdater;
+            this.levelCollectionViewController = levelCollectionViewController;
+            this.previewBeatmapLevelUpdater = previewBeatmapLevelUpdater;
         }
 
         public void Dispose()
         {
             annotatedBeatmapLevelCollectionsViewController.didSelectAnnotatedBeatmapLevelCollectionEvent -= AnnotatedBeatmapLevelCollectionsViewController_didSelectAnnotatedBeatmapLevelCollectionEvent;
+            levelCollectionViewController.didSelectLevelEvent -= LevelCollectionViewController_didSelectLevelEvent;
         }
 
         public void Initialize()
         {
             annotatedBeatmapLevelCollectionsViewController.didSelectAnnotatedBeatmapLevelCollectionEvent += AnnotatedBeatmapLevelCollectionsViewController_didSelectAnnotatedBeatmapLevelCollectionEvent;
-            levelSelectionNavigationController.didSelectLevelPackEvent += LevelSelectionNavigationController_didSelectLevelPackEvent;
+            levelCollectionViewController.didSelectLevelEvent += LevelCollectionViewController_didSelectLevelEvent;
         }
 
-        private void LevelSelectionNavigationController_didSelectLevelPackEvent(LevelSelectionNavigationController arg1, IBeatmapLevelPack arg2)
+        private void LevelCollectionViewController_didSelectLevelEvent(LevelCollectionViewController levelCollectionViewController, IPreviewBeatmapLevel beatmapLevel)
         {
-            levelPackUpdater.LevelPackUpdated();
+            previewBeatmapLevelUpdater.PreviewBeatmapLevelUpdated(beatmapLevel);
         }
 
-        private void AnnotatedBeatmapLevelCollectionsViewController_didSelectAnnotatedBeatmapLevelCollectionEvent(IAnnotatedBeatmapLevelCollection obj)
+        private void AnnotatedBeatmapLevelCollectionsViewController_didSelectAnnotatedBeatmapLevelCollectionEvent(IAnnotatedBeatmapLevelCollection annotatedBeatmapLevelCollection)
         {
             foreach (ILevelCollectionUpdater levelCollectionUpdater in levelCollectionUpdaters)
             {
-                levelCollectionUpdater.LevelCollectionUpdated(obj);
+                levelCollectionUpdater.LevelCollectionUpdated(annotatedBeatmapLevelCollection);
             }
         }
     }

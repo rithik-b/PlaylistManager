@@ -20,6 +20,7 @@
     <!--<PathMap>$(AppOutputBase)=X:\$(AssemblyName)\</PathMap>-->
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <Optimize>false</Optimize>
@@ -42,6 +43,16 @@
   <ItemGroup>
     <Reference Include="0Harmony">
       <HintPath>$(BeatSaberDir)\Libs\0Harmony.dll</HintPath>
+      <Private>False</Private>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="BeatSaberPlaylistsLib">
+      <HintPath>$(BeatSaberDir)\Libs\BeatSaberPlaylistsLib.dll</HintPath>
+      <Private>False</Private>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="BeatSaverSharp">
+      <HintPath>$(BeatSaberDir)\Libs\BeatSaverSharp.dll</HintPath>
       <Private>False</Private>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
@@ -70,11 +81,6 @@
       <Private>False</Private>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
-    <Reference Include="PlaylistLoaderLite">
-      <HintPath>$(BeatSaberDir)\Plugins\PlaylistLoaderLite.dll</HintPath>
-      <Private>False</Private>
-      <SpecificVersion>False</SpecificVersion>
-    </Reference>
     <Reference Include="SiraUtil">
       <HintPath>$(BeatSaberDir)\Plugins\SiraUtil.dll</HintPath>
       <Private>False</Private>
@@ -96,6 +102,7 @@
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Xml">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\System.Xml.dll</HintPath>
       <Private>False</Private>
@@ -153,10 +160,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="HarmonyPatches\AnnotatedBeatmapLevelCollectionTableCell_SetData.cs" />
     <Compile Include="HarmonyPatches\PlaylistCollectionOverride.cs" />
+    <Compile Include="HarmonyPatches\ScrollingFix.cs" />
     <Compile Include="Installers\PlaylistViewInstaller.cs" />
     <Compile Include="Interfaces\ILevelCollectionUpdater.cs" />
-    <Compile Include="Interfaces\ILevelPackUpdater.cs" />
+    <Compile Include="Interfaces\IPreviewBeatmapLevelUpdater.cs" />
     <Compile Include="Managers\PlaylistUIManager.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Configuration\PluginConfig.cs" />
@@ -164,6 +173,9 @@
     <Compile Include="UI\AddPlaylistController.cs" />
     <Compile Include="UI\PlaylistViewController.cs" />
     <Compile Include="UI\RemoveFromPlaylistController.cs" />
+    <Compile Include="UI\SpriteUpdateUI.cs" />
+    <Compile Include="Utilities\DownloaderUtils.cs" />
+    <Compile Include="Utilities\PlaylistLibUtils.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="manifest.json" />

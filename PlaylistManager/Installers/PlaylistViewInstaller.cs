@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Zenject;
+﻿using Zenject;
 using PlaylistManager.UI;
 using PlaylistManager.Managers;
 
@@ -15,8 +10,8 @@ namespace PlaylistManager.Installers
         {
             Container.BindInterfacesTo<AddPlaylistController>().AsSingle();
             Container.BindInterfacesTo<RemoveFromPlaylistController>().AsSingle();
-            Container.BindInterfacesTo<PlaylistUIManager>().AsSingle();
             Container.BindInterfacesTo<PlaylistViewController>().AsSingle();
+            Container.BindInterfacesTo<PlaylistUIManager>().AsSingle();
         }
     }
 }
