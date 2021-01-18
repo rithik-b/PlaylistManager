@@ -7,6 +7,7 @@ using UnityEngine;
 using PlaylistManager.Interfaces;
 using BeatSaberPlaylistsLib.Types;
 using IPA.Utilities;
+using PlaylistManager.Utilities;
 
 namespace PlaylistManager.UI
 {
@@ -15,9 +16,6 @@ namespace PlaylistManager.UI
         private LevelPackDetailViewController levelPackDetailViewController;
         private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
         private LevelCollectionViewController levelCollectionViewController;
-
-        // Currently selected map pack
-        private IAnnotatedBeatmapLevelCollection levelCollection;
 
         [UIComponent("bg")]
         private Transform bgTransform;
@@ -43,27 +41,25 @@ namespace PlaylistManager.UI
         [UIAction("delete-click")]
         internal void DisplayWarning()
         {
-            warningMessage.text = string.Format("Are you sure you would like to delete \n{0}?", levelCollection.collectionName);
+            warningMessage.text = string.Format("Are you sure you would like to delete \n{0}?", annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection.collectionName);
         }
 
         [UIAction("delete-confirm")]
         internal void DeletePlaylist()
         {
-            /*
-            if (Playlist.DeletePlaylist(annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection))
+            if (PlaylistLibUtils.playlistManager.DeletePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection))
             {
                 annotatedBeatmapLevelCollectionsViewController.SetData(HarmonyPatches.PlaylistCollectionOverride.otherCustomBeatmapLevelCollections, annotatedBeatmapLevelCollectionsViewController.selectedItemIndex - 1, false);
                 IAnnotatedBeatmapLevelCollection selectedCollection = annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection;
                 levelCollectionViewController.SetData(selectedCollection.beatmapLevelCollection, selectedCollection.collectionName, selectedCollection.coverImage, false, null);
                 levelPackDetailViewController.SetData((IBeatmapLevelPack)selectedCollection);
-                LevelPackUpdated();
+                LevelCollectionUpdated(selectedCollection);
             }
             else
             {
                 okMessage.text = "There was an error deleting the Playlist";
                 okModal.Show(true);
             }
-            */
         }
 
         public void LevelCollectionUpdated(IAnnotatedBeatmapLevelCollection beatmapLevelCollection)

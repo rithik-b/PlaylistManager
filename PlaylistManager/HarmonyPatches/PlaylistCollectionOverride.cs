@@ -14,7 +14,7 @@ namespace PlaylistManager.HarmonyPatches
         {
             get
             {
-                return (IAnnotatedBeatmapLevelCollection[]) PlaylistLibUtils.LibDefaultManager.GetAllPlaylists(true);
+                return (IAnnotatedBeatmapLevelCollection[]) PlaylistLibUtils.playlistManager.GetAllPlaylists(true);
             }
         }
 
@@ -54,7 +54,7 @@ namespace PlaylistManager.HarmonyPatches
 
         public static int RefreshPlaylists()
         {
-            BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.RequestRefresh("PlaylistManager (Plugin)");
+            PlaylistLibUtils.playlistManager.RequestRefresh("PlaylistManager (Plugin)");
             return loadedPlaylists.Length;
         }
     }

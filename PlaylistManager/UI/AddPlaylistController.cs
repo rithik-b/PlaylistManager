@@ -43,7 +43,7 @@ namespace PlaylistManager.UI
         internal void ShowPlaylists()
         {
             customListTableData.data.Clear();
-            loadedplaylists = PlaylistLibUtils.LibDefaultManager.GetAllPlaylists(true);
+            loadedplaylists = PlaylistLibUtils.playlistManager.GetAllPlaylists(true);
 
             foreach (BeatSaberPlaylistsLib.Types.IPlaylist playlist in loadedplaylists)
             {
@@ -64,7 +64,7 @@ namespace PlaylistManager.UI
             {
                 annotatedBeatmapLevelCollectionsViewController.SetData(PlaylistCollectionOverride.otherCustomBeatmapLevelCollections, annotatedBeatmapLevelCollectionsViewController.selectedItemIndex, false);
             }
-            PlaylistLibUtils.LibDefaultManager.StorePlaylist(loadedplaylists[index]);
+            PlaylistLibUtils.playlistManager.StorePlaylist(loadedplaylists[index]);
             modal.Hide(true);
         }
 

@@ -12,14 +12,14 @@ namespace PlaylistManager.Managers
         List<ILevelCollectionUpdater> levelCollectionUpdaters;
 
         LevelCollectionViewController levelCollectionViewController;
-        IPreviewBeatmapLevelUpdater previewBeatmapLevelUpdater;
+        List<IPreviewBeatmapLevelUpdater> previewBeatmapLevelUpdaters;
 
-        PlaylistUIManager(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, List<ILevelCollectionUpdater> levelCollectionUpdaters, LevelCollectionViewController levelCollectionViewController, IPreviewBeatmapLevelUpdater previewBeatmapLevelUpdater)
+        PlaylistUIManager(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, List<ILevelCollectionUpdater> levelCollectionUpdaters, LevelCollectionViewController levelCollectionViewController, List<IPreviewBeatmapLevelUpdater> previewBeatmapLevelUpdaters)
         {
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
             this.levelCollectionUpdaters = levelCollectionUpdaters;
             this.levelCollectionViewController = levelCollectionViewController;
-            this.previewBeatmapLevelUpdater = previewBeatmapLevelUpdater;
+            this.previewBeatmapLevelUpdaters = previewBeatmapLevelUpdaters;
         }
 
         public void Dispose()
@@ -36,7 +36,10 @@ namespace PlaylistManager.Managers
 
         private void LevelCollectionViewController_didSelectLevelEvent(LevelCollectionViewController levelCollectionViewController, IPreviewBeatmapLevel beatmapLevel)
         {
-            previewBeatmapLevelUpdater.PreviewBeatmapLevelUpdated(beatmapLevel);
+            foreach (IPreviewBeatmapLevelUpdater previewBeatmapLevelUpdater in previewBeatmapLevelUpdaters)
+            {
+                previewBeatmapLevelUpdater.PreviewBeatmapLevelUpdated(beatmapLevel);
+            }
         }
 
         private void AnnotatedBeatmapLevelCollectionsViewController_didSelectAnnotatedBeatmapLevelCollectionEvent(IAnnotatedBeatmapLevelCollection annotatedBeatmapLevelCollection)
