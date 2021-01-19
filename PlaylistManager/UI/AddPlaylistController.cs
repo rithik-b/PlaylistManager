@@ -13,7 +13,7 @@ using PlaylistManager.Utilities;
 
 namespace PlaylistManager.UI
 {
-    class AddPlaylistController: ILevelCollectionUpdater, IPreviewBeatmapLevelUpdater
+    class AddPlaylistController: IPreviewBeatmapLevelUpdater
     {
         private StandardLevelDetailViewController standardLevelDetailViewController;
         private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
@@ -28,7 +28,6 @@ namespace PlaylistManager.UI
         private ModalView modal;
 
         private BeatSaberPlaylistsLib.Types.IPlaylist[] loadedplaylists;
-        private bool buttonActive;
 
         AddPlaylistController(StandardLevelDetailViewController standardLevel, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController)
         {
@@ -36,7 +35,6 @@ namespace PlaylistManager.UI
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
             BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.AddPlaylist.bsml"), standardLevel.transform.Find("LevelDetail").gameObject, this);
             addButtonTransform.localScale *= 0.7f;
-            buttonActive = false;
         }
 
         [UIAction("button-click")]
@@ -75,18 +73,15 @@ namespace PlaylistManager.UI
             ShowPlaylists();
         }
 
-        public void LevelCollectionUpdated(IAnnotatedBeatmapLevelCollection beatmapLevelCollection) =>
-            buttonActive = !(annotatedBeatmapLevelCollectionsViewController.isActiveAndEnabled && beatmapLevelCollection is Playlist);
-
         public void PreviewBeatmapLevelUpdated(IPreviewBeatmapLevel beatmapLevel)
         {
-            if (beatmapLevel.levelID.EndsWith(" WIP"))
+            if (beatmapLevel.levelID.EndsWith(" WIP") || beatmapLevel is IPlaylistSong)
             {
                 addButtonTransform.gameObject.SetActive(false);
             }
             else
             {
-                addButtonTransform.gameObject.SetActive(buttonActive);
+                addButtonTransform.gameObject.SetActive(true);
             }
         }
     }
