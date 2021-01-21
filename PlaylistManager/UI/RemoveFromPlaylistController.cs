@@ -6,11 +6,13 @@ using UnityEngine;
 using PlaylistManager.Interfaces;
 using BeatSaberPlaylistsLib.Types;
 using PlaylistManager.Utilities;
+using Zenject;
 
 namespace PlaylistManager.UI
 {
-    class RemoveFromPlaylistController : IPreviewBeatmapLevelUpdater
+    class RemoveFromPlaylistController : IPreviewBeatmapLevelUpdater, IInitializable
     {
+        private StandardLevelDetailViewController standardLevelDetailViewController;
         private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
         private LevelCollectionViewController levelCollectionViewController;
         private IPlaylistSong selectedPlaylistSong;
@@ -23,10 +25,9 @@ namespace PlaylistManager.UI
 
         RemoveFromPlaylistController(StandardLevelDetailViewController standardLevelDetailViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, LevelCollectionViewController levelCollectionViewController)
         {
+            this.standardLevelDetailViewController = standardLevelDetailViewController;
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
             this.levelCollectionViewController = levelCollectionViewController;
-            BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.RemoveFromPlaylist.bsml"), standardLevelDetailViewController.transform.Find("LevelDetail").gameObject, this);
-            removeButtonTransform.localScale *= 0.7f;
         }
 
         [UIAction("button-click")]
@@ -41,13 +42,13 @@ namespace PlaylistManager.UI
             BeatSaberPlaylistsLib.Types.IPlaylist selectedPlaylist = PlaylistLibUtils.playlistManager.GetAllPlaylists()[annotatedBeatmapLevelCollectionsViewController.selectedItemIndex - 2];
             selectedPlaylist.Remove((IPlaylistSong)selectedPlaylistSong);
             PlaylistLibUtils.playlistManager.StorePlaylist(selectedPlaylist);
-            annotatedBeatmapLevelCollectionsViewController.SetData(HarmonyPatches.PlaylistCollectionOverride.otherCustomBeatmapLevelCollections, annotatedBeatmapLevelCollectionsViewController.selectedItemIndex, false);
+            annotatedBeatmapLevelCollectionsViewController.SetData(HarmonyPatches.AnnotatedBeatmapLevelCollectionsViewController_SetData.otherCustomBeatmapLevelCollections, annotatedBeatmapLevelCollectionsViewController.selectedItemIndex, false);
             levelCollectionViewController.SetData(selectedPlaylist.beatmapLevelCollection, selectedPlaylist.collectionName, selectedPlaylist.coverImage, false, null);
         }
 
         public void PreviewBeatmapLevelUpdated(IPreviewBeatmapLevel beatmapLevel)
         {
-            if(beatmapLevel is IPlaylistSong)
+            if (beatmapLevel is IPlaylistSong)
             {
                 selectedPlaylistSong = (IPlaylistSong)beatmapLevel;
                 removeButtonTransform.gameObject.SetActive(true);
@@ -56,6 +57,12 @@ namespace PlaylistManager.UI
             {
                 removeButtonTransform.gameObject.SetActive(false);
             }
+        }
+
+        public void Initialize()
+        {
+            BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.RemoveFromPlaylist.bsml"), standardLevelDetailViewController.transform.Find("LevelDetail").gameObject, this);
+            removeButtonTransform.localScale *= 0.7f;
         }
     }
 }

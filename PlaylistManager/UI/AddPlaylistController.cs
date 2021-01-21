@@ -10,10 +10,11 @@ using PlaylistManager.Interfaces;
 using PlaylistManager.HarmonyPatches;
 using BeatSaberPlaylistsLib.Types;
 using PlaylistManager.Utilities;
+using Zenject;
 
 namespace PlaylistManager.UI
 {
-    class AddPlaylistController: IPreviewBeatmapLevelUpdater
+    class AddPlaylistController: IPreviewBeatmapLevelUpdater, IInitializable
     {
         private StandardLevelDetailViewController standardLevelDetailViewController;
         private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
@@ -33,8 +34,6 @@ namespace PlaylistManager.UI
         {
             this.standardLevelDetailViewController = standardLevel;
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
-            BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.AddPlaylist.bsml"), standardLevel.transform.Find("LevelDetail").gameObject, this);
-            addButtonTransform.localScale *= 0.7f;
         }
 
         [UIAction("button-click")]
@@ -58,9 +57,9 @@ namespace PlaylistManager.UI
         {
             loadedplaylists[index].Add(standardLevelDetailViewController.selectedDifficultyBeatmap.level);
             customListTableData.tableView.ClearSelection();
-            if(annotatedBeatmapLevelCollectionsViewController.isActiveAndEnabled && PlaylistCollectionOverride.isCustomBeatmapLevelPack)
+            if(annotatedBeatmapLevelCollectionsViewController.isActiveAndEnabled && AnnotatedBeatmapLevelCollectionsViewController_SetData.isCustomBeatmapLevelPack)
             {
-                annotatedBeatmapLevelCollectionsViewController.SetData(PlaylistCollectionOverride.otherCustomBeatmapLevelCollections, annotatedBeatmapLevelCollectionsViewController.selectedItemIndex, false);
+                annotatedBeatmapLevelCollectionsViewController.SetData(AnnotatedBeatmapLevelCollectionsViewController_SetData.otherCustomBeatmapLevelCollections, annotatedBeatmapLevelCollectionsViewController.selectedItemIndex, false);
             }
             PlaylistLibUtils.playlistManager.StorePlaylist(loadedplaylists[index]);
             modal.Hide(true);
@@ -83,6 +82,12 @@ namespace PlaylistManager.UI
             {
                 addButtonTransform.gameObject.SetActive(true);
             }
+        }
+
+        public void Initialize()
+        {
+            BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.AddPlaylist.bsml"), standardLevelDetailViewController.transform.Find("LevelDetail").gameObject, this);
+            addButtonTransform.localScale *= 0.7f;
         }
     }
 }

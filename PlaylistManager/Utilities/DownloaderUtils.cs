@@ -1,7 +1,5 @@
 ﻿using BeatSaverSharp;
 using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -14,19 +12,18 @@ namespace PlaylistManager.Utilities
     {
         private BeatSaver beatSaverInstance;
         public static DownloaderUtils instance;
-        private HashSet<string> alreadyDownloadedSongs;
         private bool extractingZip;
 
         public static void Init()
         {
             instance = new DownloaderUtils();
-            instance.beatSaverInstance = new BeatSaver();
+            HttpOptions options = new HttpOptions
+            {
+                ApplicationName = typeof(DownloaderUtils).Assembly.GetName().Name,
+                Version = typeof(DownloaderUtils).Assembly.GetName().Version,
+            };
+            instance.beatSaverInstance = new BeatSaver(options);
             instance.extractingZip = false;
-        }
-
-        private void SongLoader_SongsLoadedEvent(SongCore.Loader sender, ConcurrentDictionary<string, CustomPreviewBeatmapLevel> levels)
-        {
-            alreadyDownloadedSongs = new HashSet<string>(levels.Values.Select(x => SongCore.Collections.hashForLevelID(x.levelID)));
         }
 
         public async Task BeatmapDownloadByKey(string key, CancellationToken token, IProgress<double> progress = null, bool direct = false)
@@ -48,8 +45,6 @@ namespace PlaylistManager.Utilities
                     Plugin.Log.Warn("Song Download Aborted.");
                 else
                     Plugin.Log.Critical("Failed to download Song!");
-                if (alreadyDownloadedSongs.Contains(song.Hash.ToUpper()))
-                    alreadyDownloadedSongs.Remove(song.Hash.ToUpper());
             }
         }
 
@@ -72,8 +67,6 @@ namespace PlaylistManager.Utilities
                     Plugin.Log.Warn("Song Download Aborted.");
                 else
                     Plugin.Log.Critical("Failed to download Song!");
-                if (alreadyDownloadedSongs.Contains(song.Hash.ToUpper()))
-                    alreadyDownloadedSongs.Remove(song.Hash.ToUpper());
             }
         }
 

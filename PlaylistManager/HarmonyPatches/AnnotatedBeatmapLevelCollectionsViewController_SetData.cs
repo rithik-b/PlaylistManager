@@ -8,7 +8,7 @@ namespace PlaylistManager.HarmonyPatches
     [HarmonyPatch(typeof(AnnotatedBeatmapLevelCollectionsViewController), "SetData",
         new Type[] {
         typeof(IReadOnlyList<IAnnotatedBeatmapLevelCollection>), typeof(int), typeof(bool)})]
-    public class PlaylistCollectionOverride
+    public class AnnotatedBeatmapLevelCollectionsViewController_SetData
     {
         private static IAnnotatedBeatmapLevelCollection[] loadedPlaylists
         {
@@ -50,12 +50,6 @@ namespace PlaylistManager.HarmonyPatches
             {
                 isCustomBeatmapLevelPack = false;
             }
-        }
-
-        public static int RefreshPlaylists()
-        {
-            PlaylistLibUtils.playlistManager.RequestRefresh("PlaylistManager (Plugin)");
-            return loadedPlaylists.Length;
         }
     }
 }

@@ -2,22 +2,21 @@
 using System.Collections.Generic;
 using Zenject;
 using PlaylistManager.Interfaces;
-using PlaylistManager.HarmonyPatches;
 
 namespace PlaylistManager.Managers
 {
     class PlaylistUIManager : IInitializable, IDisposable
     {
         AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
-        List<ILevelCollectionUpdater> levelCollectionUpdaters;
+        ILevelCollectionUpdater levelCollectionUpdater;
 
         LevelCollectionViewController levelCollectionViewController;
         List<IPreviewBeatmapLevelUpdater> previewBeatmapLevelUpdaters;
 
-        PlaylistUIManager(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, List<ILevelCollectionUpdater> levelCollectionUpdaters, LevelCollectionViewController levelCollectionViewController, List<IPreviewBeatmapLevelUpdater> previewBeatmapLevelUpdaters)
+        PlaylistUIManager(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, ILevelCollectionUpdater levelCollectionUpdater, LevelCollectionViewController levelCollectionViewController, List<IPreviewBeatmapLevelUpdater> previewBeatmapLevelUpdaters)
         {
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
-            this.levelCollectionUpdaters = levelCollectionUpdaters;
+            this.levelCollectionUpdater = levelCollectionUpdater;
             this.levelCollectionViewController = levelCollectionViewController;
             this.previewBeatmapLevelUpdaters = previewBeatmapLevelUpdaters;
         }
@@ -44,10 +43,7 @@ namespace PlaylistManager.Managers
 
         private void AnnotatedBeatmapLevelCollectionsViewController_didSelectAnnotatedBeatmapLevelCollectionEvent(IAnnotatedBeatmapLevelCollection annotatedBeatmapLevelCollection)
         {
-            foreach (ILevelCollectionUpdater levelCollectionUpdater in levelCollectionUpdaters)
-            {
-                levelCollectionUpdater.LevelCollectionUpdated(annotatedBeatmapLevelCollection);
-            }
+            levelCollectionUpdater.LevelCollectionUpdated(annotatedBeatmapLevelCollection);
         }
     }
 }

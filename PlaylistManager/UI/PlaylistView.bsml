@@ -1,7 +1,7 @@
 ﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
   <background id='bg' bg='panel-fade-gradient' bg-color='black'>
       <vertical>
-        <button id='download'  text='Download All Songs' />
+        <button id='download'  text='Download All Songs' on-click='download-click' />
         <button id='delete'  text='Delete Playlist' on-click='delete-click' click-event='open-delete'/>
     </vertical>
     <modal id='delete-modal' show-event='open-delete' hide-event='close-delete' clickerino-offerino-closerino="true" anchor-pos-y='15' size-delta-x='60' size-delta-y='30' move-to-center='false'>
@@ -19,5 +19,11 @@
         <button id='ok' text='Ok' click-event='close-ok'/>
       </vertical>
     </modal>
+	<modal id='download-modal' show-event='open-download' hide-event='close-download' clickerino-offerino-closerino="false" anchor-pos-y='15' size-delta-x='60' size-delta-y='30' move-to-center='false'>
+		<vertical>
+			<text id='download-message' word-wrapping='true' />
+			<button id='cancel' text='cancel' click-event='close-download' on-click='cancel-click'/>
+		</vertical>
+	</modal>
   </background>
 </bg>

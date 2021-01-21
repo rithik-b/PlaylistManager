@@ -12,7 +12,7 @@ namespace PlaylistLoaderLite.HarmonyPatches
     [HarmonyPatch(typeof(TableViewScroller), "HandleJoystickWasNotCenteredThisFrame",
         new Type[] {
         typeof(Vector2)})]
-    public class ScrollingFix
+    public class TableViewScroller_HandleJoystickWasNotCenteredThisFrame
     {
         private static Vector2 _deltaPos;
         private static TableViewScroller _instance;

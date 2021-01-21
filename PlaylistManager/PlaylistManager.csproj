@@ -161,8 +161,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="HarmonyPatches\AnnotatedBeatmapLevelCollectionTableCell_SetData.cs" />
-    <Compile Include="HarmonyPatches\PlaylistCollectionOverride.cs" />
-    <Compile Include="HarmonyPatches\ScrollingFix.cs" />
+    <Compile Include="HarmonyPatches\AnnotatedBeatmapLevelCollectionsViewController_SetData.cs" />
+    <Compile Include="HarmonyPatches\LevelFilteringNavigationController_UpdateCustomSongs.cs" />
+    <Compile Include="HarmonyPatches\TableViewScroller_HandleJoystickWasNotCenteredThisFrame.cs" />
     <Compile Include="Installers\PlaylistViewInstaller.cs" />
     <Compile Include="Interfaces\ILevelCollectionUpdater.cs" />
     <Compile Include="Interfaces\IPreviewBeatmapLevelUpdater.cs" />
@@ -173,7 +174,6 @@
     <Compile Include="UI\AddPlaylistController.cs" />
     <Compile Include="UI\PlaylistViewController.cs" />
     <Compile Include="UI\RemoveFromPlaylistController.cs" />
-    <Compile Include="UI\SpriteUpdateUI.cs" />
     <Compile Include="Utilities\DownloaderUtils.cs" />
     <Compile Include="Utilities\PlaylistLibUtils.cs" />
   </ItemGroup>
