@@ -34,7 +34,7 @@ namespace PlaylistManager.UI
         internal void DisplayWarning()
         {
             modal.Show(true);
-            warningMessage.text = string.Format("Are you sure you would like to remove \n{0}\n from the playlist?", selectedPlaylistSong.songName);
+            warningMessage.text = string.Format("Are you sure you would like to remove {0} from the playlist?", selectedPlaylistSong.songName);
         }
 
         [UIAction("delete-confirm")]
@@ -57,7 +57,7 @@ namespace PlaylistManager.UI
 
         internal void Parse()
         {
-            BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.RemoveFromPlaylist.bsml"), standardLevelDetailViewController.transform.Find("LevelDetail").gameObject, this);
+            BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.RemoveFromPlaylist.bsml"), standardLevelDetailViewController.transform.Find("LevelDetail").gameObject, this);
         }
     }
 }

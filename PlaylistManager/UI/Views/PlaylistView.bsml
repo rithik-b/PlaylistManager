@@ -1,0 +1,17 @@
+﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
+	<modal id='delete-modal' show-event='open-delete' hide-event='close-delete' clickerino-offerino-closerino="false" anchor-pos-y='15' size-delta-x='60' size-delta-y='30' move-to-center='false'>
+      <vertical>
+        <text id='warning-message' word-wrapping='true' />
+        <horizontal>
+          <button id='yes' text='Yes' on-click='delete-confirm' click-event='close-delete'/>
+          <button id='no' text='No' click-event='close-delete'/>
+        </horizontal>
+      </vertical>
+    </modal>
+    <modal id='modal' show-event='open-modal' hide-event='close-modal' clickerino-offerino-closerino="false" anchor-pos-y='15' size-delta-x='60' size-delta-y='30' move-to-center='false'>
+      <vertical>
+        <text id='modal-message' word-wrapping='true' />
+        <button id='modal-button' text='Ok' click-event='close-modal' on-click='click-modal-button'/>
+      </vertical>
+    </modal>
+</bg>

@@ -3,8 +3,6 @@ using BeatSaberMarkupLanguage.Attributes;
 using HMUI;
 using System.Reflection;
 using TMPro;
-using UnityEngine;
-using PlaylistManager.Interfaces;
 using BeatSaberPlaylistsLib.Types;
 using PlaylistManager.Utilities;
 using System.Collections.Generic;
@@ -14,49 +12,79 @@ using System.Linq;
 using System.Threading;
 using System;
 using System.Threading.Tasks;
-using Zenject;
 using PlaylistManager.HarmonyPatches;
+using UnityEngine.UI;
 
 namespace PlaylistManager.UI
 {
-    class PlaylistViewController : ILevelCollectionUpdater, IInitializable, IDisposable
+    class PlaylistViewController : IDisposable
     {
         private LevelPackDetailViewController levelPackDetailViewController;
         private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
         private LevelCollectionViewController levelCollectionViewController;
 
-        [UIComponent("bg")]
-        private Transform bgTransform;
+        [UIComponent("delete-modal")]
+        private ModalView deleteModal;
 
         [UIComponent("warning-message")]
         private TextMeshProUGUI warningMessage;
 
-        [UIComponent("ok-message")]
-        private TextMeshProUGUI okMessage;
+        [UIComponent("modal")]
+        private ModalView modal;
 
-        [UIComponent("ok-modal")]
-        private ModalView okModal;
+        [UIComponent("modal-message")]
+        private TextMeshProUGUI modalMessage;
 
-        [UIComponent("download-message")]
-        private TextMeshProUGUI downloadMessage;
+        [UIComponent("modal-button")]
+        private TextMeshProUGUI modalButtonText;
 
-        [UIComponent("download-modal")]
-        private ModalView downloadModal;
+        internal enum ModalState
+        {
+            OkModal,
+            DownloadingModal
+        }
+
+        private ModalState _modalState;
+
+        internal ModalState modalState
+        {
+            get
+            {
+                return _modalState;
+            }
+            set
+            {
+                _modalState = value;
+                switch (_modalState)
+                {
+                    case ModalState.DownloadingModal:
+                        modalButtonText.text = "Cancel";
+                        break;
+                    default:
+                        modalButtonText.text = "Ok";
+                        break;
+                }
+            }
+        }
 
         private CancellationTokenSource tokenSource;
         private int downloadingBeatmapCollectionIdx;
+        internal bool parsed;
+        internal event Action<IAnnotatedBeatmapLevelCollection> didSelectAnnotatedBeatmapLevelCollectionEvent;
 
         PlaylistViewController(LevelPackDetailViewController levelPackDetailViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, LevelCollectionViewController levelCollectionViewController)
         {
             this.levelPackDetailViewController = levelPackDetailViewController;
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
             this.levelCollectionViewController = levelCollectionViewController;
-            this.tokenSource = new CancellationTokenSource();
+            tokenSource = new CancellationTokenSource();
+            parsed = false;
         }
 
         [UIAction("delete-click")]
         internal void DisplayWarning()
         {
+            deleteModal.Show(true);
             warningMessage.text = string.Format("Are you sure you would like to delete \n{0}?", annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection.collectionName);
         }
 
@@ -69,12 +97,12 @@ namespace PlaylistManager.UI
             }
             else
             {
-                okMessage.text = "Error: Playlist cannot be deleted.";
-                okModal.Show(true);
+                modalMessage.text = "Error: Playlist cannot be deleted.";
+                modalState = ModalState.OkModal;
+                modal.Show(true);
             }
         }
 
-        [UIAction("download-click")]
         internal async System.Threading.Tasks.Task DownloadPlaylistAsync()
         {
             IAnnotatedBeatmapLevelCollection selectedPlaylist = annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection;
@@ -90,12 +118,14 @@ namespace PlaylistManager.UI
             }
             else
             {
-                okMessage.text = "Error: The selected playlist cannot be downloaded.";
-                okModal.Show(true);
+                modalMessage.text = "Error: The selected playlist cannot be downloaded.";
+                modalState = ModalState.OkModal;
+                modal.Show(true);
                 return;
             }
-            downloadMessage.text = string.Format("{0}/{1} songs downloaded", 0, missingSongs.Count);
-            downloadModal.Show(true);
+            modalMessage.text = string.Format("{0}/{1} songs downloaded", 0, missingSongs.Count);
+            modalState = ModalState.DownloadingModal;
+            modal.Show(true);
             tokenSource.Dispose();
             tokenSource = new CancellationTokenSource();
             for(int i = 0; i < missingSongs.Count; i++)
@@ -110,7 +140,7 @@ namespace PlaylistManager.UI
                     {
                         await DownloaderUtils.instance.BeatmapDownloadByHash(missingSongs[i].Hash, tokenSource.Token);
                     }
-                    downloadMessage.text = string.Format("{0}/{1} songs downloaded", i + 1, missingSongs.Count);
+                    modalMessage.text = string.Format("{0}/{1} songs downloaded", i + 1, missingSongs.Count);
                 }
                 catch (Exception e)
                 {
@@ -121,18 +151,19 @@ namespace PlaylistManager.UI
                     break;
                 }
             }
-            downloadModal.Hide(true);
+            modal.Hide(true);
             SongCore.Loader.Instance.RefreshSongs(false);
             downloadingBeatmapCollectionIdx = annotatedBeatmapLevelCollectionsViewController.selectedItemIndex;
             LevelFilteringNavigationController_UpdateCustomSongs.CustomSongsUpdatedEvent += LevelFilteringNavigationController_UpdateCustomSongs_CustomSongsUpdatedEvent;
         }
 
-        [UIAction("cancel-click")]
-        internal void CancelDownload()
+        [UIAction("click-modal-button")]
+        internal void OkClicked()
         {
-            okMessage.text = "The download is cancelled";
-            okModal.Show(true);
-            tokenSource.Cancel();
+            if(modalState == ModalState.DownloadingModal)
+            {
+                tokenSource.Cancel();
+            }
         }
 
         private void LevelFilteringNavigationController_UpdateCustomSongs_CustomSongsUpdatedEvent()
@@ -146,25 +177,12 @@ namespace PlaylistManager.UI
             IAnnotatedBeatmapLevelCollection selectedCollection = annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection;
             levelCollectionViewController.SetData(selectedCollection.beatmapLevelCollection, selectedCollection.collectionName, selectedCollection.coverImage, false, null);
             levelPackDetailViewController.SetData((IBeatmapLevelPack)selectedCollection);
-            LevelCollectionUpdated(selectedCollection);
+            didSelectAnnotatedBeatmapLevelCollectionEvent?.Invoke(selectedCollection);
         }
 
-        public void LevelCollectionUpdated(IAnnotatedBeatmapLevelCollection beatmapLevelCollection)
+        internal void Parse()
         {
-            if (annotatedBeatmapLevelCollectionsViewController.isActiveAndEnabled && beatmapLevelCollection is Playlist)
-            {
-                bgTransform.gameObject.SetActive(true);
-            }
-            else
-            {
-                bgTransform.gameObject.SetActive(false);
-            }
-        }
-
-        public void Initialize()
-        {
-            BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.PlaylistView.bsml"), levelPackDetailViewController.transform.Find("Detail").gameObject, this);
-            bgTransform.gameObject.SetActive(false);
+            BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.PlaylistView.bsml"), levelPackDetailViewController.transform.Find("Detail").gameObject, this);
         }
 
         public void Dispose()

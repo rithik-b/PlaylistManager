@@ -15,8 +15,8 @@ namespace PlaylistManager.UI
         private AddPlaylistController addPlaylistController;
         private RemoveFromPlaylistController removeFromPlaylistController;
 
-        [UIComponent("add-remove-button")]
-        private Transform addRemoveButtonTransform;
+        [UIComponent("button")]
+        private Transform buttonTransform;
 
         internal enum ButtonState
         {
@@ -36,17 +36,17 @@ namespace PlaylistManager.UI
             set
             {
                 _buttonState = value;
-                addRemoveButtonTransform.gameObject.SetActive(true);
+                buttonTransform.gameObject.SetActive(true);
                 switch (_buttonState)
                 {
                     case ButtonState.AddButton:
-                        addRemoveButtonTransform.GetComponent<ButtonIconImage>().SetIcon("PlaylistManager.Icons.AddToPlaylist.png");
+                        buttonTransform.GetComponent<ButtonIconImage>().SetIcon("PlaylistManager.Icons.AddToPlaylist.png");
                         break;
                     case ButtonState.RemoveButton:
-                        addRemoveButtonTransform.GetComponent<ButtonIconImage>().SetIcon("PlaylistManager.Icons.RemoveFromPlaylist.png");
+                        buttonTransform.GetComponent<ButtonIconImage>().SetIcon("PlaylistManager.Icons.RemoveFromPlaylist.png");
                         break;
                     default:
-                        addRemoveButtonTransform.gameObject.SetActive(false);
+                        buttonTransform.gameObject.SetActive(false);
                         break;
                 }
             }
@@ -61,14 +61,14 @@ namespace PlaylistManager.UI
 
         public void Initialize()
         {
-            BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.ButtonView.bsml"), standardLevelDetailViewController.transform.Find("LevelDetail").gameObject, this);
-            addRemoveButtonTransform.localScale *= 0.7f;
+            BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.ButtonView.bsml"), standardLevelDetailViewController.transform.Find("LevelDetail").gameObject, this);
+            buttonTransform.localScale *= 0.7f;
         }
 
         [UIAction("button-click")]
         internal void OpenModal()
         {
-            switch (_buttonState)
+            switch (buttonState)
             {
                 case ButtonState.AddButton:
                     if (!addPlaylistController.parsed)
