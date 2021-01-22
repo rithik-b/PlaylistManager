@@ -2,37 +2,38 @@
 using BeatSaberMarkupLanguage.Attributes;
 using System.Reflection;
 using TMPro;
-using UnityEngine;
 using PlaylistManager.Interfaces;
 using BeatSaberPlaylistsLib.Types;
 using PlaylistManager.Utilities;
-using Zenject;
+using HMUI;
 
 namespace PlaylistManager.UI
 {
-    class RemoveFromPlaylistController : IPreviewBeatmapLevelUpdater, IInitializable
+    class RemoveFromPlaylistController : IPreviewBeatmapLevelUpdater
     {
         private StandardLevelDetailViewController standardLevelDetailViewController;
         private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
         private LevelCollectionViewController levelCollectionViewController;
         private IPlaylistSong selectedPlaylistSong;
 
-        [UIComponent("remove-button")]
-        private Transform removeButtonTransform;
-
         [UIComponent("warning-message")]
         private TextMeshProUGUI warningMessage;
 
+        [UIComponent("modal")]
+        private ModalView modal;
+
+        internal bool parsed;
         RemoveFromPlaylistController(StandardLevelDetailViewController standardLevelDetailViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, LevelCollectionViewController levelCollectionViewController)
         {
             this.standardLevelDetailViewController = standardLevelDetailViewController;
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
             this.levelCollectionViewController = levelCollectionViewController;
+            parsed = false;
         }
 
-        [UIAction("button-click")]
         internal void DisplayWarning()
         {
+            modal.Show(true);
             warningMessage.text = string.Format("Are you sure you would like to remove \n{0}\n from the playlist?", selectedPlaylistSong.songName);
         }
 
@@ -51,18 +52,12 @@ namespace PlaylistManager.UI
             if (beatmapLevel is IPlaylistSong)
             {
                 selectedPlaylistSong = (IPlaylistSong)beatmapLevel;
-                removeButtonTransform.gameObject.SetActive(true);
-            }
-            else
-            {
-                removeButtonTransform.gameObject.SetActive(false);
             }
         }
 
-        public void Initialize()
+        internal void Parse()
         {
             BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.RemoveFromPlaylist.bsml"), standardLevelDetailViewController.transform.Find("LevelDetail").gameObject, this);
-            removeButtonTransform.localScale *= 0.7f;
         }
     }
 }

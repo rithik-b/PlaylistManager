@@ -14,7 +14,7 @@ using Zenject;
 
 namespace PlaylistManager.UI
 {
-    class AddPlaylistController: IPreviewBeatmapLevelUpdater, IInitializable
+    class AddPlaylistController
     {
         private StandardLevelDetailViewController standardLevelDetailViewController;
         private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
@@ -22,23 +22,22 @@ namespace PlaylistManager.UI
         [UIComponent("list")]
         public CustomListTableData customListTableData;
 
-        [UIComponent("add-button")]
-        private Transform addButtonTransform;
-
         [UIComponent("modal")]
         private ModalView modal;
 
         private BeatSaberPlaylistsLib.Types.IPlaylist[] loadedplaylists;
+        internal bool parsed;
 
-        AddPlaylistController(StandardLevelDetailViewController standardLevel, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController)
+        AddPlaylistController(StandardLevelDetailViewController standardLevelDetailViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController)
         {
-            this.standardLevelDetailViewController = standardLevel;
+            this.standardLevelDetailViewController = standardLevelDetailViewController;
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
+            parsed = false;
         }
 
-        [UIAction("button-click")]
         internal void ShowPlaylists()
         {
+            modal.Show(true);
             customListTableData.data.Clear();
             loadedplaylists = PlaylistLibUtils.playlistManager.GetAllPlaylists(true);
 
@@ -72,22 +71,9 @@ namespace PlaylistManager.UI
             ShowPlaylists();
         }
 
-        public void PreviewBeatmapLevelUpdated(IPreviewBeatmapLevel beatmapLevel)
-        {
-            if (beatmapLevel.levelID.EndsWith(" WIP") || beatmapLevel is IPlaylistSong)
-            {
-                addButtonTransform.gameObject.SetActive(false);
-            }
-            else
-            {
-                addButtonTransform.gameObject.SetActive(true);
-            }
-        }
-
-        public void Initialize()
+        internal void Parse()
         {
             BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.AddPlaylist.bsml"), standardLevelDetailViewController.transform.Find("LevelDetail").gameObject, this);
-            addButtonTransform.localScale *= 0.7f;
         }
     }
 }

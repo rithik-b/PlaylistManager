@@ -81,9 +81,9 @@
       <Private>False</Private>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
-    <Reference Include="SiraUtil">
-      <HintPath>$(BeatSaberDir)\Plugins\SiraUtil.dll</HintPath>
+    <Reference Include="SiraUtil, Version=2.4.0.0, Culture=neutral, processorArchitecture=MSIL">
       <Private>False</Private>
+      <HintPath>$(BeatSaberDir)\Plugins\SiraUtil.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="SongCore">
@@ -172,6 +172,7 @@
     <Compile Include="Configuration\PluginConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\AddPlaylistController.cs" />
+    <Compile Include="UI\ButtonViewController.cs" />
     <Compile Include="UI\PlaylistViewController.cs" />
     <Compile Include="UI\RemoveFromPlaylistController.cs" />
     <Compile Include="Utilities\DownloaderUtils.cs" />
@@ -187,6 +188,7 @@
     <EmbeddedResource Include="UI\AddPlaylist.bsml" />
     <EmbeddedResource Include="UI\RemoveFromPlaylist.bsml" />
     <EmbeddedResource Include="UI\PlaylistView.bsml" />
+    <EmbeddedResource Include="UI\ButtonView.bsml" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="BeatSaberModdingTools.Tasks">
