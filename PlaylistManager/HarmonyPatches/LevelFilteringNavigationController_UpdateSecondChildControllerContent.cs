@@ -6,12 +6,12 @@ namespace PlaylistManager.HarmonyPatches
     [HarmonyPatch(typeof(LevelFilteringNavigationController), "UpdateSecondChildControllerContent", 
         new Type[] {
         typeof(SelectLevelCategoryViewController.LevelCategory)})]
-    public class LevelFilteringNavigationController_UpdateCustomSongs
+    public class LevelFilteringNavigationController_UpdateSecondChildControllerContent
     {
-        internal static event Action CustomSongsUpdatedEvent;
+        internal static event Action SecondChildControllerUpdatedEvent;
         internal static void Postfix()
         {
-            CustomSongsUpdatedEvent?.Invoke();
+            SecondChildControllerUpdatedEvent?.Invoke();
         }
     }
 }

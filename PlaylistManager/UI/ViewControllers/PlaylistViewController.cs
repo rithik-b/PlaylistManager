@@ -13,7 +13,6 @@ using System.Threading;
 using System;
 using System.Threading.Tasks;
 using PlaylistManager.HarmonyPatches;
-using UnityEngine.UI;
 
 namespace PlaylistManager.UI
 {
@@ -85,7 +84,7 @@ namespace PlaylistManager.UI
         internal void DisplayWarning()
         {
             deleteModal.Show(true);
-            warningMessage.text = string.Format("Are you sure you would like to delete \n{0}?", annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection.collectionName);
+            warningMessage.text = string.Format("Are you sure you would like to delete {0}?", annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection.collectionName);
         }
 
         [UIAction("delete-confirm")]
@@ -107,7 +106,6 @@ namespace PlaylistManager.UI
         {
             IAnnotatedBeatmapLevelCollection selectedPlaylist = annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection;
             List<IPlaylistSong> missingSongs;
-            DownloaderUtils.Init();
             if (selectedPlaylist is BlistPlaylist)
             {
                 missingSongs = ((BlistPlaylist)selectedPlaylist).Where(s => s.PreviewBeatmapLevel == null).Select(s => s).ToList();
@@ -154,7 +152,7 @@ namespace PlaylistManager.UI
             modal.Hide(true);
             SongCore.Loader.Instance.RefreshSongs(false);
             downloadingBeatmapCollectionIdx = annotatedBeatmapLevelCollectionsViewController.selectedItemIndex;
-            LevelFilteringNavigationController_UpdateCustomSongs.CustomSongsUpdatedEvent += LevelFilteringNavigationController_UpdateCustomSongs_CustomSongsUpdatedEvent;
+            LevelFilteringNavigationController_UpdateSecondChildControllerContent.SecondChildControllerUpdatedEvent += LevelFilteringNavigationController_UpdateSecondChildControllerContent_SecondChildControllerUpdatedEvent;
         }
 
         [UIAction("click-modal-button")]
@@ -166,7 +164,7 @@ namespace PlaylistManager.UI
             }
         }
 
-        private void LevelFilteringNavigationController_UpdateCustomSongs_CustomSongsUpdatedEvent()
+        private void LevelFilteringNavigationController_UpdateSecondChildControllerContent_SecondChildControllerUpdatedEvent()
         {
             SelectAnnotatedBeatmapCollectionByIdx(downloadingBeatmapCollectionIdx);
         }
@@ -187,7 +185,7 @@ namespace PlaylistManager.UI
 
         public void Dispose()
         {
-            LevelFilteringNavigationController_UpdateCustomSongs.CustomSongsUpdatedEvent -= LevelFilteringNavigationController_UpdateCustomSongs_CustomSongsUpdatedEvent;
+            LevelFilteringNavigationController_UpdateSecondChildControllerContent.SecondChildControllerUpdatedEvent -= LevelFilteringNavigationController_UpdateSecondChildControllerContent_SecondChildControllerUpdatedEvent;
         }
     }
 }

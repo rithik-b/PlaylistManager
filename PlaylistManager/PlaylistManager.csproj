@@ -162,7 +162,7 @@
   <ItemGroup>
     <Compile Include="HarmonyPatches\AnnotatedBeatmapLevelCollectionTableCell_SetData.cs" />
     <Compile Include="HarmonyPatches\AnnotatedBeatmapLevelCollectionsViewController_SetData.cs" />
-    <Compile Include="HarmonyPatches\LevelFilteringNavigationController_UpdateCustomSongs.cs" />
+    <Compile Include="HarmonyPatches\LevelFilteringNavigationController_UpdateSecondChildControllerContent.cs" />
     <Compile Include="HarmonyPatches\TableViewScroller_HandleJoystickWasNotCenteredThisFrame.cs" />
     <Compile Include="Installers\PlaylistViewInstaller.cs" />
     <Compile Include="Interfaces\ILevelCollectionUpdater.cs" />
@@ -204,6 +204,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Icons\RemoveFromPlaylist.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Icons\BackgroundMask.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

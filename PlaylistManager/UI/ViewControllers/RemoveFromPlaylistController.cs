@@ -34,14 +34,14 @@ namespace PlaylistManager.UI
         internal void DisplayWarning()
         {
             modal.Show(true);
-            warningMessage.text = string.Format("Are you sure you would like to remove {0} from the playlist?", selectedPlaylistSong.songName);
+            warningMessage.text = string.Format("Are you sure you would like to remove\n{0} from the playlist?", selectedPlaylistSong.songName);
         }
 
         [UIAction("delete-confirm")]
         internal void RemoveSong()
         {   
             BeatSaberPlaylistsLib.Types.IPlaylist selectedPlaylist = PlaylistLibUtils.playlistManager.GetAllPlaylists()[annotatedBeatmapLevelCollectionsViewController.selectedItemIndex - 2];
-            selectedPlaylist.Remove((IPlaylistSong)selectedPlaylistSong);
+            selectedPlaylist.Remove(selectedPlaylistSong);
             PlaylistLibUtils.playlistManager.StorePlaylist(selectedPlaylist);
             annotatedBeatmapLevelCollectionsViewController.SetData(HarmonyPatches.AnnotatedBeatmapLevelCollectionsViewController_SetData.otherCustomBeatmapLevelCollections, annotatedBeatmapLevelCollectionsViewController.selectedItemIndex, false);
             levelCollectionViewController.SetData(selectedPlaylist.beatmapLevelCollection, selectedPlaylist.collectionName, selectedPlaylist.coverImage, false, null);

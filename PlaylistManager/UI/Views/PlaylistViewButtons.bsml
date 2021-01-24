@@ -1,8 +1,7 @@
-﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
-	<background id='bg' bg='panel-fade-gradient' bg-color='black'>
-		<vertical>
-			<button id='download'  text='Download All Songs' on-click='download-click' />
-			<button id='delete'  text='Delete Playlist' on-click='delete-click' click-event='open-delete'/>
-		</vertical>
-	</background>
+﻿<bg id='bg' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
+	<image src='PlaylistManager.Icons.BackgroundMask.png' size-delta-x='10000' size-delta-y='10000'/>
+	<vertical>
+		<button id='download'  text='Download All Songs' on-click='download-click' />
+		<button id='delete'  text='Delete Playlist' on-click='delete-click' click-event='open-delete'/>
+	</vertical>
 </bg>

@@ -11,11 +11,7 @@ namespace PlaylistManager.Utilities
 
         private static readonly Lazy<BeatSaberPlaylistsLib.PlaylistManager> playlistManagerLoader = new Lazy<BeatSaberPlaylistsLib.PlaylistManager>(() =>
         {
-            BeatSaberPlaylistsLib.PlaylistManager playlistManager = new BeatSaberPlaylistsLib.PlaylistManager("Playlists", new BlistPlaylistHandler(), new LegacyPlaylistHandler());
-            foreach (var playlist in playlistManager.GetAllPlaylists(true))
-            {
-                playlist.AllowDuplicates = true;
-            }
+            BeatSaberPlaylistsLib.PlaylistManager playlistManager = new BeatSaberPlaylistsLib.PlaylistManager("Playlists", new LegacyPlaylistHandler(), new BlistPlaylistHandler());
             return playlistManager;
         }
         , System.Threading.LazyThreadSafetyMode.ExecutionAndPublication);

@@ -6,13 +6,17 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
+/*
+ * Original Author: KyleMC1413
+ * Adapted from BeatSaverDownloader
+ */
+
 namespace PlaylistManager.Utilities
 {
     class DownloaderUtils
     {
         private BeatSaver beatSaverInstance;
         public static DownloaderUtils instance;
-        private bool extractingZip;
 
         public static void Init()
         {
@@ -23,7 +27,6 @@ namespace PlaylistManager.Utilities
                 Version = typeof(DownloaderUtils).Assembly.GetName().Version,
             };
             instance.beatSaverInstance = new BeatSaver(options);
-            instance.extractingZip = false;
         }
 
         public async Task BeatmapDownloadByKey(string key, CancellationToken token, IProgress<double> progress = null, bool direct = false)
@@ -75,7 +78,6 @@ namespace PlaylistManager.Utilities
             Stream zipStream = new MemoryStream(zip);
             try
             {
-                extractingZip = true;
                 ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Read);
                 string basePath = songInfo.Key + " (" + songInfo.Metadata.SongName + " - " + songInfo.Metadata.LevelAuthorName + ")";
                 basePath = string.Join("", basePath.Split((Path.GetInvalidFileNameChars().Concat(Path.GetInvalidPathChars()).ToArray())));
@@ -102,7 +104,6 @@ namespace PlaylistManager.Utilities
             catch (Exception e)
             {
                 Plugin.Log.Critical($"Unable to extract ZIP! Exception: {e}");
-                extractingZip = false;
                 return;
             }
             zipStream.Close();

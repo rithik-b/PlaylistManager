@@ -4,6 +4,7 @@ using HarmonyLib;
 using System.Reflection;
 using SiraUtil.Zenject;
 using PlaylistManager.Installers;
+using PlaylistManager.Utilities;
 
 namespace PlaylistManager
 {
@@ -29,6 +30,7 @@ namespace PlaylistManager
             Log.Info("PlaylistManager initialized.");
             harmony = new Harmony(HarmonyId);
             zenjector.OnMenu<PlaylistViewInstaller>();
+            DownloaderUtils.Init();
         }
 
         #region BSIPA Config

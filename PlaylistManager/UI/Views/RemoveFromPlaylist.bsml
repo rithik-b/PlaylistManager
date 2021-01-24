@@ -1,10 +1,10 @@
-﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
-	<modal id='modal' hide-event='close-modal' clickerino-offerino-closerino="false" anchor-pos-y='15' size-delta-x='60' size-delta-y='30' move-to-center='false'>
-		<vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' preferred-width='60' preferred-height='30'>
-			<text id='warning-message' word-wrapping='true' align='Center' />
-			<horizontal horizontal-fit='PreferredSize' vertical-fit='PreferredSize' preferred-width='60' preferred-height='30'>
-				<button id='yes' text='Yes' on-click='delete-confirm' click-event='close-modal'/>
-				<button id='no' text='No' click-event='close-modal'/>
+﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd' anchor-pos-y='15' size-delta-x='60' size-delta-y='30' horizontal-fit='PreferredSize' vertical-fit='PreferredSize'>
+	<modal id='modal' hide-event='close-modal' clickerino-offerino-closerino="false" move-to-center='false' size-delta-x='60' size-delta-y='30'>
+		<vertical ignore-layout='false' horizontal-fit='PreferredSize' vertical-fit='PreferredSize' spacing='5' pad='2' size-delta-x='60' size-delta-y='30'>
+			<text id='warning-message' word-wrapping='true' />
+			<horizontal>
+				<button id='yes' text='Yes' on-click='delete-confirm' click-event='close-modal' />
+				<button id='no' text='No' click-event='close-modal' />
 			</horizontal>
 		</vertical>
 	</modal>
