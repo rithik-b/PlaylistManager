@@ -3,7 +3,7 @@
   "id": "PlaylistManager",
   "name": "PlaylistManager",
   "author": "PixelBoom",
-  "version": "0.0.5",
+  "version": "0.1.0",
   "description": "An ingame playlist manager mod for beat saber",
   "gameVersion": "1.13.2",
     "dependsOn": {
@@ -11,6 +11,6 @@
         "BeatSaberMarkupLanguage": "^1.4.5",
         "SiraUtil": "^2.4.0",
         "BeatSaberPlaylistsLib": "^1.1.0",
-        "BeatSaverSharp": "^1.6.0"
+        "BeatSaverSharp": "^2.0.1"
     }
 }

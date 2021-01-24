@@ -3,7 +3,6 @@ using BeatSaberMarkupLanguage.Attributes;
 using PlaylistManager.Interfaces;
 using System.Reflection;
 using Zenject;
-using UnityEngine;
 using BeatSaberMarkupLanguage.Components;
 using BeatSaberPlaylistsLib.Types;
 

@@ -50,9 +50,9 @@ namespace PlaylistManager.UI
             await playlistViewController.DownloadPlaylistAsync();
         }
 
-        public void LevelCollectionUpdated(IAnnotatedBeatmapLevelCollection beatmapLevelCollection)
+        public void LevelCollectionUpdated()
         {
-            if (annotatedBeatmapLevelCollectionsViewController.isActiveAndEnabled && beatmapLevelCollection is Playlist)
+            if (annotatedBeatmapLevelCollectionsViewController.isActiveAndEnabled && annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection is Playlist)
             {
                 bgTransform.gameObject.SetActive(true);
             }

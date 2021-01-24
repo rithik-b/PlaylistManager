@@ -80,6 +80,16 @@ namespace PlaylistManager.UI
             parsed = false;
         }
 
+        internal void Parse()
+        {
+            BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.PlaylistView.bsml"), levelPackDetailViewController.transform.Find("Detail").gameObject, this);
+        }
+
+        public void Dispose()
+        {
+            LevelFilteringNavigationController_UpdateSecondChildControllerContent.SecondChildControllerUpdatedEvent -= LevelFilteringNavigationController_UpdateSecondChildControllerContent_SecondChildControllerUpdatedEvent;
+        }
+
         [UIAction("delete-click")]
         internal void DisplayWarning()
         {
@@ -176,16 +186,6 @@ namespace PlaylistManager.UI
             levelCollectionViewController.SetData(selectedCollection.beatmapLevelCollection, selectedCollection.collectionName, selectedCollection.coverImage, false, null);
             levelPackDetailViewController.SetData((IBeatmapLevelPack)selectedCollection);
             didSelectAnnotatedBeatmapLevelCollectionEvent?.Invoke(selectedCollection);
-        }
-
-        internal void Parse()
-        {
-            BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.PlaylistView.bsml"), levelPackDetailViewController.transform.Find("Detail").gameObject, this);
-        }
-
-        public void Dispose()
-        {
-            LevelFilteringNavigationController_UpdateSecondChildControllerContent.SecondChildControllerUpdatedEvent -= LevelFilteringNavigationController_UpdateSecondChildControllerContent_SecondChildControllerUpdatedEvent;
         }
     }
 }

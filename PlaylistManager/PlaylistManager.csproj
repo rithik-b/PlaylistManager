@@ -171,6 +171,7 @@
     <Compile Include="Plugin.cs" />
     <Compile Include="Configuration\PluginConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UI\RefreshButtonUI.cs" />
     <Compile Include="UI\ViewControllers\AddPlaylistController.cs" />
     <Compile Include="UI\ViewControllers\ButtonViewController.cs" />
     <Compile Include="UI\ViewControllers\PlaylistViewButtonsController.cs" />

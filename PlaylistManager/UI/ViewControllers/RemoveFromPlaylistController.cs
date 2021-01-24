@@ -31,10 +31,15 @@ namespace PlaylistManager.UI
             parsed = false;
         }
 
+        internal void Parse()
+        {
+            BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.RemoveFromPlaylist.bsml"), standardLevelDetailViewController.transform.Find("LevelDetail").gameObject, this);
+        }
+
         internal void DisplayWarning()
         {
             modal.Show(true);
-            warningMessage.text = string.Format("Are you sure you would like to remove\n{0} from the playlist?", selectedPlaylistSong.songName);
+            warningMessage.text = string.Format("Are you sure you would like to remove {0} from the playlist?", selectedPlaylistSong.songName);
         }
 
         [UIAction("delete-confirm")]
@@ -47,17 +52,12 @@ namespace PlaylistManager.UI
             levelCollectionViewController.SetData(selectedPlaylist.beatmapLevelCollection, selectedPlaylist.collectionName, selectedPlaylist.coverImage, false, null);
         }
 
-        public void PreviewBeatmapLevelUpdated(IPreviewBeatmapLevel beatmapLevel)
+        public void PreviewBeatmapLevelUpdated(IPreviewBeatmapLevel beatmapLevel) // This is needed as it is impossible to get the IPlaylistSong through IDifficultyBeatmapLevel
         {
             if (beatmapLevel is IPlaylistSong)
             {
                 selectedPlaylistSong = (IPlaylistSong)beatmapLevel;
             }
-        }
-
-        internal void Parse()
-        {
-            BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.RemoveFromPlaylist.bsml"), standardLevelDetailViewController.transform.Find("LevelDetail").gameObject, this);
         }
     }
 }

@@ -4,13 +4,9 @@ using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using static BeatSaberMarkupLanguage.Components.CustomListTableData;
 using System.Reflection;
-using UnityEngine;
 using HMUI;
-using PlaylistManager.Interfaces;
 using PlaylistManager.HarmonyPatches;
-using BeatSaberPlaylistsLib.Types;
 using PlaylistManager.Utilities;
-using Zenject;
 
 namespace PlaylistManager.UI
 {
@@ -33,6 +29,11 @@ namespace PlaylistManager.UI
             this.standardLevelDetailViewController = standardLevelDetailViewController;
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
             parsed = false;
+        }
+
+        internal void Parse()
+        {
+            BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.AddPlaylist.bsml"), standardLevelDetailViewController.transform.Find("LevelDetail").gameObject, this);
         }
 
         internal void ShowPlaylists()
@@ -69,11 +70,6 @@ namespace PlaylistManager.UI
         {
             PlaylistLibUtils.CreatePlaylist(playlistName, "PlaylistManager");
             ShowPlaylists();
-        }
-
-        internal void Parse()
-        {
-            BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.AddPlaylist.bsml"), standardLevelDetailViewController.transform.Find("LevelDetail").gameObject, this);
         }
     }
 }

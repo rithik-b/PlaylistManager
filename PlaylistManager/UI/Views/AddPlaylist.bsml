@@ -1,6 +1,6 @@
 ﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
 	<modal id='modal' hide-event='close-modal' clickerino-offerino-closerino="true" anchor-pos-y='15' size-delta-x='65' size-delta-y='75' move-to-center='false'>
-		<modal-keyboard show-event='open-keyboard' click-off-closes='true' clear-on-open='true' on-enter='keyboard-enter'></modal-keyboard>
+		<modal-keyboard show-event='open-keyboard' clickerino-offerino-closerino='true' clear-on-open='true' on-enter='keyboard-enter'></modal-keyboard>
 		<vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' anchor-pos-y='3' size-delta-y='0'>
 			<page-button event-click='list#PageUp' direction='Up' ignore-layout='true' anchor-min-y='0.8' anchor-pos-x='25' anchor-pos-y='9' pref-width='12'></page-button>
 			<list id='list' pref-height='50' select-cell='select-cell' list-style='List'></list>

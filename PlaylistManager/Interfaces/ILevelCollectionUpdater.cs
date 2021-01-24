@@ -2,6 +2,6 @@
 {
     interface ILevelCollectionUpdater
     {
-        void LevelCollectionUpdated(IAnnotatedBeatmapLevelCollection beatmapLevelCollection);
+        void LevelCollectionUpdated();
     }
 }
