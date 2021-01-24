@@ -1,23 +1,28 @@
 # PlaylistManager
-This plugin allows for ingame management of playlists as well as the ability to download missing songs, just like the pre-1.6.0 days :)
-A video demo of the mod: https://twitter.com/PixelB00m/status/1343389515004715008
+This plugin allows for viewing and ingame management of playlists as well as the ability to download missing songs, just like the pre-1.6.0 days :)
+<blockquote class="twitter-tweet"><p lang="en" dir="ltr">Hey guys I&#39;ve been working on a little something <a href="https://t.co/uyeMZ7J28l">pic.twitter.com/uyeMZ7J28l</a></p>&mdash; PixelBoom (@PixelB00m) <a href="https://twitter.com/PixelB00m/status/1343389515004715008?ref_src=twsrc%5Etfw">December 28, 2020</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
 ## Features
+- View playlists ingame (R.I.P. PlaylistLoaderLite)
+- Refresh playlists and custom songs
 - Create playlists
 - Add custom songs and OST songs to playlists
 - Remove songs from playlists
-- Delete playlists (coming soon)
-- Download missing songs from BeatSaver (coming soon)
+- Delete playlists
+- Download missing songs in playlists
 
-## Download (BETA)
-Download the latest version of the mod (v0.0.5) [here](https://github.com/rithik-b/PlaylistManager/releases/tag/0.0.5 "here")
-To install, simply move the plugin dll to the Plugins folder of your Beat Saber install
-BSML and SongCore are required for this mod, so please download the latest version from ModAssistant
-The Beta release comes with a beta version of v1.3.0 for PlaylistLoaderLite which is **required** for this mod. This version may be incompatible with other mods that depend on PlaylistLoaderLite so please download this mod at your own discretion.
+## Download
+Download the latest version of the mod (v0.1.0) [here](https://github.com/rithik-b/PlaylistManager/releases/tag/0.1.0 "here")
+To install, move the 2 folders (Libs and Plugins) to your Beat Saber folder
+BSML, SongCore, BeatSaverSharp and SiraUtil are required for this mod, so please download the latest version from ModAssistant
+[BeatSaberPlaylistsLib](https://github.com/Zingabopp/BeatSaberPlaylistsLib) is also required and will be coming to ModAssistant, however the current release comes with this Library.
 
 ## Issues and Support
-Since this is a beta, I haven't completed all features yet (look at the features section). If you have any suggestions for this mod that aren't already mentioned, you can contact me on Discord: PixelBoom#0001.
-I also won't be able to provide support for now since this is a beta, if you encounter any issues file an Issue on GitHub and I'll fix it as soon as I can. But this mod is not complete and I haven't submitted it to beatmods or the BSMG discord for that reason so don't expect it to work flawlessly.
+If you encounter any issues with this mod, PM me on Discord PixelBoom#0001 or file an Issue on GitHub and I'll fix it as soon as I can For support with the mod, DM me or @ me on the #pc-mod-support channel on the BSMG discord
 
 ## Contribution
 If you're a developer and would like to contribute to this mod, your contributions are welcome! Just submit a PR and I will take a look at it.
+
+## Special Thanks
+Huge thanks for both Auros and Zingabopp for their co-operation as well as their contribution to this mod.
+Auros helped me do a full plugin rewrite with Zenject, allowing for a more optimized mod and Zingabopp created the BeatSaberPlaylistsLib library, which is what I depend on with this mod.
