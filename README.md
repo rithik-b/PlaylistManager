@@ -1,8 +1,7 @@
 # PlaylistManager
 This plugin allows for viewing and ingame management of playlists as well as the ability to download missing songs, just like the pre-1.6.0 days :)
-<figure class="video_container">
-  <iframe src="pic.twitter.com/uyeMZ7J28l" frameborder="0" allowfullscreen="true"> </iframe>
-</figure>
+
+[Video Demo](https://twitter.com/PixelB00m/status/1343389515004715008)
 
 ## Features
 - View playlists ingame (R.I.P. PlaylistLoaderLite)
