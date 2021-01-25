@@ -3,7 +3,7 @@
   "id": "PlaylistManager",
   "name": "PlaylistManager",
   "author": "PixelBoom",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "An ingame playlist manager mod for beat saber",
   "gameVersion": "1.13.2",
     "dependsOn": {
