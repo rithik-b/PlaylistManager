@@ -12,6 +12,9 @@ This plugin allows for viewing and ingame management of playlists as well as the
 - Delete playlists
 - Download missing songs in playlists
 
+## ATTENTION INDEX USERS
+For scrolling through the playlists in the UI, you need to fix controller bindings to scroll as it requires the thumbstick. Look at this tutorial [here](https://www.youtube.com/watch?v=Bb4YKwmYvWk&feature=youtu.be) (Credits: Toni Macaroni)
+
 ## Download
 Download the latest version of the mod (v0.1.0) [here](https://github.com/rithik-b/PlaylistManager/releases/tag/0.1.0 "here")
 To install, move the 2 folders (Libs and Plugins) to your Beat Saber folder
