@@ -16,9 +16,10 @@ This plugin allows for viewing and ingame management of playlists as well as the
 For scrolling through the playlists in the UI, you need to fix controller bindings to scroll as it requires the thumbstick. Look at this tutorial [here](https://www.youtube.com/watch?v=Bb4YKwmYvWk&feature=youtu.be) (Credits: Toni Macaroni)
 
 ## Download
-Download the latest version of the mod (v0.1.1) [here](https://github.com/rithik-b/PlaylistManager/releases/tag/0.1.1 "here")
-To install, move the 2 folders (Libs and Plugins) to your Beat Saber folder
-BSML, SongCore, BeatSaverSharp and SiraUtil are required for this mod, so please download the latest version from ModAssistant
+Download the latest version of the mod (v0.1.1) [here](https://github.com/rithik-b/PlaylistManager/releases/tag/0.1.1 "here").
+To install, move the 2 folders (Libs and Plugins) to your Beat Saber folder.
+
+**SongCore**, **BeatSaverSharp**, **BeatSaberMarkupLanguage (BSML)**, and **SiraUtil** are required for this mod, so please download the latest version from ModAssistant.
 [BeatSaberPlaylistsLib](https://github.com/Zingabopp/BeatSaberPlaylistsLib) is also required and will be coming to ModAssistant, however the current release comes with this Library.
 
 ## Issues and Support
