@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using UnityEngine;
 
-namespace PlaylistLoaderLite.HarmonyPatches
+namespace PlaylistManager.HarmonyPatches
 {
     [HarmonyPatch(typeof(TableViewScroller), "HandleJoystickWasNotCenteredThisFrame",
         new Type[] {
