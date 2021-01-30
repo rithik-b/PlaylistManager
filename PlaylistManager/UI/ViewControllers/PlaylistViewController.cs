@@ -127,13 +127,16 @@ namespace PlaylistManager.UI
         {
             IAnnotatedBeatmapLevelCollection selectedPlaylist = annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection;
             List<IPlaylistSong> missingSongs;
+            string customArchiveUrl;
             if (selectedPlaylist is BlistPlaylist)
             {
                 missingSongs = ((BlistPlaylist)selectedPlaylist).Where(s => s.PreviewBeatmapLevel == null).Select(s => s).ToList();
+                customArchiveUrl = ((BlistPlaylist)selectedPlaylist).CustomArchiveURL;
             }
             else if(selectedPlaylist is LegacyPlaylist)
             {
                 missingSongs = ((LegacyPlaylist)selectedPlaylist).Where(s => s.PreviewBeatmapLevel == null).Select(s => s).ToList();
+                customArchiveUrl = ((LegacyPlaylist)selectedPlaylist).CustomArchiveURL;
             }
             else
             {
@@ -142,32 +145,64 @@ namespace PlaylistManager.UI
                 modal.Show(true);
                 return;
             }
+
             modalMessage.text = string.Format("{0}/{1} songs downloaded", 0, missingSongs.Count);
             modalState = ModalState.DownloadingModal;
             modal.Show(true);
             tokenSource.Dispose();
             tokenSource = new CancellationTokenSource();
-            for(int i = 0; i < missingSongs.Count; i++)
+            if (!string.IsNullOrEmpty(customArchiveUrl))
             {
-                try
+                for (int i = 0; i < missingSongs.Count; i++)
                 {
-                    if (!string.IsNullOrEmpty(missingSongs[i].Key))
+                    try
                     {
-                        await DownloaderUtils.instance.BeatmapDownloadByKey(missingSongs[i].Key, tokenSource.Token);
+                        if (!string.IsNullOrEmpty(missingSongs[i].Key))
+                        {
+                            string songName = selectedPlaylist.collectionName;
+                            if(!string.IsNullOrEmpty(missingSongs[i].songName))
+                            {
+                                songName = missingSongs[i].songName;
+                            }
+                            string url = customArchiveUrl.Replace("[KEY]", missingSongs[i].Key.ToLower());
+                            await DownloaderUtils.instance.BeatmapDownloadByCustomURL(url, songName, tokenSource.Token);
+                        }
+                        modalMessage.text = string.Format("{0}/{1} songs downloaded", i + 1, missingSongs.Count);
                     }
-                    else if (!string.IsNullOrEmpty(missingSongs[i].Hash))
+                    catch (Exception e)
                     {
-                        await DownloaderUtils.instance.BeatmapDownloadByHash(missingSongs[i].Hash, tokenSource.Token);
+                        if (e is TaskCanceledException)
+                            Plugin.Log.Warn("Song Download Aborted.");
+                        else
+                            Plugin.Log.Critical("Failed to download Song!");
+                        break;
                     }
-                    modalMessage.text = string.Format("{0}/{1} songs downloaded", i + 1, missingSongs.Count);
                 }
-                catch (Exception e)
+            }
+            else
+            {
+                for (int i = 0; i < missingSongs.Count; i++)
                 {
-                    if (e is TaskCanceledException)
-                        Plugin.Log.Warn("Song Download Aborted.");
-                    else
-                        Plugin.Log.Critical("Failed to download Song!");
-                    break;
+                    try
+                    {
+                        if (!string.IsNullOrEmpty(missingSongs[i].Key))
+                        {
+                            await DownloaderUtils.instance.BeatmapDownloadByKey(missingSongs[i].Key, tokenSource.Token);
+                        }
+                        else if (!string.IsNullOrEmpty(missingSongs[i].Hash))
+                        {
+                            await DownloaderUtils.instance.BeatmapDownloadByHash(missingSongs[i].Hash, tokenSource.Token);
+                        }
+                        modalMessage.text = string.Format("{0}/{1} songs downloaded", i + 1, missingSongs.Count);
+                    }
+                    catch (Exception e)
+                    {
+                        if (e is TaskCanceledException)
+                            Plugin.Log.Warn("Song Download Aborted.");
+                        else
+                            Plugin.Log.Critical("Failed to download Song!");
+                        break;
+                    }
                 }
             }
             modal.Hide(true);

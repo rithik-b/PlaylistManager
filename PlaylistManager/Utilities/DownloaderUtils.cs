@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,13 +17,14 @@ namespace PlaylistManager.Utilities
     internal class DownloaderUtils
     {
         private BeatSaver beatSaverInstance;
+        private string userAgent;
         public static DownloaderUtils instance;
-
         public static void Init()
         {
             instance = new DownloaderUtils();
             HttpOptions options = new HttpOptions(name: typeof(DownloaderUtils).Assembly.GetName().Name, version: typeof(DownloaderUtils).Assembly.GetName().Version);
             instance.beatSaverInstance = new BeatSaver(options);
+            instance.userAgent = string.Format("{0}/{1} (+https://github.com/rithik-b/PlaylistManager)", typeof(DownloaderUtils).Assembly.GetName().Name, typeof(DownloaderUtils).Assembly.GetName().Version);
         }
 
         public async Task BeatmapDownloadByKey(string key, CancellationToken token, IProgress<double> progress = null, bool direct = false)
@@ -37,7 +39,7 @@ namespace PlaylistManager.Utilities
                     Directory.CreateDirectory(customSongsPath);
                 }
                 var zip = await song.ZipBytes(direct, options).ConfigureAwait(false);
-                await ExtractZipAsync(song, zip, customSongsPath).ConfigureAwait(false);
+                await ExtractZipAsync(zip, customSongsPath, songInfo: song).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -60,7 +62,7 @@ namespace PlaylistManager.Utilities
                     Directory.CreateDirectory(customSongsPath);
                 }
                 var zip = await song.ZipBytes(direct, options).ConfigureAwait(false);
-                await ExtractZipAsync(song, zip, customSongsPath).ConfigureAwait(false);
+                await ExtractZipAsync(zip, customSongsPath, songInfo: song).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -71,15 +73,54 @@ namespace PlaylistManager.Utilities
             }
         }
 
-        private async Task ExtractZipAsync(BeatSaverSharp.Beatmap songInfo, byte[] zip, string customSongsPath, bool overwrite = false)
+        public async Task BeatmapDownloadByCustomURL(string url, string songName, CancellationToken token)
+        {
+            try
+            {
+                string customSongsPath = CustomLevelPathHelper.customLevelsDirectoryPath;
+                if (!Directory.Exists(customSongsPath))
+                {
+                    Directory.CreateDirectory(customSongsPath);
+                }
+                var request = WebRequest.CreateHttp(url);
+                Plugin.Log.Critical(url);
+                request.UserAgent = userAgent;
+                using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
+                using (Stream stream = response.GetResponseStream())
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    await stream.CopyToAsync(ms);
+                    var zip = ms.ToArray();
+                    await ExtractZipAsync(zip, customSongsPath, songName: songName).ConfigureAwait(false);
+                }
+            }
+            catch (Exception e)
+            {
+                if (e is TaskCanceledException)
+                    Plugin.Log.Warn("Song Download Aborted.");
+                else
+                    Plugin.Log.Critical(e.Message);
+            }
+        }
+
+        private async Task ExtractZipAsync(byte[] zip, string customSongsPath, bool overwrite = false, string songName = null, BeatSaverSharp.Beatmap songInfo = null)
         {
             Stream zipStream = new MemoryStream(zip);
             try
             {
                 ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Read);
-                string basePath = songInfo.Key + " (" + songInfo.Metadata.SongName + " - " + songInfo.Metadata.LevelAuthorName + ")";
-                basePath = string.Join("", basePath.Split((Path.GetInvalidFileNameChars().Concat(Path.GetInvalidPathChars()).ToArray())));
+                string basePath = "";
+                if (songInfo != null)
+                {
+                    basePath = songInfo.Key + " (" + songInfo.Metadata.SongName + " - " + songInfo.Metadata.LevelAuthorName + ")";
+                }
+                else
+                {
+                    basePath = songName;
+                }
+                basePath = string.Join("", basePath.Split(Path.GetInvalidFileNameChars().Concat(Path.GetInvalidPathChars()).ToArray()));
                 string path = customSongsPath + "/" + basePath;
+                
                 if (!overwrite && Directory.Exists(path))
                 {
                     int pathNum = 1;
