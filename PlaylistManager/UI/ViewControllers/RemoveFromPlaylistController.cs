@@ -6,10 +6,11 @@ using PlaylistManager.Interfaces;
 using BeatSaberPlaylistsLib.Types;
 using PlaylistManager.Utilities;
 using HMUI;
+using UnityEngine;
 
 namespace PlaylistManager.UI
 {
-    class RemoveFromPlaylistController : IPreviewBeatmapLevelUpdater
+    class RemoveFromPlaylistController : IPreviewBeatmapLevelUpdater, IPlaylistManagerModal
     {
         private StandardLevelDetailViewController standardLevelDetailViewController;
         private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
@@ -21,6 +22,12 @@ namespace PlaylistManager.UI
 
         [UIComponent("modal")]
         private ModalView modal;
+
+        [UIComponent("root")]
+        private RectTransform rootTransform;
+
+        [UIComponent("modal")]
+        private RectTransform modalTransform;
 
         internal bool parsed;
         RemoveFromPlaylistController(StandardLevelDetailViewController standardLevelDetailViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, LevelCollectionViewController levelCollectionViewController)
@@ -57,6 +64,14 @@ namespace PlaylistManager.UI
             if (beatmapLevel is IPlaylistSong)
             {
                 selectedPlaylistSong = (IPlaylistSong)beatmapLevel;
+            }
+        }
+
+        public void ParentControllerDeactivated()
+        {
+            if (parsed && rootTransform != null && modalTransform != null)
+            {
+                modalTransform.transform.SetParent(rootTransform);
             }
         }
     }

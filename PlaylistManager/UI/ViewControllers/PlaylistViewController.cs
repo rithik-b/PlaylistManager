@@ -13,10 +13,12 @@ using System.Threading;
 using System;
 using System.Threading.Tasks;
 using PlaylistManager.HarmonyPatches;
+using UnityEngine;
+using PlaylistManager.Interfaces;
 
 namespace PlaylistManager.UI
 {
-    class PlaylistViewController : IDisposable
+    class PlaylistViewController : IDisposable, IPlaylistManagerModal
     {
         private LevelPackDetailViewController levelPackDetailViewController;
         private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
@@ -36,6 +38,15 @@ namespace PlaylistManager.UI
 
         [UIComponent("modal-button")]
         private TextMeshProUGUI modalButtonText;
+
+        [UIComponent("root")]
+        private RectTransform rootTransform;
+
+        [UIComponent("delete-modal")]
+        private RectTransform deleteModalTransform;
+
+        [UIComponent("modal")]
+        private RectTransform modalTransform;
 
         internal enum ModalState
         {
@@ -177,15 +188,25 @@ namespace PlaylistManager.UI
         private void LevelFilteringNavigationController_UpdateSecondChildControllerContent_SecondChildControllerUpdatedEvent()
         {
             SelectAnnotatedBeatmapCollectionByIdx(downloadingBeatmapCollectionIdx);
+            LevelFilteringNavigationController_UpdateSecondChildControllerContent.SecondChildControllerUpdatedEvent -= LevelFilteringNavigationController_UpdateSecondChildControllerContent_SecondChildControllerUpdatedEvent;
         }
 
         private void SelectAnnotatedBeatmapCollectionByIdx(int index)
         {
-            annotatedBeatmapLevelCollectionsViewController.SetData(HarmonyPatches.AnnotatedBeatmapLevelCollectionsViewController_SetData.otherCustomBeatmapLevelCollections, index, false);
+            annotatedBeatmapLevelCollectionsViewController.SetData(AnnotatedBeatmapLevelCollectionsViewController_SetData.otherCustomBeatmapLevelCollections, index, false);
             IAnnotatedBeatmapLevelCollection selectedCollection = annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection;
             levelCollectionViewController.SetData(selectedCollection.beatmapLevelCollection, selectedCollection.collectionName, selectedCollection.coverImage, false, null);
             levelPackDetailViewController.SetData((IBeatmapLevelPack)selectedCollection);
             didSelectAnnotatedBeatmapLevelCollectionEvent?.Invoke(selectedCollection);
+        }
+
+        public void ParentControllerDeactivated()
+        {
+            if (parsed && rootTransform != null && modalTransform != null && deleteModalTransform != null)
+            {
+                modalTransform.transform.SetParent(rootTransform);
+                deleteModalTransform.transform.SetParent(rootTransform);
+            }
         }
     }
 }

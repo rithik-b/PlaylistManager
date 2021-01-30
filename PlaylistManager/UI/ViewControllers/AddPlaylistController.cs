@@ -7,10 +7,12 @@ using System.Reflection;
 using HMUI;
 using PlaylistManager.HarmonyPatches;
 using PlaylistManager.Utilities;
+using PlaylistManager.Interfaces;
+using UnityEngine;
 
 namespace PlaylistManager.UI
 {
-    class AddPlaylistController
+    class AddPlaylistController: IPlaylistManagerModal
     {
         private StandardLevelDetailViewController standardLevelDetailViewController;
         private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
@@ -20,6 +22,15 @@ namespace PlaylistManager.UI
 
         [UIComponent("modal")]
         private ModalView modal;
+
+        [UIComponent("root")]
+        private RectTransform rootTransform;
+
+        [UIComponent("modal")]
+        private RectTransform modalTransform;
+
+        [UIComponent("keyboard")]
+        private RectTransform keyboardTransform;
 
         private BeatSaberPlaylistsLib.Types.IPlaylist[] loadedplaylists;
         internal bool parsed;
@@ -70,6 +81,15 @@ namespace PlaylistManager.UI
         {
             PlaylistLibUtils.CreatePlaylist(playlistName, "PlaylistManager");
             ShowPlaylists();
+        }
+
+        public void ParentControllerDeactivated()
+        {
+            if(parsed && rootTransform != null && modalTransform != null && keyboardTransform != null)
+            {
+                modalTransform.transform.SetParent(rootTransform);
+                keyboardTransform.transform.SetParent(modalTransform);
+            }
         }
     }
 }

@@ -167,6 +167,7 @@
     <Compile Include="HarmonyPatches\TableViewScroller_HandleJoystickWasNotCenteredThisFrame.cs" />
     <Compile Include="Installers\PlaylistViewInstaller.cs" />
     <Compile Include="Interfaces\ILevelCollectionUpdater.cs" />
+    <Compile Include="Interfaces\IPlaylistManagerModal.cs" />
     <Compile Include="Interfaces\IPreviewBeatmapLevelUpdater.cs" />
     <Compile Include="Managers\PlaylistUIManager.cs" />
     <Compile Include="Plugin.cs" />
