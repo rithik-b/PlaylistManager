@@ -127,16 +127,13 @@ namespace PlaylistManager.UI
         {
             IAnnotatedBeatmapLevelCollection selectedPlaylist = annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection;
             List<IPlaylistSong> missingSongs;
-            string customArchiveUrl;
             if (selectedPlaylist is BlistPlaylist)
             {
                 missingSongs = ((BlistPlaylist)selectedPlaylist).Where(s => s.PreviewBeatmapLevel == null).Select(s => s).ToList();
-                customArchiveUrl = ((BlistPlaylist)selectedPlaylist).CustomArchiveURL;
             }
             else if(selectedPlaylist is LegacyPlaylist)
             {
                 missingSongs = ((LegacyPlaylist)selectedPlaylist).Where(s => s.PreviewBeatmapLevel == null).Select(s => s).ToList();
-                customArchiveUrl = ((LegacyPlaylist)selectedPlaylist).CustomArchiveURL;
             }
             else
             {
@@ -151,58 +148,27 @@ namespace PlaylistManager.UI
             modal.Show(true);
             tokenSource.Dispose();
             tokenSource = new CancellationTokenSource();
-            if (!string.IsNullOrEmpty(customArchiveUrl))
+            for (int i = 0; i < missingSongs.Count; i++)
             {
-                for (int i = 0; i < missingSongs.Count; i++)
+                try
                 {
-                    try
+                    if (!string.IsNullOrEmpty(missingSongs[i].Key))
                     {
-                        if (!string.IsNullOrEmpty(missingSongs[i].Key))
-                        {
-                            string songName = selectedPlaylist.collectionName;
-                            if(!string.IsNullOrEmpty(missingSongs[i].songName))
-                            {
-                                songName = missingSongs[i].songName;
-                            }
-                            string url = customArchiveUrl.Replace("[KEY]", missingSongs[i].Key.ToLower());
-                            await DownloaderUtils.instance.BeatmapDownloadByCustomURL(url, songName, tokenSource.Token);
-                        }
-                        modalMessage.text = string.Format("{0}/{1} songs downloaded", i + 1, missingSongs.Count);
+                        await DownloaderUtils.instance.BeatmapDownloadByKey(missingSongs[i].Key, tokenSource.Token);
                     }
-                    catch (Exception e)
+                    else if (!string.IsNullOrEmpty(missingSongs[i].Hash))
                     {
-                        if (e is TaskCanceledException)
-                            Plugin.Log.Warn("Song Download Aborted.");
-                        else
-                            Plugin.Log.Critical("Failed to download Song!");
-                        break;
+                        await DownloaderUtils.instance.BeatmapDownloadByHash(missingSongs[i].Hash, tokenSource.Token);
                     }
+                    modalMessage.text = string.Format("{0}/{1} songs downloaded", i + 1, missingSongs.Count);
                 }
-            }
-            else
-            {
-                for (int i = 0; i < missingSongs.Count; i++)
+                catch (Exception e)
                 {
-                    try
-                    {
-                        if (!string.IsNullOrEmpty(missingSongs[i].Key))
-                        {
-                            await DownloaderUtils.instance.BeatmapDownloadByKey(missingSongs[i].Key, tokenSource.Token);
-                        }
-                        else if (!string.IsNullOrEmpty(missingSongs[i].Hash))
-                        {
-                            await DownloaderUtils.instance.BeatmapDownloadByHash(missingSongs[i].Hash, tokenSource.Token);
-                        }
-                        modalMessage.text = string.Format("{0}/{1} songs downloaded", i + 1, missingSongs.Count);
-                    }
-                    catch (Exception e)
-                    {
-                        if (e is TaskCanceledException)
-                            Plugin.Log.Warn("Song Download Aborted.");
-                        else
-                            Plugin.Log.Critical("Failed to download Song!");
-                        break;
-                    }
+                    if (e is TaskCanceledException)
+                        Plugin.Log.Warn("Song Download Aborted.");
+                    else
+                        Plugin.Log.Critical("Failed to download Song!");
+                    break;
                 }
             }
             modal.Hide(true);

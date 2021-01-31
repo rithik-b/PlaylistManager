@@ -55,13 +55,10 @@ namespace PlaylistManager.Configuration
         private async void SetAuthorNameAsync()
         {
             AuthorName = "PlaylistManager";
-            Plugin.Log.Info("Finding UserInfo");
             UserInfo userInfo = await UserInfoUtils.GetUserInfoAsync();
-            Plugin.Log.Info("UserInfo found");
             if (userInfo != null)
             {
                 AuthorName = userInfo.userName;
-                Plugin.Log.Info("UserInfo not null");
             }
         }
     }

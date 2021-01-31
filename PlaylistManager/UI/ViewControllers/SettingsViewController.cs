@@ -1,4 +1,5 @@
 ﻿using BeatSaberMarkupLanguage.Attributes;
+using BeatSaberMarkupLanguage.Settings;
 using PlaylistManager.Configuration;
 
 namespace PlaylistManager.UI
@@ -23,6 +24,16 @@ namespace PlaylistManager.UI
             {
                 PluginConfig.Instance.DefaultImageDisabled = value;
             }
+        }
+
+        internal void Register()
+        {
+            BSMLSettings.instance.AddSettingsMenu("PlaylistManager", "PlaylistManager.UI.Views.Settings.bsml", instance);
+        }
+
+        internal void Unregister()
+        {
+            BSMLSettings.instance.RemoveSettingsMenu(instance);
         }
     }
 }

@@ -12,14 +12,14 @@ namespace PlaylistManager.UI
         internal static ProgressBar _progressBar;
         const int MESSAGE_TIME = 5;
         const string REQUEST_SOURCE = "PlaylistManager (Plugin)";
-        internal void Setup()
+        internal void Register()
         {
             _refreshButton = new MenuButton("Refresh Playlists", "Refresh Songs & Playlists", RefreshButtonPressed, true);
             MenuButtons.instance.RegisterButton(_refreshButton);
             LaunchLoadPlaylists();
         }
 
-        internal void Remove()
+        internal void Unregister()
         {
             MenuButtons.instance.UnregisterButton(_refreshButton);
         }

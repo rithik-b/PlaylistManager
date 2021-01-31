@@ -15,7 +15,7 @@ namespace PlaylistManager.Installers
             Container.BindInterfacesTo<ButtonViewController>().AsSingle();
             Container.BindInterfacesTo<PlaylistViewButtonsController>().AsSingle();
             Container.BindInterfacesTo<PlaylistUIManager>().AsSingle();
-            Container.Bind<UserInfoUtils>().AsSingle();
+            Container.Bind<UserInfoUtils>().AsSingle().NonLazy();
         }
     }
 }
