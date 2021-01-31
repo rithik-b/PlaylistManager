@@ -4,6 +4,8 @@ using Zenject;
 using PlaylistManager.Interfaces;
 using PlaylistManager.UI;
 using PlaylistManager.HarmonyPatches;
+using System.Threading.Tasks;
+using PlaylistManager.Configuration;
 
 namespace PlaylistManager.Managers
 {
@@ -13,6 +15,7 @@ namespace PlaylistManager.Managers
         SelectLevelCategoryViewController selectLevelCategoryViewController;
         PlaylistViewController playlistViewController;
         ILevelCollectionUpdater levelCollectionUpdater;
+        IPlatformUserModel platformUserModel;
 
         List<IPreviewBeatmapLevelUpdater> previewBeatmapLevelUpdaters;
 
@@ -20,7 +23,7 @@ namespace PlaylistManager.Managers
         List<IPlaylistManagerModal> playlistManagerModals;
 
         PlaylistUIManager(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, SelectLevelCategoryViewController selectLevelCategoryViewController, PlaylistViewController playlistViewController, ILevelCollectionUpdater levelCollectionUpdater,
-            List<IPreviewBeatmapLevelUpdater> previewBeatmapLevelUpdaters, StandardLevelDetailViewController standardLevelDetailViewController, List<IPlaylistManagerModal> playlistManagerModals)
+            List<IPreviewBeatmapLevelUpdater> previewBeatmapLevelUpdaters, StandardLevelDetailViewController standardLevelDetailViewController, List<IPlaylistManagerModal> playlistManagerModals, IPlatformUserModel platformUserModel)
         {
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
             this.selectLevelCategoryViewController = selectLevelCategoryViewController;
@@ -29,6 +32,7 @@ namespace PlaylistManager.Managers
             this.previewBeatmapLevelUpdaters = previewBeatmapLevelUpdaters;
             this.standardLevelDetailViewController = standardLevelDetailViewController;
             this.playlistManagerModals = playlistManagerModals;
+            this.platformUserModel = platformUserModel;
         }
 
         public void Dispose()
@@ -47,6 +51,20 @@ namespace PlaylistManager.Managers
             LevelCollectionTableView_HandleDidSelectRowEvent.didSelectLevelEvent += LevelCollectionViewController_didSelectLevelEvent;
             standardLevelDetailViewController.didDeactivateEvent += StandardLevelDetailViewController_didDeactivateEvent;
             standardLevelDetailViewController.didChangeContentEvent += StandardLevelDetailViewController_didChangeContentEvent;
+            _ = AssignAuthor();
+        }
+
+        private async Task AssignAuthor()
+        {
+            if (PluginConfig.Instance.AuthorName == null || PluginConfig.Instance.AuthorName == nameof(PlaylistManager))
+            {
+                UserInfo user = await platformUserModel.GetUserInfo();
+                PluginConfig.Instance.AuthorName = user?.userName ?? nameof(PlaylistManager);
+            }
+            else
+            {
+                PluginConfig.Instance.AuthorName = PluginConfig.Instance.AuthorName;
+            }
         }
 
         private void LevelCollectionViewController_didSelectLevelEvent(IPreviewBeatmapLevel beatmapLevel)

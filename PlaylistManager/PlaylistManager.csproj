@@ -182,7 +182,6 @@
     <Compile Include="UI\ViewControllers\SettingsViewController.cs" />
     <Compile Include="Utilities\DownloaderUtils.cs" />
     <Compile Include="Utilities\PlaylistLibUtils.cs" />
-    <Compile Include="Utilities\UserInfoUtils.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="manifest.json" />
