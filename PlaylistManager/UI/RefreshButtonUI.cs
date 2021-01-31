@@ -17,7 +17,6 @@ namespace PlaylistManager.UI
 
         public void Initialize()
         {
-            Plugin.Log.Info("initializing");
             _refreshButton = new MenuButton("Refresh Playlists", "Refresh Songs & Playlists", RefreshButtonPressed, true);
             MenuButtons.instance.RegisterButton(_refreshButton);
             _ = LaunchLoadPlaylistsFlow();
@@ -36,7 +35,6 @@ namespace PlaylistManager.UI
 
         public void Dispose()
         {
-            Plugin.Log.Info("disposing");
             UnityEngine.Object.Destroy(_progressBar);
             if (BSMLParser.IsSingletonAvailable && MenuButtons.IsSingletonAvailable)
                 MenuButtons.instance.UnregisterButton(_refreshButton);
@@ -45,15 +43,12 @@ namespace PlaylistManager.UI
 
         internal void RefreshButtonPressed()
         {
-            Plugin.Log.Info("refresh pressed");
-
             if (!Loader.AreSongsLoading)
                 Loader.Instance.RefreshSongs(fullRefresh: false);
         }
 
         internal async Task LaunchLoadPlaylistsFlow()
         {
-            Plugin.Log.Info("launched playlist");
             // Wait for SongCore plugin to load
             while (Loader.Instance == null)
                 await SiraUtil.Utilities.PauseChamp;

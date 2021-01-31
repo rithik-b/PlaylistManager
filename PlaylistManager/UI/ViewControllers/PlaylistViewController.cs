@@ -164,10 +164,10 @@ namespace PlaylistManager.UI
                 }
                 catch (Exception e)
                 {
-                    if (e is TaskCanceledException)
-                        Plugin.Log.Warn("Song Download Aborted.");
-                    else
+                    if (!(e is TaskCanceledException))
+                    {
                         Plugin.Log.Critical("Failed to download Song!");
+                    }
                     break;
                 }
             }

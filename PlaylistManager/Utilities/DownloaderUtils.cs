@@ -27,26 +27,29 @@ namespace PlaylistManager.Utilities
             instance.userAgent = string.Format("{0}/{1} (+https://github.com/rithik-b/PlaylistManager)", typeof(DownloaderUtils).Assembly.GetName().Name, typeof(DownloaderUtils).Assembly.GetName().Version);
         }
 
+        private async Task BeatSaverBeatmapDownload(BeatSaverSharp.Beatmap song, BeatSaverSharp.StandardRequestOptions options, bool direct)
+        {
+            string customSongsPath = CustomLevelPathHelper.customLevelsDirectoryPath;
+            if (!Directory.Exists(customSongsPath))
+            {
+                Directory.CreateDirectory(customSongsPath);
+            }
+            var zip = await song.ZipBytes(direct, options).ConfigureAwait(false);
+            await ExtractZipAsync(zip, customSongsPath, songInfo: song).ConfigureAwait(false);
+        }
+
         public async Task BeatmapDownloadByKey(string key, CancellationToken token, IProgress<double> progress = null, bool direct = false)
         {
             var options = new StandardRequestOptions { Token = token, Progress = progress };
             var song = await beatSaverInstance.Key(key, options);
             try
             {
-                string customSongsPath = CustomLevelPathHelper.customLevelsDirectoryPath;
-                if (!Directory.Exists(customSongsPath))
-                {
-                    Directory.CreateDirectory(customSongsPath);
-                }
-                var zip = await song.ZipBytes(direct, options).ConfigureAwait(false);
-                await ExtractZipAsync(zip, customSongsPath, songInfo: song).ConfigureAwait(false);
+                await BeatSaverBeatmapDownload(song, options, direct);
             }
             catch (Exception e)
             {
-                if (e is TaskCanceledException)
-                    Plugin.Log.Warn("Song Download Aborted.");
-                else
-                    Plugin.Log.Critical("Failed to download Song!");
+                if (!(e is TaskCanceledException))
+                    Plugin.Log.Critical(string.Format("Failed to download Song {0}", key));
             }
         }
 
@@ -56,20 +59,12 @@ namespace PlaylistManager.Utilities
             var song = await beatSaverInstance.Hash(hash, options);
             try
             {
-                string customSongsPath = CustomLevelPathHelper.customLevelsDirectoryPath;
-                if (!Directory.Exists(customSongsPath))
-                {
-                    Directory.CreateDirectory(customSongsPath);
-                }
-                var zip = await song.ZipBytes(direct, options).ConfigureAwait(false);
-                await ExtractZipAsync(zip, customSongsPath, songInfo: song).ConfigureAwait(false);
+                await BeatSaverBeatmapDownload(song, options, direct);
             }
             catch (Exception e)
             {
-                if (e is TaskCanceledException)
-                    Plugin.Log.Warn("Song Download Aborted.");
-                else
-                    Plugin.Log.Critical("Failed to download Song!");
+                if (!(e is TaskCanceledException))
+                    Plugin.Log.Critical(string.Format("Failed to download Song {0}", hash));
             }
         }
 
@@ -96,10 +91,8 @@ namespace PlaylistManager.Utilities
             }
             catch (Exception e)
             {
-                if (e is TaskCanceledException)
-                    Plugin.Log.Warn("Song Download Aborted.");
-                else
-                    Plugin.Log.Critical(e.Message);
+                if (!(e is TaskCanceledException))
+                    Plugin.Log.Critical(string.Format("Failed to download Song {0}", url));
             }
         }
 
