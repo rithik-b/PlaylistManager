@@ -6,6 +6,9 @@ using SiraUtil.Zenject;
 using PlaylistManager.Installers;
 using PlaylistManager.Utilities;
 using PlaylistManager.UI;
+using BeatSaberMarkupLanguage.Settings;
+using IPA.Config;
+using IPA.Config.Stores;
 
 namespace PlaylistManager
 {
@@ -32,31 +35,31 @@ namespace PlaylistManager
             harmony = new Harmony(HarmonyId);
             zenjector.OnMenu<PlaylistViewInstaller>();
             DownloaderUtils.Init();
-            RefreshButtonUI.instance.Setup();
         }
 
         #region BSIPA Config
-        //Uncomment to use BSIPA's config
-        /*
         [Init]
         public void InitWithConfig(Config conf)
         {
             Configuration.PluginConfig.Instance = conf.Generated<Configuration.PluginConfig>();
             Log.Debug("Config loaded");
         }
-        */
         #endregion
 
         [OnEnable]
         public void OnEnable()
         {
             harmony.PatchAll(Assembly.GetExecutingAssembly());
+            BSMLSettings.instance.AddSettingsMenu("PlaylistManager", "PlaylistManager.UI.Views.Settings.bsml", SettingsViewController.instance);
+            RefreshButtonUI.instance.Setup();
         }
 
         [OnDisable]
         public void OnDisable()
         {
             harmony.UnpatchAll(HarmonyId);
+            BSMLSettings.instance.RemoveSettingsMenu(SettingsViewController.instance);
+            RefreshButtonUI.instance.Remove();
         }
     }
 }

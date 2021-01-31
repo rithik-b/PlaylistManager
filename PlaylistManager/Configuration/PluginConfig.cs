@@ -1,6 +1,7 @@
-﻿/*
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using IPA.Config.Stores;
+using PlaylistManager.Utilities;
 
 [assembly: InternalsVisibleTo(GeneratedStore.AssemblyVisibilityTarget)]
 namespace PlaylistManager.Configuration
@@ -8,14 +9,25 @@ namespace PlaylistManager.Configuration
     internal class PluginConfig
     {
         public static PluginConfig Instance { get; set; }
-        public virtual int IntValue { get; set; } = 42; // Must be 'virtual' if you want BSIPA to detect a value change and save the config automatically.
+        public virtual string AuthorName { get; set; }
+        public virtual bool DefaultImageDisabled { get; set; } = false;
 
         /// <summary>
         /// This is called whenever BSIPA reads the config from disk (including when file changes are detected).
         /// </summary>
         public virtual void OnReload()
         {
-            // Do stuff after config is read from disk.
+            if (AuthorName == null)
+            {
+                if (!UserInfoUtils.HasPlatformUserModelLoaded)
+                {
+                    UserInfoUtils.PlatformUserModelLoadedEvent += SetAuthorName;
+                }
+                else
+                {
+                    SetAuthorName();
+                }
+            }
         }
 
         /// <summary>
@@ -33,6 +45,24 @@ namespace PlaylistManager.Configuration
         {
             // This instance's members populated from other
         }
+
+        private void SetAuthorName()
+        {
+            Task.Run(() => SetAuthorNameAsync());
+            UserInfoUtils.PlatformUserModelLoadedEvent -= SetAuthorName;
+        }
+
+        private async void SetAuthorNameAsync()
+        {
+            AuthorName = "PlaylistManager";
+            Plugin.Log.Info("Finding UserInfo");
+            UserInfo userInfo = await UserInfoUtils.GetUserInfoAsync();
+            Plugin.Log.Info("UserInfo found");
+            if (userInfo != null)
+            {
+                AuthorName = userInfo.userName;
+                Plugin.Log.Info("UserInfo not null");
+            }
+        }
     }
 }
-*/

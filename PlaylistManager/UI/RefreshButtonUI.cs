@@ -19,6 +19,11 @@ namespace PlaylistManager.UI
             LaunchLoadPlaylists();
         }
 
+        internal void Remove()
+        {
+            MenuButtons.instance.UnregisterButton(_refreshButton);
+        }
+
         internal void LaunchLoadPlaylists()
         {
             StartCoroutine(LaunchLoadPlaylistsFlow());

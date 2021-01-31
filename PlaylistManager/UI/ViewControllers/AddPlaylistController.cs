@@ -9,6 +9,7 @@ using PlaylistManager.HarmonyPatches;
 using PlaylistManager.Utilities;
 using PlaylistManager.Interfaces;
 using UnityEngine;
+using PlaylistManager.Configuration;
 
 namespace PlaylistManager.UI
 {
@@ -55,7 +56,11 @@ namespace PlaylistManager.UI
 
             foreach (BeatSaberPlaylistsLib.Types.IPlaylist playlist in loadedplaylists)
             {
-                String subName = String.Format("{0} songs", playlist.beatmapLevelCollection.beatmapLevels.Length);
+                String subName = string.Format("{0} songs", playlist.beatmapLevelCollection.beatmapLevels.Length);
+                if (Array.Exists(playlist.beatmapLevelCollection.beatmapLevels, level => level.levelID == standardLevelDetailViewController.selectedDifficultyBeatmap.level.levelID))
+                {
+                    subName += " (contains song)";
+                }
                 customListTableData.data.Add(new CustomCellInfo(playlist.collectionName, subName, playlist.coverImage));
             }
 
@@ -68,7 +73,7 @@ namespace PlaylistManager.UI
         {
             loadedplaylists[index].Add(standardLevelDetailViewController.selectedDifficultyBeatmap.level);
             customListTableData.tableView.ClearSelection();
-            if(annotatedBeatmapLevelCollectionsViewController.isActiveAndEnabled && AnnotatedBeatmapLevelCollectionsViewController_SetData.isCustomBeatmapLevelPack)
+            if (annotatedBeatmapLevelCollectionsViewController.isActiveAndEnabled && AnnotatedBeatmapLevelCollectionsViewController_SetData.isCustomBeatmapLevelPack)
             {
                 annotatedBeatmapLevelCollectionsViewController.SetData(AnnotatedBeatmapLevelCollectionsViewController_SetData.otherCustomBeatmapLevelCollections, annotatedBeatmapLevelCollectionsViewController.selectedItemIndex, false);
             }
@@ -79,13 +84,20 @@ namespace PlaylistManager.UI
         [UIAction("keyboard-enter")]
         internal void CreatePlaylist(string playlistName)
         {
-            PlaylistLibUtils.CreatePlaylist(playlistName, "PlaylistManager");
+            if (!PluginConfig.Instance.DefaultImageDisabled)
+            {
+                PlaylistLibUtils.CreatePlaylist(playlistName, PluginConfig.Instance.AuthorName);
+            }
+            else
+            {
+                PlaylistLibUtils.CreatePlaylist(playlistName, PluginConfig.Instance.AuthorName, "");
+            }
             ShowPlaylists();
         }
 
         public void ParentControllerDeactivated()
         {
-            if(parsed && rootTransform != null && modalTransform != null && keyboardTransform != null)
+            if (parsed && rootTransform != null && modalTransform != null && keyboardTransform != null)
             {
                 modalTransform.transform.SetParent(rootTransform);
                 keyboardTransform.transform.SetParent(modalTransform);
