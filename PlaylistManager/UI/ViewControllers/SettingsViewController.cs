@@ -1,10 +1,12 @@
 ﻿using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Settings;
 using PlaylistManager.Configuration;
+using System;
+using Zenject;
 
 namespace PlaylistManager.UI
 {
-    class SettingsViewController : PersistentSingleton<SettingsViewController>
+    class SettingsViewController : IInitializable, IDisposable
     {
         [UIValue("author-name")]
         public string AuthorName
@@ -26,14 +28,14 @@ namespace PlaylistManager.UI
             }
         }
 
-        internal void Register()
+        public void Initialize()
         {
-            BSMLSettings.instance.AddSettingsMenu("PlaylistManager", "PlaylistManager.UI.Views.Settings.bsml", instance);
+            BSMLSettings.instance.AddSettingsMenu(nameof(PlaylistManager), "PlaylistManager.UI.Views.Settings.bsml", this);
         }
 
-        internal void Unregister()
+        public void Dispose()
         {
-            BSMLSettings.instance.RemoveSettingsMenu(instance);
+            BSMLSettings.instance.RemoveSettingsMenu(this);
         }
     }
 }

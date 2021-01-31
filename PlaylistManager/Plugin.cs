@@ -1,13 +1,12 @@
-﻿using IPA;
-using IPALogger = IPA.Logging.Logger;
-using HarmonyLib;
-using System.Reflection;
-using SiraUtil.Zenject;
-using PlaylistManager.Installers;
-using PlaylistManager.Utilities;
-using PlaylistManager.UI;
+﻿using HarmonyLib;
+using IPA;
 using IPA.Config;
 using IPA.Config.Stores;
+using PlaylistManager.Installers;
+using PlaylistManager.Utilities;
+using SiraUtil.Zenject;
+using System.Reflection;
+using IPALogger = IPA.Logging.Logger;
 
 namespace PlaylistManager
 {
@@ -49,16 +48,12 @@ namespace PlaylistManager
         public void OnEnable()
         {
             harmony.PatchAll(Assembly.GetExecutingAssembly());
-            SettingsViewController.instance.Register();
-            RefreshButtonUI.instance.Register();
         }
 
         [OnDisable]
         public void OnDisable()
         {
             harmony.UnpatchAll(HarmonyId);
-            SettingsViewController.instance.Unregister();
-            RefreshButtonUI.instance.Unregister();
         }
     }
 }
