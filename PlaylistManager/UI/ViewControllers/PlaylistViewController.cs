@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using PlaylistManager.HarmonyPatches;
 using UnityEngine;
 using PlaylistManager.Interfaces;
+using System.IO;
 
 namespace PlaylistManager.UI
 {
@@ -125,15 +126,15 @@ namespace PlaylistManager.UI
 
         internal async System.Threading.Tasks.Task DownloadPlaylistAsync()
         {
-            IAnnotatedBeatmapLevelCollection selectedPlaylist = annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection;
+            var selectedBeatmapLevelCollection = annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection;
             List<IPlaylistSong> missingSongs;
-            if (selectedPlaylist is BlistPlaylist)
+            if (selectedBeatmapLevelCollection is BlistPlaylist)
             {
-                missingSongs = ((BlistPlaylist)selectedPlaylist).Where(s => s.PreviewBeatmapLevel == null).Select(s => s).ToList();
+                missingSongs = ((BlistPlaylist)selectedBeatmapLevelCollection).Where(s => s.PreviewBeatmapLevel == null).Select(s => s).ToList();
             }
-            else if(selectedPlaylist is LegacyPlaylist)
+            else if(selectedBeatmapLevelCollection is LegacyPlaylist)
             {
-                missingSongs = ((LegacyPlaylist)selectedPlaylist).Where(s => s.PreviewBeatmapLevel == null).Select(s => s).ToList();
+                missingSongs = ((LegacyPlaylist)selectedBeatmapLevelCollection).Where(s => s.PreviewBeatmapLevel == null).Select(s => s).ToList();
             }
             else
             {
@@ -175,6 +176,63 @@ namespace PlaylistManager.UI
             SongCore.Loader.Instance.RefreshSongs(false);
             downloadingBeatmapCollectionIdx = annotatedBeatmapLevelCollectionsViewController.selectedItemIndex;
             LevelFilteringNavigationController_UpdateSecondChildControllerContent.SecondChildControllerUpdatedEvent += LevelFilteringNavigationController_UpdateSecondChildControllerContent_SecondChildControllerUpdatedEvent;
+        }
+
+        internal async System.Threading.Tasks.Task SyncPlaylistAsync()
+        {
+            var selectedBeatmapLevelCollection = annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection;
+            if (!(selectedBeatmapLevelCollection is Playlist))
+            {
+                modalMessage.text = "Error: The selected playlist cannot be synced";
+                modalState = ModalState.OkModal;
+                modal.Show(true);
+                return;
+            }
+            var selectedPlaylist = (Playlist)selectedBeatmapLevelCollection;
+            if (selectedPlaylist.CustomData == null || !selectedPlaylist.CustomData.ContainsKey("syncURL"))
+            {
+                modalMessage.text = "Error: The selected playlist cannot be synced";
+                modalState = ModalState.OkModal;
+                modal.Show(true);
+                return;
+            }
+
+            string path = Path.Combine(PlaylistLibUtils.playlistManager.PlaylistPath, selectedPlaylist.Filename + '.' + selectedPlaylist.SuggestedExtension);
+            string syncURL = (string)selectedPlaylist.CustomData["syncURL"];
+            tokenSource.Dispose();
+            tokenSource = new CancellationTokenSource();
+
+            modalMessage.text = "Syncing Playlist";
+            modalState = ModalState.DownloadingModal;
+            modal.Show(true);
+
+            Stream playlistStream = null;
+            try
+            {
+                playlistStream = await DownloaderUtils.instance.DownloadFileToStreamAsync(syncURL, tokenSource.Token);
+            }
+            catch (Exception e)
+            {
+                modal.Show(false);
+                if (!(e is TaskCanceledException))
+                {
+                    modalMessage.text = "Error: The selected playlist cannot be synced";
+                    modalState = ModalState.OkModal;
+                    modal.Show(true);
+                }
+                return;
+            }
+            finally
+            {
+                modal.Show(false);
+                PlaylistLibUtils.playlistManager.DefaultHandler.Populate(playlistStream, selectedPlaylist);
+                PlaylistLibUtils.playlistManager.StorePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
+                await DownloadPlaylistAsync();
+
+                modalMessage.text = "Playlist Synced";
+                modalState = ModalState.OkModal;
+                modal.Show(true);
+            }
         }
 
         [UIAction("click-modal-button")]

@@ -17,6 +17,9 @@ namespace PlaylistManager.UI
         [UIComponent("bg")]
         private Transform bgTransform;
 
+        [UIComponent("sync-button")]
+        private Transform syncButtonTransform;
+
         PlaylistViewButtonsController(LevelPackDetailViewController levelPackDetailViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, PlaylistViewController playlistViewController)
         {
             this.levelPackDetailViewController = levelPackDetailViewController;
@@ -27,6 +30,8 @@ namespace PlaylistManager.UI
         public void Initialize()
         {
             BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.PlaylistViewButtons.bsml"), levelPackDetailViewController.transform.Find("Detail").gameObject, this);
+            syncButtonTransform.transform.localScale *= 0.08f;
+            syncButtonTransform.gameObject.SetActive(false);
             bgTransform.gameObject.SetActive(false);
         }
 
@@ -50,11 +55,30 @@ namespace PlaylistManager.UI
             await playlistViewController.DownloadPlaylistAsync();
         }
 
+        [UIAction("sync-click")]
+        internal async System.Threading.Tasks.Task OnSync()
+        {
+            if (!playlistViewController.parsed)
+            {
+                playlistViewController.Parse();
+            }
+            await playlistViewController.SyncPlaylistAsync();
+        }
+
         public void LevelCollectionUpdated()
         {
             if (annotatedBeatmapLevelCollectionsViewController.isActiveAndEnabled && annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection is Playlist)
             {
                 bgTransform.gameObject.SetActive(true);
+                var customData = ((Playlist)annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection).CustomData;
+                if (customData != null && customData.ContainsKey("syncURL"))
+                {
+                    syncButtonTransform.gameObject.SetActive(true);
+                }
+                else
+                {
+                    syncButtonTransform.gameObject.SetActive(false);
+                }
             }
             else
             {

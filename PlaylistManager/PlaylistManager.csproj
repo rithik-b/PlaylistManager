@@ -213,5 +213,8 @@
   <ItemGroup>
     <EmbeddedResource Include="Icons\BackgroundMask.png" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Icons\Sync.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

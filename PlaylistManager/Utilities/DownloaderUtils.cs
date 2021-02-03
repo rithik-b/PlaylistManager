@@ -140,5 +140,16 @@ namespace PlaylistManager.Utilities
             }
             zipStream.Close();
         }
+
+        public async Task<Stream> DownloadFileToStreamAsync(string url, CancellationToken token)
+        {
+            Uri uri = new Uri(url);
+            using (var webClient = new WebClient())
+            using (var registration = token.Register(() => webClient.CancelAsync()))
+            {
+                var data = await webClient.DownloadDataTaskAsync(uri);
+                return new MemoryStream(data);
+            }
+        }
     }
 }
