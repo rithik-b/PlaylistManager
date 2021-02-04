@@ -10,7 +10,7 @@ namespace PlaylistManager.HarmonyPatches
         typeof(IReadOnlyList<IAnnotatedBeatmapLevelCollection>), typeof(int), typeof(bool)})]
     public class AnnotatedBeatmapLevelCollectionsViewController_SetData
     {
-        private static IAnnotatedBeatmapLevelCollection[] loadedPlaylists
+        private static IAnnotatedBeatmapLevelCollection[] LoadedPlaylists
         {
             get
             {
@@ -30,7 +30,7 @@ namespace PlaylistManager.HarmonyPatches
             if (annotatedBeatmapLevelCollections[0] is CustomBeatmapLevelPack)
             {
                 isCustomBeatmapLevelPack = true;
-                IAnnotatedBeatmapLevelCollection[] allCustomBeatmapLevelCollections = new IAnnotatedBeatmapLevelCollection[loadedPlaylists.Length + annotatedBeatmapLevelCollections.Length];
+                IAnnotatedBeatmapLevelCollection[] allCustomBeatmapLevelCollections = new IAnnotatedBeatmapLevelCollection[LoadedPlaylists.Length + annotatedBeatmapLevelCollections.Length];
                 otherCustomBeatmapLevelCollections = new IAnnotatedBeatmapLevelCollection[annotatedBeatmapLevelCollections.Length];
                 for (int i = 0; i < annotatedBeatmapLevelCollections.Length; i++)
                 {
@@ -41,7 +41,7 @@ namespace PlaylistManager.HarmonyPatches
                 int j = 0;
                 for (int i = annotatedBeatmapLevelCollections.Length; i < allCustomBeatmapLevelCollections.Length; i++)
                 {
-                    allCustomBeatmapLevelCollections[i] = loadedPlaylists[j++];
+                    allCustomBeatmapLevelCollections[i] = LoadedPlaylists[j++];
                 }
 
                 annotatedBeatmapLevelCollections = allCustomBeatmapLevelCollections;

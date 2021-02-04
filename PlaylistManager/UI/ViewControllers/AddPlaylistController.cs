@@ -22,16 +22,16 @@ namespace PlaylistManager.UI
         public CustomListTableData customListTableData;
 
         [UIComponent("modal")]
-        private ModalView modal;
+        private readonly ModalView modal;
 
         [UIComponent("root")]
-        private RectTransform rootTransform;
+        private readonly RectTransform rootTransform;
 
         [UIComponent("modal")]
-        private RectTransform modalTransform;
+        private readonly RectTransform modalTransform;
 
         [UIComponent("keyboard")]
-        private RectTransform keyboardTransform;
+        private readonly RectTransform keyboardTransform;
 
         private BeatSaberPlaylistsLib.Types.IPlaylist[] loadedplaylists;
         internal bool parsed;

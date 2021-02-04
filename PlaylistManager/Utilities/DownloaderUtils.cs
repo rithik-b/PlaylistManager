@@ -27,7 +27,7 @@ namespace PlaylistManager.Utilities
             instance.userAgent = string.Format("{0}/{1} (+https://github.com/rithik-b/PlaylistManager)", typeof(DownloaderUtils).Assembly.GetName().Name, typeof(DownloaderUtils).Assembly.GetName().Version);
         }
 
-        private async Task BeatSaverBeatmapDownload(BeatSaverSharp.Beatmap song, BeatSaverSharp.StandardRequestOptions options, bool direct)
+        private async Task BeatSaverBeatmapDownload(Beatmap song, StandardRequestOptions options, bool direct)
         {
             string customSongsPath = CustomLevelPathHelper.customLevelsDirectoryPath;
             if (!Directory.Exists(customSongsPath))
@@ -96,7 +96,7 @@ namespace PlaylistManager.Utilities
             }
         }
 
-        private async Task ExtractZipAsync(byte[] zip, string customSongsPath, bool overwrite = false, string songName = null, BeatSaverSharp.Beatmap songInfo = null)
+        private async Task ExtractZipAsync(byte[] zip, string customSongsPath, bool overwrite = false, string songName = null, Beatmap songInfo = null)
         {
             Stream zipStream = new MemoryStream(zip);
             try

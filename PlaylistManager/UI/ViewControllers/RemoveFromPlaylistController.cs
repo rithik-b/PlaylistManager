@@ -12,22 +12,22 @@ namespace PlaylistManager.UI
 {
     class RemoveFromPlaylistController : IPreviewBeatmapLevelUpdater, IPlaylistManagerModal
     {
-        private StandardLevelDetailViewController standardLevelDetailViewController;
-        private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
-        private LevelCollectionViewController levelCollectionViewController;
+        private readonly StandardLevelDetailViewController standardLevelDetailViewController;
+        private readonly AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
+        private readonly LevelCollectionViewController levelCollectionViewController;
         private IPlaylistSong selectedPlaylistSong;
 
         [UIComponent("warning-message")]
-        private TextMeshProUGUI warningMessage;
+        private readonly TextMeshProUGUI warningMessage;
 
         [UIComponent("modal")]
-        private ModalView modal;
+        private readonly ModalView modal;
 
         [UIComponent("root")]
-        private RectTransform rootTransform;
+        private readonly RectTransform rootTransform;
 
         [UIComponent("modal")]
-        private RectTransform modalTransform;
+        private readonly RectTransform modalTransform;
 
         internal bool parsed;
         RemoveFromPlaylistController(StandardLevelDetailViewController standardLevelDetailViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, LevelCollectionViewController levelCollectionViewController)

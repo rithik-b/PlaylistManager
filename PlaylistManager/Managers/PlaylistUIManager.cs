@@ -11,16 +11,14 @@ namespace PlaylistManager.Managers
 {
     internal class PlaylistUIManager : IInitializable, IDisposable
     {
-        AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
-        SelectLevelCategoryViewController selectLevelCategoryViewController;
-        PlaylistViewController playlistViewController;
-        ILevelCollectionUpdater levelCollectionUpdater;
-        IPlatformUserModel platformUserModel;
-
-        List<IPreviewBeatmapLevelUpdater> previewBeatmapLevelUpdaters;
-
-        StandardLevelDetailViewController standardLevelDetailViewController;
-        List<IPlaylistManagerModal> playlistManagerModals;
+        readonly AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
+        readonly SelectLevelCategoryViewController selectLevelCategoryViewController;
+        readonly PlaylistViewController playlistViewController;
+        readonly ILevelCollectionUpdater levelCollectionUpdater;
+        readonly IPlatformUserModel platformUserModel;
+        readonly List<IPreviewBeatmapLevelUpdater> previewBeatmapLevelUpdaters;
+        readonly StandardLevelDetailViewController standardLevelDetailViewController;
+        readonly List<IPlaylistManagerModal> playlistManagerModals;
 
         PlaylistUIManager(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, SelectLevelCategoryViewController selectLevelCategoryViewController, PlaylistViewController playlistViewController, ILevelCollectionUpdater levelCollectionUpdater,
             List<IPreviewBeatmapLevelUpdater> previewBeatmapLevelUpdaters, StandardLevelDetailViewController standardLevelDetailViewController, List<IPlaylistManagerModal> playlistManagerModals, IPlatformUserModel platformUserModel)
@@ -40,7 +38,7 @@ namespace PlaylistManager.Managers
             standardLevelDetailViewController.didDeactivateEvent += StandardLevelDetailViewController_didDeactivateEvent;
             standardLevelDetailViewController.didChangeContentEvent += StandardLevelDetailViewController_didChangeContentEvent;
             playlistViewController.didSelectAnnotatedBeatmapLevelCollectionEvent += DidSelectAnnotatedBeatmapLevelCollectionEvent;
-            LevelCollectionTableView_HandleDidSelectRowEvent.didSelectLevelEvent += LevelCollectionViewController_didSelectLevelEvent;
+            LevelCollectionTableView_HandleDidSelectRowEvent.DidSelectLevelEvent += LevelCollectionViewController_didSelectLevelEvent;
             selectLevelCategoryViewController.didSelectLevelCategoryEvent += SelectLevelCategoryViewController_didSelectLevelCategoryEvent;
             annotatedBeatmapLevelCollectionsViewController.didSelectAnnotatedBeatmapLevelCollectionEvent += DidSelectAnnotatedBeatmapLevelCollectionEvent;
             _ = AssignAuthor();
@@ -51,7 +49,7 @@ namespace PlaylistManager.Managers
             standardLevelDetailViewController.didDeactivateEvent -= StandardLevelDetailViewController_didDeactivateEvent;
             standardLevelDetailViewController.didChangeContentEvent -= StandardLevelDetailViewController_didChangeContentEvent;
             playlistViewController.didSelectAnnotatedBeatmapLevelCollectionEvent -= DidSelectAnnotatedBeatmapLevelCollectionEvent;
-            LevelCollectionTableView_HandleDidSelectRowEvent.didSelectLevelEvent -= LevelCollectionViewController_didSelectLevelEvent;
+            LevelCollectionTableView_HandleDidSelectRowEvent.DidSelectLevelEvent -= LevelCollectionViewController_didSelectLevelEvent;
             selectLevelCategoryViewController.didSelectLevelCategoryEvent -= SelectLevelCategoryViewController_didSelectLevelCategoryEvent;
             annotatedBeatmapLevelCollectionsViewController.didSelectAnnotatedBeatmapLevelCollectionEvent -= DidSelectAnnotatedBeatmapLevelCollectionEvent;
         }

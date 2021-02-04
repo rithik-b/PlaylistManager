@@ -16,39 +16,38 @@ using PlaylistManager.HarmonyPatches;
 using UnityEngine;
 using PlaylistManager.Interfaces;
 using System.IO;
-using BeatSaberPlaylistsLib;
 
 namespace PlaylistManager.UI
 {
     class PlaylistViewController : IDisposable, IPlaylistManagerModal
     {
-        private LevelPackDetailViewController levelPackDetailViewController;
-        private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
-        private LevelCollectionViewController levelCollectionViewController;
+        private readonly LevelPackDetailViewController levelPackDetailViewController;
+        private readonly AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
+        private readonly LevelCollectionViewController levelCollectionViewController;
 
         [UIComponent("delete-modal")]
-        private ModalView deleteModal;
+        private readonly ModalView deleteModal;
 
         [UIComponent("warning-message")]
-        private TextMeshProUGUI warningMessage;
+        private readonly TextMeshProUGUI warningMessage;
 
         [UIComponent("modal")]
-        private ModalView modal;
+        private readonly ModalView modal;
 
         [UIComponent("modal-message")]
-        private TextMeshProUGUI modalMessage;
+        private readonly TextMeshProUGUI modalMessage;
 
         [UIComponent("modal-button")]
-        private TextMeshProUGUI modalButtonText;
+        private readonly TextMeshProUGUI modalButtonText;
 
         [UIComponent("root")]
-        private RectTransform rootTransform;
+        private readonly RectTransform rootTransform;
 
         [UIComponent("delete-modal")]
-        private RectTransform deleteModalTransform;
+        private readonly RectTransform deleteModalTransform;
 
         [UIComponent("modal")]
-        private RectTransform modalTransform;
+        private readonly RectTransform modalTransform;
 
         internal enum ModalState
         {
@@ -58,7 +57,7 @@ namespace PlaylistManager.UI
 
         private ModalState _modalState;
 
-        internal ModalState modalState
+        internal ModalState CurrentModalState
         {
             get
             {
@@ -120,7 +119,7 @@ namespace PlaylistManager.UI
             else
             {
                 modalMessage.text = "Error: Playlist cannot be deleted.";
-                modalState = ModalState.OkModal;
+                CurrentModalState = ModalState.OkModal;
                 modal.Show(true);
             }
         }
@@ -140,13 +139,13 @@ namespace PlaylistManager.UI
             else
             {
                 modalMessage.text = "Error: The selected playlist cannot be downloaded.";
-                modalState = ModalState.OkModal;
+                CurrentModalState = ModalState.OkModal;
                 modal.Show(true);
                 return;
             }
 
             modalMessage.text = string.Format("{0}/{1} songs downloaded", 0, missingSongs.Count);
-            modalState = ModalState.DownloadingModal;
+            CurrentModalState = ModalState.DownloadingModal;
             modal.Show(true);
             tokenSource.Dispose();
             tokenSource = new CancellationTokenSource();
@@ -185,7 +184,7 @@ namespace PlaylistManager.UI
             if (!(selectedBeatmapLevelCollection is Playlist))
             {
                 modalMessage.text = "Error: The selected playlist cannot be synced";
-                modalState = ModalState.OkModal;
+                CurrentModalState = ModalState.OkModal;
                 modal.Show(true);
                 return;
             }
@@ -193,7 +192,7 @@ namespace PlaylistManager.UI
             if (selectedPlaylist.CustomData == null || !selectedPlaylist.CustomData.ContainsKey("syncURL"))
             {
                 modalMessage.text = "Error: The selected playlist cannot be synced";
-                modalState = ModalState.OkModal;
+                CurrentModalState = ModalState.OkModal;
                 modal.Show(true);
                 return;
             }
@@ -204,7 +203,7 @@ namespace PlaylistManager.UI
             tokenSource = new CancellationTokenSource();
 
             modalMessage.text = "Syncing Playlist";
-            modalState = ModalState.DownloadingModal;
+            CurrentModalState = ModalState.DownloadingModal;
             modal.Show(true);
 
             Stream playlistStream = null;
@@ -218,7 +217,7 @@ namespace PlaylistManager.UI
                 if (!(e is TaskCanceledException))
                 {
                     modalMessage.text = "Error: The selected playlist cannot be synced";
-                    modalState = ModalState.OkModal;
+                    CurrentModalState = ModalState.OkModal;
                     modal.Show(true);
                 }
                 return;
@@ -226,12 +225,12 @@ namespace PlaylistManager.UI
             finally
             {
                 modal.Show(false);
-                //PlaylistLibUtils.playlistManager.DefaultHandler.Populate(playlistStream, selectedPlaylist);
+                PlaylistLibUtils.playlistManager.DefaultHandler.Populate(playlistStream, (BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
                 PlaylistLibUtils.playlistManager.StorePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
                 await DownloadPlaylistAsync();
 
                 modalMessage.text = "Playlist Synced";
-                modalState = ModalState.OkModal;
+                CurrentModalState = ModalState.OkModal;
                 modal.Show(true);
             }
         }
@@ -239,7 +238,7 @@ namespace PlaylistManager.UI
         [UIAction("click-modal-button")]
         internal void OkClicked()
         {
-            if(modalState == ModalState.DownloadingModal)
+            if(CurrentModalState == ModalState.DownloadingModal)
             {
                 tokenSource.Cancel();
             }

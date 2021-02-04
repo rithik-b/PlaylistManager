@@ -10,15 +10,15 @@ namespace PlaylistManager.UI
 {
     class PlaylistViewButtonsController : IInitializable, ILevelCollectionUpdater
     {
-        private LevelPackDetailViewController levelPackDetailViewController;
-        private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
-        private PlaylistViewController playlistViewController;
+        private readonly LevelPackDetailViewController levelPackDetailViewController;
+        private readonly AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
+        private readonly PlaylistViewController playlistViewController;
 
         [UIComponent("bg")]
-        private Transform bgTransform;
+        private readonly Transform bgTransform;
 
         [UIComponent("sync-button")]
-        private Transform syncButtonTransform;
+        private readonly Transform syncButtonTransform;
 
         PlaylistViewButtonsController(LevelPackDetailViewController levelPackDetailViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, PlaylistViewController playlistViewController)
         {
