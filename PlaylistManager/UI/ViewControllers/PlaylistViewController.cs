@@ -16,6 +16,7 @@ using PlaylistManager.HarmonyPatches;
 using UnityEngine;
 using PlaylistManager.Interfaces;
 using System.IO;
+using BeatSaberPlaylistsLib;
 
 namespace PlaylistManager.UI
 {
@@ -124,7 +125,7 @@ namespace PlaylistManager.UI
             }
         }
 
-        internal async System.Threading.Tasks.Task DownloadPlaylistAsync()
+        internal async Task DownloadPlaylistAsync()
         {
             var selectedBeatmapLevelCollection = annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection;
             List<IPlaylistSong> missingSongs;
@@ -178,7 +179,7 @@ namespace PlaylistManager.UI
             LevelFilteringNavigationController_UpdateSecondChildControllerContent.SecondChildControllerUpdatedEvent += LevelFilteringNavigationController_UpdateSecondChildControllerContent_SecondChildControllerUpdatedEvent;
         }
 
-        internal async System.Threading.Tasks.Task SyncPlaylistAsync()
+        internal async Task SyncPlaylistAsync()
         {
             var selectedBeatmapLevelCollection = annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection;
             if (!(selectedBeatmapLevelCollection is Playlist))
@@ -225,7 +226,7 @@ namespace PlaylistManager.UI
             finally
             {
                 modal.Show(false);
-                PlaylistLibUtils.playlistManager.DefaultHandler.Populate(playlistStream, selectedPlaylist);
+                //PlaylistLibUtils.playlistManager.DefaultHandler.Populate(playlistStream, selectedPlaylist);
                 PlaylistLibUtils.playlistManager.StorePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
                 await DownloadPlaylistAsync();
 
