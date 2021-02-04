@@ -56,7 +56,7 @@ namespace PlaylistManager.UI
 
             foreach (BeatSaberPlaylistsLib.Types.IPlaylist playlist in loadedplaylists)
             {
-                String subName = string.Format("{0} songs", playlist.beatmapLevelCollection.beatmapLevels.Length);
+                string subName = string.Format("{0} songs", playlist.beatmapLevelCollection.beatmapLevels.Length);
                 if (Array.Exists(playlist.beatmapLevelCollection.beatmapLevels, level => level.levelID == standardLevelDetailViewController.selectedDifficultyBeatmap.level.levelID))
                 {
                     subName += " (contains song)";
