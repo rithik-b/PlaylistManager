@@ -19,14 +19,17 @@ namespace PlaylistManager.UI
         {
             _refreshButton = new MenuButton("Refresh Playlists", "Refresh Songs & Playlists", RefreshButtonPressed, true);
             MenuButtons.instance.RegisterButton(_refreshButton);
-            _ = LaunchLoadPlaylistsFlow();
-
             Loader.SongsLoadedEvent += SongsLoaded;
         }
 
         private void SongsLoaded(Loader _, System.Collections.Concurrent.ConcurrentDictionary<string, CustomPreviewBeatmapLevel> songs)
         {
-            PlaylistLibUtils.playlistManager.RequestRefresh(REQUEST_SOURCE);
+            if (_progressBar == null)
+            {
+                _progressBar = ProgressBar.Create();
+            }
+
+            PlaylistLibUtils.playlistManager.RequestRefresh(REQUEST_SOURCE); // For now does nothing, need to ask the author of manager to implement actual refresh
             int numPlaylists = PlaylistLibUtils.playlistManager.GetAllPlaylists(true).Length;
 
             _progressBar.enabled = true;
@@ -45,14 +48,6 @@ namespace PlaylistManager.UI
         {
             if (!Loader.AreSongsLoading)
                 Loader.Instance.RefreshSongs(fullRefresh: false);
-        }
-
-        internal async Task LaunchLoadPlaylistsFlow()
-        {
-            // Wait for SongCore plugin to load
-            while (Loader.Instance == null)
-                await SiraUtil.Utilities.PauseChamp;
-            _progressBar = ProgressBar.Create();
         }
     }
 }
