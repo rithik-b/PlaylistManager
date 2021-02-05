@@ -209,7 +209,10 @@ namespace PlaylistManager.UI
             Stream playlistStream = null;
             try
             {
-                playlistStream = await DownloaderUtils.instance.DownloadFileToStreamAsync(syncURL, tokenSource.Token);
+                playlistStream = new MemoryStream(await DownloaderUtils.instance.DownloadFileToBytesAsync(syncURL, tokenSource.Token));
+                modal.Show(false);
+                ((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist).RemoveAll((playlistSong) => true); // Clear all songs
+                PlaylistLibUtils.playlistManager.DefaultHandler.Populate(playlistStream, (BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
             }
             catch (Exception e)
             {
@@ -224,8 +227,16 @@ namespace PlaylistManager.UI
             }
             finally
             {
-                modal.Show(false);
-                PlaylistLibUtils.playlistManager.DefaultHandler.Populate(playlistStream, (BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
+                // If the downloaded playlist doesn't have the sync url, add it back
+                if (selectedPlaylist.CustomData == null)
+                {
+                    selectedPlaylist.CustomData = new Dictionary<string, object>();
+                }
+                if (!selectedPlaylist.CustomData.ContainsKey("syncURL"))
+                {
+                    selectedPlaylist.CustomData["syncURL"] = syncURL;
+                }
+
                 PlaylistLibUtils.playlistManager.StorePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
                 await DownloadPlaylistAsync();
 

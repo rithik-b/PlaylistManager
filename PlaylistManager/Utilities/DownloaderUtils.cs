@@ -77,17 +77,8 @@ namespace PlaylistManager.Utilities
                 {
                     Directory.CreateDirectory(customSongsPath);
                 }
-                var request = WebRequest.CreateHttp(url);
-                Plugin.Log.Critical(url);
-                request.UserAgent = userAgent;
-                using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
-                using (Stream stream = response.GetResponseStream())
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    await stream.CopyToAsync(ms);
-                    var zip = ms.ToArray();
-                    await ExtractZipAsync(zip, customSongsPath, songName: songName).ConfigureAwait(false);
-                }
+                var zip = await DownloadFileToBytesAsync(url, token);
+                await ExtractZipAsync(zip, customSongsPath, songName: songName).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -141,14 +132,14 @@ namespace PlaylistManager.Utilities
             zipStream.Close();
         }
 
-        public async Task<Stream> DownloadFileToStreamAsync(string url, CancellationToken token)
+        public async Task<byte[]> DownloadFileToBytesAsync(string url, CancellationToken token)
         {
             Uri uri = new Uri(url);
             using (var webClient = new WebClient())
             using (var registration = token.Register(() => webClient.CancelAsync()))
             {
                 var data = await webClient.DownloadDataTaskAsync(uri);
-                return new MemoryStream(data);
+                return data;
             }
         }
     }

@@ -3,6 +3,7 @@ using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberPlaylistsLib.Types;
 using PlaylistManager.Interfaces;
 using System.Reflection;
+using System.Threading.Tasks;
 using UnityEngine;
 using Zenject;
 
@@ -46,7 +47,7 @@ namespace PlaylistManager.UI
         }
 
         [UIAction("download-click")]
-        internal async System.Threading.Tasks.Task OnDownload()
+        internal async Task OnDownload()
         {
             if (!playlistViewController.parsed)
             {
@@ -56,7 +57,7 @@ namespace PlaylistManager.UI
         }
 
         [UIAction("sync-click")]
-        internal async System.Threading.Tasks.Task OnSync()
+        internal async Task OnSync()
         {
             if (!playlistViewController.parsed)
             {
