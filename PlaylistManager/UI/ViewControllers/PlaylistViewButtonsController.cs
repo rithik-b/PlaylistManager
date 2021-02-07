@@ -9,7 +9,7 @@ using Zenject;
 
 namespace PlaylistManager.UI
 {
-    class PlaylistViewButtonsController : IInitializable, ILevelCollectionUpdater
+    class PlaylistViewButtonsController : IInitializable, ILevelCollectionUpdater, IRefreshable
     {
         private readonly LevelPackDetailViewController levelPackDetailViewController;
         private readonly AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
@@ -68,10 +68,10 @@ namespace PlaylistManager.UI
 
         public void LevelCollectionUpdated()
         {
-            if (annotatedBeatmapLevelCollectionsViewController.isActiveAndEnabled && annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection is Playlist)
+            if (annotatedBeatmapLevelCollectionsViewController.isActiveAndEnabled && annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection is Playlist playlist)
             {
                 bgTransform.gameObject.SetActive(true);
-                var customData = ((Playlist)annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection).CustomData;
+                var customData = playlist.CustomData;
                 if (customData != null && customData.ContainsKey("syncURL"))
                 {
                     syncButtonTransform.gameObject.SetActive(true);
@@ -97,6 +97,11 @@ namespace PlaylistManager.UI
             {
                 LevelCollectionUpdated();
             }
+        }
+
+        public void Refresh()
+        {
+            LevelCollectionUpdated();
         }
     }
 }

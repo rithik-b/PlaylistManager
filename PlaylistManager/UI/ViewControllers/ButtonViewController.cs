@@ -8,7 +8,7 @@ using BeatSaberPlaylistsLib.Types;
 
 namespace PlaylistManager.UI
 {
-    class ButtonViewController : IInitializable, IPreviewBeatmapLevelUpdater
+    class ButtonViewController : IInitializable, IPreviewBeatmapLevelUpdater, IRefreshable
     {
         private readonly StandardLevelDetailViewController standardLevelDetailViewController;
         private readonly AddPlaylistController addPlaylistController;
@@ -106,6 +106,11 @@ namespace PlaylistManager.UI
             {
                 CurrentButtonState = ButtonState.AddButton;
             }
+        }
+
+        public void Refresh()
+        {
+            PreviewBeatmapLevelUpdated(standardLevelDetailViewController.selectedDifficultyBeatmap.level);
         }
     }
 }

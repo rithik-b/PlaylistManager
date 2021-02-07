@@ -59,9 +59,8 @@ namespace PlaylistManager.UI
 
             foreach (BeatSaberPlaylistsLib.Types.IPlaylist playlist in loadedplaylists)
             {
-                if (playlist is IDeferredSpriteLoad && !((IDeferredSpriteLoad)playlist).SpriteWasLoaded)
+                if (playlist is IDeferredSpriteLoad deferredSpriteLoadPlaylist && !deferredSpriteLoadPlaylist.SpriteWasLoaded)
                 {
-                    IDeferredSpriteLoad deferredSpriteLoadPlaylist = (IDeferredSpriteLoad)playlist;
                     _ = playlist.coverImage;
                     deferredSpriteLoadPlaylist.SpriteLoaded -= DeferredSpriteLoadPlaylist_SpriteLoaded;
                     deferredSpriteLoadPlaylist.SpriteLoaded += DeferredSpriteLoadPlaylist_SpriteLoaded;
@@ -78,11 +77,11 @@ namespace PlaylistManager.UI
 
         private void DeferredSpriteLoadPlaylist_SpriteLoaded(object sender, EventArgs e)
         {
-            if (sender is IDeferredSpriteLoad deferredSpriteLoad)
+            if (sender is IDeferredSpriteLoad deferredSpriteLoadPlaylist)
             {
-                ShowPlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)sender);
+                ShowPlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)deferredSpriteLoadPlaylist);
                 customListTableData.tableView.ReloadData();
-                ((IDeferredSpriteLoad)sender).SpriteLoaded -= DeferredSpriteLoadPlaylist_SpriteLoaded;
+                (deferredSpriteLoadPlaylist).SpriteLoaded -= DeferredSpriteLoadPlaylist_SpriteLoaded;
             }
         }
 

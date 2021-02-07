@@ -169,6 +169,7 @@
     <Compile Include="Interfaces\ILevelCollectionUpdater.cs" />
     <Compile Include="Interfaces\IPlaylistManagerModal.cs" />
     <Compile Include="Interfaces\IPreviewBeatmapLevelUpdater.cs" />
+    <Compile Include="Interfaces\IRefreshable.cs" />
     <Compile Include="Managers\PlaylistUIManager.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Configuration\PluginConfig.cs" />
@@ -181,6 +182,7 @@
     <Compile Include="UI\ViewControllers\RemoveFromPlaylistController.cs" />
     <Compile Include="UI\ViewControllers\SettingsViewController.cs" />
     <Compile Include="Utilities\DownloaderUtils.cs" />
+    <Compile Include="Utilities\Events.cs" />
     <Compile Include="Utilities\PlaylistLibUtils.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -19,7 +19,7 @@ using System.IO;
 
 namespace PlaylistManager.UI
 {
-    class PlaylistViewController : IDisposable, IPlaylistManagerModal
+    class PlaylistViewController : IDisposable, IPlaylistManagerModal, IRefreshable
     {
         private readonly LevelPackDetailViewController levelPackDetailViewController;
         private readonly AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
@@ -134,13 +134,13 @@ namespace PlaylistManager.UI
         {
             var selectedBeatmapLevelCollection = annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection;
             List<IPlaylistSong> missingSongs;
-            if (selectedBeatmapLevelCollection is BlistPlaylist)
+            if (selectedBeatmapLevelCollection is BlistPlaylist blistPlaylist)
             {
-                missingSongs = ((BlistPlaylist)selectedBeatmapLevelCollection).Where(s => s.PreviewBeatmapLevel == null).Select(s => s).ToList();
+                missingSongs = blistPlaylist.Where(s => s.PreviewBeatmapLevel == null).Select(s => s).ToList();
             }
-            else if(selectedBeatmapLevelCollection is LegacyPlaylist)
+            else if (selectedBeatmapLevelCollection is LegacyPlaylist legacyPlaylist)
             {
-                missingSongs = ((LegacyPlaylist)selectedBeatmapLevelCollection).Where(s => s.PreviewBeatmapLevel == null).Select(s => s).ToList();
+                missingSongs = legacyPlaylist.Where(s => s.PreviewBeatmapLevel == null).Select(s => s).ToList();
             }
             else
             {
@@ -269,6 +269,7 @@ namespace PlaylistManager.UI
 
         private void SelectAnnotatedBeatmapCollectionByIdx(int index)
         {
+
             annotatedBeatmapLevelCollectionsViewController.SetData(AnnotatedBeatmapLevelCollectionsViewController_SetData.otherCustomBeatmapLevelCollections, index, false);
             IAnnotatedBeatmapLevelCollection selectedCollection = annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection;
             levelCollectionViewController.SetData(selectedCollection.beatmapLevelCollection, selectedCollection.collectionName, selectedCollection.coverImage, false, null);
@@ -286,6 +287,11 @@ namespace PlaylistManager.UI
                 deleteModalTransform.transform.SetParent(rootTransform);
                 deleteModalTransform.position = deleteModalPosition;
             }
+        }
+
+        public void Refresh()
+        {
+            SelectAnnotatedBeatmapCollectionByIdx(annotatedBeatmapLevelCollectionsViewController.selectedItemIndex);
         }
     }
 }
