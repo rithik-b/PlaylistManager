@@ -86,5 +86,17 @@ namespace PlaylistManager.UI
                 bgTransform.gameObject.SetActive(false);
             }
         }
+
+        public void LevelCategoryUpdated(SelectLevelCategoryViewController.LevelCategory levelCategory)
+        {
+            if (levelCategory != SelectLevelCategoryViewController.LevelCategory.CustomSongs)
+            {
+                bgTransform.gameObject.SetActive(false);
+            }
+            else
+            {
+                LevelCollectionUpdated();
+            }
+        }
     }
 }

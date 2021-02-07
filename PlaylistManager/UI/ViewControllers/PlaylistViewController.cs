@@ -155,7 +155,7 @@ namespace PlaylistManager.UI
                 {
                     if (!string.IsNullOrEmpty(missingSongs[i].Key))
                     {
-                        await DownloaderUtils.instance.BeatmapDownloadByKey(missingSongs[i].Key, tokenSource.Token);
+                        await DownloaderUtils.instance.BeatmapDownloadByKey(missingSongs[i].Key.ToLower(), tokenSource.Token);
                     }
                     else if (!string.IsNullOrEmpty(missingSongs[i].Hash))
                     {
