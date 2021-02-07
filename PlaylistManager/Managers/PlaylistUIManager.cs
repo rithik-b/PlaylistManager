@@ -13,40 +13,49 @@ namespace PlaylistManager.Managers
     {
         readonly AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
         readonly SelectLevelCategoryViewController selectLevelCategoryViewController;
-        readonly PlaylistViewController playlistViewController;
         readonly LevelPackDetailViewController levelPackDetailViewController;
-        readonly ILevelCollectionUpdater levelCollectionUpdater;
-        readonly IPlatformUserModel platformUserModel;
-        readonly List<IPreviewBeatmapLevelUpdater> previewBeatmapLevelUpdaters;
         readonly StandardLevelDetailViewController standardLevelDetailViewController;
+        readonly PlaylistViewController playlistViewController;
+
+        readonly ILevelCollectionUpdater levelCollectionUpdater;
+        readonly List<IPreviewBeatmapLevelUpdater> previewBeatmapLevelUpdaters;
         readonly List<IPlaylistManagerModal> playlistManagerModals;
+        readonly IPlatformUserModel platformUserModel;
 
         PlaylistUIManager(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, SelectLevelCategoryViewController selectLevelCategoryViewController,
-            LevelPackDetailViewController levelPackDetailViewController, PlaylistViewController playlistViewController, ILevelCollectionUpdater levelCollectionUpdater, List<IPreviewBeatmapLevelUpdater> previewBeatmapLevelUpdaters,
-            StandardLevelDetailViewController standardLevelDetailViewController, List<IPlaylistManagerModal> playlistManagerModals, IPlatformUserModel platformUserModel)
+            LevelPackDetailViewController levelPackDetailViewController, StandardLevelDetailViewController standardLevelDetailViewController, PlaylistViewController playlistViewController,
+            ILevelCollectionUpdater levelCollectionUpdater, List<IPreviewBeatmapLevelUpdater> previewBeatmapLevelUpdaters, List<IPlaylistManagerModal> playlistManagerModals, IPlatformUserModel platformUserModel)
         {
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
             this.selectLevelCategoryViewController = selectLevelCategoryViewController;
-            this.playlistViewController = playlistViewController;
             this.levelPackDetailViewController = levelPackDetailViewController;
+            this.standardLevelDetailViewController = standardLevelDetailViewController;
+            this.playlistViewController = playlistViewController;
+
             this.levelCollectionUpdater = levelCollectionUpdater;
             this.previewBeatmapLevelUpdaters = previewBeatmapLevelUpdaters;
-            this.standardLevelDetailViewController = standardLevelDetailViewController;
             this.playlistManagerModals = playlistManagerModals;
             this.platformUserModel = platformUserModel;
         }
 
         public void Initialize()
         {
+            // Fixing modal pop
             standardLevelDetailViewController.didDeactivateEvent += StandardLevelDetailViewController_didDeactivateEvent;
             standardLevelDetailViewController.didChangeContentEvent += StandardLevelDetailViewController_didChangeContentEvent;
 
+            // Whenever a beatmap level collection is selected
             playlistViewController.didSelectAnnotatedBeatmapLevelCollectionEvent += DidSelectAnnotatedBeatmapLevelCollectionEvent;
-            levelPackDetailViewController.didActivateEvent += LevelPackDetailViewController_didActivateEvent;
-            LevelCollectionTableView_HandleDidSelectRowEvent.DidSelectLevelEvent += LevelCollectionViewController_didSelectLevelEvent;
-            selectLevelCategoryViewController.didSelectLevelCategoryEvent += SelectLevelCategoryViewController_didSelectLevelCategoryEvent;
             annotatedBeatmapLevelCollectionsViewController.didSelectAnnotatedBeatmapLevelCollectionEvent += DidSelectAnnotatedBeatmapLevelCollectionEvent;
+            levelPackDetailViewController.didActivateEvent += LevelPackDetailViewController_didActivateEvent;
 
+            // Whenever a level category is selected
+            selectLevelCategoryViewController.didSelectLevelCategoryEvent += SelectLevelCategoryViewController_didSelectLevelCategoryEvent;
+
+            // Whenever a level is selected
+            LevelCollectionTableView_HandleDidSelectRowEvent.DidSelectLevelEvent += LevelCollectionViewController_didSelectLevelEvent;
+
+            // For assigning playlist author
             _ = AssignAuthor();
         }
 
@@ -56,45 +65,11 @@ namespace PlaylistManager.Managers
             standardLevelDetailViewController.didChangeContentEvent -= StandardLevelDetailViewController_didChangeContentEvent;
 
             playlistViewController.didSelectAnnotatedBeatmapLevelCollectionEvent -= DidSelectAnnotatedBeatmapLevelCollectionEvent;
-            LevelCollectionTableView_HandleDidSelectRowEvent.DidSelectLevelEvent -= LevelCollectionViewController_didSelectLevelEvent;
-            selectLevelCategoryViewController.didSelectLevelCategoryEvent -= SelectLevelCategoryViewController_didSelectLevelCategoryEvent;
             annotatedBeatmapLevelCollectionsViewController.didSelectAnnotatedBeatmapLevelCollectionEvent -= DidSelectAnnotatedBeatmapLevelCollectionEvent;
-        }
 
-        private async Task AssignAuthor()
-        {
-            if (PluginConfig.Instance.AuthorName == null || PluginConfig.Instance.AuthorName == nameof(PlaylistManager))
-            {
-                UserInfo user = await platformUserModel.GetUserInfo();
-                PluginConfig.Instance.AuthorName = user?.userName ?? nameof(PlaylistManager);
-            }
-            else
-            {
-                PluginConfig.Instance.AuthorName = PluginConfig.Instance.AuthorName;
-            }
-        }
+            selectLevelCategoryViewController.didSelectLevelCategoryEvent -= SelectLevelCategoryViewController_didSelectLevelCategoryEvent;
 
-        private void LevelCollectionViewController_didSelectLevelEvent(IPreviewBeatmapLevel beatmapLevel)
-        {
-            foreach (IPreviewBeatmapLevelUpdater previewBeatmapLevelUpdater in previewBeatmapLevelUpdaters)
-            {
-                previewBeatmapLevelUpdater.PreviewBeatmapLevelUpdated(beatmapLevel);
-            }
-        }
-
-        private void DidSelectAnnotatedBeatmapLevelCollectionEvent(IAnnotatedBeatmapLevelCollection annotatedBeatmapLevelCollection)
-        {
-            levelCollectionUpdater.LevelCollectionUpdated();
-        }
-
-        private void LevelPackDetailViewController_didActivateEvent(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
-        {
-            levelCollectionUpdater.LevelCollectionUpdated();
-        }
-
-        private void SelectLevelCategoryViewController_didSelectLevelCategoryEvent(SelectLevelCategoryViewController selectLevelCategoryViewController, SelectLevelCategoryViewController.LevelCategory levelCategory)
-        {
-            levelCollectionUpdater.LevelCategoryUpdated(levelCategory);
+            LevelCollectionTableView_HandleDidSelectRowEvent.DidSelectLevelEvent -= LevelCollectionViewController_didSelectLevelEvent;
         }
 
         private void StandardLevelDetailViewController_didChangeContentEvent(StandardLevelDetailViewController standardLevelDetailViewController, StandardLevelDetailViewController.ContentType contentType)
@@ -113,6 +88,42 @@ namespace PlaylistManager.Managers
             foreach (IPlaylistManagerModal playlistManagerModal in playlistManagerModals)
             {
                 playlistManagerModal.ParentControllerDeactivated();
+            }
+        }
+
+        private void DidSelectAnnotatedBeatmapLevelCollectionEvent(IAnnotatedBeatmapLevelCollection annotatedBeatmapLevelCollection)
+        {
+            levelCollectionUpdater.LevelCollectionUpdated();
+        }
+
+        private void LevelPackDetailViewController_didActivateEvent(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
+        {
+            levelCollectionUpdater.LevelCollectionUpdated();
+        }
+
+        private void SelectLevelCategoryViewController_didSelectLevelCategoryEvent(SelectLevelCategoryViewController selectLevelCategoryViewController, SelectLevelCategoryViewController.LevelCategory levelCategory)
+        {
+            levelCollectionUpdater.LevelCategoryUpdated(levelCategory);
+        }
+
+        private void LevelCollectionViewController_didSelectLevelEvent(IPreviewBeatmapLevel beatmapLevel)
+        {
+            foreach (IPreviewBeatmapLevelUpdater previewBeatmapLevelUpdater in previewBeatmapLevelUpdaters)
+            {
+                previewBeatmapLevelUpdater.PreviewBeatmapLevelUpdated(beatmapLevel);
+            }
+        }
+
+        private async Task AssignAuthor()
+        {
+            if (PluginConfig.Instance.AuthorName == null || PluginConfig.Instance.AuthorName == nameof(PlaylistManager))
+            {
+                UserInfo user = await platformUserModel.GetUserInfo();
+                PluginConfig.Instance.AuthorName = user?.userName ?? nameof(PlaylistManager);
+            }
+            else
+            {
+                PluginConfig.Instance.AuthorName = PluginConfig.Instance.AuthorName;
             }
         }
     }

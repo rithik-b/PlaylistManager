@@ -25,12 +25,6 @@ namespace PlaylistManager.UI
         private readonly AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
         private readonly LevelCollectionViewController levelCollectionViewController;
 
-        [UIComponent("delete-modal")]
-        private readonly ModalView deleteModal;
-
-        [UIComponent("warning-message")]
-        private readonly TextMeshProUGUI warningMessage;
-
         [UIComponent("modal")]
         private readonly ModalView modal;
 
@@ -40,14 +34,24 @@ namespace PlaylistManager.UI
         [UIComponent("modal-button")]
         private readonly TextMeshProUGUI modalButtonText;
 
+        [UIComponent("delete-modal")]
+        private readonly ModalView deleteModal;
+
+        [UIComponent("warning-message")]
+        private readonly TextMeshProUGUI warningMessage;
+
         [UIComponent("root")]
         private readonly RectTransform rootTransform;
+
+        [UIComponent("modal")]
+        private readonly RectTransform modalTransform;
+
+        private Vector3 modalPosition;
 
         [UIComponent("delete-modal")]
         private readonly RectTransform deleteModalTransform;
 
-        [UIComponent("modal")]
-        private readonly RectTransform modalTransform;
+        private Vector3 deleteModalPosition;
 
         internal enum ModalState
         {
@@ -95,6 +99,8 @@ namespace PlaylistManager.UI
         internal void Parse()
         {
             BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.PlaylistView.bsml"), levelPackDetailViewController.transform.Find("Detail").gameObject, this);
+            modalPosition = modalTransform.position;
+            deleteModalPosition = deleteModalTransform.position;
         }
 
         public void Dispose()
@@ -275,7 +281,10 @@ namespace PlaylistManager.UI
             if (parsed && rootTransform != null && modalTransform != null && deleteModalTransform != null)
             {
                 modalTransform.transform.SetParent(rootTransform);
+                modalTransform.position = modalPosition;
+
                 deleteModalTransform.transform.SetParent(rootTransform);
+                deleteModalTransform.position = deleteModalPosition;
             }
         }
     }

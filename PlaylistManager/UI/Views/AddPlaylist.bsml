@@ -6,6 +6,6 @@
 			<list id='list' pref-height='50' select-cell='select-cell' list-style='List'></list>
 			<page-button event-click='list#PageDown' direction='Down' ignore-layout='true' anchor-min-y='-0.8' anchor-pos-x='25' anchor-pos-y='-16' pref-width='12'></page-button>
 		</vertical>
-		<button id ='create-playlist-button' text='+' click-event='open-keyboard' anchor-pos-x ='5' anchor-pos-y='-70' ></button>
+		<button id ='create-playlist-button' text='+' click-event='open-keyboard' on-click='keyboard-opened' anchor-pos-x ='5' anchor-pos-y='-70' ></button>
 	</modal>
 </bg>

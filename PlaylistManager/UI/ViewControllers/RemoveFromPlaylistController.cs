@@ -29,6 +29,8 @@ namespace PlaylistManager.UI
         [UIComponent("modal")]
         private readonly RectTransform modalTransform;
 
+        private Vector3 modalPosition;
+
         internal bool parsed;
         RemoveFromPlaylistController(StandardLevelDetailViewController standardLevelDetailViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, LevelCollectionViewController levelCollectionViewController)
         {
@@ -41,6 +43,7 @@ namespace PlaylistManager.UI
         internal void Parse()
         {
             BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.RemoveFromPlaylist.bsml"), standardLevelDetailViewController.transform.Find("LevelDetail").gameObject, this);
+            modalPosition = modalTransform.position;
         }
 
         internal void DisplayWarning()
@@ -72,6 +75,7 @@ namespace PlaylistManager.UI
             if (parsed && rootTransform != null && modalTransform != null)
             {
                 modalTransform.transform.SetParent(rootTransform);
+                modalTransform.position = modalPosition;
             }
         }
     }

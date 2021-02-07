@@ -18,6 +18,8 @@ namespace PlaylistManager.UI
     {
         private StandardLevelDetailViewController standardLevelDetailViewController;
         private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
+        private BeatSaberPlaylistsLib.Types.IPlaylist[] loadedplaylists;
+        internal bool parsed;
 
         [UIComponent("list")]
         public CustomListTableData customListTableData;
@@ -31,11 +33,10 @@ namespace PlaylistManager.UI
         [UIComponent("modal")]
         private readonly RectTransform modalTransform;
 
+        private Vector3 modalPosition;
+
         [UIComponent("keyboard")]
         private readonly RectTransform keyboardTransform;
-
-        private BeatSaberPlaylistsLib.Types.IPlaylist[] loadedplaylists;
-        internal bool parsed;
 
         AddPlaylistController(StandardLevelDetailViewController standardLevelDetailViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController)
         {
@@ -47,6 +48,7 @@ namespace PlaylistManager.UI
         internal void Parse()
         {
             BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.AddPlaylist.bsml"), standardLevelDetailViewController.transform.Find("LevelDetail").gameObject, this);
+            modalPosition = modalTransform.position; // Position can change if SongBrowser is clicked while modal is opened so storing here
         }
 
         internal void ShowPlaylists()
@@ -107,9 +109,23 @@ namespace PlaylistManager.UI
             modal.Hide(true);
         }
 
+        [UIAction("keyboard-opened")]
+        internal void OnKeyboardOpened()
+        {
+            // Need to set parent because it goes out of order
+            if (parsed && modalTransform != null && keyboardTransform != null)
+            {
+                keyboardTransform.transform.SetParent(modalTransform);
+            }
+        }
+
         [UIAction("keyboard-enter")]
         internal void CreatePlaylist(string playlistName)
         {
+            if (string.IsNullOrWhiteSpace(playlistName))
+            {
+                return;
+            }
             if (!PluginConfig.Instance.DefaultImageDisabled)
             {
                 PlaylistLibUtils.CreatePlaylist(playlistName, PluginConfig.Instance.AuthorName);
@@ -123,10 +139,11 @@ namespace PlaylistManager.UI
 
         public void ParentControllerDeactivated()
         {
-            if (parsed && rootTransform != null && modalTransform != null && keyboardTransform != null)
+            // Need to restore position and parent of modal
+            if (parsed && rootTransform != null && modalTransform != null)
             {
                 modalTransform.transform.SetParent(rootTransform);
-                keyboardTransform.transform.SetParent(modalTransform);
+                modalTransform.position = modalPosition;
             }
         }
     }
