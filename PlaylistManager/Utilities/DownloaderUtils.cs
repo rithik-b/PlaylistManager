@@ -17,14 +17,12 @@ namespace PlaylistManager.Utilities
     internal class DownloaderUtils
     {
         private BeatSaver beatSaverInstance;
-        private string userAgent;
         public static DownloaderUtils instance;
         public static void Init()
         {
             instance = new DownloaderUtils();
             HttpOptions options = new HttpOptions(name: typeof(DownloaderUtils).Assembly.GetName().Name, version: typeof(DownloaderUtils).Assembly.GetName().Version);
             instance.beatSaverInstance = new BeatSaver(options);
-            instance.userAgent = string.Format("{0}/{1} (+https://github.com/rithik-b/PlaylistManager)", typeof(DownloaderUtils).Assembly.GetName().Name, typeof(DownloaderUtils).Assembly.GetName().Version);
         }
 
         private async Task BeatSaverBeatmapDownload(Beatmap song, StandardRequestOptions options, bool direct)

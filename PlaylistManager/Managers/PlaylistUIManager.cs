@@ -144,10 +144,17 @@ namespace PlaylistManager.Managers
 
         private async Task AssignAuthor()
         {
-            if (PluginConfig.Instance.AuthorName == null || PluginConfig.Instance.AuthorName == nameof(PlaylistManager))
+            if (PluginConfig.Instance.AutomaticAuthorName)
             {
                 UserInfo user = await platformUserModel.GetUserInfo();
-                PluginConfig.Instance.AuthorName = user?.userName ?? nameof(PlaylistManager);
+                if (PluginConfig.Instance.AuthorName == null && user == null)
+                {
+                    PluginConfig.Instance.AuthorName = nameof(PlaylistManager);
+                }
+                else
+                {
+                    PluginConfig.Instance.AuthorName = user?.userName ?? PluginConfig.Instance.AuthorName;
+                }
             }
             else
             {

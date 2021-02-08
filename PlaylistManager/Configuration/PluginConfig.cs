@@ -10,6 +10,7 @@ namespace PlaylistManager.Configuration
     {
         public static PluginConfig Instance { get; set; }
         public virtual string AuthorName { get; set; } = nameof(PlaylistManager);
+        public virtual bool AutomaticAuthorName { get; set; } = true;
         public virtual bool DefaultImageDisabled { get; set; } = false;
 
         /// <summary>
