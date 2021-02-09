@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>PlaylistManager</RootNamespace>
     <AssemblyName>PlaylistManager</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>portable</DebugType>
@@ -46,9 +46,9 @@
       <Private>False</Private>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
-    <Reference Include="BeatSaberPlaylistsLib">
-      <HintPath>$(BeatSaberDir)\Libs\BeatSaberPlaylistsLib.dll</HintPath>
+    <Reference Include="BeatSaberPlaylistsLib, Version=1.1.1.0, Culture=neutral, processorArchitecture=MSIL">
       <Private>False</Private>
+      <HintPath>$(BeatSaberDir)\Libs\BeatSaberPlaylistsLib.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="BeatSaverSharp">
@@ -167,7 +167,9 @@
     <Compile Include="HarmonyPatches\TableViewScroller_HandleJoystickWasNotCenteredThisFrame.cs" />
     <Compile Include="Installers\PlaylistViewInstaller.cs" />
     <Compile Include="Interfaces\ILevelCollectionUpdater.cs" />
+    <Compile Include="Interfaces\IPlaylistManagerModal.cs" />
     <Compile Include="Interfaces\IPreviewBeatmapLevelUpdater.cs" />
+    <Compile Include="Interfaces\IRefreshable.cs" />
     <Compile Include="Managers\PlaylistUIManager.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Configuration\PluginConfig.cs" />
@@ -178,7 +180,9 @@
     <Compile Include="UI\ViewControllers\PlaylistViewButtonsController.cs" />
     <Compile Include="UI\ViewControllers\PlaylistViewController.cs" />
     <Compile Include="UI\ViewControllers\RemoveFromPlaylistController.cs" />
+    <Compile Include="UI\ViewControllers\SettingsViewController.cs" />
     <Compile Include="Utilities\DownloaderUtils.cs" />
+    <Compile Include="Utilities\Events.cs" />
     <Compile Include="Utilities\PlaylistLibUtils.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -193,6 +197,7 @@
     <EmbeddedResource Include="UI\Views\PlaylistView.bsml" />
     <EmbeddedResource Include="UI\Views\ButtonView.bsml" />
     <EmbeddedResource Include="UI\Views\PlaylistViewButtons.bsml" />
+    <EmbeddedResource Include="UI\Views\Settings.bsml" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="BeatSaberModdingTools.Tasks">
@@ -209,6 +214,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Icons\BackgroundMask.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Icons\Sync.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

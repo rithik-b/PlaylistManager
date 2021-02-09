@@ -8,14 +8,14 @@ using BeatSaberPlaylistsLib.Types;
 
 namespace PlaylistManager.UI
 {
-    class ButtonViewController : IInitializable, IPreviewBeatmapLevelUpdater
+    class ButtonViewController : IInitializable, IPreviewBeatmapLevelUpdater, IRefreshable
     {
-        private StandardLevelDetailViewController standardLevelDetailViewController;
-        private AddPlaylistController addPlaylistController;
-        private RemoveFromPlaylistController removeFromPlaylistController;
+        private readonly StandardLevelDetailViewController standardLevelDetailViewController;
+        private readonly AddPlaylistController addPlaylistController;
+        private readonly RemoveFromPlaylistController removeFromPlaylistController;
 
         [UIComponent("button")]
-        private ButtonIconImage buttonIconImage;
+        private readonly ButtonIconImage buttonIconImage;
 
         internal enum ButtonState
         {
@@ -26,7 +26,7 @@ namespace PlaylistManager.UI
 
         private ButtonState _buttonState;
 
-        internal ButtonState buttonState
+        internal ButtonState CurrentButtonState
         {
             get
             {
@@ -71,7 +71,7 @@ namespace PlaylistManager.UI
         [UIAction("button-click")]
         internal void OpenModal()
         {
-            switch (buttonState)
+            switch (CurrentButtonState)
             {
                 case ButtonState.AddButton:
                     if (!addPlaylistController.parsed)
@@ -96,16 +96,21 @@ namespace PlaylistManager.UI
         {
             if (beatmapLevel.levelID.EndsWith(" WIP"))
             {
-                buttonState = ButtonState.Inactive;
+                CurrentButtonState = ButtonState.Inactive;
             }
             else if (beatmapLevel is IPlaylistSong)
             {
-                buttonState = ButtonState.RemoveButton;
+                CurrentButtonState = ButtonState.RemoveButton;
             }
             else
             {
-                buttonState = ButtonState.AddButton;
+                CurrentButtonState = ButtonState.AddButton;
             }
+        }
+
+        public void Refresh()
+        {
+            PreviewBeatmapLevelUpdated(standardLevelDetailViewController.selectedDifficultyBeatmap.level);
         }
     }
 }

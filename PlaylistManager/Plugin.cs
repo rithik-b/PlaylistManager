@@ -1,11 +1,12 @@
-﻿using IPA;
-using IPALogger = IPA.Logging.Logger;
-using HarmonyLib;
-using System.Reflection;
-using SiraUtil.Zenject;
+﻿using HarmonyLib;
+using IPA;
+using IPA.Config;
+using IPA.Config.Stores;
 using PlaylistManager.Installers;
 using PlaylistManager.Utilities;
-using PlaylistManager.UI;
+using SiraUtil.Zenject;
+using System.Reflection;
+using IPALogger = IPA.Logging.Logger;
 
 namespace PlaylistManager
 {
@@ -32,19 +33,15 @@ namespace PlaylistManager
             harmony = new Harmony(HarmonyId);
             zenjector.OnMenu<PlaylistViewInstaller>();
             DownloaderUtils.Init();
-            RefreshButtonUI.instance.Setup();
         }
 
         #region BSIPA Config
-        //Uncomment to use BSIPA's config
-        /*
         [Init]
         public void InitWithConfig(Config conf)
         {
             Configuration.PluginConfig.Instance = conf.Generated<Configuration.PluginConfig>();
             Log.Debug("Config loaded");
         }
-        */
         #endregion
 
         [OnEnable]

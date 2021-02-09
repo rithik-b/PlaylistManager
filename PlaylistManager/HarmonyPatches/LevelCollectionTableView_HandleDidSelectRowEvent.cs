@@ -20,7 +20,7 @@ namespace PlaylistManager.HarmonyPatches
         typeof(TableView), typeof(int)})]
     public class LevelCollectionTableView_HandleDidSelectRowEvent
     {
-        internal static event Action<IPreviewBeatmapLevel> didSelectLevelEvent;
+        internal static event Action<IPreviewBeatmapLevel> DidSelectLevelEvent;
         internal static readonly MethodInfo _unwrapPlaylistSong = SymbolExtensions.GetMethodInfo((IPreviewBeatmapLevel previewBeatmapLevel) => UnwrapPlaylistSong(previewBeatmapLevel));
 
         internal static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
@@ -47,7 +47,7 @@ namespace PlaylistManager.HarmonyPatches
 
         internal static IPreviewBeatmapLevel UnwrapPlaylistSong(IPreviewBeatmapLevel previewBeatmapLevel)
         {
-            didSelectLevelEvent.Invoke(previewBeatmapLevel);
+            DidSelectLevelEvent?.Invoke(previewBeatmapLevel);
             if (previewBeatmapLevel is IPlaylistSong)
             {
                 return ((IPlaylistSong)previewBeatmapLevel).PreviewBeatmapLevel;

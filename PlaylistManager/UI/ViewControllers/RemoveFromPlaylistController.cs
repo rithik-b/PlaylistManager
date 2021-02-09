@@ -6,21 +6,30 @@ using PlaylistManager.Interfaces;
 using BeatSaberPlaylistsLib.Types;
 using PlaylistManager.Utilities;
 using HMUI;
+using UnityEngine;
 
 namespace PlaylistManager.UI
 {
-    class RemoveFromPlaylistController : IPreviewBeatmapLevelUpdater
+    class RemoveFromPlaylistController : IPreviewBeatmapLevelUpdater, IPlaylistManagerModal
     {
-        private StandardLevelDetailViewController standardLevelDetailViewController;
-        private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
-        private LevelCollectionViewController levelCollectionViewController;
+        private readonly StandardLevelDetailViewController standardLevelDetailViewController;
+        private readonly AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
+        private readonly LevelCollectionViewController levelCollectionViewController;
         private IPlaylistSong selectedPlaylistSong;
 
         [UIComponent("warning-message")]
-        private TextMeshProUGUI warningMessage;
+        private readonly TextMeshProUGUI warningMessage;
 
         [UIComponent("modal")]
-        private ModalView modal;
+        private readonly ModalView modal;
+
+        [UIComponent("root")]
+        private readonly RectTransform rootTransform;
+
+        [UIComponent("modal")]
+        private readonly RectTransform modalTransform;
+
+        private Vector3 modalPosition;
 
         internal bool parsed;
         RemoveFromPlaylistController(StandardLevelDetailViewController standardLevelDetailViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, LevelCollectionViewController levelCollectionViewController)
@@ -34,6 +43,7 @@ namespace PlaylistManager.UI
         internal void Parse()
         {
             BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.RemoveFromPlaylist.bsml"), standardLevelDetailViewController.transform.Find("LevelDetail").gameObject, this);
+            modalPosition = modalTransform.position;
         }
 
         internal void DisplayWarning()
@@ -57,6 +67,15 @@ namespace PlaylistManager.UI
             if (beatmapLevel is IPlaylistSong)
             {
                 selectedPlaylistSong = (IPlaylistSong)beatmapLevel;
+            }
+        }
+
+        public void ParentControllerDeactivated()
+        {
+            if (parsed && rootTransform != null && modalTransform != null)
+            {
+                modalTransform.transform.SetParent(rootTransform);
+                modalTransform.position = modalPosition;
             }
         }
     }

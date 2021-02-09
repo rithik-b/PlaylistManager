@@ -13,29 +13,45 @@ using System.Threading;
 using System;
 using System.Threading.Tasks;
 using PlaylistManager.HarmonyPatches;
+using UnityEngine;
+using PlaylistManager.Interfaces;
+using System.IO;
 
 namespace PlaylistManager.UI
 {
-    class PlaylistViewController : IDisposable
+    class PlaylistViewController : IDisposable, IPlaylistManagerModal, IRefreshable
     {
-        private LevelPackDetailViewController levelPackDetailViewController;
-        private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
-        private LevelCollectionViewController levelCollectionViewController;
-
-        [UIComponent("delete-modal")]
-        private ModalView deleteModal;
-
-        [UIComponent("warning-message")]
-        private TextMeshProUGUI warningMessage;
+        private readonly LevelPackDetailViewController levelPackDetailViewController;
+        private readonly AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
+        private readonly LevelCollectionViewController levelCollectionViewController;
 
         [UIComponent("modal")]
-        private ModalView modal;
+        private readonly ModalView modal;
 
         [UIComponent("modal-message")]
-        private TextMeshProUGUI modalMessage;
+        private readonly TextMeshProUGUI modalMessage;
 
         [UIComponent("modal-button")]
-        private TextMeshProUGUI modalButtonText;
+        private readonly TextMeshProUGUI modalButtonText;
+
+        [UIComponent("delete-modal")]
+        private readonly ModalView deleteModal;
+
+        [UIComponent("warning-message")]
+        private readonly TextMeshProUGUI warningMessage;
+
+        [UIComponent("root")]
+        private readonly RectTransform rootTransform;
+
+        [UIComponent("modal")]
+        private readonly RectTransform modalTransform;
+
+        private Vector3 modalPosition;
+
+        [UIComponent("delete-modal")]
+        private readonly RectTransform deleteModalTransform;
+
+        private Vector3 deleteModalPosition;
 
         internal enum ModalState
         {
@@ -45,7 +61,7 @@ namespace PlaylistManager.UI
 
         private ModalState _modalState;
 
-        internal ModalState modalState
+        internal ModalState CurrentModalState
         {
             get
             {
@@ -83,6 +99,8 @@ namespace PlaylistManager.UI
         internal void Parse()
         {
             BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.PlaylistView.bsml"), levelPackDetailViewController.transform.Find("Detail").gameObject, this);
+            modalPosition = modalTransform.position;
+            deleteModalPosition = deleteModalTransform.position;
         }
 
         public void Dispose()
@@ -107,42 +125,43 @@ namespace PlaylistManager.UI
             else
             {
                 modalMessage.text = "Error: Playlist cannot be deleted.";
-                modalState = ModalState.OkModal;
+                CurrentModalState = ModalState.OkModal;
                 modal.Show(true);
             }
         }
 
-        internal async System.Threading.Tasks.Task DownloadPlaylistAsync()
+        internal async Task DownloadPlaylistAsync()
         {
-            IAnnotatedBeatmapLevelCollection selectedPlaylist = annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection;
+            var selectedBeatmapLevelCollection = annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection;
             List<IPlaylistSong> missingSongs;
-            if (selectedPlaylist is BlistPlaylist)
+            if (selectedBeatmapLevelCollection is BlistPlaylist blistPlaylist)
             {
-                missingSongs = ((BlistPlaylist)selectedPlaylist).Where(s => s.PreviewBeatmapLevel == null).Select(s => s).ToList();
+                missingSongs = blistPlaylist.Where(s => s.PreviewBeatmapLevel == null).Select(s => s).ToList();
             }
-            else if(selectedPlaylist is LegacyPlaylist)
+            else if (selectedBeatmapLevelCollection is LegacyPlaylist legacyPlaylist)
             {
-                missingSongs = ((LegacyPlaylist)selectedPlaylist).Where(s => s.PreviewBeatmapLevel == null).Select(s => s).ToList();
+                missingSongs = legacyPlaylist.Where(s => s.PreviewBeatmapLevel == null).Select(s => s).ToList();
             }
             else
             {
                 modalMessage.text = "Error: The selected playlist cannot be downloaded.";
-                modalState = ModalState.OkModal;
+                CurrentModalState = ModalState.OkModal;
                 modal.Show(true);
                 return;
             }
+
             modalMessage.text = string.Format("{0}/{1} songs downloaded", 0, missingSongs.Count);
-            modalState = ModalState.DownloadingModal;
+            CurrentModalState = ModalState.DownloadingModal;
             modal.Show(true);
             tokenSource.Dispose();
             tokenSource = new CancellationTokenSource();
-            for(int i = 0; i < missingSongs.Count; i++)
+            for (int i = 0; i < missingSongs.Count; i++)
             {
                 try
                 {
                     if (!string.IsNullOrEmpty(missingSongs[i].Key))
                     {
-                        await DownloaderUtils.instance.BeatmapDownloadByKey(missingSongs[i].Key, tokenSource.Token);
+                        await DownloaderUtils.instance.BeatmapDownloadByKey(missingSongs[i].Key.ToLower(), tokenSource.Token);
                     }
                     else if (!string.IsNullOrEmpty(missingSongs[i].Hash))
                     {
@@ -152,10 +171,10 @@ namespace PlaylistManager.UI
                 }
                 catch (Exception e)
                 {
-                    if (e is TaskCanceledException)
-                        Plugin.Log.Warn("Song Download Aborted.");
-                    else
+                    if (!(e is TaskCanceledException))
+                    {
                         Plugin.Log.Critical("Failed to download Song!");
+                    }
                     break;
                 }
             }
@@ -165,10 +184,78 @@ namespace PlaylistManager.UI
             LevelFilteringNavigationController_UpdateSecondChildControllerContent.SecondChildControllerUpdatedEvent += LevelFilteringNavigationController_UpdateSecondChildControllerContent_SecondChildControllerUpdatedEvent;
         }
 
+        internal async Task SyncPlaylistAsync()
+        {
+            var selectedBeatmapLevelCollection = annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection;
+            if (!(selectedBeatmapLevelCollection is Playlist))
+            {
+                modalMessage.text = "Error: The selected playlist cannot be synced";
+                CurrentModalState = ModalState.OkModal;
+                modal.Show(true);
+                return;
+            }
+            var selectedPlaylist = (Playlist)selectedBeatmapLevelCollection;
+            if (selectedPlaylist.CustomData == null || !selectedPlaylist.CustomData.ContainsKey("syncURL"))
+            {
+                modalMessage.text = "Error: The selected playlist cannot be synced";
+                CurrentModalState = ModalState.OkModal;
+                modal.Show(true);
+                return;
+            }
+
+            string path = Path.Combine(PlaylistLibUtils.playlistManager.PlaylistPath, selectedPlaylist.Filename + '.' + selectedPlaylist.SuggestedExtension);
+            string syncURL = (string)selectedPlaylist.CustomData["syncURL"];
+            tokenSource.Dispose();
+            tokenSource = new CancellationTokenSource();
+
+            modalMessage.text = "Syncing Playlist";
+            CurrentModalState = ModalState.DownloadingModal;
+            modal.Show(true);
+
+            Stream playlistStream = null;
+            try
+            {
+                playlistStream = new MemoryStream(await DownloaderUtils.instance.DownloadFileToBytesAsync(syncURL, tokenSource.Token));
+                modal.Show(false);
+                ((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist).RemoveAll((playlistSong) => true); // Clear all songs
+                PlaylistLibUtils.playlistManager.DefaultHandler.Populate(playlistStream, (BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
+            }
+            catch (Exception e)
+            {
+                modal.Show(false);
+                if (!(e is TaskCanceledException))
+                {
+                    modalMessage.text = "Error: The selected playlist cannot be synced";
+                    CurrentModalState = ModalState.OkModal;
+                    modal.Show(true);
+                }
+                return;
+            }
+            finally
+            {
+                // If the downloaded playlist doesn't have the sync url, add it back
+                if (selectedPlaylist.CustomData == null)
+                {
+                    selectedPlaylist.CustomData = new Dictionary<string, object>();
+                }
+                if (!selectedPlaylist.CustomData.ContainsKey("syncURL"))
+                {
+                    selectedPlaylist.CustomData["syncURL"] = syncURL;
+                }
+
+                PlaylistLibUtils.playlistManager.StorePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
+                await DownloadPlaylistAsync();
+
+                modalMessage.text = "Playlist Synced";
+                CurrentModalState = ModalState.OkModal;
+                modal.Show(true);
+            }
+        }
+
         [UIAction("click-modal-button")]
         internal void OkClicked()
         {
-            if(modalState == ModalState.DownloadingModal)
+            if(CurrentModalState == ModalState.DownloadingModal)
             {
                 tokenSource.Cancel();
             }
@@ -177,15 +264,34 @@ namespace PlaylistManager.UI
         private void LevelFilteringNavigationController_UpdateSecondChildControllerContent_SecondChildControllerUpdatedEvent()
         {
             SelectAnnotatedBeatmapCollectionByIdx(downloadingBeatmapCollectionIdx);
+            LevelFilteringNavigationController_UpdateSecondChildControllerContent.SecondChildControllerUpdatedEvent -= LevelFilteringNavigationController_UpdateSecondChildControllerContent_SecondChildControllerUpdatedEvent;
         }
 
         private void SelectAnnotatedBeatmapCollectionByIdx(int index)
         {
-            annotatedBeatmapLevelCollectionsViewController.SetData(HarmonyPatches.AnnotatedBeatmapLevelCollectionsViewController_SetData.otherCustomBeatmapLevelCollections, index, false);
+
+            annotatedBeatmapLevelCollectionsViewController.SetData(AnnotatedBeatmapLevelCollectionsViewController_SetData.otherCustomBeatmapLevelCollections, index, false);
             IAnnotatedBeatmapLevelCollection selectedCollection = annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection;
             levelCollectionViewController.SetData(selectedCollection.beatmapLevelCollection, selectedCollection.collectionName, selectedCollection.coverImage, false, null);
             levelPackDetailViewController.SetData((IBeatmapLevelPack)selectedCollection);
             didSelectAnnotatedBeatmapLevelCollectionEvent?.Invoke(selectedCollection);
+        }
+
+        public void ParentControllerDeactivated()
+        {
+            if (parsed && rootTransform != null && modalTransform != null && deleteModalTransform != null)
+            {
+                modalTransform.transform.SetParent(rootTransform);
+                modalTransform.position = modalPosition;
+
+                deleteModalTransform.transform.SetParent(rootTransform);
+                deleteModalTransform.position = deleteModalPosition;
+            }
+        }
+
+        public void Refresh()
+        {
+            SelectAnnotatedBeatmapCollectionByIdx(annotatedBeatmapLevelCollectionsViewController.selectedItemIndex);
         }
     }
 }

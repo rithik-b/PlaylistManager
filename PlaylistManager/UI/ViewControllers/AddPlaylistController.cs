@@ -7,22 +7,36 @@ using System.Reflection;
 using HMUI;
 using PlaylistManager.HarmonyPatches;
 using PlaylistManager.Utilities;
+using PlaylistManager.Interfaces;
+using UnityEngine;
+using PlaylistManager.Configuration;
+using BeatSaberPlaylistsLib.Types;
 
 namespace PlaylistManager.UI
 {
-    class AddPlaylistController
+    class AddPlaylistController: IPlaylistManagerModal
     {
         private StandardLevelDetailViewController standardLevelDetailViewController;
         private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
+        private BeatSaberPlaylistsLib.Types.IPlaylist[] loadedplaylists;
+        internal bool parsed;
 
         [UIComponent("list")]
         public CustomListTableData customListTableData;
 
         [UIComponent("modal")]
-        private ModalView modal;
+        private readonly ModalView modal;
 
-        private BeatSaberPlaylistsLib.Types.IPlaylist[] loadedplaylists;
-        internal bool parsed;
+        [UIComponent("root")]
+        private readonly RectTransform rootTransform;
+
+        [UIComponent("modal")]
+        private readonly RectTransform modalTransform;
+
+        private Vector3 modalPosition;
+
+        [UIComponent("keyboard")]
+        private readonly RectTransform keyboardTransform;
 
         AddPlaylistController(StandardLevelDetailViewController standardLevelDetailViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController)
         {
@@ -34,6 +48,7 @@ namespace PlaylistManager.UI
         internal void Parse()
         {
             BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.AddPlaylist.bsml"), standardLevelDetailViewController.transform.Find("LevelDetail").gameObject, this);
+            modalPosition = modalTransform.position; // Position can change if SongBrowser is clicked while modal is opened so storing here
         }
 
         internal void ShowPlaylists()
@@ -44,12 +59,40 @@ namespace PlaylistManager.UI
 
             foreach (BeatSaberPlaylistsLib.Types.IPlaylist playlist in loadedplaylists)
             {
-                String subName = String.Format("{0} songs", playlist.beatmapLevelCollection.beatmapLevels.Length);
-                customListTableData.data.Add(new CustomCellInfo(playlist.collectionName, subName, playlist.coverImage));
+                if (playlist is IDeferredSpriteLoad deferredSpriteLoadPlaylist && !deferredSpriteLoadPlaylist.SpriteWasLoaded)
+                {
+                    _ = playlist.coverImage;
+                    deferredSpriteLoadPlaylist.SpriteLoaded -= DeferredSpriteLoadPlaylist_SpriteLoaded;
+                    deferredSpriteLoadPlaylist.SpriteLoaded += DeferredSpriteLoadPlaylist_SpriteLoaded;
+                }
+                else
+                {
+                    ShowPlaylist(playlist);
+                }
             }
 
             customListTableData.tableView.ReloadData();
             customListTableData.tableView.ScrollToCellWithIdx(0, TableViewScroller.ScrollPositionType.Beginning, false);
+        }
+
+        private void DeferredSpriteLoadPlaylist_SpriteLoaded(object sender, EventArgs e)
+        {
+            if (sender is IDeferredSpriteLoad deferredSpriteLoadPlaylist)
+            {
+                ShowPlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)deferredSpriteLoadPlaylist);
+                customListTableData.tableView.ReloadData();
+                (deferredSpriteLoadPlaylist).SpriteLoaded -= DeferredSpriteLoadPlaylist_SpriteLoaded;
+            }
+        }
+
+        private void ShowPlaylist(BeatSaberPlaylistsLib.Types.IPlaylist playlist)
+        {
+            string subName = string.Format("{0} songs", playlist.beatmapLevelCollection.beatmapLevels.Length);
+            if (Array.Exists(playlist.beatmapLevelCollection.beatmapLevels, level => level.levelID == standardLevelDetailViewController.selectedDifficultyBeatmap.level.levelID))
+            {
+                subName += " (contains song)";
+            }
+            customListTableData.data.Add(new CustomCellInfo(playlist.collectionName, subName, playlist.coverImage));
         }
 
         [UIAction("select-cell")]
@@ -57,7 +100,7 @@ namespace PlaylistManager.UI
         {
             loadedplaylists[index].Add(standardLevelDetailViewController.selectedDifficultyBeatmap.level);
             customListTableData.tableView.ClearSelection();
-            if(annotatedBeatmapLevelCollectionsViewController.isActiveAndEnabled && AnnotatedBeatmapLevelCollectionsViewController_SetData.isCustomBeatmapLevelPack)
+            if (annotatedBeatmapLevelCollectionsViewController.isActiveAndEnabled && AnnotatedBeatmapLevelCollectionsViewController_SetData.isCustomBeatmapLevelPack)
             {
                 annotatedBeatmapLevelCollectionsViewController.SetData(AnnotatedBeatmapLevelCollectionsViewController_SetData.otherCustomBeatmapLevelCollections, annotatedBeatmapLevelCollectionsViewController.selectedItemIndex, false);
             }
@@ -65,11 +108,42 @@ namespace PlaylistManager.UI
             modal.Hide(true);
         }
 
+        [UIAction("keyboard-opened")]
+        internal void OnKeyboardOpened()
+        {
+            // Need to set parent because it goes out of order
+            if (parsed && modalTransform != null && keyboardTransform != null)
+            {
+                keyboardTransform.transform.SetParent(modalTransform);
+            }
+        }
+
         [UIAction("keyboard-enter")]
         internal void CreatePlaylist(string playlistName)
         {
-            PlaylistLibUtils.CreatePlaylist(playlistName, "PlaylistManager");
+            if (string.IsNullOrWhiteSpace(playlistName))
+            {
+                return;
+            }
+            if (!PluginConfig.Instance.DefaultImageDisabled)
+            {
+                PlaylistLibUtils.CreatePlaylist(playlistName, PluginConfig.Instance.AuthorName);
+            }
+            else
+            {
+                PlaylistLibUtils.CreatePlaylist(playlistName, PluginConfig.Instance.AuthorName, "");
+            }
             ShowPlaylists();
+        }
+
+        public void ParentControllerDeactivated()
+        {
+            // Need to restore position and parent of modal
+            if (parsed && rootTransform != null && modalTransform != null)
+            {
+                modalTransform.transform.SetParent(rootTransform);
+                modalTransform.position = modalPosition;
+            }
         }
     }
 }

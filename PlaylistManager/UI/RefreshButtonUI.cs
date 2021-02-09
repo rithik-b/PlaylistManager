@@ -1,53 +1,50 @@
-﻿using BeatSaberMarkupLanguage.MenuButtons;
-using UnityEngine;
-using SongCore;
-using System.Collections;
+﻿using BeatSaberMarkupLanguage;
+using BeatSaberMarkupLanguage.MenuButtons;
 using PlaylistManager.Utilities;
+using SongCore;
+using System;
+using Zenject;
 
 namespace PlaylistManager.UI
 {
-    public class RefreshButtonUI : PersistentSingleton<RefreshButtonUI>
+    public class RefreshButtonUI : IInitializable, IDisposable
     {
         public MenuButton _refreshButton;
-        internal static ProgressBar _progressBar;
+        internal ProgressBar _progressBar;
         const int MESSAGE_TIME = 5;
-        const string REQUEST_SOURCE = "PlaylistManager (Plugin)";
-        internal void Setup()
+
+        public void Initialize()
         {
             _refreshButton = new MenuButton("Refresh Playlists", "Refresh Songs & Playlists", RefreshButtonPressed, true);
             MenuButtons.instance.RegisterButton(_refreshButton);
-            LaunchLoadPlaylists();
         }
 
-        internal void LaunchLoadPlaylists()
+        private void SongsLoaded(Loader _, System.Collections.Concurrent.ConcurrentDictionary<string, CustomPreviewBeatmapLevel> songs)
         {
-            StartCoroutine(LaunchLoadPlaylistsFlow());
-        }
-
-        internal void RefreshButtonPressed()
-        {
-            StartCoroutine(RefreshButtonFlow());
-        }
-
-        internal IEnumerator LaunchLoadPlaylistsFlow()
-        {
-            // Wait for SongCore plugin to load
-            yield return new WaitUntil(() => Loader.Instance != null);
-            _progressBar = ProgressBar.Create();
-            StartCoroutine(RefreshButtonFlow());
-        }
-
-        internal IEnumerator RefreshButtonFlow()
-        {
-            if (!Loader.AreSongsLoading)
-                Loader.Instance.RefreshSongs(fullRefresh: false);
-
-            yield return new WaitUntil(() => Loader.AreSongsLoaded == true);
-            PlaylistLibUtils.playlistManager.RequestRefresh(REQUEST_SOURCE);
+            if (_progressBar == null)
+            {
+                _progressBar = ProgressBar.Create();
+            }
             int numPlaylists = PlaylistLibUtils.playlistManager.GetAllPlaylists(true).Length;
 
             _progressBar.enabled = true;
             _progressBar.ShowMessage(string.Format("\n{0} playlists loaded.", numPlaylists), MESSAGE_TIME);
+            Loader.SongsLoadedEvent -= SongsLoaded;
+        }
+
+        public void Dispose()
+        {
+            UnityEngine.Object.Destroy(_progressBar);
+            if (BSMLParser.IsSingletonAvailable && MenuButtons.IsSingletonAvailable)
+                MenuButtons.instance.UnregisterButton(_refreshButton);
+            Loader.SongsLoadedEvent -= SongsLoaded;
+        }
+
+        internal void RefreshButtonPressed()
+        {
+            if (!Loader.AreSongsLoading)
+                Loader.Instance.RefreshSongs(fullRefresh: false);
+            Loader.SongsLoadedEvent += SongsLoaded;
         }
     }
 }

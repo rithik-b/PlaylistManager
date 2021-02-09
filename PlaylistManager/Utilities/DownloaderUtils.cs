@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,12 +18,22 @@ namespace PlaylistManager.Utilities
     {
         private BeatSaver beatSaverInstance;
         public static DownloaderUtils instance;
-
         public static void Init()
         {
             instance = new DownloaderUtils();
             HttpOptions options = new HttpOptions(name: typeof(DownloaderUtils).Assembly.GetName().Name, version: typeof(DownloaderUtils).Assembly.GetName().Version);
             instance.beatSaverInstance = new BeatSaver(options);
+        }
+
+        private async Task BeatSaverBeatmapDownload(Beatmap song, StandardRequestOptions options, bool direct)
+        {
+            string customSongsPath = CustomLevelPathHelper.customLevelsDirectoryPath;
+            if (!Directory.Exists(customSongsPath))
+            {
+                Directory.CreateDirectory(customSongsPath);
+            }
+            var zip = await song.ZipBytes(direct, options).ConfigureAwait(false);
+            await ExtractZipAsync(zip, customSongsPath, songInfo: song).ConfigureAwait(false);
         }
 
         public async Task BeatmapDownloadByKey(string key, CancellationToken token, IProgress<double> progress = null, bool direct = false)
@@ -31,20 +42,12 @@ namespace PlaylistManager.Utilities
             var song = await beatSaverInstance.Key(key, options);
             try
             {
-                string customSongsPath = CustomLevelPathHelper.customLevelsDirectoryPath;
-                if (!Directory.Exists(customSongsPath))
-                {
-                    Directory.CreateDirectory(customSongsPath);
-                }
-                var zip = await song.ZipBytes(direct, options).ConfigureAwait(false);
-                await ExtractZipAsync(song, zip, customSongsPath).ConfigureAwait(false);
+                await BeatSaverBeatmapDownload(song, options, direct);
             }
             catch (Exception e)
             {
-                if (e is TaskCanceledException)
-                    Plugin.Log.Warn("Song Download Aborted.");
-                else
-                    Plugin.Log.Critical("Failed to download Song!");
+                if (!(e is TaskCanceledException))
+                    Plugin.Log.Critical(string.Format("Failed to download Song {0}", key));
             }
         }
 
@@ -54,32 +57,52 @@ namespace PlaylistManager.Utilities
             var song = await beatSaverInstance.Hash(hash, options);
             try
             {
+                await BeatSaverBeatmapDownload(song, options, direct);
+            }
+            catch (Exception e)
+            {
+                if (!(e is TaskCanceledException))
+                    Plugin.Log.Critical(string.Format("Failed to download Song {0}", hash));
+            }
+        }
+
+        public async Task BeatmapDownloadByCustomURL(string url, string songName, CancellationToken token)
+        {
+            try
+            {
                 string customSongsPath = CustomLevelPathHelper.customLevelsDirectoryPath;
                 if (!Directory.Exists(customSongsPath))
                 {
                     Directory.CreateDirectory(customSongsPath);
                 }
-                var zip = await song.ZipBytes(direct, options).ConfigureAwait(false);
-                await ExtractZipAsync(song, zip, customSongsPath).ConfigureAwait(false);
+                var zip = await DownloadFileToBytesAsync(url, token);
+                await ExtractZipAsync(zip, customSongsPath, songName: songName).ConfigureAwait(false);
             }
             catch (Exception e)
             {
-                if (e is TaskCanceledException)
-                    Plugin.Log.Warn("Song Download Aborted.");
-                else
-                    Plugin.Log.Critical("Failed to download Song!");
+                if (!(e is TaskCanceledException))
+                    Plugin.Log.Critical(string.Format("Failed to download Song {0}", url));
             }
         }
 
-        private async Task ExtractZipAsync(BeatSaverSharp.Beatmap songInfo, byte[] zip, string customSongsPath, bool overwrite = false)
+        private async Task ExtractZipAsync(byte[] zip, string customSongsPath, bool overwrite = false, string songName = null, Beatmap songInfo = null)
         {
             Stream zipStream = new MemoryStream(zip);
             try
             {
                 ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Read);
-                string basePath = songInfo.Key + " (" + songInfo.Metadata.SongName + " - " + songInfo.Metadata.LevelAuthorName + ")";
-                basePath = string.Join("", basePath.Split((Path.GetInvalidFileNameChars().Concat(Path.GetInvalidPathChars()).ToArray())));
+                string basePath = "";
+                if (songInfo != null)
+                {
+                    basePath = songInfo.Key + " (" + songInfo.Metadata.SongName + " - " + songInfo.Metadata.LevelAuthorName + ")";
+                }
+                else
+                {
+                    basePath = songName;
+                }
+                basePath = string.Join("", basePath.Split(Path.GetInvalidFileNameChars().Concat(Path.GetInvalidPathChars()).ToArray()));
                 string path = customSongsPath + "/" + basePath;
+                
                 if (!overwrite && Directory.Exists(path))
                 {
                     int pathNum = 1;
@@ -105,6 +128,17 @@ namespace PlaylistManager.Utilities
                 return;
             }
             zipStream.Close();
+        }
+
+        public async Task<byte[]> DownloadFileToBytesAsync(string url, CancellationToken token)
+        {
+            Uri uri = new Uri(url);
+            using (var webClient = new WebClient())
+            using (var registration = token.Register(() => webClient.CancelAsync()))
+            {
+                var data = await webClient.DownloadDataTaskAsync(uri);
+                return data;
+            }
         }
     }
 }

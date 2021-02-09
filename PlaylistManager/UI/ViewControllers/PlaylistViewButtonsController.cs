@@ -3,19 +3,23 @@ using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberPlaylistsLib.Types;
 using PlaylistManager.Interfaces;
 using System.Reflection;
+using System.Threading.Tasks;
 using UnityEngine;
 using Zenject;
 
 namespace PlaylistManager.UI
 {
-    class PlaylistViewButtonsController : IInitializable, ILevelCollectionUpdater
+    class PlaylistViewButtonsController : IInitializable, ILevelCollectionUpdater, IRefreshable
     {
-        private LevelPackDetailViewController levelPackDetailViewController;
-        private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
-        private PlaylistViewController playlistViewController;
+        private readonly LevelPackDetailViewController levelPackDetailViewController;
+        private readonly AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
+        private readonly PlaylistViewController playlistViewController;
 
         [UIComponent("bg")]
-        private Transform bgTransform;
+        private readonly Transform bgTransform;
+
+        [UIComponent("sync-button")]
+        private readonly Transform syncButtonTransform;
 
         PlaylistViewButtonsController(LevelPackDetailViewController levelPackDetailViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, PlaylistViewController playlistViewController)
         {
@@ -27,6 +31,8 @@ namespace PlaylistManager.UI
         public void Initialize()
         {
             BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.PlaylistViewButtons.bsml"), levelPackDetailViewController.transform.Find("Detail").gameObject, this);
+            syncButtonTransform.transform.localScale *= 0.08f;
+            syncButtonTransform.gameObject.SetActive(false);
             bgTransform.gameObject.SetActive(false);
         }
 
@@ -41,7 +47,7 @@ namespace PlaylistManager.UI
         }
 
         [UIAction("download-click")]
-        internal async System.Threading.Tasks.Task OnDownload()
+        internal async Task OnDownload()
         {
             if (!playlistViewController.parsed)
             {
@@ -50,16 +56,52 @@ namespace PlaylistManager.UI
             await playlistViewController.DownloadPlaylistAsync();
         }
 
+        [UIAction("sync-click")]
+        internal async Task OnSync()
+        {
+            if (!playlistViewController.parsed)
+            {
+                playlistViewController.Parse();
+            }
+            await playlistViewController.SyncPlaylistAsync();
+        }
+
         public void LevelCollectionUpdated()
         {
-            if (annotatedBeatmapLevelCollectionsViewController.isActiveAndEnabled && annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection is Playlist)
+            if (annotatedBeatmapLevelCollectionsViewController.isActiveAndEnabled && annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection is Playlist playlist)
             {
                 bgTransform.gameObject.SetActive(true);
+                var customData = playlist.CustomData;
+                if (customData != null && customData.ContainsKey("syncURL"))
+                {
+                    syncButtonTransform.gameObject.SetActive(true);
+                }
+                else
+                {
+                    syncButtonTransform.gameObject.SetActive(false);
+                }
             }
             else
             {
                 bgTransform.gameObject.SetActive(false);
             }
+        }
+
+        public void LevelCategoryUpdated(SelectLevelCategoryViewController.LevelCategory levelCategory)
+        {
+            if (levelCategory != SelectLevelCategoryViewController.LevelCategory.CustomSongs)
+            {
+                bgTransform.gameObject.SetActive(false);
+            }
+            else
+            {
+                LevelCollectionUpdated();
+            }
+        }
+
+        public void Refresh()
+        {
+            LevelCollectionUpdated();
         }
     }
 }
