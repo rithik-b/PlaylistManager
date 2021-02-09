@@ -47,7 +47,7 @@ namespace PlaylistManager.HarmonyPatches
 
         internal static IPreviewBeatmapLevel UnwrapPlaylistSong(IPreviewBeatmapLevel previewBeatmapLevel)
         {
-            DidSelectLevelEvent.Invoke(previewBeatmapLevel);
+            DidSelectLevelEvent?.Invoke(previewBeatmapLevel);
             if (previewBeatmapLevel is IPlaylistSong)
             {
                 return ((IPlaylistSong)previewBeatmapLevel).PreviewBeatmapLevel;

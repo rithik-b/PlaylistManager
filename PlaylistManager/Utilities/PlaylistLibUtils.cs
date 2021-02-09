@@ -32,7 +32,11 @@ namespace PlaylistManager.Utilities
         public static void CreatePlaylist(string playlistName, string playlistAuthorName, string image)
         {
             string playlistFolderPath = Path.Combine(Environment.CurrentDirectory, "Playlists");
-            string playlistFileName = string.Join("_", playlistName.Split(' '));
+            string playlistFileName = string.Join("_", playlistName.Replace("/", "").Replace("\\", "").Split(' '));
+            if (string.IsNullOrEmpty(playlistFileName))
+            {
+                playlistFileName = "playlist";
+            }
             string playlistPath = Path.Combine(playlistFolderPath, playlistFileName + ".blist");
             string originalPlaylistPath = Path.Combine(playlistFolderPath, playlistFileName);
             int dupNum = 0;
