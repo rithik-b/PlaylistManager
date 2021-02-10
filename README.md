@@ -14,7 +14,7 @@ For scrolling through the playlists in the UI, you need to fix controller bindin
 - Delete playlists
 - Download missing songs in playlists
 - Sync some playlists with the internet (example map pools)
-![Delete, Download missing songs and Sync Playlists Playlists](https://github.com/rithik-b/PlaylistManager/blob/master/img/view.gif?raw=true)
+![Delete, Download missing songs and Sync Playlists Playlists](https://github.com/rithik-b/PlaylistManager/blob/master/img/view.png?raw=true)
 
 ## Download
 Download the latest version of the mod (v0.2.0) [here](https://github.com/rithik-b/PlaylistManager/releases/tag/0.2.0 "here").
