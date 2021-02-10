@@ -23,7 +23,7 @@ To install, move the dll to your Plugins folder.
 **SongCore**, **BeatSaverSharp**, **BeatSaberMarkupLanguage (BSML)**, **SiraUtil** and **BeatSaberPlaylistsLib** are required for this mod, so please download the latest version from ModAssistant.
 
 ## Issues and Support
-If you encounter any issues with this mod, PM me on Discord PixelBoom#0001 or file an Issue on GitHub and I'll fix it as soon as I can For support with the mod, DM me or @ me on the #pc-mod-support channel on the BSMG discord
+If you encounter any issues with this mod, PM me on Discord PixelBoom#0001 or file an Issue on GitHub and I'll fix it as soon as I can For support with the mod, DM me or ask a question on the #pc-mod-support channel on the BSMG discord
 
 ## Contribution
 If you're a developer and would like to contribute to this mod, your contributions are welcome! Just submit a PR and I will take a look at it.
