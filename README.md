@@ -1,7 +1,8 @@
 # PlaylistManager
 This plugin allows for viewing and ingame management of playlists as well as the ability to download missing songs, just like the pre-1.6.0 days :)
 
-[Video Demo](https://twitter.com/PixelB00m/status/1343389515004715008)
+## ATTENTION INDEX USERS
+For scrolling through the playlists in the UI, you need to fix controller bindings to scroll as it requires the thumbstick. Look at this tutorial [here](https://www.youtube.com/watch?v=Bb4YKwmYvWk&feature=youtu.be) (Credits: Toni Macaroni)
 
 ## Features
 - View playlists ingame (R.I.P. PlaylistLoaderLite)
@@ -12,15 +13,11 @@ This plugin allows for viewing and ingame management of playlists as well as the
 - Delete playlists
 - Download missing songs in playlists
 
-## ATTENTION INDEX USERS
-For scrolling through the playlists in the UI, you need to fix controller bindings to scroll as it requires the thumbstick. Look at this tutorial [here](https://www.youtube.com/watch?v=Bb4YKwmYvWk&feature=youtu.be) (Credits: Toni Macaroni)
-
 ## Download
-Download the latest version of the mod (v0.1.1) [here](https://github.com/rithik-b/PlaylistManager/releases/tag/0.1.1 "here").
-To install, move the 2 folders (Libs and Plugins) to your Beat Saber folder.
+Download the latest version of the mod (v0.2.0) [here](https://github.com/rithik-b/PlaylistManager/releases/tag/0.2.0 "here").
+To install, move the dll to your Plugins folder.
 
-**SongCore**, **BeatSaverSharp**, **BeatSaberMarkupLanguage (BSML)**, and **SiraUtil** are required for this mod, so please download the latest version from ModAssistant.
-[BeatSaberPlaylistsLib](https://github.com/Zingabopp/BeatSaberPlaylistsLib) is also required and will be coming to ModAssistant, however the current release comes with this Library.
+**SongCore**, **BeatSaverSharp**, **BeatSaberMarkupLanguage (BSML)**, **SiraUtil** and **BeatSaberPlaylistsLib** are required for this mod, so please download the latest version from ModAssistant.
 
 ## Issues and Support
 If you encounter any issues with this mod, PM me on Discord PixelBoom#0001 or file an Issue on GitHub and I'll fix it as soon as I can For support with the mod, DM me or @ me on the #pc-mod-support channel on the BSMG discord
