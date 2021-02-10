@@ -6,12 +6,15 @@ For scrolling through the playlists in the UI, you need to fix controller bindin
 
 ## Features
 - View playlists ingame (R.I.P. PlaylistLoaderLite)
-- Refresh playlists and custom songs
-- Create playlists
 - Add custom songs and OST songs to playlists
+- Create playlists
+![Add to and Create Playlists]https://github.com/rithik-b/PlaylistManager/blob/master/img/add.gif?raw=true)
 - Remove songs from playlists
+![Remove songs from Playlists]https://github.com/rithik-b/PlaylistManager/blob/master/img/remove.gif?raw=true)
 - Delete playlists
 - Download missing songs in playlists
+- Sync some playlists with the internet (example map pools)
+![Delete, Download missing songs and Sync Playlists Playlists]https://github.com/rithik-b/PlaylistManager/blob/master/img/view.gif?raw=true)
 
 ## Download
 Download the latest version of the mod (v0.2.0) [here](https://github.com/rithik-b/PlaylistManager/releases/tag/0.2.0 "here").
