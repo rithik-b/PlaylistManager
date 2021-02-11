@@ -37,6 +37,13 @@ namespace PlaylistManager.UI
             set => PluginConfig.Instance.DefaultImageDisabled = value;
         }
 
+        [UIValue("scroll-speed")]
+        public float PlaylistScrollSpeed
+        {
+            get => PluginConfig.Instance.PlaylistScrollSpeed;
+            set => PluginConfig.Instance.PlaylistScrollSpeed = value;
+        }
+
         public void Initialize() => BSMLSettings.instance.AddSettingsMenu(nameof(PlaylistManager), "PlaylistManager.UI.Views.Settings.bsml", this);
         public void Dispose() => BSMLSettings.instance.RemoveSettingsMenu(this);
 
