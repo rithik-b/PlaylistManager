@@ -3,5 +3,6 @@
     <string-setting id='name-setting' value='author-name' text='Playlist Author Name' hover-hint='Change the name of the playlist author for new playlists.' />
     <checkbox value='auto-name' on-change='auto-name-toggled' text='Set Name Automatically' hover-hint='Set the name of the playlist author automatically based on your username' />
     <checkbox value='no-image' text='Disable Default Icon' hover-hint='Do not add the default playlist image for new playlists.' />
+    <slider-setting value='scroll-speed' text='Playlist Scroll Speed' hover-hint='Set how fast you scroll through the playlists list.' min='1' max='7' increment='0.5'></slider-setting>
 	</settings-container>
 </bg>
