@@ -75,7 +75,7 @@ namespace PlaylistManager.UI
             }
 
             customListTableData.tableView.ReloadData();
-            customListTableData.tableView.ScrollToCellWithIdx(0, TableView.ScrollPositionType.Beginning, false);
+            customListTableData.tableView.ScrollToCellWithIdx(0, TableViewScroller.ScrollPositionType.Beginning, false);
         }
 
         private void DeferredSpriteLoadPlaylist_SpriteLoaded(object sender, EventArgs e)
@@ -103,7 +103,7 @@ namespace PlaylistManager.UI
         {
             loadedplaylists[index].Add(standardLevelDetailViewController.selectedDifficultyBeatmap.level);
             customListTableData.tableView.ClearSelection();
-            PlaylistLibUtils.playlistManager.GetManagerForPlaylist(loadedplaylists[index]).StorePlaylist(loadedplaylists[index]);
+            PlaylistLibUtils.playlistManager.StorePlaylist(loadedplaylists[index]);
             modal.Hide(true);
         }
 

@@ -55,9 +55,9 @@ namespace PlaylistManager.UI
         [UIAction("delete-confirm")]
         internal void RemoveSong()
         {   
-            BeatSaberPlaylistsLib.Types.IPlaylist selectedPlaylist = PlaylistLibUtils.playlistManager.GetAllPlaylists(true)[annotatedBeatmapLevelCollectionsViewController.selectedItemIndex - 2];
+            BeatSaberPlaylistsLib.Types.IPlaylist selectedPlaylist = PlaylistLibUtils.playlistManager.GetAllPlaylists()[annotatedBeatmapLevelCollectionsViewController.selectedItemIndex - 2];
             selectedPlaylist.Remove(selectedPlaylistSong);
-            PlaylistLibUtils.playlistManager.GetManagerForPlaylist(selectedPlaylist).StorePlaylist(selectedPlaylist);
+            PlaylistLibUtils.playlistManager.StorePlaylist(selectedPlaylist);
             levelCollectionViewController.SetData(selectedPlaylist.beatmapLevelCollection, selectedPlaylist.collectionName, selectedPlaylist.coverImage, false, null);
         }
 

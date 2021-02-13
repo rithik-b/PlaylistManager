@@ -280,8 +280,8 @@ namespace PlaylistManager.UI
 
         private void SelectAnnotatedBeatmapCollectionByIdx(int index)
         {
-
-            annotatedBeatmapLevelCollectionsViewController.SetData(AnnotatedBeatmapLevelCollectionsViewController_SetData.otherCustomBeatmapLevelCollections, index, false);
+            // TODO FIX!!!!
+            // annotatedBeatmapLevelCollectionsViewController.SetData(AnnotatedBeatmapLevelCollectionsViewController_SetData.otherCustomBeatmapLevelCollections, index, false);
             IAnnotatedBeatmapLevelCollection selectedCollection = annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection;
             levelCollectionViewController.SetData(selectedCollection.beatmapLevelCollection, selectedCollection.collectionName, selectedCollection.coverImage, false, null);
             levelPackDetailViewController.SetData((IBeatmapLevelPack)selectedCollection);
