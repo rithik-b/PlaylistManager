@@ -18,6 +18,8 @@ namespace PlaylistManager.UI
     {
         private StandardLevelDetailViewController standardLevelDetailViewController;
         private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
+        private SelectLevelCategoryViewController selectLevelCategoryViewController;
+
         private BeatSaberPlaylistsLib.Types.IPlaylist[] loadedplaylists;
         internal bool parsed;
 
@@ -38,10 +40,11 @@ namespace PlaylistManager.UI
         [UIComponent("keyboard")]
         private readonly RectTransform keyboardTransform;
 
-        AddPlaylistController(StandardLevelDetailViewController standardLevelDetailViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController)
+        AddPlaylistController(StandardLevelDetailViewController standardLevelDetailViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, SelectLevelCategoryViewController selectLevelCategoryViewController)
         {
             this.standardLevelDetailViewController = standardLevelDetailViewController;
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
+            this.selectLevelCategoryViewController = selectLevelCategoryViewController;
             parsed = false;
         }
 
@@ -100,10 +103,6 @@ namespace PlaylistManager.UI
         {
             loadedplaylists[index].Add(standardLevelDetailViewController.selectedDifficultyBeatmap.level);
             customListTableData.tableView.ClearSelection();
-            if (annotatedBeatmapLevelCollectionsViewController.isActiveAndEnabled && AnnotatedBeatmapLevelCollectionsViewController_SetData.isCustomBeatmapLevelPack)
-            {
-                annotatedBeatmapLevelCollectionsViewController.SetData(AnnotatedBeatmapLevelCollectionsViewController_SetData.otherCustomBeatmapLevelCollections, annotatedBeatmapLevelCollectionsViewController.selectedItemIndex, false);
-            }
             PlaylistLibUtils.playlistManager.StorePlaylist(loadedplaylists[index]);
             modal.Hide(true);
         }

@@ -20,6 +20,7 @@ namespace PlaylistManager.Managers
         readonly PlaylistViewController playlistViewController;
 
         readonly ILevelCollectionUpdater levelCollectionUpdater;
+        readonly List<ILevelCategoryUpdater> levelCategoryUpdaters;
         readonly List<IPreviewBeatmapLevelUpdater> previewBeatmapLevelUpdaters;
         readonly List<IPlaylistManagerModal> playlistManagerModals;
         readonly List<IRefreshable> refreshables;
@@ -27,8 +28,8 @@ namespace PlaylistManager.Managers
 
         PlaylistUIManager(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, SelectLevelCategoryViewController selectLevelCategoryViewController,
             LevelPackDetailViewController levelPackDetailViewController, StandardLevelDetailViewController standardLevelDetailViewController, PlaylistViewController playlistViewController,
-            ILevelCollectionUpdater levelCollectionUpdater, List<IPreviewBeatmapLevelUpdater> previewBeatmapLevelUpdaters, List<IPlaylistManagerModal> playlistManagerModals,
-            List<IRefreshable> refreshables, IPlatformUserModel platformUserModel)
+            ILevelCollectionUpdater levelCollectionUpdater, List<ILevelCategoryUpdater> levelCategoryUpdaters, List<IPreviewBeatmapLevelUpdater> previewBeatmapLevelUpdaters,
+            List<IPlaylistManagerModal> playlistManagerModals, List<IRefreshable> refreshables, IPlatformUserModel platformUserModel)
         {
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
             this.selectLevelCategoryViewController = selectLevelCategoryViewController;
@@ -37,6 +38,7 @@ namespace PlaylistManager.Managers
             this.playlistViewController = playlistViewController;
 
             this.levelCollectionUpdater = levelCollectionUpdater;
+            this.levelCategoryUpdaters = levelCategoryUpdaters;
             this.previewBeatmapLevelUpdaters = previewBeatmapLevelUpdaters;
             this.playlistManagerModals = playlistManagerModals;
             this.refreshables = refreshables;
@@ -118,7 +120,10 @@ namespace PlaylistManager.Managers
 
         private void SelectLevelCategoryViewController_didSelectLevelCategoryEvent(SelectLevelCategoryViewController selectLevelCategoryViewController, SelectLevelCategoryViewController.LevelCategory levelCategory)
         {
-            levelCollectionUpdater.LevelCategoryUpdated(levelCategory);
+            foreach (ILevelCategoryUpdater levelCategoryUpdater in levelCategoryUpdaters)
+            {
+                levelCategoryUpdater.LevelCategoryUpdated(levelCategory);
+            }
         }
 
         private void LevelCollectionViewController_didSelectLevelEvent(IPreviewBeatmapLevel previewBeatmapLevel)

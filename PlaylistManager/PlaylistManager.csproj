@@ -161,11 +161,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="HarmonyPatches\AnnotatedBeatmapLevelCollectionTableCell_SetData.cs" />
-    <Compile Include="HarmonyPatches\AnnotatedBeatmapLevelCollectionsViewController_SetData.cs" />
     <Compile Include="HarmonyPatches\LevelCollectionTableView_HandleDidSelectRowEvent.cs" />
     <Compile Include="HarmonyPatches\LevelFilteringNavigationController_UpdateSecondChildControllerContent.cs" />
     <Compile Include="HarmonyPatches\TableViewScroller_HandleJoystickWasNotCenteredThisFrame.cs" />
     <Compile Include="Installers\PlaylistViewInstaller.cs" />
+    <Compile Include="Interfaces\ILevelCategoryUpdater.cs" />
     <Compile Include="Interfaces\ILevelCollectionUpdater.cs" />
     <Compile Include="Interfaces\IPlaylistManagerModal.cs" />
     <Compile Include="Interfaces\IPreviewBeatmapLevelUpdater.cs" />
@@ -174,9 +174,11 @@
     <Compile Include="Plugin.cs" />
     <Compile Include="Configuration\PluginConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UI\PlaylistSegmentedControl.cs" />
     <Compile Include="UI\RefreshButtonUI.cs" />
     <Compile Include="UI\ViewControllers\AddPlaylistController.cs" />
     <Compile Include="UI\ViewControllers\ButtonViewController.cs" />
+    <Compile Include="UI\ViewControllers\FoldersViewController.cs" />
     <Compile Include="UI\ViewControllers\PlaylistViewButtonsController.cs" />
     <Compile Include="UI\ViewControllers\PlaylistViewController.cs" />
     <Compile Include="UI\ViewControllers\RemoveFromPlaylistController.cs" />
@@ -198,6 +200,7 @@
     <EmbeddedResource Include="UI\Views\ButtonView.bsml" />
     <EmbeddedResource Include="UI\Views\PlaylistViewButtons.bsml" />
     <EmbeddedResource Include="UI\Views\Settings.bsml" />
+    <EmbeddedResource Include="UI\Views\FoldersView.bsml" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="BeatSaberModdingTools.Tasks">
@@ -217,6 +220,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Icons\Sync.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Icons\Playlist.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -9,7 +9,7 @@ using Zenject;
 
 namespace PlaylistManager.UI
 {
-    class PlaylistViewButtonsController : IInitializable, ILevelCollectionUpdater, IRefreshable
+    class PlaylistViewButtonsController : IInitializable, ILevelCollectionUpdater, ILevelCategoryUpdater, IRefreshable
     {
         private readonly LevelPackDetailViewController levelPackDetailViewController;
         private readonly AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
