@@ -1,0 +1,4 @@
+﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
+	<page-button id='left-button' direction='Left' anchor-pos-x='-52' anchor-pos-y='0' />
+	<page-button id='right-button' direction='Right' anchor-pos-x='32' anchor-pos-y='0' />
+</bg>

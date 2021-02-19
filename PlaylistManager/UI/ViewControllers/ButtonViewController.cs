@@ -69,7 +69,7 @@ namespace PlaylistManager.UI
         }
 
         [UIAction("button-click")]
-        internal void OpenModal()
+        private void OpenModal()
         {
             switch (CurrentButtonState)
             {
