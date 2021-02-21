@@ -1,7 +1,13 @@
 ﻿<bg id='root' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
-	<horizontal horizontal-fit='PreferredSize' preferred-width='75' preferred-height='15'>
-		<page-button event-click='folderList#PageUp' direction='Left' />
-		<list id='folderList' cell-size='15' list-direction='Horizontal' list-style='Box' select-cell='folderSelect' />
-		<page-button event-click='folderList#PageDown' direction='Right' />
-	</horizontal>
+	<vertical vertical-fit='PreferredSize'>
+		<horizontal id='back-rect' horizontal-fit='PreferredSize' preferred-width='75' align-to-center='false'>
+			<button text='&lt;' on-click='back-button-clicked' />
+			<text id='folder-text' text='Folders' />
+		</horizontal>
+		<horizontal horizontal-fit='PreferredSize' preferred-width='75' preferred-height='15' align-to-center='true'>
+			<page-button event-click='folder-list#PageUp' direction='Left' />
+			<list id='folder-list' cell-size='15' list-direction='Horizontal' list-style='Box' select-cell='folder-select' />
+			<page-button event-click='folder-list#PageDown' direction='Right' />
+		</horizontal>
+	</vertical>
 </bg>
