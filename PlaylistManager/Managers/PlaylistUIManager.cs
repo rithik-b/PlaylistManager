@@ -58,6 +58,8 @@ namespace PlaylistManager.Managers
 
             // Whenever a level category is selected
             selectLevelCategoryViewController.didSelectLevelCategoryEvent += SelectLevelCategoryViewController_didSelectLevelCategoryEvent;
+            selectLevelCategoryViewController.didActivateEvent += SelectLevelCategoryViewController_didActivateEvent;
+            selectLevelCategoryViewController.didDeactivateEvent += SelectLevelCategoryViewController_didDeactivateEvent;
 
             // Whenever a level is selected
             LevelCollectionTableView_HandleDidSelectRowEvent.DidSelectLevelEvent += LevelCollectionViewController_didSelectLevelEvent;
@@ -123,6 +125,22 @@ namespace PlaylistManager.Managers
             foreach (ILevelCategoryUpdater levelCategoryUpdater in levelCategoryUpdaters)
             {
                 levelCategoryUpdater.LevelCategoryUpdated(levelCategory);
+            }
+        }
+
+        private void SelectLevelCategoryViewController_didActivateEvent(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
+        {
+            foreach (ILevelCategoryUpdater levelCategoryUpdater in levelCategoryUpdaters)
+            {
+                levelCategoryUpdater.LevelCategoryUpdated(selectLevelCategoryViewController.selectedLevelCategory);
+            }
+        }
+
+        private void SelectLevelCategoryViewController_didDeactivateEvent(bool removedFromHierarchy, bool screenSystemDisabling)
+        {
+            foreach (ILevelCategoryUpdater levelCategoryUpdater in levelCategoryUpdaters)
+            {
+                levelCategoryUpdater.LevelCategoryUpdated(SelectLevelCategoryViewController.LevelCategory.None);
             }
         }
 

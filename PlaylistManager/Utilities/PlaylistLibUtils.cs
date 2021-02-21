@@ -1,7 +1,12 @@
 ﻿using System;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
+using System.Reflection;
+using BeatSaberPlaylistsLib;
 using BeatSaberPlaylistsLib.Blist;
 using BeatSaberPlaylistsLib.Legacy;
+using UnityEngine;
 
 namespace PlaylistManager.Utilities
 {
@@ -43,5 +48,35 @@ namespace PlaylistManager.Utilities
             playlist.AllowDuplicates = true;
             playlistManager.StorePlaylist(playlist);
         }
+
+        #region Image
+
+        private static DrawSettings defaultDrawSettings = new DrawSettings
+        {
+            Color = System.Drawing.Color.Black,
+            DrawStyle = DrawStyle.Normal,
+            Font = new Font("arial", 60, FontStyle.Regular),
+            StringFormat = new StringFormat()
+            {
+                Alignment = StringAlignment.Center,
+                LineAlignment = StringAlignment.Center
+            },
+            MinTextSize = 30,
+            MaxTextSize = 60,
+            WrapWidth = 10
+        };
+
+        private static Stream GetFolderImageStream() =>
+            Assembly.GetExecutingAssembly().GetManifestResourceStream("PlaylistManager.Icons.FolderIcon.png");
+
+        internal static Sprite DrawFolderIcon(string str)
+        {
+            Image img = ImageUtilities.DrawString(str, Image.FromStream(GetFolderImageStream()), defaultDrawSettings);
+            MemoryStream ms = new MemoryStream();
+            img.Save(ms, ImageFormat.Png);
+            return BeatSaberMarkupLanguage.Utilities.LoadSpriteRaw(ms.ToArray());
+        }
+
+        #endregion
     }
 }
