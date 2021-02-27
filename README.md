@@ -14,7 +14,7 @@ This plugin allows for viewing and ingame management of playlists as well as the
 ![Delete, Download missing songs and Sync Playlists Playlists](https://github.com/rithik-b/PlaylistManager/blob/master/img/view.png?raw=true)
 
 ## Download
-Download the latest version of the mod (v0.2.0) [here](https://github.com/rithik-b/PlaylistManager/releases/tag/0.2.0 "here").
+Download the latest version of the mod (v0.2.1) [here](https://github.com/rithik-b/PlaylistManager/releases/tag/0.2.1 "here").
 To install, move the dll to your Plugins folder.
 
 **SongCore**, **BeatSaverSharp**, **BeatSaberMarkupLanguage (BSML)**, **SiraUtil** and **BeatSaberPlaylistsLib** are required for this mod, so please download the latest version from ModAssistant.
