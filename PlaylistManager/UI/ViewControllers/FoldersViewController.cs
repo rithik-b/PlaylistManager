@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using TMPro;
 using UnityEngine;
 using Zenject;
 
@@ -31,11 +32,17 @@ namespace PlaylistManager.UI
         public static readonly FieldAccessor<CustomLevelLoader, Sprite>.Accessor DefaultPackCoverAccessor = FieldAccessor<CustomLevelLoader, Sprite>.GetAccessor("_defaultPackCover");
         public static readonly FieldAccessor<BeatmapLevelsModel, IBeatmapLevelPackCollection>.Accessor CustomLevelPackCollectionAccessor = FieldAccessor<BeatmapLevelsModel, IBeatmapLevelPackCollection>.GetAccessor("_customLevelPackCollection");
 
-        [UIComponent("folder-list")]
-        public CustomListTableData customListTableData = null;
-
         [UIComponent("root")]
         private RectTransform rootTransform;
+
+        [UIComponent("back-rect")]
+        private RectTransform backTransform;
+
+        [UIComponent("folder-text")]
+        private TextMeshProUGUI folderText;
+
+        [UIComponent("folder-list")]
+        public CustomListTableData customListTableData = null;
 
         FoldersViewController(HierarchyManager hierarchyManager, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, CustomLevelLoader customLevelLoader, BeatmapLevelsModel beatmapLevelsModel)
         {
@@ -67,6 +74,8 @@ namespace PlaylistManager.UI
 
                 customCellInfo = new CustomListTableData.CustomCellInfo("Playlists", icon: BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.Playlist.png"));
                 customListTableData.data.Add(customCellInfo);
+
+                backTransform.gameObject.SetActive(false);
             }
             else
             {
@@ -83,6 +92,9 @@ namespace PlaylistManager.UI
                     CustomListTableData.CustomCellInfo customCellInfo = new CustomListTableData.CustomCellInfo(folderName, icon: PlaylistLibUtils.DrawFolderIcon(folderName));
                     customListTableData.data.Add(customCellInfo);
                 }
+
+                backTransform.gameObject.SetActive(true);
+                folderText.text = Path.GetFileName(currentParentManager.PlaylistPath);
             }
 
             customListTableData.tableView.ReloadData();
@@ -112,7 +124,7 @@ namespace PlaylistManager.UI
                 {
                     SetupList(currentParentManager: currentManagers[row]);
                 }
-                else
+                else if (currentManagers[row].GetAllPlaylists(false).Length != 0) // Only set data if not empty
                 {
                     IBeatmapLevelPack[] beatmapLevelPacks = currentManagers[row].GetAllPlaylists(false);
                     annotatedBeatmapLevelCollectionsViewController.SetData(beatmapLevelPacks, 0, false);
@@ -121,7 +133,7 @@ namespace PlaylistManager.UI
             }
         }
 
-        [UIAction("back-button-clicked")]
+        [UIAction("back-button-click")]
         private void BackButtonClicked()
         {
             if (currentParentManager == null)
@@ -129,6 +141,12 @@ namespace PlaylistManager.UI
                 return;
             }
             SetupList(currentParentManager: currentParentManager.Parent);
+        }
+
+        [UIAction("keyboard-enter")]
+        private void CreateFolder(string folderName)
+        {
+            currentParentManager.CreateChildManager(folderName);
         }
 
         public void LevelCategoryUpdated(SelectLevelCategoryViewController.LevelCategory levelCategory)

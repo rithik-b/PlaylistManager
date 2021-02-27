@@ -1,8 +1,10 @@
 ﻿<bg id='root' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
 	<vertical vertical-fit='PreferredSize'>
-		<horizontal id='back-rect' horizontal-fit='PreferredSize' preferred-width='75' align-to-center='false'>
-			<button text='&lt;' on-click='back-button-clicked' />
+		<modal-keyboard id='keyboard' show-event='open-keyboard' clickerino-offerino-closerino='true' clear-on-open='true' on-enter='keyboard-enter' />
+		<horizontal id='back-rect' horizontal-fit='PreferredSize' preferred-width='75' align-to-center='true'>
+			<button text='&lt;' on-click='back-button-click' />
 			<text id='folder-text' text='Folders' />
+			<button text='+' click-event='open-keyboard' />
 		</horizontal>
 		<horizontal horizontal-fit='PreferredSize' preferred-width='75' preferred-height='15' align-to-center='true'>
 			<page-button event-click='folder-list#PageUp' direction='Left' />
