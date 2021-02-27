@@ -1,11 +1,11 @@
 ﻿{
-  "$schema": "https://raw.githubusercontent.com/bsmg/BSIPA-MetadataFileSchema/master/Schema.json",
-  "id": "PlaylistManager",
-  "name": "PlaylistManager",
-  "author": "PixelBoom",
-  "version": "0.2.0",
-  "description": "An ingame playlist manager mod for beat saber",
-  "gameVersion": "1.13.2",
+    "$schema": "https://raw.githubusercontent.com/bsmg/BSIPA-MetadataFileSchema/master/Schema.json",
+    "id": "PlaylistManager",
+    "name": "PlaylistManager",
+    "author": "PixelBoom",
+    "version": "0.2.1",
+    "description": "Load, Create, Edit and Download Songs of Playlists in Beat Saber.",
+    "gameVersion": "1.13.2",
     "dependsOn": {
         "BSIPA": "^4.1.4",
         "SongCore": "^3.1.0",

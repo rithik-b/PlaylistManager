@@ -103,7 +103,7 @@ namespace PlaylistManager.UI
         {
             loadedplaylists[index].Add(standardLevelDetailViewController.selectedDifficultyBeatmap.level);
             customListTableData.tableView.ClearSelection();
-            PlaylistLibUtils.playlistManager.StorePlaylist(loadedplaylists[index]);
+            PlaylistLibUtils.playlistManager.GetManagerForPlaylist(loadedplaylists[index]).StorePlaylist(loadedplaylists[index]);
             modal.Hide(true);
         }
 
