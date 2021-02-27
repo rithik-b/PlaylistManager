@@ -182,6 +182,7 @@
     <Compile Include="UI\ViewControllers\PlaylistViewController.cs" />
     <Compile Include="UI\ViewControllers\RemoveFromPlaylistController.cs" />
     <Compile Include="UI\ViewControllers\SettingsViewController.cs" />
+    <Compile Include="UI\ViewControllers\TableViewButtonsController.cs" />
     <Compile Include="Utilities\DownloaderUtils.cs" />
     <Compile Include="Utilities\Events.cs" />
     <Compile Include="Utilities\PlaylistLibUtils.cs" />
@@ -199,6 +200,7 @@
     <EmbeddedResource Include="UI\Views\ButtonView.bsml" />
     <EmbeddedResource Include="UI\Views\PlaylistViewButtons.bsml" />
     <EmbeddedResource Include="UI\Views\Settings.bsml" />
+    <EmbeddedResource Include="UI\Views\TableViewButtons.bsml" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="BeatSaberModdingTools.Tasks">
