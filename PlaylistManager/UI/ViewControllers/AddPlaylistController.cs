@@ -16,12 +16,10 @@ namespace PlaylistManager.UI
 {
     class AddPlaylistController: IPlaylistManagerModal
     {
-        private StandardLevelDetailViewController standardLevelDetailViewController;
-        private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
-        private SelectLevelCategoryViewController selectLevelCategoryViewController;
+        private readonly StandardLevelDetailViewController standardLevelDetailViewController;
 
         private BeatSaberPlaylistsLib.Types.IPlaylist[] loadedplaylists;
-        internal bool parsed;
+        public bool parsed { get; private set; }
 
         [UIComponent("list")]
         public CustomListTableData customListTableData;
@@ -40,11 +38,9 @@ namespace PlaylistManager.UI
         [UIComponent("keyboard")]
         private readonly RectTransform keyboardTransform;
 
-        AddPlaylistController(StandardLevelDetailViewController standardLevelDetailViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, SelectLevelCategoryViewController selectLevelCategoryViewController)
+        public AddPlaylistController(StandardLevelDetailViewController standardLevelDetailViewController)
         {
             this.standardLevelDetailViewController = standardLevelDetailViewController;
-            this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
-            this.selectLevelCategoryViewController = selectLevelCategoryViewController;
             parsed = false;
         }
 
@@ -52,6 +48,7 @@ namespace PlaylistManager.UI
         {
             BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.AddPlaylist.bsml"), standardLevelDetailViewController.transform.Find("LevelDetail").gameObject, this);
             modalPosition = modalTransform.position; // Position can change if SongBrowser is clicked while modal is opened so storing here
+            parsed = true;
         }
 
         internal void ShowPlaylists()

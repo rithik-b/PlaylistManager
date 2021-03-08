@@ -77,7 +77,6 @@ namespace PlaylistManager.UI
                     if (!addPlaylistController.parsed)
                     {
                         addPlaylistController.Parse();
-                        addPlaylistController.parsed = true;
                     }
                     addPlaylistController.ShowPlaylists();
                     break;
@@ -85,7 +84,6 @@ namespace PlaylistManager.UI
                     if (!removeFromPlaylistController.parsed)
                     {
                         removeFromPlaylistController.Parse();
-                        removeFromPlaylistController.parsed = true;
                     }
                     removeFromPlaylistController.DisplayWarning();
                     break;
