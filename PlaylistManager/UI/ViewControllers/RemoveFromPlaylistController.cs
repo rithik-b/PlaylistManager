@@ -15,6 +15,7 @@ namespace PlaylistManager.UI
         private readonly StandardLevelDetailViewController standardLevelDetailViewController;
         private readonly AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
         private readonly LevelCollectionViewController levelCollectionViewController;
+        private readonly PopupModalsController popupModalsController;
         private IPlaylistSong selectedPlaylistSong;
 
         [UIComponent("warning-message")]
@@ -31,25 +32,24 @@ namespace PlaylistManager.UI
 
         private Vector3 modalPosition;
 
-        internal bool parsed;
-        RemoveFromPlaylistController(StandardLevelDetailViewController standardLevelDetailViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, LevelCollectionViewController levelCollectionViewController)
+        public bool parsed { get; private set; }
+
+        public RemoveFromPlaylistController(StandardLevelDetailViewController standardLevelDetailViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, LevelCollectionViewController levelCollectionViewController, PopupModalsController popupModalsController)
         {
             this.standardLevelDetailViewController = standardLevelDetailViewController;
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
             this.levelCollectionViewController = levelCollectionViewController;
+            this.popupModalsController = popupModalsController;
             parsed = false;
         }
 
         internal void Parse()
         {
-            BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.RemoveFromPlaylist.bsml"), standardLevelDetailViewController.transform.Find("LevelDetail").gameObject, this);
-            modalPosition = modalTransform.position;
         }
 
         internal void DisplayWarning()
         {
-            modal.Show(true);
-            warningMessage.text = string.Format("Are you sure you would like to remove {0} from the playlist?", selectedPlaylistSong.songName);
+            popupModalsController.ShowYesNoModal(standardLevelDetailViewController.transform, string.Format("Are you sure you would like to remove {0} from the playlist?", selectedPlaylistSong.songName), RemoveSong);
         }
 
         [UIAction("delete-confirm")]
