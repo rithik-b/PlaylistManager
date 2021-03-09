@@ -4,8 +4,6 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Reflection;
 using BeatSaberPlaylistsLib;
-using BeatSaberPlaylistsLib.Blist;
-using BeatSaberPlaylistsLib.Legacy;
 using UnityEngine;
 
 namespace PlaylistManager.Utilities

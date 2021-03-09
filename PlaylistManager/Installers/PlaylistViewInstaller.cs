@@ -8,10 +8,9 @@ namespace PlaylistManager.Installers
     {
         public override void InstallBindings()
         {
-            Container.BindInterfacesAndSelfTo<AddPlaylistController>().AsSingle();
-            Container.BindInterfacesAndSelfTo<RemoveFromPlaylistController>().AsSingle();
+            Container.BindInterfacesAndSelfTo<AddPlaylistViewController>().AsSingle();
+            Container.BindInterfacesAndSelfTo<AddRemoveButtonsViewController>().AsSingle();
             Container.BindInterfacesAndSelfTo<PlaylistViewController>().AsSingle();
-            Container.BindInterfacesAndSelfTo<ButtonViewController>().AsSingle();
             Container.BindInterfacesAndSelfTo<PlaylistViewButtonsController>().AsSingle();
             Container.BindInterfacesTo<FoldersViewController>().AsSingle();
             Container.BindInterfacesTo<TableViewButtonsController>().AsSingle();
