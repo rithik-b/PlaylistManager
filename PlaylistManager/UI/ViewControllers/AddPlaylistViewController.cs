@@ -5,21 +5,22 @@ using BeatSaberMarkupLanguage.Components;
 using static BeatSaberMarkupLanguage.Components.CustomListTableData;
 using System.Reflection;
 using HMUI;
-using PlaylistManager.HarmonyPatches;
 using PlaylistManager.Utilities;
 using PlaylistManager.Interfaces;
 using UnityEngine;
 using PlaylistManager.Configuration;
 using BeatSaberPlaylistsLib.Types;
+using Zenject;
 
 namespace PlaylistManager.UI
 {
-    class AddPlaylistController: IPlaylistManagerModal
+    public class AddPlaylistViewController : IInitializable, IDisposable
     {
         private readonly StandardLevelDetailViewController standardLevelDetailViewController;
+        private readonly PopupModalsController popupModalsController;
 
         private BeatSaberPlaylistsLib.Types.IPlaylist[] loadedplaylists;
-        public bool parsed { get; private set; }
+        private bool parsed;
 
         [UIComponent("list")]
         public CustomListTableData customListTableData;
@@ -35,24 +36,37 @@ namespace PlaylistManager.UI
 
         private Vector3 modalPosition;
 
-        [UIComponent("keyboard")]
-        private readonly RectTransform keyboardTransform;
-
-        public AddPlaylistController(StandardLevelDetailViewController standardLevelDetailViewController)
+        public AddPlaylistViewController(StandardLevelDetailViewController standardLevelDetailViewController, PopupModalsController popupModalsController)
         {
             this.standardLevelDetailViewController = standardLevelDetailViewController;
+            this.popupModalsController = popupModalsController;
             parsed = false;
         }
 
-        internal void Parse()
+        public void Initialize()
         {
-            BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.AddPlaylist.bsml"), standardLevelDetailViewController.transform.Find("LevelDetail").gameObject, this);
-            modalPosition = modalTransform.position; // Position can change if SongBrowser is clicked while modal is opened so storing here
-            parsed = true;
+            standardLevelDetailViewController.didDeactivateEvent += ParentControllerDeactivated;
         }
 
+        public void Dispose()
+        {
+            standardLevelDetailViewController.didDeactivateEvent -= ParentControllerDeactivated;
+        }
+
+        private void Parse()
+        {
+            if (!parsed)
+            {
+                BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.AddPlaylistView.bsml"), standardLevelDetailViewController.transform.Find("LevelDetail").gameObject, this);
+                modalPosition = modalTransform.position; // Position can change if SongBrowser is clicked while modal is opened so storing here
+                parsed = true;
+            }
+        }
+
+        #region Show Playlists
         internal void ShowPlaylists()
         {
+            Parse();
             modal.Show(true);
             customListTableData.data.Clear();
             loadedplaylists = PlaylistLibUtils.playlistManager.GetAllPlaylists(true);
@@ -95,8 +109,10 @@ namespace PlaylistManager.UI
             customListTableData.data.Add(new CustomCellInfo(playlist.collectionName, subName, playlist.coverImage));
         }
 
+        #endregion
+
         [UIAction("select-cell")]
-        internal void OnCellSelect(TableView tableView, int index)
+        private void OnCellSelect(TableView tableView, int index)
         {
             loadedplaylists[index].Add(standardLevelDetailViewController.selectedDifficultyBeatmap.level);
             customListTableData.tableView.ClearSelection();
@@ -104,18 +120,13 @@ namespace PlaylistManager.UI
             modal.Hide(true);
         }
 
-        [UIAction("keyboard-opened")]
-        internal void OnKeyboardOpened()
+        [UIAction("open-keyboard")]
+        private void OpenKeyboard()
         {
-            // Need to set parent because it goes out of order
-            if (parsed && modalTransform != null && keyboardTransform != null)
-            {
-                keyboardTransform.transform.SetParent(modalTransform);
-            }
+            popupModalsController.ShowKeyboard(rootTransform, CreatePlaylist);
         }
 
-        [UIAction("keyboard-enter")]
-        internal void CreatePlaylist(string playlistName)
+        private void CreatePlaylist(string playlistName)
         {
             if (string.IsNullOrWhiteSpace(playlistName))
             {
@@ -132,8 +143,8 @@ namespace PlaylistManager.UI
             ShowPlaylists();
         }
 
-        public void ParentControllerDeactivated()
-        {
+        public void ParentControllerDeactivated(bool removedFromHierarchy, bool screenSystemDisabling)
+    {
             // Need to restore position and parent of modal
             if (parsed && rootTransform != null && modalTransform != null)
             {

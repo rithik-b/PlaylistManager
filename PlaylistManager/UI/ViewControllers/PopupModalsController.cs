@@ -63,10 +63,14 @@ namespace PlaylistManager.UI
             }
         }
 
+        #region Yes/No Modal
+
+        // Methods
+
         internal void ShowYesNoModal(Transform parent, string text, ButtonPressed buttonPressedCallback, string yesButtonText = "Yes", string noButtonText = "No")
         {
             Parse();
-            yesNoModalTransform.parent = parent;
+            yesNoModalTransform.transform.parent = parent;
             YesNoText = text;
             YesButtonText = yesButtonText;
             NoButtonText = noButtonText;
@@ -81,51 +85,7 @@ namespace PlaylistManager.UI
             yesButtonPressed = null;
         }
 
-        internal void ShowOkModal(Transform parent, string text, ButtonPressed buttonPressedCallback, string okButtonText = "Ok")
-        {
-            Parse();
-            okModalTransform.parent = parent;
-            OkText = text;
-            OkButtonText = okButtonText;
-            okButtonPressed = buttonPressedCallback;
-            parserParams.EmitEvent("ok-button-pressed");
-        }
-
-        [UIAction("ok-button-pressed")]
-        private void OkButtonPressed()
-        {
-            okButtonPressed?.Invoke();
-            okButtonPressed = null;
-        }
-
-        internal void ShowKeyboard(Transform parent, KeyboardPressed keyboardPressedCallback)
-        {
-            Parse();
-            keyboardTransform.parent = parent;
-            keyboardPressed = keyboardPressedCallback;
-            parserParams.EmitEvent("open-keyboard");
-        }
-
-        [UIAction("keyboard-enter")]
-        private void KeyboardEnter(string keyboardText)
-        {
-            keyboardPressed?.Invoke(keyboardText);
-            keyboardPressed = null;
-        }
-
-        public void ParentControllerDeactivated()
-        {
-            if (parsed && rootTransform != null && yesNoModalTransform != null && okModalTransform != null && keyboardTransform != null)
-            {
-                yesNoModalTransform.transform.SetParent(rootTransform);
-                yesNoModalTransform.position = yesNoModalPosition;
-
-                okModalTransform.transform.SetParent(rootTransform);
-                okModalTransform.position = okModalPosition;
-
-                keyboardTransform.transform.SetParent(rootTransform);
-            }
-        }
+        // Values
 
         [UIValue("yes-no-text")]
         private string YesNoText
@@ -159,6 +119,30 @@ namespace PlaylistManager.UI
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NoButtonText)));
             }
         }
+        #endregion
+
+        #region Ok Modal
+
+        // Methods
+
+        internal void ShowOkModal(Transform parent, string text, ButtonPressed buttonPressedCallback, string okButtonText = "Ok")
+        {
+            Parse();
+            okModalTransform.transform.parent = parent;
+            OkText = text;
+            OkButtonText = okButtonText;
+            okButtonPressed = buttonPressedCallback;
+            parserParams.EmitEvent("open-ok");
+        }
+
+        [UIAction("ok-button-pressed")]
+        private void OkButtonPressed()
+        {
+            okButtonPressed?.Invoke();
+            okButtonPressed = null;
+        }
+
+        // Values
 
         [UIValue("ok-text")]
         private string OkText
@@ -179,6 +163,39 @@ namespace PlaylistManager.UI
             {
                 _okButtonText = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(OkButtonText)));
+            }
+        }
+
+        #endregion
+
+        #region Keyboard
+        internal void ShowKeyboard(Transform parent, KeyboardPressed keyboardPressedCallback)
+        {
+            Parse();
+            keyboardTransform.transform.parent = parent;
+            keyboardPressed = keyboardPressedCallback;
+            parserParams.EmitEvent("open-keyboard");
+        }
+
+        [UIAction("keyboard-enter")]
+        private void KeyboardEnter(string keyboardText)
+        {
+            keyboardPressed?.Invoke(keyboardText);
+            keyboardPressed = null;
+        }
+        #endregion
+
+        public void ParentControllerDeactivated()
+        {
+            if (parsed && rootTransform != null && yesNoModalTransform != null && okModalTransform != null && keyboardTransform != null)
+            {
+                yesNoModalTransform.transform.SetParent(rootTransform);
+                yesNoModalTransform.position = yesNoModalPosition;
+
+                okModalTransform.transform.SetParent(rootTransform);
+                okModalTransform.position = okModalPosition;
+
+                keyboardTransform.transform.SetParent(rootTransform);
             }
         }
     }

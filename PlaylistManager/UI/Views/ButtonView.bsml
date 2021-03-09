@@ -1,3 +1,0 @@
-﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
-	<icon-button id='button' anchor-pos-x='65' anchor-pos-y='42' pref-width='10' pref-height='10' on-click='button-click' />
-</bg>

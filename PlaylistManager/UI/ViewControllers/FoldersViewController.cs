@@ -1,7 +1,6 @@
 ﻿using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
-using BeatSaberPlaylistsLib;
 using HMUI;
 using IPA.Utilities;
 using PlaylistManager.Interfaces;
@@ -18,9 +17,11 @@ namespace PlaylistManager.UI
 {
     class FoldersViewController : IInitializable, ILevelCategoryUpdater
     {
-        private HMUI.Screen bottomScreen;
+        private readonly HMUI.Screen bottomScreen;
         private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
-        private Sprite customSongsCover;
+        private readonly LevelCollectionNavigationController levelCollectionNavigationController;
+        private readonly PopupModalsController popupModalsController;
+        private readonly Sprite customSongsCover;
         private BeatmapLevelsModel beatmapLevelsModel;
 
         private BeatSaberPlaylistsLib.PlaylistManager currentParentManager;
@@ -44,12 +45,14 @@ namespace PlaylistManager.UI
         [UIComponent("folder-list")]
         public CustomListTableData customListTableData = null;
 
-        FoldersViewController(HierarchyManager hierarchyManager, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, CustomLevelLoader customLevelLoader, BeatmapLevelsModel beatmapLevelsModel)
+        FoldersViewController(HierarchyManager hierarchyManager, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, LevelCollectionNavigationController levelCollectionNavigationController, PopupModalsController popupModalsController, CustomLevelLoader customLevelLoader, BeatmapLevelsModel beatmapLevelsModel)
         {
             ScreenSystem screenSystem = ScreenSystemAccessor(ref hierarchyManager);
             bottomScreen = screenSystem.bottomScreen;
 
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
+            this.levelCollectionNavigationController = levelCollectionNavigationController;
+            this.popupModalsController = popupModalsController;
 
             customSongsCover = DefaultPackCoverAccessor(ref customLevelLoader);
 
@@ -143,10 +146,25 @@ namespace PlaylistManager.UI
             SetupList(currentParentManager: currentParentManager.Parent);
         }
 
-        [UIAction("keyboard-enter")]
-        private void CreateFolder(string folderName)
+        [UIAction("create-folder")]
+        private void CreateFolder()
         {
-            currentParentManager.CreateChildManager(folderName);
+            popupModalsController.ShowKeyboard(levelCollectionNavigationController.transform, KeyboardEnter);
+        }
+
+        private void KeyboardEnter(string folderName)
+        {
+            if (!string.IsNullOrEmpty(folderName))
+            {
+                BeatSaberPlaylistsLib.PlaylistManager childManager = currentParentManager.CreateChildManager(folderName);
+
+                CustomListTableData.CustomCellInfo customCellInfo = new CustomListTableData.CustomCellInfo(folderName, icon: PlaylistLibUtils.DrawFolderIcon(folderName));
+                customListTableData.data.Add(customCellInfo);
+                customListTableData.tableView.ReloadData();
+                customListTableData.tableView.ClearSelection();
+
+                currentManagers.Add(childManager);
+            }
         }
 
         public void LevelCategoryUpdated(SelectLevelCategoryViewController.LevelCategory levelCategory)
