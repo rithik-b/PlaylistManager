@@ -10,7 +10,7 @@
 	</modal>
 	<modal id='ok-modal' show-event='open-ok' hide-event='close-ok' clickerino-offerino-closerino="false" size-delta-x='60' size-delta-y='30'>
 		<vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' spacing='3' pad='3' preferred-width='60' preferred-height='30'>
-			<text test='~ok-text' word-wrapping='true' align='Center' />
+			<text text='~ok-text' word-wrapping='true' align='Center' />
 			<button text='~ok-button-text' on-click='ok-button-pressed' click-event='close-ok' />
 		</vertical>
 	</modal>

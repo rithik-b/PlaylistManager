@@ -19,7 +19,7 @@ using System.IO;
 
 namespace PlaylistManager.UI
 {
-    class PlaylistViewController : IDisposable, IPlaylistManagerModal, IRefreshable
+    public class PlaylistViewController : IDisposable, IPlaylistManagerModal, IRefreshable
     {
         private readonly LevelPackDetailViewController levelPackDetailViewController;
         private readonly AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
@@ -87,7 +87,7 @@ namespace PlaylistManager.UI
         internal bool parsed;
         internal event Action<IAnnotatedBeatmapLevelCollection> didSelectAnnotatedBeatmapLevelCollectionEvent;
 
-        PlaylistViewController(LevelPackDetailViewController levelPackDetailViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, LevelCollectionViewController levelCollectionViewController)
+        public PlaylistViewController(LevelPackDetailViewController levelPackDetailViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, LevelCollectionViewController levelCollectionViewController)
         {
             this.levelPackDetailViewController = levelPackDetailViewController;
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;

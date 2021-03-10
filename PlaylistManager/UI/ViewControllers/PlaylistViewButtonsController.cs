@@ -9,7 +9,7 @@ using Zenject;
 
 namespace PlaylistManager.UI
 {
-    class PlaylistViewButtonsController : IInitializable, ILevelCollectionUpdater, ILevelCategoryUpdater, IRefreshable
+    public class PlaylistViewButtonsController : IInitializable, ILevelCollectionUpdater, ILevelCategoryUpdater, IRefreshable
     {
         private readonly LevelPackDetailViewController levelPackDetailViewController;
         private readonly AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
@@ -21,7 +21,7 @@ namespace PlaylistManager.UI
         [UIComponent("sync-button")]
         private readonly Transform syncButtonTransform;
 
-        PlaylistViewButtonsController(LevelPackDetailViewController levelPackDetailViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, PlaylistViewController playlistViewController)
+        public PlaylistViewButtonsController(LevelPackDetailViewController levelPackDetailViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, PlaylistViewController playlistViewController)
         {
             this.levelPackDetailViewController = levelPackDetailViewController;
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;

@@ -70,7 +70,7 @@ namespace PlaylistManager.UI
         internal void ShowYesNoModal(Transform parent, string text, ButtonPressed buttonPressedCallback, string yesButtonText = "Yes", string noButtonText = "No")
         {
             Parse();
-            yesNoModalTransform.transform.parent = parent;
+            yesNoModalTransform.transform.SetParent(parent);
             YesNoText = text;
             YesButtonText = yesButtonText;
             NoButtonText = noButtonText;
@@ -128,7 +128,7 @@ namespace PlaylistManager.UI
         internal void ShowOkModal(Transform parent, string text, ButtonPressed buttonPressedCallback, string okButtonText = "Ok")
         {
             Parse();
-            okModalTransform.transform.parent = parent;
+            okModalTransform.transform.SetParent(parent);
             OkText = text;
             OkButtonText = okButtonText;
             okButtonPressed = buttonPressedCallback;
@@ -172,7 +172,7 @@ namespace PlaylistManager.UI
         internal void ShowKeyboard(Transform parent, KeyboardPressed keyboardPressedCallback)
         {
             Parse();
-            keyboardTransform.transform.parent = parent;
+            keyboardTransform.transform.SetParent(parent);
             keyboardPressed = keyboardPressedCallback;
             parserParams.EmitEvent("open-keyboard");
         }
