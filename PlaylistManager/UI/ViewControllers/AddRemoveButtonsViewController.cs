@@ -8,7 +8,6 @@ using UnityEngine;
 using System.ComponentModel;
 using IPA.Utilities;
 using PlaylistManager.Utilities;
-using HMUI;
 using System.Collections.Generic;
 
 namespace PlaylistManager.UI

@@ -6,11 +6,11 @@ using static BeatSaberMarkupLanguage.Components.CustomListTableData;
 using System.Reflection;
 using HMUI;
 using PlaylistManager.Utilities;
-using PlaylistManager.Interfaces;
 using UnityEngine;
 using PlaylistManager.Configuration;
 using BeatSaberPlaylistsLib.Types;
 using Zenject;
+using BeatSaberMarkupLanguage.Parser;
 
 namespace PlaylistManager.UI
 {
@@ -25,9 +25,6 @@ namespace PlaylistManager.UI
         [UIComponent("list")]
         public CustomListTableData customListTableData;
 
-        [UIComponent("modal")]
-        private readonly ModalView modal;
-
         [UIComponent("root")]
         private readonly RectTransform rootTransform;
 
@@ -35,6 +32,9 @@ namespace PlaylistManager.UI
         private readonly RectTransform modalTransform;
 
         private Vector3 modalPosition;
+
+        [UIParams]
+        private readonly BSMLParserParams parserParams;
 
         public AddPlaylistViewController(StandardLevelDetailViewController standardLevelDetailViewController, PopupModalsController popupModalsController)
         {
@@ -67,7 +67,7 @@ namespace PlaylistManager.UI
         internal void ShowPlaylists()
         {
             Parse();
-            modal.Show(true);
+            parserParams.EmitEvent("open-modal");
             customListTableData.data.Clear();
             loadedplaylists = PlaylistLibUtils.playlistManager.GetAllPlaylists(true);
 
@@ -86,7 +86,7 @@ namespace PlaylistManager.UI
             }
 
             customListTableData.tableView.ReloadData();
-            customListTableData.tableView.ScrollToCellWithIdx(0, TableViewScroller.ScrollPositionType.Beginning, false);
+            customListTableData.tableView.ScrollToCellWithIdx(0, TableView.ScrollPositionType.Beginning, false);
         }
 
         private void DeferredSpriteLoadPlaylist_SpriteLoaded(object sender, EventArgs e)
@@ -114,10 +114,30 @@ namespace PlaylistManager.UI
         [UIAction("select-cell")]
         private void OnCellSelect(TableView tableView, int index)
         {
-            loadedplaylists[index].Add(standardLevelDetailViewController.selectedDifficultyBeatmap.level);
+            var selectedPlaylist = loadedplaylists[index];
+            selectedPlaylist.Add(standardLevelDetailViewController.selectedDifficultyBeatmap.level);
             customListTableData.tableView.ClearSelection();
-            PlaylistLibUtils.playlistManager.GetManagerForPlaylist(loadedplaylists[index]).StorePlaylist(loadedplaylists[index]);
-            modal.Hide(true);
+            try
+            {
+                PlaylistLibUtils.playlistManager.GetManagerForPlaylist(selectedPlaylist).StorePlaylist(selectedPlaylist);
+                popupModalsController.ShowOkModal(modalTransform, string.Format("Song successfully added to {0}", selectedPlaylist.collectionName), null);
+            }
+            catch(Exception e)
+            {
+                popupModalsController.ShowOkModal(modalTransform, "An error occured while adding song to playlist.", null);
+                Plugin.Log.Critical(string.Format("An exception occured while adding {0} to playlist {1}.\nException Message: {2}",
+                    standardLevelDetailViewController.selectedDifficultyBeatmap.level, selectedPlaylist.collectionName, e.Message));
+            }
+            finally
+            {
+                string subName = string.Format("{0} songs", selectedPlaylist.beatmapLevelCollection.beatmapLevels.Length);
+                if (Array.Exists(selectedPlaylist.beatmapLevelCollection.beatmapLevels, level => level.levelID == standardLevelDetailViewController.selectedDifficultyBeatmap.level.levelID))
+                {
+                    subName += " (contains song)";
+                }
+                customListTableData.data[index] = new CustomCellInfo(selectedPlaylist.collectionName, subName, selectedPlaylist.coverImage);
+                customListTableData.tableView.RefreshCellsContent();
+            }
         }
 
         [UIAction("open-keyboard")]
@@ -144,7 +164,7 @@ namespace PlaylistManager.UI
         }
 
         public void ParentControllerDeactivated(bool removedFromHierarchy, bool screenSystemDisabling)
-    {
+        {
             // Need to restore position and parent of modal
             if (parsed && rootTransform != null && modalTransform != null)
             {

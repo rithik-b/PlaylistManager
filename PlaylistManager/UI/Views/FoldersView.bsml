@@ -2,7 +2,7 @@
 	<vertical vertical-fit='PreferredSize'>
 		<horizontal id='back-rect' horizontal-fit='PreferredSize' preferred-width='75' align-to-center='true'>
 			<button text='&lt;' on-click='back-button-click' />
-			<text id='folder-text' text='Folders' />
+			<text text='~folder-text' />
 			<button text='+' on-click='create-folder' />
 		</horizontal>
 		<horizontal horizontal-fit='PreferredSize' preferred-width='75' preferred-height='15' align-to-center='true'>

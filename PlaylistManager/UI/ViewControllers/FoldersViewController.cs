@@ -6,16 +6,16 @@ using IPA.Utilities;
 using PlaylistManager.Interfaces;
 using PlaylistManager.Utilities;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using TMPro;
 using UnityEngine;
 using Zenject;
 
 namespace PlaylistManager.UI
 {
-    class FoldersViewController : IInitializable, ILevelCategoryUpdater
+    class FoldersViewController : IInitializable, ILevelCategoryUpdater, INotifyPropertyChanged
     {
         private readonly HMUI.Screen bottomScreen;
         private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
@@ -24,8 +24,10 @@ namespace PlaylistManager.UI
         private readonly Sprite customSongsCover;
         private BeatmapLevelsModel beatmapLevelsModel;
 
+        public event PropertyChangedEventHandler PropertyChanged;
         private BeatSaberPlaylistsLib.PlaylistManager currentParentManager;
         private List<BeatSaberPlaylistsLib.PlaylistManager> currentManagers;
+        private string _folderText = "";
 
         public static readonly FieldAccessor<HierarchyManager, ScreenSystem>.Accessor ScreenSystemAccessor = FieldAccessor<HierarchyManager, ScreenSystem>.GetAccessor("_screenSystem");
         public static readonly FieldAccessor<AnnotatedBeatmapLevelCollectionsViewController, AnnotatedBeatmapLevelCollectionsTableView>.Accessor AnnotatedBeatmapLevelCollectionsTableViewAccessor = 
@@ -38,9 +40,6 @@ namespace PlaylistManager.UI
 
         [UIComponent("back-rect")]
         private RectTransform backTransform;
-
-        [UIComponent("folder-text")]
-        private TextMeshProUGUI folderText;
 
         [UIComponent("folder-list")]
         public CustomListTableData customListTableData = null;
@@ -67,6 +66,7 @@ namespace PlaylistManager.UI
 
         private void SetupList(BeatSaberPlaylistsLib.PlaylistManager currentParentManager = null)
         {
+            customListTableData.tableView.ClearSelection();
             customListTableData.data.Clear();
             this.currentParentManager = currentParentManager;
 
@@ -92,17 +92,20 @@ namespace PlaylistManager.UI
                 foreach (var childManager in currentManagers)
                 {
                     var folderName = Path.GetFileName(childManager.PlaylistPath);
+                    if (childManager == currentParentManager)
+                    {
+                        folderName = "/";
+                    }
                     CustomListTableData.CustomCellInfo customCellInfo = new CustomListTableData.CustomCellInfo(folderName, icon: PlaylistLibUtils.DrawFolderIcon(folderName));
                     customListTableData.data.Add(customCellInfo);
                 }
 
                 backTransform.gameObject.SetActive(true);
-                folderText.text = Path.GetFileName(currentParentManager.PlaylistPath);
+                FolderText = Path.GetFileName(currentParentManager.PlaylistPath);
             }
 
             customListTableData.tableView.ReloadData();
-            customListTableData.tableView.ScrollToCellWithIdx(0, TableViewScroller.ScrollPositionType.Beginning, false);
-            customListTableData.tableView.ClearSelection();
+            customListTableData.tableView.ScrollToCellWithIdx(0, TableView.ScrollPositionType.Beginning, false);
         }
 
         [UIAction("folder-select")]
@@ -123,7 +126,7 @@ namespace PlaylistManager.UI
             }
             else
             {
-                if (currentManagers[row] != currentParentManager && currentManagers[row].HasChildren)
+                if (currentManagers[row] != currentParentManager)
                 {
                     SetupList(currentParentManager: currentManagers[row]);
                 }
@@ -178,6 +181,17 @@ namespace PlaylistManager.UI
             else
             {
                 rootTransform.gameObject.SetActive(false);
+            }
+        }
+
+        [UIValue("folder-text")]
+        private string FolderText
+        {
+            get => _folderText;
+            set
+            {
+                _folderText = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FolderText)));
             }
         }
     }
