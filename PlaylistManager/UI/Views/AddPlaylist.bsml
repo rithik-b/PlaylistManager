@@ -7,5 +7,6 @@
 			<page-button event-click='list#PageDown' direction='Down' ignore-layout='true' anchor-min-y='-0.8' anchor-pos-x='25' anchor-pos-y='-16' pref-width='12'></page-button>
 		</vertical>
 		<button id ='create-playlist-button' text='+' click-event='open-keyboard' on-click='keyboard-opened' anchor-pos-x ='5' anchor-pos-y='-70' ></button>
+		<button text='x' click-event='close-modal' anchor-pos-x ='5' anchor-pos-y='-5' />
 	</modal>
 </bg>

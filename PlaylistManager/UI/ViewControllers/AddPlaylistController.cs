@@ -75,7 +75,7 @@ namespace PlaylistManager.UI
             }
 
             customListTableData.tableView.ReloadData();
-            customListTableData.tableView.ScrollToCellWithIdx(0, TableViewScroller.ScrollPositionType.Beginning, false);
+            customListTableData.tableView.ScrollToCellWithIdx(0, TableView.ScrollPositionType.Beginning, false);
         }
 
         private void DeferredSpriteLoadPlaylist_SpriteLoaded(object sender, EventArgs e)

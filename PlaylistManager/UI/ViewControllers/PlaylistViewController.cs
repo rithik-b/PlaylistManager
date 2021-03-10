@@ -118,13 +118,24 @@ namespace PlaylistManager.UI
         [UIAction("delete-confirm")]
         internal void DeletePlaylist()
         {
-            if (PlaylistLibUtils.playlistManager.DeletePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection))
+            try
             {
-                SelectAnnotatedBeatmapCollectionByIdx(annotatedBeatmapLevelCollectionsViewController.selectedItemIndex - 1);
+                BeatSaberPlaylistsLib.Types.IPlaylist selectedPlaylist = (BeatSaberPlaylistsLib.Types.IPlaylist)annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection;
+                if (PlaylistLibUtils.playlistManager.GetManagerForPlaylist(selectedPlaylist).DeletePlaylist(selectedPlaylist))
+                {
+                    SelectAnnotatedBeatmapCollectionByIdx(annotatedBeatmapLevelCollectionsViewController.selectedItemIndex - 1);
+                }
+                else
+                {
+                    modalMessage.text = "Error: Playlist cannot be deleted.";
+                    CurrentModalState = ModalState.OkModal;
+                    modal.Show(true);
+                }
             }
-            else
+            catch (Exception e)
             {
                 modalMessage.text = "Error: Playlist cannot be deleted.";
+                Plugin.Log.Critical(e.Message);
                 CurrentModalState = ModalState.OkModal;
                 modal.Show(true);
             }
