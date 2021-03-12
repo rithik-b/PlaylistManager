@@ -15,10 +15,11 @@ using Zenject;
 
 namespace PlaylistManager.UI
 {
-    class FoldersViewController : IInitializable, ILevelCategoryUpdater, INotifyPropertyChanged
+    public class FoldersViewController : IInitializable, ILevelCategoryUpdater, INotifyPropertyChanged
     {
         private readonly HMUI.Screen bottomScreen;
         private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
+        private readonly AnnotatedBeatmapLevelCollectionsTableView annotatedBeatmapLevelCollectionsTableView;
         private readonly LevelCollectionNavigationController levelCollectionNavigationController;
         private readonly PopupModalsController popupModalsController;
         private readonly Sprite customSongsCover;
@@ -44,12 +45,13 @@ namespace PlaylistManager.UI
         [UIComponent("folder-list")]
         public CustomListTableData customListTableData = null;
 
-        FoldersViewController(HierarchyManager hierarchyManager, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, LevelCollectionNavigationController levelCollectionNavigationController, PopupModalsController popupModalsController, CustomLevelLoader customLevelLoader, BeatmapLevelsModel beatmapLevelsModel)
+        public FoldersViewController(HierarchyManager hierarchyManager, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, LevelCollectionNavigationController levelCollectionNavigationController, PopupModalsController popupModalsController, CustomLevelLoader customLevelLoader, BeatmapLevelsModel beatmapLevelsModel)
         {
             ScreenSystem screenSystem = ScreenSystemAccessor(ref hierarchyManager);
             bottomScreen = screenSystem.bottomScreen;
 
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
+            annotatedBeatmapLevelCollectionsTableView = AnnotatedBeatmapLevelCollectionsTableViewAccessor(ref annotatedBeatmapLevelCollectionsViewController);
             this.levelCollectionNavigationController = levelCollectionNavigationController;
             this.popupModalsController = popupModalsController;
 
@@ -117,7 +119,7 @@ namespace PlaylistManager.UI
                 {
                     IBeatmapLevelPack[] beatmapLevelPacks = CustomLevelPackCollectionAccessor(ref beatmapLevelsModel).beatmapLevelPacks;
                     annotatedBeatmapLevelCollectionsViewController.SetData(beatmapLevelPacks, 0, false);
-                    annotatedBeatmapLevelCollectionsViewController.HandleDidSelectAnnotatedBeatmapLevelCollection(AnnotatedBeatmapLevelCollectionsTableViewAccessor(ref annotatedBeatmapLevelCollectionsViewController), beatmapLevelPacks[0]);
+                    annotatedBeatmapLevelCollectionsViewController.HandleDidSelectAnnotatedBeatmapLevelCollection(annotatedBeatmapLevelCollectionsTableView, beatmapLevelPacks[0]);
                 }
                 else if (row == 1)
                 {
@@ -134,7 +136,7 @@ namespace PlaylistManager.UI
                 {
                     IBeatmapLevelPack[] beatmapLevelPacks = currentManagers[row].GetAllPlaylists(false);
                     annotatedBeatmapLevelCollectionsViewController.SetData(beatmapLevelPacks, 0, false);
-                    annotatedBeatmapLevelCollectionsViewController.HandleDidSelectAnnotatedBeatmapLevelCollection(AnnotatedBeatmapLevelCollectionsTableViewAccessor(ref annotatedBeatmapLevelCollectionsViewController), beatmapLevelPacks[0]);
+                    annotatedBeatmapLevelCollectionsViewController.HandleDidSelectAnnotatedBeatmapLevelCollection(annotatedBeatmapLevelCollectionsTableView, beatmapLevelPacks[0]);
                 }
             }
         }
