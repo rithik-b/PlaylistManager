@@ -3,7 +3,7 @@ using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberPlaylistsLib.Types;
 using IPA.Utilities;
 using PlaylistManager.Interfaces;
-using PlaylistManager.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -13,13 +13,16 @@ using Zenject;
 
 namespace PlaylistManager.UI
 {
-    public class PlaylistViewButtonsController : IInitializable, ILevelCollectionUpdater, ILevelCategoryUpdater, IRefreshable
+    public class PlaylistViewButtonsController : IInitializable, ILevelCollectionUpdater
     {
         private readonly LevelPackDetailViewController levelPackDetailViewController;
         private readonly PopupModalsController popupModalsController;
         private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
         private AnnotatedBeatmapLevelCollectionsTableView annotatedBeatmapLevelCollectionsTableView;
         private readonly PlaylistViewController playlistViewController;
+
+        private Playlist selectedPlaylist;
+        private BeatSaberPlaylistsLib.PlaylistManager parentManager;
 
         public static readonly FieldAccessor<AnnotatedBeatmapLevelCollectionsViewController, AnnotatedBeatmapLevelCollectionsTableView>.Accessor AnnotatedBeatmapLevelCollectionsTableViewAccessor =
             FieldAccessor<AnnotatedBeatmapLevelCollectionsViewController, AnnotatedBeatmapLevelCollectionsTableView>.GetAccessor("_annotatedBeatmapLevelCollectionsTableView");
@@ -60,19 +63,21 @@ namespace PlaylistManager.UI
 
         private void DeletePlaylist()
         {
-            BeatSaberPlaylistsLib.Types.IPlaylist selectedPlaylist = (BeatSaberPlaylistsLib.Types.IPlaylist)annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection;
-            if (PlaylistLibUtils.playlistManager.GetManagerForPlaylist(selectedPlaylist).DeletePlaylist(selectedPlaylist))
+            try
             {
+                parentManager.DeletePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
+
                 var annotatedBeatmapLevelCollections = AnnotatedBeatmapLevelCollectionsAccessor(ref annotatedBeatmapLevelCollectionsTableView).ToList();
-                annotatedBeatmapLevelCollections.Remove(selectedPlaylist);
+                annotatedBeatmapLevelCollections.Remove((IAnnotatedBeatmapLevelCollection)selectedPlaylist);
 
                 int selectedIndex = annotatedBeatmapLevelCollectionsViewController.selectedItemIndex;
                 annotatedBeatmapLevelCollectionsViewController.SetData(annotatedBeatmapLevelCollections, selectedIndex - 1, false);
                 annotatedBeatmapLevelCollectionsViewController.HandleDidSelectAnnotatedBeatmapLevelCollection(annotatedBeatmapLevelCollectionsTableView, annotatedBeatmapLevelCollections[selectedIndex - 1]);
             }
-            else
+            catch (Exception e)
             {
                 popupModalsController.ShowOkModal(rootTransform, "Error: Playlist cannot be deleted.", null);
+                Plugin.Log.Critical(string.Format("An exception was thrown while deleting a playlist.\nException message:{0}", e));
             }
         }
 
@@ -98,12 +103,16 @@ namespace PlaylistManager.UI
             await playlistViewController.SyncPlaylistAsync();
         }
 
-        public void LevelCollectionUpdated()
+        public void LevelCollectionUpdated(IAnnotatedBeatmapLevelCollection selectedBeatmapLevelCollection, BeatSaberPlaylistsLib.PlaylistManager parentManager)
         {
-            if (annotatedBeatmapLevelCollectionsViewController.isActiveAndEnabled && annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection is Playlist playlist)
+            if (annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection is Playlist selectedPlaylist)
             {
+                this.selectedPlaylist = selectedPlaylist;
+                this.parentManager = parentManager;
+
                 rootTransform.gameObject.SetActive(true);
-                var customData = playlist.CustomData;
+
+                var customData = selectedPlaylist.CustomData;
                 if (customData != null && customData.ContainsKey("syncURL"))
                 {
                     syncButtonTransform.gameObject.SetActive(true);
@@ -115,25 +124,10 @@ namespace PlaylistManager.UI
             }
             else
             {
+                this.selectedPlaylist = null;
+                this.parentManager = null;
                 rootTransform.gameObject.SetActive(false);
             }
-        }
-
-        public void LevelCategoryUpdated(SelectLevelCategoryViewController.LevelCategory levelCategory)
-        {
-            if (levelCategory != SelectLevelCategoryViewController.LevelCategory.CustomSongs)
-            {
-                rootTransform.gameObject.SetActive(false);
-            }
-            else
-            {
-                LevelCollectionUpdated();
-            }
-        }
-
-        public void Refresh()
-        {
-            LevelCollectionUpdated();
         }
     }
 }

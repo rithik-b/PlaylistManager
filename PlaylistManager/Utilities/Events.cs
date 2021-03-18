@@ -1,14 +1,13 @@
-﻿using BeatSaberPlaylistsLib.Types;
-using System;
+﻿using System;
 
 namespace PlaylistManager.Utilities
 {
-    class Events
+    public class Events
     {
-        public static event Action<IPlaylistSong> playlistSongSelected;
-        public static event Action<BeatSaberPlaylistsLib.Types.IPlaylist> playlistSelected;
+        public static event Action<BeatSaberPlaylistsLib.Types.IPlaylistSong> playlistSongSelected;
+        public static event Action<BeatSaberPlaylistsLib.Types.IPlaylist, BeatSaberPlaylistsLib.PlaylistManager> playlistSelected;
 
-        internal static void RaisePlaylistSongSelected(IPlaylistSong playlistSong) => playlistSongSelected?.Invoke(playlistSong);
-        internal static void RaisePlaylistSelected(BeatSaberPlaylistsLib.Types.IPlaylist playlist) => playlistSelected?.Invoke(playlist);
+        internal static void RaisePlaylistSongSelected(BeatSaberPlaylistsLib.Types.IPlaylistSong playlistSong) => playlistSongSelected?.Invoke(playlistSong);
+        internal static void RaisePlaylistSelected(BeatSaberPlaylistsLib.Types.IPlaylist playlist, BeatSaberPlaylistsLib.PlaylistManager parentManager) => playlistSelected?.Invoke(playlist, parentManager);
     }
 }

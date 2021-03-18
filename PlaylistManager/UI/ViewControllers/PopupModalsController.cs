@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace PlaylistManager.UI
 {
-    public class PopupModalsController : IPlaylistManagerModal, INotifyPropertyChanged
+    public class PopupModalsController : INotifyPropertyChanged
     {
         private readonly LevelCollectionNavigationController levelCollectionNavigationController;
         private bool parsed;
@@ -70,6 +70,7 @@ namespace PlaylistManager.UI
         internal void ShowYesNoModal(Transform parent, string text, ButtonPressed buttonPressedCallback, string yesButtonText = "Yes", string noButtonText = "No")
         {
             Parse();
+            yesNoModalTransform.position = yesNoModalPosition;
             yesNoModalTransform.transform.SetParent(parent);
             YesNoText = text;
             YesButtonText = yesButtonText;
@@ -83,6 +84,7 @@ namespace PlaylistManager.UI
         {
             yesButtonPressed?.Invoke();
             yesButtonPressed = null;
+            yesNoModalTransform.transform.SetParent(rootTransform);
         }
 
         // Values
@@ -128,6 +130,7 @@ namespace PlaylistManager.UI
         internal void ShowOkModal(Transform parent, string text, ButtonPressed buttonPressedCallback, string okButtonText = "Ok")
         {
             Parse();
+            okModalTransform.position = okModalPosition;
             okModalTransform.transform.SetParent(parent);
             OkText = text;
             OkButtonText = okButtonText;
@@ -140,6 +143,7 @@ namespace PlaylistManager.UI
         {
             okButtonPressed?.Invoke();
             okButtonPressed = null;
+            okModalTransform.transform.SetParent(rootTransform);
         }
 
         // Values
@@ -182,21 +186,9 @@ namespace PlaylistManager.UI
         {
             keyboardPressed?.Invoke(keyboardText);
             keyboardPressed = null;
+            keyboardTransform.transform.SetParent(rootTransform);
         }
         #endregion
 
-        public void ParentControllerDeactivated()
-        {
-            if (parsed && rootTransform != null && yesNoModalTransform != null && okModalTransform != null && keyboardTransform != null)
-            {
-                yesNoModalTransform.transform.SetParent(rootTransform);
-                yesNoModalTransform.position = yesNoModalPosition;
-
-                okModalTransform.transform.SetParent(rootTransform);
-                okModalTransform.position = okModalPosition;
-
-                keyboardTransform.transform.SetParent(rootTransform);
-            }
-        }
     }
 }

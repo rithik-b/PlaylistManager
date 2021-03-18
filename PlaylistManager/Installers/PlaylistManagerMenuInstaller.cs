@@ -4,7 +4,7 @@ using PlaylistManager.Managers;
 
 namespace PlaylistManager.Installers
 {
-    class PlaylistViewInstaller : Installer
+    class PlaylistManagerMenuInstaller : Installer
     {
         public override void InstallBindings()
         {
@@ -15,7 +15,9 @@ namespace PlaylistManager.Installers
             Container.BindInterfacesTo<FoldersViewController>().AsSingle();
             Container.BindInterfacesTo<TableViewButtonsController>().AsSingle();
             Container.BindInterfacesAndSelfTo<PopupModalsController>().AsSingle();
+
             Container.BindInterfacesTo<PlaylistUIManager>().AsSingle();
+            Container.BindInterfacesAndSelfTo<PlaylistDataManager>().AsSingle();
 
             Container.BindInterfacesTo<SettingsViewController>().AsSingle();
             Container.BindInterfacesTo<RefreshButtonUI>().AsSingle();

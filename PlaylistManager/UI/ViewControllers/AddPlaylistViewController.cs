@@ -125,8 +125,7 @@ namespace PlaylistManager.UI
             catch(Exception e)
             {
                 popupModalsController.ShowOkModal(modalTransform, "An error occured while adding song to playlist.", null);
-                Plugin.Log.Critical(string.Format("An exception occured while adding {0} to playlist {1}.\nException Message: {2}",
-                    standardLevelDetailViewController.selectedDifficultyBeatmap.level, selectedPlaylist.collectionName, e.Message));
+                Plugin.Log.Critical(string.Format("An exception was thrown while adding a song to a playlist.\nException Message: {0}", e.Message));
             }
             finally
             {
