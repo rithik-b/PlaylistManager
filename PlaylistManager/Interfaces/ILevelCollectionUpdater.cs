@@ -2,6 +2,6 @@
 {
     interface ILevelCollectionUpdater
     {
-        void LevelCollectionUpdated();
+        void LevelCollectionUpdated(IAnnotatedBeatmapLevelCollection annotatedBeatmapLevelCollection, BeatSaberPlaylistsLib.PlaylistManager parentManager);
     }
 }

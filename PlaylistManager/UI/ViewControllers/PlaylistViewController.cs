@@ -19,7 +19,7 @@ using System.IO;
 
 namespace PlaylistManager.UI
 {
-    public class PlaylistViewController : IDisposable, IPlaylistManagerModal, IRefreshable
+    public class PlaylistViewController : IDisposable, IRefreshable
     {
         private readonly LevelPackDetailViewController levelPackDetailViewController;
         private readonly AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
@@ -118,16 +118,7 @@ namespace PlaylistManager.UI
         [UIAction("delete-confirm")]
         internal void DeletePlaylist()
         {
-            if (PlaylistLibUtils.playlistManager.DeletePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection))
-            {
-                SelectAnnotatedBeatmapCollectionByIdx(annotatedBeatmapLevelCollectionsViewController.selectedItemIndex - 1);
-            }
-            else
-            {
-                modalMessage.text = "Error: Playlist cannot be deleted.";
-                CurrentModalState = ModalState.OkModal;
-                modal.Show(true);
-            }
+            
         }
 
         internal async Task DownloadPlaylistAsync()
