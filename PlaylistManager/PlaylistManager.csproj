@@ -165,7 +165,6 @@
     <Compile Include="HarmonyPatches\LevelCollectionTableView_HandleDidSelectRowEvent.cs" />
     <Compile Include="HarmonyPatches\LevelFilteringNavigationController_UpdateSecondChildControllerContent.cs" />
     <Compile Include="HarmonyPatches\LevelListTableCellSetDataFromLevel.cs" />
-    <Compile Include="HarmonyPatches\TableView_GetVisibleCellsIdRange.cs" />
     <Compile Include="Installers\PlaylistViewInstaller.cs" />
     <Compile Include="Interfaces\ILevelCollectionUpdater.cs" />
     <Compile Include="Interfaces\IPlaylistManagerModal.cs" />
