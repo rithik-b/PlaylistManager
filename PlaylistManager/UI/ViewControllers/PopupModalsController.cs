@@ -1,7 +1,6 @@
 ﻿using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Parser;
-using PlaylistManager.Interfaces;
 using System.ComponentModel;
 using System.Reflection;
 using UnityEngine;
@@ -76,6 +75,7 @@ namespace PlaylistManager.UI
             YesButtonText = yesButtonText;
             NoButtonText = noButtonText;
             yesButtonPressed = buttonPressedCallback;
+            parserParams.EmitEvent("close-yes-no");
             parserParams.EmitEvent("open-yes-no");
         }
 
@@ -121,6 +121,7 @@ namespace PlaylistManager.UI
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NoButtonText)));
             }
         }
+
         #endregion
 
         #region Ok Modal
@@ -135,6 +136,7 @@ namespace PlaylistManager.UI
             OkText = text;
             OkButtonText = okButtonText;
             okButtonPressed = buttonPressedCallback;
+            parserParams.EmitEvent("close-ok");
             parserParams.EmitEvent("open-ok");
         }
 
@@ -149,7 +151,7 @@ namespace PlaylistManager.UI
         // Values
 
         [UIValue("ok-text")]
-        private string OkText
+        internal string OkText
         {
             get => _okText;
             set
@@ -160,7 +162,7 @@ namespace PlaylistManager.UI
         }
 
         [UIValue("ok-button-text")]
-        private string OkButtonText
+        internal string OkButtonText
         {
             get => _okButtonText;
             set
@@ -173,11 +175,13 @@ namespace PlaylistManager.UI
         #endregion
 
         #region Keyboard
+
         internal void ShowKeyboard(Transform parent, KeyboardPressed keyboardPressedCallback)
         {
             Parse();
             keyboardTransform.transform.SetParent(parent);
             keyboardPressed = keyboardPressedCallback;
+            parserParams.EmitEvent("close-keyboard");
             parserParams.EmitEvent("open-keyboard");
         }
 
@@ -188,6 +192,7 @@ namespace PlaylistManager.UI
             keyboardPressed = null;
             keyboardTransform.transform.SetParent(rootTransform);
         }
+
         #endregion
 
     }

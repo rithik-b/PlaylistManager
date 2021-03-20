@@ -9,12 +9,11 @@ using PlaylistManager.Utilities;
 using UnityEngine;
 using PlaylistManager.Configuration;
 using BeatSaberPlaylistsLib.Types;
-using Zenject;
 using BeatSaberMarkupLanguage.Parser;
 
 namespace PlaylistManager.UI
 {
-    public class AddPlaylistViewController : IInitializable, IDisposable
+    public class AddPlaylistViewController
     {
         private readonly StandardLevelDetailViewController standardLevelDetailViewController;
         private readonly PopupModalsController popupModalsController;
@@ -43,16 +42,6 @@ namespace PlaylistManager.UI
             parsed = false;
         }
 
-        public void Initialize()
-        {
-            standardLevelDetailViewController.didDeactivateEvent += ParentControllerDeactivated;
-        }
-
-        public void Dispose()
-        {
-            standardLevelDetailViewController.didDeactivateEvent -= ParentControllerDeactivated;
-        }
-
         private void Parse()
         {
             if (!parsed)
@@ -61,12 +50,14 @@ namespace PlaylistManager.UI
                 modalPosition = modalTransform.position; // Position can change if SongBrowser is clicked while modal is opened so storing here
                 parsed = true;
             }
+            modalTransform.position = modalPosition; // Reset position
         }
 
         #region Show Playlists
         internal void ShowPlaylists()
         {
             Parse();
+            parserParams.EmitEvent("close-modal");
             parserParams.EmitEvent("open-modal");
             customListTableData.data.Clear();
             loadedplaylists = PlaylistLibUtils.playlistManager.GetAllPlaylists(true);
@@ -160,16 +151,6 @@ namespace PlaylistManager.UI
                 PlaylistLibUtils.CreatePlaylist(playlistName, PluginConfig.Instance.AuthorName, "");
             }
             ShowPlaylists();
-        }
-
-        public void ParentControllerDeactivated(bool removedFromHierarchy, bool screenSystemDisabling)
-        {
-            // Need to restore position and parent of modal
-            if (parsed && rootTransform != null && modalTransform != null)
-            {
-                modalTransform.transform.SetParent(rootTransform);
-                modalTransform.position = modalPosition;
-            }
         }
     }
 }

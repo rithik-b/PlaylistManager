@@ -10,7 +10,7 @@ namespace PlaylistManager.Installers
         {
             Container.BindInterfacesAndSelfTo<AddPlaylistViewController>().AsSingle();
             Container.BindInterfacesAndSelfTo<AddRemoveButtonsViewController>().AsSingle();
-            Container.BindInterfacesAndSelfTo<PlaylistViewController>().AsSingle();
+            Container.BindInterfacesAndSelfTo<PlaylistDetailsViewController>().AsSingle();
             Container.BindInterfacesAndSelfTo<PlaylistViewButtonsController>().AsSingle();
             Container.BindInterfacesTo<FoldersViewController>().AsSingle();
             Container.BindInterfacesTo<TableViewButtonsController>().AsSingle();

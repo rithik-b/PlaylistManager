@@ -1,33 +1,39 @@
 ﻿using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
+using BeatSaberPlaylistsLib.Blist;
+using BeatSaberPlaylistsLib.Legacy;
 using BeatSaberPlaylistsLib.Types;
 using IPA.Utilities;
+using PlaylistManager.HarmonyPatches;
 using PlaylistManager.Interfaces;
+using PlaylistManager.Utilities;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using Zenject;
 
 namespace PlaylistManager.UI
 {
-    public class PlaylistViewButtonsController : IInitializable, ILevelCollectionUpdater
+    public class PlaylistViewButtonsController : IInitializable, IDisposable, ILevelCollectionUpdater
     {
         private readonly LevelPackDetailViewController levelPackDetailViewController;
         private readonly PopupModalsController popupModalsController;
+        private readonly PlaylistDetailsViewController playlistDetailsViewController;
         private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
         private AnnotatedBeatmapLevelCollectionsTableView annotatedBeatmapLevelCollectionsTableView;
-        private readonly PlaylistViewController playlistViewController;
 
+        private int downloadingBeatmapCollectionIdx;
+        private CancellationTokenSource tokenSource;
         private Playlist selectedPlaylist;
         private BeatSaberPlaylistsLib.PlaylistManager parentManager;
 
         public static readonly FieldAccessor<AnnotatedBeatmapLevelCollectionsViewController, AnnotatedBeatmapLevelCollectionsTableView>.Accessor AnnotatedBeatmapLevelCollectionsTableViewAccessor =
             FieldAccessor<AnnotatedBeatmapLevelCollectionsViewController, AnnotatedBeatmapLevelCollectionsTableView>.GetAccessor("_annotatedBeatmapLevelCollectionsTableView");
-        public static readonly FieldAccessor<AnnotatedBeatmapLevelCollectionsTableView, IReadOnlyList<IAnnotatedBeatmapLevelCollection>>.Accessor AnnotatedBeatmapLevelCollectionsAccessor =
-            FieldAccessor<AnnotatedBeatmapLevelCollectionsTableView, IReadOnlyList<IAnnotatedBeatmapLevelCollection>>.GetAccessor("_annotatedBeatmapLevelCollections");
 
         [UIComponent("root")]
         private readonly Transform rootTransform;
@@ -35,14 +41,16 @@ namespace PlaylistManager.UI
         [UIComponent("sync-button")]
         private readonly Transform syncButtonTransform;
 
-        public PlaylistViewButtonsController(LevelPackDetailViewController levelPackDetailViewController, PopupModalsController popupModalsController,
-            AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, PlaylistViewController playlistViewController)
+        public PlaylistViewButtonsController(LevelPackDetailViewController levelPackDetailViewController, PopupModalsController popupModalsController, 
+            PlaylistDetailsViewController playlistDetailsViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController)
         {
             this.levelPackDetailViewController = levelPackDetailViewController;
             this.popupModalsController = popupModalsController;
+            this.playlistDetailsViewController = playlistDetailsViewController;
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
             annotatedBeatmapLevelCollectionsTableView = AnnotatedBeatmapLevelCollectionsTableViewAccessor(ref annotatedBeatmapLevelCollectionsViewController);
-            this.playlistViewController = playlistViewController;
+
+            tokenSource = new CancellationTokenSource();
         }
 
         public void Initialize()
@@ -53,23 +61,36 @@ namespace PlaylistManager.UI
             rootTransform.gameObject.SetActive(false);
         }
 
+        public void Dispose()
+        {
+            LevelFilteringNavigationController_UpdateSecondChildControllerContent.SecondChildControllerUpdatedEvent -= LevelFilteringNavigationController_UpdateSecondChildControllerContent_SecondChildControllerUpdatedEvent;
+        }
+
+        #region Details
+
+        [UIAction("details-click")]
+        private void ShowDetails()
+        {
+            playlistDetailsViewController.ShowDetails();
+        }
+
+
+        #endregion
+
         #region Delete
 
         [UIAction("delete-click")]
         private void OnDelete()
         {
-            popupModalsController.ShowYesNoModal(rootTransform, string.Format("Are you sure you would like to delete {0}?", annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection.collectionName), DeletePlaylist);
+            popupModalsController.ShowYesNoModal(rootTransform, string.Format("Are you sure you would like to delete {0}?", annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection.collectionName), DeleteButtonPressed);
         }
 
-        private void DeletePlaylist()
+        private void DeleteButtonPressed()
         {
             try
             {
                 parentManager.DeletePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
-
-                var annotatedBeatmapLevelCollections = AnnotatedBeatmapLevelCollectionsAccessor(ref annotatedBeatmapLevelCollectionsTableView).ToList();
-                annotatedBeatmapLevelCollections.Remove((IAnnotatedBeatmapLevelCollection)selectedPlaylist);
-
+                var annotatedBeatmapLevelCollections = parentManager.GetAllPlaylists(false);
                 int selectedIndex = annotatedBeatmapLevelCollectionsViewController.selectedItemIndex;
                 annotatedBeatmapLevelCollectionsViewController.SetData(annotatedBeatmapLevelCollections, selectedIndex - 1, false);
                 annotatedBeatmapLevelCollectionsViewController.HandleDidSelectAnnotatedBeatmapLevelCollection(annotatedBeatmapLevelCollectionsTableView, annotatedBeatmapLevelCollections[selectedIndex - 1]);
@@ -83,29 +104,135 @@ namespace PlaylistManager.UI
 
         #endregion
 
+        #region Download
+
         [UIAction("download-click")]
-        internal async Task OnDownload()
+        private async Task DownloadPlaylistAsync()
         {
-            if (!playlistViewController.parsed)
+            popupModalsController.ShowOkModal(rootTransform, "", CancelButtonPressed, "Cancel");
+
+            List<IPlaylistSong> missingSongs;
+            if (selectedPlaylist is BlistPlaylist blistPlaylist)
             {
-                playlistViewController.Parse();
+                missingSongs = blistPlaylist.Where(s => s.PreviewBeatmapLevel == null).Select(s => s).ToList();
             }
-            await playlistViewController.DownloadPlaylistAsync();
+            else if (selectedPlaylist is LegacyPlaylist legacyPlaylist)
+            {
+                missingSongs = legacyPlaylist.Where(s => s.PreviewBeatmapLevel == null).Select(s => s).ToList();
+            }
+            else
+            {
+                popupModalsController.OkText = "Error: The selected playlist cannot be downloaded.";
+                popupModalsController.OkButtonText = "Ok";
+                return;
+            }
+
+            popupModalsController.OkText = string.Format("{0}/{1} songs downloaded", 0, missingSongs.Count);
+            tokenSource.Dispose();
+            tokenSource = new CancellationTokenSource();
+
+            for (int i = 0; i < missingSongs.Count; i++)
+            {
+                try
+                {
+                    if (!string.IsNullOrEmpty(missingSongs[i].Key))
+                    {
+                        await DownloaderUtils.instance.BeatmapDownloadByKey(missingSongs[i].Key.ToLower(), tokenSource.Token);
+                    }
+                    else if (!string.IsNullOrEmpty(missingSongs[i].Hash))
+                    {
+                        await DownloaderUtils.instance.BeatmapDownloadByHash(missingSongs[i].Hash, tokenSource.Token);
+                    }
+                    popupModalsController.OkText = string.Format("{0}/{1} songs downloaded", i + 1, missingSongs.Count);
+                }
+                catch (Exception e)
+                {
+                    if (!(e is TaskCanceledException))
+                    {
+                        Plugin.Log.Critical("Failed to download Song!");
+                    }
+                    break;
+                }
+            }
+
+            popupModalsController.OkText = "Download Complete!";
+            popupModalsController.OkButtonText = "Ok";
+            downloadingBeatmapCollectionIdx = annotatedBeatmapLevelCollectionsViewController.selectedItemIndex;
+            SongCore.Loader.Instance.RefreshSongs(false);
+            LevelFilteringNavigationController_UpdateSecondChildControllerContent.SecondChildControllerUpdatedEvent += LevelFilteringNavigationController_UpdateSecondChildControllerContent_SecondChildControllerUpdatedEvent;
         }
 
-        [UIAction("sync-click")]
-        internal async Task OnSync()
+        private void CancelButtonPressed()
         {
-            if (!playlistViewController.parsed)
-            {
-                playlistViewController.Parse();
-            }
-            await playlistViewController.SyncPlaylistAsync();
+            tokenSource.Cancel();
         }
+
+        private void LevelFilteringNavigationController_UpdateSecondChildControllerContent_SecondChildControllerUpdatedEvent()
+        {
+            IBeatmapLevelPack[] beatmapLevelPacks = parentManager.GetAllPlaylists(false);
+            annotatedBeatmapLevelCollectionsViewController.SetData(beatmapLevelPacks, downloadingBeatmapCollectionIdx, false);
+            annotatedBeatmapLevelCollectionsViewController.HandleDidSelectAnnotatedBeatmapLevelCollection(annotatedBeatmapLevelCollectionsTableView, beatmapLevelPacks[downloadingBeatmapCollectionIdx]);
+            LevelFilteringNavigationController_UpdateSecondChildControllerContent.SecondChildControllerUpdatedEvent -= LevelFilteringNavigationController_UpdateSecondChildControllerContent_SecondChildControllerUpdatedEvent;
+        }
+
+        #endregion
+
+        #region Sync
+
+        [UIAction("sync-click")]
+        private async Task SyncPlaylistAsync()
+        {
+            if (selectedPlaylist.CustomData == null || !selectedPlaylist.CustomData.ContainsKey("syncURL"))
+            {
+                popupModalsController.ShowOkModal(rootTransform, "Error: The selected playlist cannot be synced", null);
+                return;
+            }
+
+            string syncURL = (string)selectedPlaylist.CustomData["syncURL"];
+            tokenSource.Dispose();
+            tokenSource = new CancellationTokenSource();
+
+            popupModalsController.ShowOkModal(rootTransform, "Syncing Playlist", CancelButtonPressed, "Cancel");
+            Stream playlistStream = null;
+
+            try
+            {
+                playlistStream = new MemoryStream(await DownloaderUtils.instance.DownloadFileToBytesAsync(syncURL, tokenSource.Token));
+                ((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist).RemoveAll((playlistSong) => true); // Clear all songs
+                PlaylistLibUtils.playlistManager.DefaultHandler.Populate(playlistStream, (BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
+            }
+            catch (Exception e)
+            {
+                if (!(e is TaskCanceledException))
+                {
+                    popupModalsController.OkText = "Error: The selected playlist cannot be synced";
+                    popupModalsController.OkButtonText = "Ok";
+                }
+                return;
+            }
+            finally
+            {
+                // If the downloaded playlist doesn't have the sync url, add it back
+                if (selectedPlaylist.CustomData == null)
+                {
+                    selectedPlaylist.CustomData = new Dictionary<string, object>();
+                }
+                if (!selectedPlaylist.CustomData.ContainsKey("syncURL"))
+                {
+                    selectedPlaylist.CustomData["syncURL"] = syncURL;
+                }
+
+                PlaylistLibUtils.playlistManager.StorePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
+                await DownloadPlaylistAsync();
+                popupModalsController.ShowOkModal(rootTransform, "Playlist Synced", null);
+            }
+        }
+
+        #endregion
 
         public void LevelCollectionUpdated(IAnnotatedBeatmapLevelCollection selectedBeatmapLevelCollection, BeatSaberPlaylistsLib.PlaylistManager parentManager)
         {
-            if (annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection is Playlist selectedPlaylist)
+            if (selectedBeatmapLevelCollection is Playlist selectedPlaylist)
             {
                 this.selectedPlaylist = selectedPlaylist;
                 this.parentManager = parentManager;

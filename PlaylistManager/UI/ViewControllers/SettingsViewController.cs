@@ -3,14 +3,17 @@ using BeatSaberMarkupLanguage.Components.Settings;
 using BeatSaberMarkupLanguage.Settings;
 using PlaylistManager.Configuration;
 using System;
+using System.ComponentModel;
 using Zenject;
 
 namespace PlaylistManager.UI
 {
-    class SettingsViewController : IInitializable, IDisposable
+    public class SettingsViewController : IInitializable, IDisposable, INotifyPropertyChanged
     {
         [UIComponent("name-setting")]
         private readonly StringSetting nameSetting;
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         [UIValue("author-name")]
         public string AuthorName
@@ -27,7 +30,11 @@ namespace PlaylistManager.UI
                 nameSetting.interactable = !PluginConfig.Instance.AutomaticAuthorName;
                 return PluginConfig.Instance.AutomaticAuthorName;
             }
-            set => PluginConfig.Instance.AutomaticAuthorName = value;
+            set
+            {
+                PluginConfig.Instance.AutomaticAuthorName = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AutomaticAuthorName)));
+            }
         }
 
         [UIValue("no-image")]
@@ -46,8 +53,5 @@ namespace PlaylistManager.UI
 
         public void Initialize() => BSMLSettings.instance.AddSettingsMenu(nameof(PlaylistManager), "PlaylistManager.UI.Views.Settings.bsml", this);
         public void Dispose() => BSMLSettings.instance.RemoveSettingsMenu(this);
-
-        [UIAction("auto-name-toggled")]
-        public void AutoNameToggled(bool value) => nameSetting.interactable = !value;
     }
 }

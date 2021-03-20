@@ -11,18 +11,18 @@ namespace PlaylistManager
     {
         private readonly AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
 
-        private readonly ILevelCollectionUpdater levelCollectionUpdater;
+        private readonly List<ILevelCollectionUpdater> levelCollectionUpdaters;
         private readonly List<IPreviewBeatmapLevelUpdater> previewBeatmapLevelUpdaters;
 
         public BeatSaberPlaylistsLib.Types.IPlaylist selectedPlaylist;
         public BeatSaberPlaylistsLib.Types.IPlaylistSong selectedPlaylistSong;
         public BeatSaberPlaylistsLib.PlaylistManager parentManager;
 
-        internal PlaylistDataManager(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, ILevelCollectionUpdater levelCollectionUpdater, List<IPreviewBeatmapLevelUpdater> previewBeatmapLevelUpdaters)
+        internal PlaylistDataManager(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, List<ILevelCollectionUpdater> levelCollectionUpdaters, List<IPreviewBeatmapLevelUpdater> previewBeatmapLevelUpdaters)
         {
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
 
-            this.levelCollectionUpdater = levelCollectionUpdater;
+            this.levelCollectionUpdaters = levelCollectionUpdaters;
             this.previewBeatmapLevelUpdaters = previewBeatmapLevelUpdaters;
         }
 
@@ -56,7 +56,10 @@ namespace PlaylistManager
                 this.selectedPlaylist = null;
                 parentManager = null;
             }
-            levelCollectionUpdater.LevelCollectionUpdated(annotatedBeatmapLevelCollection, parentManager);
+            foreach (ILevelCollectionUpdater levelCollectionUpdater in levelCollectionUpdaters)
+            {
+                levelCollectionUpdater.LevelCollectionUpdated(annotatedBeatmapLevelCollection, parentManager);
+            }
         }
 
         private void LevelCollectionTableView_DidSelectLevelEvent(IPreviewBeatmapLevel previewBeatmapLevel)

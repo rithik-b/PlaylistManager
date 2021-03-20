@@ -2,6 +2,7 @@
 	<image src='PlaylistManager.Icons.BackgroundMask.png' size-delta-x='10000' size-delta-y='10000'/>
 	<icon-button id='sync-button' icon='PlaylistManager.Icons.Sync.png' anchor-pos-x='53' anchor-pos-y='-3' hover-hint='Sync Playlist' on-click='sync-click' />
 	<vertical>
+		<button text='Details' on-click='details-click' />
 		<button text='Download All Songs' on-click='download-click' />
 		<button text='Delete Playlist' on-click='delete-click' click-event='open-delete'/>
 	</vertical>
