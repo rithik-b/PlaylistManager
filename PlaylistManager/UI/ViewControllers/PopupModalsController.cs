@@ -15,6 +15,7 @@ namespace PlaylistManager.UI
 
         public delegate void ButtonPressed();
         private ButtonPressed yesButtonPressed;
+        private ButtonPressed noButtonPressed;
         private ButtonPressed okButtonPressed;
 
         public delegate void KeyboardPressed(string keyboardText);
@@ -66,7 +67,7 @@ namespace PlaylistManager.UI
 
         // Methods
 
-        internal void ShowYesNoModal(Transform parent, string text, ButtonPressed buttonPressedCallback, string yesButtonText = "Yes", string noButtonText = "No")
+        internal void ShowYesNoModal(Transform parent, string text, ButtonPressed yesButtonPressedCallback, string yesButtonText = "Yes", string noButtonText = "No", ButtonPressed noButtonPressedCallback = null)
         {
             Parse();
             yesNoModalTransform.position = yesNoModalPosition;
@@ -74,7 +75,8 @@ namespace PlaylistManager.UI
             YesNoText = text;
             YesButtonText = yesButtonText;
             NoButtonText = noButtonText;
-            yesButtonPressed = buttonPressedCallback;
+            yesButtonPressed = yesButtonPressedCallback;
+            noButtonPressed = noButtonPressedCallback;
             parserParams.EmitEvent("close-yes-no");
             parserParams.EmitEvent("open-yes-no");
         }
@@ -84,6 +86,14 @@ namespace PlaylistManager.UI
         {
             yesButtonPressed?.Invoke();
             yesButtonPressed = null;
+            yesNoModalTransform.transform.SetParent(rootTransform);
+        }
+
+        [UIAction("no-button-pressed")]
+        private void NoButtonPressed()
+        {
+            noButtonPressed?.Invoke();
+            noButtonPressed = null;
             yesNoModalTransform.transform.SetParent(rootTransform);
         }
 

@@ -4,7 +4,7 @@
 			<text text='~yes-no-text' word-wrapping='true' align='Center' />
 			<horizontal>
 				<button text='~yes-button-text' on-click='yes-button-pressed' click-event='close-yes-no' />
-				<button text='~no-button-text' click-event='close-yes-no' />
+				<button text='~no-button-text' on-click='no-button-pressed' click-event='close-yes-no' />
 			</horizontal>
 		</vertical>
 	</modal>

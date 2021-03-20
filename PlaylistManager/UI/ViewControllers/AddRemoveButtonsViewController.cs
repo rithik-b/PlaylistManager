@@ -12,17 +12,18 @@ using System.Collections.Generic;
 
 namespace PlaylistManager.UI
 {
-    public class AddRemoveButtonsViewController : IInitializable, IPreviewBeatmapLevelUpdater, IRefreshable, INotifyPropertyChanged
+    public class AddRemoveButtonsViewController : IInitializable, IPreviewBeatmapLevelUpdater, ILevelCollectionUpdater, IRefreshable, INotifyPropertyChanged
     {
         private StandardLevelDetailViewController standardLevelDetailViewController;
         private LevelCollectionTableView levelCollectionTableView;
         private readonly LevelCollectionNavigationController levelCollectionNavigationController;
-        private readonly AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
         private readonly AddPlaylistViewController addPlaylistController;
         private readonly PopupModalsController popupModalsController;
 
         public event PropertyChangedEventHandler PropertyChanged;
         private IPreviewBeatmapLevel selectedBeatmapLevel;
+        private BeatSaberPlaylistsLib.Types.IPlaylist selectedPlaylist;
+        private BeatSaberPlaylistsLib.PlaylistManager parentManager;
         private bool _addActive;
         private bool _removeActive;
 
@@ -37,12 +38,11 @@ namespace PlaylistManager.UI
         private RectTransform rootTransform;
 
         public AddRemoveButtonsViewController(StandardLevelDetailViewController standardLevelDetailViewController, LevelCollectionViewController levelCollectionViewController, LevelCollectionNavigationController levelCollectionNavigationController,
-            AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, AddPlaylistViewController addPlaylistController, PopupModalsController popupModalsController)
+               AddPlaylistViewController addPlaylistController, PopupModalsController popupModalsController)
         {
             this.standardLevelDetailViewController = standardLevelDetailViewController;
             levelCollectionTableView = LevelCollectionTableViewAccessor(ref levelCollectionViewController);
             this.levelCollectionNavigationController = levelCollectionNavigationController;
-            this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
             this.addPlaylistController = addPlaylistController;
             this.popupModalsController = popupModalsController;
         }
@@ -59,7 +59,7 @@ namespace PlaylistManager.UI
         [UIAction("add-button-click")]
         private void OpenAddModal()
         {
-            addPlaylistController.ShowPlaylists();
+            addPlaylistController.ShowModal();
         }
 
         [UIValue("add-active")]
@@ -92,9 +92,8 @@ namespace PlaylistManager.UI
 
         private void RemoveSong()
         {
-            BeatSaberPlaylistsLib.Types.IPlaylist selectedPlaylist = (BeatSaberPlaylistsLib.Types.IPlaylist)annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection;
             selectedPlaylist.Remove((IPlaylistSong)selectedBeatmapLevel);
-            PlaylistLibUtils.playlistManager.GetManagerForPlaylist(selectedPlaylist).StorePlaylist(selectedPlaylist);
+            parentManager.StorePlaylist(selectedPlaylist);
 
             levelCollectionTableView.ClearSelection();
             levelCollectionTableView.SetData(selectedPlaylist.beatmapLevelCollection.beatmapLevels, FavoriteLevelIdsAccessor(ref levelCollectionTableView), false);
@@ -131,6 +130,20 @@ namespace PlaylistManager.UI
             {
                 AddActive = true;
                 RemoveActive = false;
+            }
+        }
+
+        public void LevelCollectionUpdated(IAnnotatedBeatmapLevelCollection annotatedBeatmapLevelCollection, BeatSaberPlaylistsLib.PlaylistManager parentManager)
+        {
+            if (annotatedBeatmapLevelCollection is BeatSaberPlaylistsLib.Types.IPlaylist selectedPlaylist)
+            {
+                this.selectedPlaylist = selectedPlaylist;
+                this.parentManager = parentManager;
+            }
+            else
+            {
+                this.selectedPlaylist = null;
+                this.parentManager = null;
             }
         }
 
