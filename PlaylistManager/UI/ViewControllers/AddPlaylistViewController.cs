@@ -4,31 +4,39 @@ using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using static BeatSaberMarkupLanguage.Components.CustomListTableData;
 using System.Reflection;
+using System.Linq;
 using HMUI;
 using PlaylistManager.Utilities;
 using UnityEngine;
 using PlaylistManager.Configuration;
 using BeatSaberPlaylistsLib.Types;
 using BeatSaberMarkupLanguage.Parser;
+using System.IO;
+using System.ComponentModel;
 
 namespace PlaylistManager.UI
 {
-    public class AddPlaylistViewController
+    public class AddPlaylistViewController : INotifyPropertyChanged
     {
         private readonly StandardLevelDetailViewController standardLevelDetailViewController;
         private readonly PopupModalsController popupModalsController;
 
-        private BeatSaberPlaylistsLib.Types.IPlaylist[] loadedplaylists;
+        private BeatSaberPlaylistsLib.PlaylistManager parentManager;
+        private BeatSaberPlaylistsLib.PlaylistManager[] childManagers;
+        private BeatSaberPlaylistsLib.Types.IPlaylist[] childPlaylists;
+
+        private readonly Sprite folderIcon;
         private bool parsed;
+        public event PropertyChangedEventHandler PropertyChanged;
 
         [UIComponent("list")]
         public CustomListTableData customListTableData;
 
-        [UIComponent("root")]
-        private readonly RectTransform rootTransform;
-
         [UIComponent("modal")]
         private readonly RectTransform modalTransform;
+
+        [UIComponent("back-rect")]
+        private readonly RectTransform backTransform;
 
         private Vector3 modalPosition;
 
@@ -39,6 +47,7 @@ namespace PlaylistManager.UI
         {
             this.standardLevelDetailViewController = standardLevelDetailViewController;
             this.popupModalsController = popupModalsController;
+            folderIcon = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.FolderIcon.png");
             parsed = false;
         }
 
@@ -54,15 +63,27 @@ namespace PlaylistManager.UI
         }
 
         #region Show Playlists
-        internal void ShowPlaylists()
+
+        internal void ShowModal()
         {
             Parse();
             parserParams.EmitEvent("close-modal");
             parserParams.EmitEvent("open-modal");
-            customListTableData.data.Clear();
-            loadedplaylists = PlaylistLibUtils.playlistManager.GetAllPlaylists(true);
+            ShowPlaylistsForManager(PlaylistLibUtils.playlistManager);
+        }
 
-            foreach (BeatSaberPlaylistsLib.Types.IPlaylist playlist in loadedplaylists)
+        internal void ShowPlaylistsForManager(BeatSaberPlaylistsLib.PlaylistManager parentManager)
+        {
+            customListTableData.data.Clear();
+            this.parentManager = parentManager;
+            childManagers = parentManager.GetChildManagers().ToArray();
+            childPlaylists = parentManager.GetAllPlaylists(false);
+
+            foreach (BeatSaberPlaylistsLib.PlaylistManager playlistManager in childManagers)
+            {
+                customListTableData.data.Add(new CustomCellInfo(Path.GetFileName(playlistManager.PlaylistPath), "Folder", folderIcon));
+            }
+            foreach (BeatSaberPlaylistsLib.Types.IPlaylist playlist in childPlaylists)
             {
                 if (playlist is IDeferredSpriteLoad deferredSpriteLoadPlaylist && !deferredSpriteLoadPlaylist.SpriteWasLoaded)
                 {
@@ -75,9 +96,18 @@ namespace PlaylistManager.UI
                     ShowPlaylist(playlist);
                 }
             }
-
             customListTableData.tableView.ReloadData();
             customListTableData.tableView.ScrollToCellWithIdx(0, TableView.ScrollPositionType.Beginning, false);
+
+            if (parentManager.Parent != null)
+            {
+                backTransform.gameObject.SetActive(true);
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FolderText)));
+            }
+            else
+            {
+                backTransform.gameObject.SetActive(false);
+            }
         }
 
         private void DeferredSpriteLoadPlaylist_SpriteLoaded(object sender, EventArgs e)
@@ -95,45 +125,77 @@ namespace PlaylistManager.UI
             string subName = string.Format("{0} songs", playlist.beatmapLevelCollection.beatmapLevels.Length);
             if (Array.Exists(playlist.beatmapLevelCollection.beatmapLevels, level => level.levelID == standardLevelDetailViewController.selectedDifficultyBeatmap.level.levelID))
             {
+                if (!playlist.AllowDuplicates)
+                {
+                    return;
+                }
                 subName += " (contains song)";
             }
             customListTableData.data.Add(new CustomCellInfo(playlist.collectionName, subName, playlist.coverImage));
         }
 
-        #endregion
-
         [UIAction("select-cell")]
         private void OnCellSelect(TableView tableView, int index)
         {
-            var selectedPlaylist = loadedplaylists[index];
-            selectedPlaylist.Add(standardLevelDetailViewController.selectedDifficultyBeatmap.level);
             customListTableData.tableView.ClearSelection();
-            try
+            // Folder Selected
+            if (index < childManagers.Length)
             {
-                PlaylistLibUtils.playlistManager.GetManagerForPlaylist(selectedPlaylist).StorePlaylist(selectedPlaylist);
-                popupModalsController.ShowOkModal(modalTransform, string.Format("Song successfully added to {0}", selectedPlaylist.collectionName), null);
+                ShowPlaylistsForManager(childManagers[index]);
             }
-            catch(Exception e)
+            else
             {
-                popupModalsController.ShowOkModal(modalTransform, "An error occured while adding song to playlist.", null);
-                Plugin.Log.Critical(string.Format("An exception was thrown while adding a song to a playlist.\nException Message: {0}", e.Message));
-            }
-            finally
-            {
-                string subName = string.Format("{0} songs", selectedPlaylist.beatmapLevelCollection.beatmapLevels.Length);
-                if (Array.Exists(selectedPlaylist.beatmapLevelCollection.beatmapLevels, level => level.levelID == standardLevelDetailViewController.selectedDifficultyBeatmap.level.levelID))
+                index -= childManagers.Length;
+                var selectedPlaylist = childPlaylists[index];
+                selectedPlaylist.Add(standardLevelDetailViewController.selectedDifficultyBeatmap.level);
+                try
                 {
-                    subName += " (contains song)";
+                    parentManager.StorePlaylist(selectedPlaylist);
+                    popupModalsController.ShowOkModal(modalTransform, string.Format("Song successfully added to {0}", selectedPlaylist.collectionName), null);
                 }
-                customListTableData.data[index] = new CustomCellInfo(selectedPlaylist.collectionName, subName, selectedPlaylist.coverImage);
-                customListTableData.tableView.RefreshCellsContent();
+                catch (Exception e)
+                {
+                    popupModalsController.ShowOkModal(modalTransform, "An error occured while adding song to playlist.", null);
+                    Plugin.Log.Critical(string.Format("An exception was thrown while adding a song to a playlist.\nException Message: {0}", e.Message));
+                }
+                finally
+                {
+                    string subName = string.Format("{0} songs", selectedPlaylist.beatmapLevelCollection.beatmapLevels.Length);
+                    if (Array.Exists(selectedPlaylist.beatmapLevelCollection.beatmapLevels, level => level.levelID == standardLevelDetailViewController.selectedDifficultyBeatmap.level.levelID))
+                    {
+                        if (!selectedPlaylist.AllowDuplicates)
+                        {
+                            customListTableData.data.RemoveAt(index);
+                        }
+                        else
+                        {
+                            subName += " (contains song)";
+                            customListTableData.data[index] = new CustomCellInfo(selectedPlaylist.collectionName, subName, selectedPlaylist.coverImage);
+                        }
+                    }
+                    customListTableData.tableView.RefreshCellsContent();
+                }
             }
         }
+
+        [UIAction("back-button-pressed")]
+        private void BackButtonPressed()
+        {
+            ShowPlaylistsForManager(parentManager.Parent);
+        }
+
+        [UIValue("folder-text")]
+        private string FolderText
+        {
+            get => parentManager == null ? "" : Path.GetFileName(parentManager.PlaylistPath);
+        }
+
+        #endregion
 
         [UIAction("open-keyboard")]
         private void OpenKeyboard()
         {
-            popupModalsController.ShowKeyboard(rootTransform, CreatePlaylist);
+            popupModalsController.ShowKeyboard(modalTransform, CreatePlaylist);
         }
 
         private void CreatePlaylist(string playlistName)
@@ -150,7 +212,7 @@ namespace PlaylistManager.UI
             {
                 PlaylistLibUtils.CreatePlaylist(playlistName, PluginConfig.Instance.AuthorName, "");
             }
-            ShowPlaylists();
+            ShowPlaylistsForManager(parentManager);
         }
     }
 }

@@ -1,9 +1,12 @@
 ﻿using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Parser;
+using BeatSaberPlaylistsLib.Blist;
+using BeatSaberPlaylistsLib.Legacy;
 using BeatSaberPlaylistsLib.Types;
 using HMUI;
 using PlaylistManager.Interfaces;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
 using UnityEngine;
@@ -13,6 +16,7 @@ namespace PlaylistManager.UI
     public class PlaylistDetailsViewController : ILevelCollectionUpdater, INotifyPropertyChanged
     {
         private readonly LevelPackDetailViewController levelPackDetailViewController;
+        private readonly PopupModalsController popupModalsController;
 
         private Vector3 modalPosition;
         private bool parsed;
@@ -53,21 +57,48 @@ namespace PlaylistManager.UI
             }
         }
 
+        [UIValue("playlist-allow-duplicates")]
+        private bool PlaylistAllowDuplicates
+        {
+            get => selectedPlaylist == null ? false : selectedPlaylist.AllowDuplicates;
+            set
+            {
+                selectedPlaylist.AllowDuplicates = value;
+
+                if (selectedPlaylist.CustomData == null)
+                {
+                    selectedPlaylist.CustomData = new Dictionary<string, object>();
+                }
+                selectedPlaylist.CustomData["AllowDuplicates"] = value;
+
+                if (!value)
+                {
+                    if (selectedPlaylist is BlistPlaylist blistPlaylist)
+                    {
+                        blistPlaylist.RemoveDuplicates();
+                    }
+                    else if (selectedPlaylist is LegacyPlaylist legacyPlaylist)
+                    {
+                        legacyPlaylist.RemoveDuplicates();
+                    }
+                }
+
+                parentManager.StorePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistAllowDuplicates)));
+            }
+
+        }
+
         [UIValue("playlist-description")]
         private string PlaylistDescription
         {
             get => selectedPlaylist == null ? "" : selectedPlaylist.Description;
-            set
-            {
-                selectedPlaylist.Description = value;
-                parentManager.StorePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistDescription)));
-            }
         }
 
-        public PlaylistDetailsViewController(LevelPackDetailViewController levelPackDetailViewController)
+        public PlaylistDetailsViewController(LevelPackDetailViewController levelPackDetailViewController, PopupModalsController popupModalsController)
         {
             this.levelPackDetailViewController = levelPackDetailViewController;
+            this.popupModalsController = popupModalsController;
             parsed = false;
         }
 
@@ -87,6 +118,35 @@ namespace PlaylistManager.UI
             Parse();
             parserParams.EmitEvent("close-modal");
             parserParams.EmitEvent("open-modal");
+
+            // Update values
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistName)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistAuthor)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistAllowDuplicates)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistDescription)));
+        }
+
+        [UIAction("duplicates-toggled")]
+        private void DuplicatesToggled(bool playlistAllowDuplicates)
+        {
+            if (playlistAllowDuplicates)
+            {
+                PlaylistAllowDuplicates = true;
+            }
+            else
+            {
+                popupModalsController.ShowYesNoModal(modalTransform, "Are you sure you want to turn off duplicates for this playlist? This will also delete all duplicate songs from this playlist.", DeleteDuplicates, noButtonPressedCallback: DontDeleteDuplicates);
+            }
+        }
+
+        private void DeleteDuplicates()
+        {
+            PlaylistAllowDuplicates = false;
+        }
+
+        private void DontDeleteDuplicates()
+        {
+            PlaylistAllowDuplicates = true;
         }
 
         public void LevelCollectionUpdated(IAnnotatedBeatmapLevelCollection annotatedBeatmapLevelCollection, BeatSaberPlaylistsLib.PlaylistManager parentManager)
@@ -98,8 +158,8 @@ namespace PlaylistManager.UI
             }
             else
             {
-                selectedPlaylist = null;
-                parentManager = null;
+                this.selectedPlaylist = null;
+                this.parentManager = null;
             }
         }
     }
