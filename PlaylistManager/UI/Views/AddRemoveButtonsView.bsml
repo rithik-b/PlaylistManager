@@ -1,5 +1,5 @@
 ﻿<bg id='root' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
-	<horizontal horizontal-fit='PreferredSize' vertical-fit='PreferredSize' anchor-pos-x='40' anchor-pos-y='18'>
+	<horizontal horizontal-fit='PreferredSize' vertical-fit='PreferredSize' anchor-pos-x='38' anchor-pos-y='20'>
 		<icon-button icon='PlaylistManager.Icons.AddToPlaylist.png' pref-width='10' pref-height='10' on-click='add-button-click' active='~add-active' />
 		<icon-button icon='PlaylistManager.Icons.RemoveFromPlaylist.png' pref-width='10' pref-height='10' on-click='remove-button-click' active='~remove-active' />
 	</horizontal>
