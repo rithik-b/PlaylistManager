@@ -35,9 +35,6 @@ namespace PlaylistManager.UI
         [UIComponent("modal")]
         private readonly RectTransform modalTransform;
 
-        [UIComponent("back-rect")]
-        private readonly RectTransform backTransform;
-
         private Vector3 modalPosition;
 
         [UIParams]
@@ -99,15 +96,8 @@ namespace PlaylistManager.UI
             customListTableData.tableView.ReloadData();
             customListTableData.tableView.ScrollToCellWithIdx(0, TableView.ScrollPositionType.Beginning, false);
 
-            if (parentManager.Parent != null)
-            {
-                backTransform.gameObject.SetActive(true);
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FolderText)));
-            }
-            else
-            {
-                backTransform.gameObject.SetActive(false);
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(BackActive)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FolderText)));
         }
 
         private void DeferredSpriteLoadPlaylist_SpriteLoaded(object sender, EventArgs e)
@@ -190,7 +180,15 @@ namespace PlaylistManager.UI
             get => parentManager == null ? "" : Path.GetFileName(parentManager.PlaylistPath);
         }
 
+        [UIValue("back-active")]
+        private bool BackActive
+        {
+            get => parentManager != null && parentManager.Parent != null;
+        }
+
         #endregion
+
+        #region Create Playlist
 
         [UIAction("open-keyboard")]
         private void OpenKeyboard()
@@ -214,5 +212,8 @@ namespace PlaylistManager.UI
             }
             ShowPlaylistsForManager(parentManager);
         }
+
+        #endregion
+
     }
 }

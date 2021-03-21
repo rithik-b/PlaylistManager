@@ -7,7 +7,6 @@ using BeatSaberPlaylistsLib.Types;
 using UnityEngine;
 using System.ComponentModel;
 using IPA.Utilities;
-using PlaylistManager.Utilities;
 using System.Collections.Generic;
 
 namespace PlaylistManager.UI

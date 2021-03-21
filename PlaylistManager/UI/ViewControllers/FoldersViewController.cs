@@ -28,7 +28,6 @@ namespace PlaylistManager.UI
         public event PropertyChangedEventHandler PropertyChanged;
         private BeatSaberPlaylistsLib.PlaylistManager currentParentManager;
         private List<BeatSaberPlaylistsLib.PlaylistManager> currentManagers;
-        private string _folderText = "";
 
         public static readonly FieldAccessor<HierarchyManager, ScreenSystem>.Accessor ScreenSystemAccessor = FieldAccessor<HierarchyManager, ScreenSystem>.GetAccessor("_screenSystem");
         public static readonly FieldAccessor<AnnotatedBeatmapLevelCollectionsViewController, AnnotatedBeatmapLevelCollectionsTableView>.Accessor AnnotatedBeatmapLevelCollectionsTableViewAccessor = 
@@ -103,7 +102,7 @@ namespace PlaylistManager.UI
                 }
 
                 backTransform.gameObject.SetActive(true);
-                FolderText = Path.GetFileName(currentParentManager.PlaylistPath);
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FolderText)));
             }
 
             customListTableData.tableView.ReloadData();
@@ -189,12 +188,7 @@ namespace PlaylistManager.UI
         [UIValue("folder-text")]
         private string FolderText
         {
-            get => _folderText;
-            set
-            {
-                _folderText = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FolderText)));
-            }
+            get => currentParentManager == null ? "" : Path.GetFileName(currentParentManager.PlaylistPath);
         }
     }
 }
