@@ -1,6 +1,6 @@
 ﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
 	<modal id='modal' show-event='open-modal' hide-event='close-modal' clickerino-offerino-closerino="true" anchor-pos-y='15' size-delta-x='65' size-delta-y='75' move-to-center='false'>
-		<bg id='back-rect'>
+		<bg active='~back-active'>
 			<button text='&lt;' on-click='back-button-pressed' anchor-pos-x ='5' anchor-pos-y='-5' />
 			<text text='~folder-text' anchor-pos-x ='45' anchor-pos-y='-15' />
 		</bg>
