@@ -3,6 +3,8 @@
 		<horizontal id='back-rect' horizontal-fit='PreferredSize' preferred-width='75' align-to-center='true'>
 			<button text='&lt;' on-click='back-button-click' />
 			<text text='~folder-text' />
+			<button id='rename-button' text='Rename' on-click='rename-folder' />
+			<button id='delete-button' text='Delete' on-click='delete-folder'/>
 			<button text='+' on-click='create-folder' />
 		</horizontal>
 		<horizontal horizontal-fit='PreferredSize' preferred-width='75' preferred-height='15' align-to-center='true'>

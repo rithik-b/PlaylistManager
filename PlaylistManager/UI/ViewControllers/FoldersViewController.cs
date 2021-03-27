@@ -11,27 +11,26 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.UI;
 using Zenject;
 
 namespace PlaylistManager.UI
 {
-    public class FoldersViewController : IInitializable, ILevelCategoryUpdater, INotifyPropertyChanged
+    public class FoldersViewController : IInitializable, ILevelCategoryUpdater, INotifyPropertyChanged, ILevelCollectionsTableUpdater
     {
         private readonly HMUI.Screen bottomScreen;
-        private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
-        private readonly AnnotatedBeatmapLevelCollectionsTableView annotatedBeatmapLevelCollectionsTableView;
         private readonly LevelCollectionNavigationController levelCollectionNavigationController;
         private readonly PopupModalsController popupModalsController;
         private readonly Sprite customSongsCover;
         private BeatmapLevelsModel beatmapLevelsModel;
 
         public event PropertyChangedEventHandler PropertyChanged;
+        public event System.Action<IAnnotatedBeatmapLevelCollection[], int> LevelCollectionTableViewUpdatedEvent;
+
         private BeatSaberPlaylistsLib.PlaylistManager currentParentManager;
         private List<BeatSaberPlaylistsLib.PlaylistManager> currentManagers;
 
         public static readonly FieldAccessor<HierarchyManager, ScreenSystem>.Accessor ScreenSystemAccessor = FieldAccessor<HierarchyManager, ScreenSystem>.GetAccessor("_screenSystem");
-        public static readonly FieldAccessor<AnnotatedBeatmapLevelCollectionsViewController, AnnotatedBeatmapLevelCollectionsTableView>.Accessor AnnotatedBeatmapLevelCollectionsTableViewAccessor = 
-            FieldAccessor<AnnotatedBeatmapLevelCollectionsViewController, AnnotatedBeatmapLevelCollectionsTableView>.GetAccessor("_annotatedBeatmapLevelCollectionsTableView");
         public static readonly FieldAccessor<CustomLevelLoader, Sprite>.Accessor DefaultPackCoverAccessor = FieldAccessor<CustomLevelLoader, Sprite>.GetAccessor("_defaultPackCover");
         public static readonly FieldAccessor<BeatmapLevelsModel, IBeatmapLevelPackCollection>.Accessor CustomLevelPackCollectionAccessor = FieldAccessor<BeatmapLevelsModel, IBeatmapLevelPackCollection>.GetAccessor("_customLevelPackCollection");
 
@@ -41,22 +40,25 @@ namespace PlaylistManager.UI
         [UIComponent("back-rect")]
         private RectTransform backTransform;
 
+        [UIComponent("rename-button")]
+        private Button renameButton;
+
+        [UIComponent("delete-button")]
+        private Button deleteButton;
+
         [UIComponent("folder-list")]
         public CustomListTableData customListTableData = null;
 
-        public FoldersViewController(HierarchyManager hierarchyManager, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, LevelCollectionNavigationController levelCollectionNavigationController, PopupModalsController popupModalsController, CustomLevelLoader customLevelLoader, BeatmapLevelsModel beatmapLevelsModel)
+        public FoldersViewController(HierarchyManager hierarchyManager, LevelCollectionNavigationController levelCollectionNavigationController, PopupModalsController popupModalsController, CustomLevelLoader customLevelLoader, BeatmapLevelsModel beatmapLevelsModel)
         {
             ScreenSystem screenSystem = ScreenSystemAccessor(ref hierarchyManager);
             bottomScreen = screenSystem.bottomScreen;
 
-            this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
-            annotatedBeatmapLevelCollectionsTableView = AnnotatedBeatmapLevelCollectionsTableViewAccessor(ref annotatedBeatmapLevelCollectionsViewController);
             this.levelCollectionNavigationController = levelCollectionNavigationController;
             this.popupModalsController = popupModalsController;
+            this.beatmapLevelsModel = beatmapLevelsModel;
 
             customSongsCover = DefaultPackCoverAccessor(ref customLevelLoader);
-
-            this.beatmapLevelsModel = beatmapLevelsModel;
         }
 
         public void Initialize()
@@ -78,65 +80,66 @@ namespace PlaylistManager.UI
 
                 customCellInfo = new CustomListTableData.CustomCellInfo("Playlists", icon: BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.Playlist.png"));
                 customListTableData.data.Add(customCellInfo);
-
+                
                 backTransform.gameObject.SetActive(false);
             }
             else
             {
                 currentManagers = currentParentManager.GetChildManagers().ToList();
-
-                if (currentParentManager.GetAllPlaylists(false).Length != 0)
-                {
-                    currentManagers.Insert(0, currentParentManager);
-                }
-
                 foreach (var childManager in currentManagers)
                 {
                     var folderName = Path.GetFileName(childManager.PlaylistPath);
-                    if (childManager == currentParentManager)
-                    {
-                        folderName = "/";
-                    }
                     CustomListTableData.CustomCellInfo customCellInfo = new CustomListTableData.CustomCellInfo(folderName, icon: PlaylistLibUtils.DrawFolderIcon(folderName));
                     customListTableData.data.Add(customCellInfo);
                 }
 
                 backTransform.gameObject.SetActive(true);
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FolderText)));
+
+                // If root, can't rename or delete
+                if (currentParentManager.Parent == null)
+                {
+                    renameButton.interactable = false;
+                    deleteButton.interactable = false;
+                }
+                else
+                {
+                    renameButton.interactable = true;
+                    deleteButton.interactable = true;
+                }
+
+                IAnnotatedBeatmapLevelCollection[] annotatedBeatmapLevelCollections = currentParentManager.GetAllPlaylists(false);
+                LevelCollectionTableViewUpdatedEvent?.Invoke(annotatedBeatmapLevelCollections, 0);
+                
             }
 
             customListTableData.tableView.ReloadData();
             customListTableData.tableView.ScrollToCellWithIdx(0, TableView.ScrollPositionType.Beginning, false);
+            if (currentParentManager == null)
+            {
+                customListTableData.tableView.SelectCellWithIdx(0);
+                Select(customListTableData.tableView, 0);
+            }
         }
 
         [UIAction("folder-select")]
-        private void Select(TableView _, int row)
+        private void Select(TableView _, int selectedCellIndex)
         {
             if (currentParentManager == null) // If we are at root
             {
-                if (row == 0)
+                if (selectedCellIndex == 0)
                 {
                     IBeatmapLevelPack[] beatmapLevelPacks = CustomLevelPackCollectionAccessor(ref beatmapLevelsModel).beatmapLevelPacks;
-                    annotatedBeatmapLevelCollectionsViewController.SetData(beatmapLevelPacks, 0, false);
-                    annotatedBeatmapLevelCollectionsViewController.HandleDidSelectAnnotatedBeatmapLevelCollection(annotatedBeatmapLevelCollectionsTableView, beatmapLevelPacks[0]);
+                    LevelCollectionTableViewUpdatedEvent?.Invoke(beatmapLevelPacks, 0);
                 }
-                else if (row == 1)
+                else if (selectedCellIndex == 1)
                 {
                     SetupList(currentParentManager: PlaylistLibUtils.playlistManager);
                 }
             }
             else
             {
-                if (currentManagers[row] != currentParentManager)
-                {
-                    SetupList(currentParentManager: currentManagers[row]);
-                }
-                else if (currentManagers[row].GetAllPlaylists(false).Length != 0) // Only set data if not empty
-                {
-                    IBeatmapLevelPack[] beatmapLevelPacks = currentManagers[row].GetAllPlaylists(false);
-                    annotatedBeatmapLevelCollectionsViewController.SetData(beatmapLevelPacks, 0, false);
-                    annotatedBeatmapLevelCollectionsViewController.HandleDidSelectAnnotatedBeatmapLevelCollection(annotatedBeatmapLevelCollectionsTableView, beatmapLevelPacks[0]);
-                }
+                SetupList(currentParentManager: currentManagers[selectedCellIndex]);
             }
         }
 
@@ -150,26 +153,66 @@ namespace PlaylistManager.UI
             SetupList(currentParentManager: currentParentManager.Parent);
         }
 
+        #region Create Folder
+
         [UIAction("create-folder")]
         private void CreateFolder()
         {
-            popupModalsController.ShowKeyboard(levelCollectionNavigationController.transform, KeyboardEnter);
+            popupModalsController.ShowKeyboard(levelCollectionNavigationController.transform, CreateKeyboardEnter);
         }
 
-        private void KeyboardEnter(string folderName)
+        private void CreateKeyboardEnter(string folderName)
         {
             if (!string.IsNullOrEmpty(folderName))
             {
+                folderName = string.Join("_", folderName.Replace("/", "").Replace("\\", "").Split(' '));
                 BeatSaberPlaylistsLib.PlaylistManager childManager = currentParentManager.CreateChildManager(folderName);
 
                 CustomListTableData.CustomCellInfo customCellInfo = new CustomListTableData.CustomCellInfo(folderName, icon: PlaylistLibUtils.DrawFolderIcon(folderName));
                 customListTableData.data.Add(customCellInfo);
                 customListTableData.tableView.ReloadData();
                 customListTableData.tableView.ClearSelection();
-
                 currentManagers.Add(childManager);
             }
         }
+
+        #endregion
+
+        #region Rename Folder
+
+        [UIAction("rename-folder")]
+        private void RenameButtonClicked()
+        {
+            popupModalsController.ShowKeyboard(levelCollectionNavigationController.transform, RenameKeyboardEnter);
+        }
+
+        private void RenameKeyboardEnter(string folderName)
+        {
+            if (!string.IsNullOrEmpty(folderName))
+            {
+                folderName = folderName.Replace("/", "").Replace("\\", "");
+                currentParentManager.RenameManager(folderName);
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FolderText)));
+            }
+        }
+
+        #endregion
+
+        #region Delete Folder
+
+        [UIAction("delete-folder")]
+        private void DeleteButtonClicked()
+        {
+            popupModalsController.ShowYesNoModal(levelCollectionNavigationController.transform, string.Format("Are you sure you want to delete {0} along with all playlists and subfolders?", Path.GetFileName(currentParentManager.PlaylistPath)), DeleteConfirm);
+        }
+
+        private void DeleteConfirm()
+        {
+            currentParentManager.Parent.DeleteChildManager(currentParentManager);
+            BackButtonClicked();
+        }
+
+        #endregion
 
         public void LevelCategoryUpdated(SelectLevelCategoryViewController.LevelCategory levelCategory)
         {

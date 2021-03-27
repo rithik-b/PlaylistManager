@@ -6,7 +6,6 @@ using BeatSaberPlaylistsLib.Legacy;
 using BeatSaberPlaylistsLib.Types;
 using HMUI;
 using PlaylistManager.Interfaces;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
 using UnityEngine;
@@ -64,12 +63,6 @@ namespace PlaylistManager.UI
             set
             {
                 selectedPlaylist.AllowDuplicates = value;
-
-                if (selectedPlaylist.CustomData == null)
-                {
-                    selectedPlaylist.CustomData = new Dictionary<string, object>();
-                }
-                selectedPlaylist.CustomData["AllowDuplicates"] = value;
 
                 if (!value)
                 {
