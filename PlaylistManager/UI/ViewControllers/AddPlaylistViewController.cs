@@ -204,11 +204,11 @@ namespace PlaylistManager.UI
             }
             if (!PluginConfig.Instance.DefaultImageDisabled)
             {
-                PlaylistLibUtils.CreatePlaylist(playlistName, PluginConfig.Instance.AuthorName);
+                PlaylistLibUtils.CreatePlaylist(playlistName, PluginConfig.Instance.AuthorName, parentManager);
             }
             else
             {
-                PlaylistLibUtils.CreatePlaylist(playlistName, PluginConfig.Instance.AuthorName, "");
+                PlaylistLibUtils.CreatePlaylist(playlistName, PluginConfig.Instance.AuthorName, "", parentManager);
             }
             ShowPlaylistsForManager(parentManager);
         }

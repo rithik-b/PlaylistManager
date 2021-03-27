@@ -37,14 +37,14 @@ namespace PlaylistManager.UI
 
         public void Initialize()
         {
-            beatmapCharacteristicSegmentedControl.didSelectCellEvent += HighlightDifficultiesForSelectedCharacteristic;
-            BeatmapDifficultySegmentedControlController_SetData.CharacteristicsSegmentedControllerDataSetEvent += BeatmapCharacteristicSegmentedControlController_CharacteristicsSegmentedControllerDataSetEvent;
+            beatmapCharacteristicSegmentedControl.didSelectCellEvent += BeatmapCharacteristicSegmentedControl_DidSelectCellEvent;
+            BeatmapDifficultySegmentedControlController_SetData.CharacteristicsSegmentedControllerDataSetEvent += HighlightDifficultiesForSelectedCharacteristic;
         }
 
         public void Dispose()
         {
-            beatmapCharacteristicSegmentedControl.didSelectCellEvent -= HighlightDifficultiesForSelectedCharacteristic;
-            BeatmapDifficultySegmentedControlController_SetData.CharacteristicsSegmentedControllerDataSetEvent -= BeatmapCharacteristicSegmentedControlController_CharacteristicsSegmentedControllerDataSetEvent;
+            beatmapCharacteristicSegmentedControl.didSelectCellEvent -= BeatmapCharacteristicSegmentedControl_DidSelectCellEvent;
+            BeatmapDifficultySegmentedControlController_SetData.CharacteristicsSegmentedControllerDataSetEvent -= HighlightDifficultiesForSelectedCharacteristic;
         }
 
         public void PreviewBeatmapLevelUpdated(IPreviewBeatmapLevel beatmapLevel)
@@ -56,16 +56,10 @@ namespace PlaylistManager.UI
             else
             {
                 SelectedPlaylistSong = null;
-                beatmapCharacteristicSegmentedControl.didSelectCellEvent -= HighlightDifficultiesForSelectedCharacteristic;
             }
         }
 
-        private void BeatmapCharacteristicSegmentedControlController_CharacteristicsSegmentedControllerDataSetEvent()
-        {
-            HighlightDifficultiesForSelectedCharacteristic(null, 0);
-        }
-
-        private void HighlightDifficultiesForSelectedCharacteristic(SegmentedControl _, int __)
+        private void HighlightDifficultiesForSelectedCharacteristic()
         {
             if (SelectedPlaylistSong != null)
             {
@@ -79,6 +73,10 @@ namespace PlaylistManager.UI
                     textToHighlight.faceColor = new UnityEngine.Color32(255, 255, 0, 255);
                 }
             }
+        }
+        private void BeatmapCharacteristicSegmentedControl_DidSelectCellEvent(SegmentedControl _, int __)
+        {
+            HighlightDifficultiesForSelectedCharacteristic();
         }
 
         private PlaylistSong SelectedPlaylistSong

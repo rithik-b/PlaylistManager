@@ -19,7 +19,7 @@ using Zenject;
 
 namespace PlaylistManager.UI
 {
-    public class PlaylistViewButtonsController : IInitializable, IDisposable, ILevelCollectionUpdater
+    public class PlaylistViewButtonsController : IInitializable, IDisposable, ILevelCollectionUpdater, ILevelCategoryUpdater, ILevelCollectionsTableUpdater
     {
         private readonly LevelPackDetailViewController levelPackDetailViewController;
         private readonly PopupModalsController popupModalsController;
@@ -31,6 +31,8 @@ namespace PlaylistManager.UI
         private CancellationTokenSource tokenSource;
         private Playlist selectedPlaylist;
         private BeatSaberPlaylistsLib.PlaylistManager parentManager;
+
+        public event Action<IAnnotatedBeatmapLevelCollection[], int> LevelCollectionTableViewUpdatedEvent;
 
         public static readonly FieldAccessor<AnnotatedBeatmapLevelCollectionsViewController, AnnotatedBeatmapLevelCollectionsTableView>.Accessor AnnotatedBeatmapLevelCollectionsTableViewAccessor =
             FieldAccessor<AnnotatedBeatmapLevelCollectionsViewController, AnnotatedBeatmapLevelCollectionsTableView>.GetAccessor("_annotatedBeatmapLevelCollectionsTableView");
@@ -92,8 +94,7 @@ namespace PlaylistManager.UI
                 parentManager.DeletePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
                 var annotatedBeatmapLevelCollections = parentManager.GetAllPlaylists(false);
                 int selectedIndex = annotatedBeatmapLevelCollectionsViewController.selectedItemIndex;
-                annotatedBeatmapLevelCollectionsViewController.SetData(annotatedBeatmapLevelCollections, selectedIndex - 1, false);
-                annotatedBeatmapLevelCollectionsViewController.HandleDidSelectAnnotatedBeatmapLevelCollection(annotatedBeatmapLevelCollectionsTableView, annotatedBeatmapLevelCollections[selectedIndex - 1]);
+                LevelCollectionTableViewUpdatedEvent?.Invoke(annotatedBeatmapLevelCollections, selectedIndex - 1);
             }
             catch (Exception e)
             {
@@ -133,26 +134,15 @@ namespace PlaylistManager.UI
 
             for (int i = 0; i < missingSongs.Count; i++)
             {
-                try
+                if (!string.IsNullOrEmpty(missingSongs[i].Key))
                 {
-                    if (!string.IsNullOrEmpty(missingSongs[i].Key))
-                    {
-                        await DownloaderUtils.instance.BeatmapDownloadByKey(missingSongs[i].Key.ToLower(), tokenSource.Token);
-                    }
-                    else if (!string.IsNullOrEmpty(missingSongs[i].Hash))
-                    {
-                        await DownloaderUtils.instance.BeatmapDownloadByHash(missingSongs[i].Hash, tokenSource.Token);
-                    }
-                    popupModalsController.OkText = string.Format("{0}/{1} songs downloaded", i + 1, missingSongs.Count);
+                    await DownloaderUtils.instance.BeatmapDownloadByKey(missingSongs[i].Key.ToLower(), tokenSource.Token);
                 }
-                catch (Exception e)
+                else if (!string.IsNullOrEmpty(missingSongs[i].Hash))
                 {
-                    if (!(e is TaskCanceledException))
-                    {
-                        Plugin.Log.Critical("Failed to download Song!");
-                    }
-                    break;
+                    await DownloaderUtils.instance.BeatmapDownloadByHash(missingSongs[i].Hash, tokenSource.Token);
                 }
+                popupModalsController.OkText = string.Format("{0}/{1} songs downloaded", i + 1, missingSongs.Count);
             }
 
             popupModalsController.OkText = "Download Complete!";
@@ -182,13 +172,16 @@ namespace PlaylistManager.UI
         [UIAction("sync-click")]
         private async Task SyncPlaylistAsync()
         {
-            if (selectedPlaylist.CustomData == null || !selectedPlaylist.CustomData.ContainsKey("syncURL"))
+            object outSyncURL;
+
+            if (!selectedPlaylist.TryGetCustomData("syncURL", out outSyncURL))
             {
                 popupModalsController.ShowOkModal(rootTransform, "Error: The selected playlist cannot be synced", null);
                 return;
             }
 
-            string syncURL = (string)selectedPlaylist.CustomData["syncURL"];
+            string syncURL = (string)outSyncURL;
+
             tokenSource.Dispose();
             tokenSource = new CancellationTokenSource();
 
@@ -213,13 +206,9 @@ namespace PlaylistManager.UI
             finally
             {
                 // If the downloaded playlist doesn't have the sync url, add it back
-                if (selectedPlaylist.CustomData == null)
+                if (!selectedPlaylist.TryGetCustomData("syncURL", out outSyncURL))
                 {
-                    selectedPlaylist.CustomData = new Dictionary<string, object>();
-                }
-                if (!selectedPlaylist.CustomData.ContainsKey("syncURL"))
-                {
-                    selectedPlaylist.CustomData["syncURL"] = syncURL;
+                    selectedPlaylist.SetCustomData("syncURL", syncURL);
                 }
 
                 PlaylistLibUtils.playlistManager.StorePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
@@ -238,9 +227,7 @@ namespace PlaylistManager.UI
                 this.parentManager = parentManager;
 
                 rootTransform.gameObject.SetActive(true);
-
-                var customData = selectedPlaylist.CustomData;
-                if (customData != null && customData.ContainsKey("syncURL"))
+                if (selectedPlaylist.TryGetCustomData("syncURL", out _))
                 {
                     syncButtonTransform.gameObject.SetActive(true);
                 }
@@ -253,6 +240,14 @@ namespace PlaylistManager.UI
             {
                 this.selectedPlaylist = null;
                 this.parentManager = null;
+                rootTransform.gameObject.SetActive(false);
+            }
+        }
+
+        public void LevelCategoryUpdated(SelectLevelCategoryViewController.LevelCategory levelCategory)
+        {
+            if (levelCategory != SelectLevelCategoryViewController.LevelCategory.CustomSongs)
+            {
                 rootTransform.gameObject.SetActive(false);
             }
         }

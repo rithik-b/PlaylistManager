@@ -20,12 +20,12 @@ namespace PlaylistManager.Utilities
             }
         }
 
-        public static void CreatePlaylist(string playlistName, string playlistAuthorName)
+        public static void CreatePlaylist(string playlistName, string playlistAuthorName, BeatSaberPlaylistsLib.PlaylistManager playlistManager)
         {
-            CreatePlaylist(playlistName, playlistAuthorName, DEFAULT_IMAGE);
+            CreatePlaylist(playlistName, playlistAuthorName, DEFAULT_IMAGE, playlistManager);
         }
 
-        public static void CreatePlaylist(string playlistName, string playlistAuthorName, string image)
+        public static void CreatePlaylist(string playlistName, string playlistAuthorName, string image, BeatSaberPlaylistsLib.PlaylistManager playlistManager)
         {
             string playlistFolderPath = Path.Combine(Environment.CurrentDirectory, "Playlists");
             string playlistFileName = string.Join("_", playlistName.Replace("/", "").Replace("\\", "").Split(' '));
