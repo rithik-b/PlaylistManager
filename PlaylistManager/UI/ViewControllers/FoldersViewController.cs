@@ -6,6 +6,7 @@ using IPA.Utilities;
 using PlaylistManager.HarmonyPatches;
 using PlaylistManager.Interfaces;
 using PlaylistManager.Utilities;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -17,7 +18,7 @@ using Zenject;
 
 namespace PlaylistManager.UI
 {
-    public class FoldersViewController : IInitializable, ILevelCategoryUpdater, INotifyPropertyChanged, ILevelCollectionsTableUpdater
+    public class FoldersViewController : IInitializable, ILevelCategoryUpdater, INotifyPropertyChanged, ILevelCollectionsTableUpdater, IDisposable
     {
         private readonly HMUI.Screen bottomScreen;
         private readonly LevelCollectionNavigationController levelCollectionNavigationController;
@@ -48,7 +49,7 @@ namespace PlaylistManager.UI
         private Button deleteButton;
 
         [UIComponent("folder-list")]
-        public CustomListTableData customListTableData = null;
+        public CustomListTableData customListTableData;
 
         public FoldersViewController(HierarchyManager hierarchyManager, LevelCollectionNavigationController levelCollectionNavigationController, PopupModalsController popupModalsController, CustomLevelLoader customLevelLoader, BeatmapLevelsModel beatmapLevelsModel)
         {
@@ -248,6 +249,11 @@ namespace PlaylistManager.UI
         {
             AnnotatedBeatmapLevelCollectionsViewController_SetData.SetDataEvent -= AnnotatedBeatmapLevelCollectionsViewController_SetData_SetDataEvent;
             SetupList(currentParentManager);
+        }
+
+        public void Dispose()
+        {
+            AnnotatedBeatmapLevelCollectionsViewController_SetData.SetDataEvent -= AnnotatedBeatmapLevelCollectionsViewController_SetData_SetDataEvent;
         }
 
         [UIValue("folder-text")]

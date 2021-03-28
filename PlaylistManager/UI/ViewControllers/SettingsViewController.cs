@@ -44,6 +44,13 @@ namespace PlaylistManager.UI
             set => PluginConfig.Instance.DefaultImageDisabled = value;
         }
 
+        [UIValue("allow-duplicates")]
+        public bool DefaultAllowDuplicates
+        {
+            get => PluginConfig.Instance.DefaultAllowDuplicates;
+            set => PluginConfig.Instance.DefaultAllowDuplicates = value;
+        }
+
         [UIValue("scroll-speed")]
         public float PlaylistScrollSpeed
         {

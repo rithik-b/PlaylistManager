@@ -3,9 +3,11 @@
 		<horizontal id='back-rect' horizontal-fit='PreferredSize' preferred-width='75' align-to-center='true'>
 			<button text='&lt;' on-click='back-button-click' />
 			<text text='~folder-text' />
-			<button id='rename-button' text='Rename' on-click='rename-folder' />
-			<button id='delete-button' text='Delete' on-click='delete-folder'/>
-			<button text='+' on-click='create-folder' />
+			<horizontal horizontal-fit='PreferredSize' preferred-width='33'>
+				<button id='rename-button' text='Rename' hover-hint='Rename the current folder' on-click='rename-folder' />
+				<button id='delete-button' text='🗑' hover-hint='Delete the current folder' on-click='delete-folder'/>
+				<button text='+' hover-hint='Create a new folder' on-click='create-folder' />
+			</horizontal>
 		</horizontal>
 		<horizontal horizontal-fit='PreferredSize' preferred-width='75' preferred-height='15' align-to-center='true'>
 			<page-button event-click='folder-list#PageUp' direction='Left' />

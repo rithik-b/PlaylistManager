@@ -4,6 +4,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Reflection;
 using BeatSaberPlaylistsLib;
+using PlaylistManager.Configuration;
 using UnityEngine;
 
 namespace PlaylistManager.Utilities
@@ -43,7 +44,10 @@ namespace PlaylistManager.Utilities
                 playlistFileName = playlistFileName + string.Format("({0})", dupNum);
             }
             BeatSaberPlaylistsLib.Types.IPlaylist playlist = playlistManager.CreatePlaylist(playlistFileName, playlistName, playlistAuthorName, image);
-            playlist.AllowDuplicates = true;
+            if (PluginConfig.Instance.DefaultAllowDuplicates == false)
+            {
+                playlist.AllowDuplicates = false;
+            }
             playlistManager.StorePlaylist(playlist);
         }
 
