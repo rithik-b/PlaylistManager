@@ -3,6 +3,7 @@ using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using HMUI;
 using IPA.Utilities;
+using PlaylistManager.HarmonyPatches;
 using PlaylistManager.Interfaces;
 using PlaylistManager.Utilities;
 using System.Collections.Generic;
@@ -75,12 +76,15 @@ namespace PlaylistManager.UI
 
             if (currentParentManager == null)
             {
-                CustomListTableData.CustomCellInfo customCellInfo = new CustomListTableData.CustomCellInfo("Custom Songs", icon: customSongsCover);
+                CustomListTableData.CustomCellInfo customCellInfo = new CustomListTableData.CustomCellInfo("Level Packs", icon: BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.LevelPacks.png"));
                 customListTableData.data.Add(customCellInfo);
 
-                customCellInfo = new CustomListTableData.CustomCellInfo("Playlists", icon: BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.Playlist.png"));
+                customCellInfo = new CustomListTableData.CustomCellInfo("Custom Songs", icon: customSongsCover);
                 customListTableData.data.Add(customCellInfo);
-                
+
+                customCellInfo = new CustomListTableData.CustomCellInfo("Folders", icon: BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.FolderIcon.png"));
+                customListTableData.data.Add(customCellInfo);
+
                 backTransform.gameObject.SetActive(false);
             }
             else
@@ -110,7 +114,6 @@ namespace PlaylistManager.UI
 
                 IAnnotatedBeatmapLevelCollection[] annotatedBeatmapLevelCollections = currentParentManager.GetAllPlaylists(false);
                 LevelCollectionTableViewUpdatedEvent?.Invoke(annotatedBeatmapLevelCollections, 0);
-                
             }
 
             customListTableData.tableView.ReloadData();
@@ -129,10 +132,16 @@ namespace PlaylistManager.UI
             {
                 if (selectedCellIndex == 0)
                 {
+                    IBeatmapLevelPack[] beatmapLevelPacks = CustomLevelPackCollectionAccessor(ref beatmapLevelsModel).beatmapLevelPacks.Concat(PlaylistLibUtils.playlistManager.GetAllPlaylists(true)).ToArray();
+                    LevelCollectionTableViewUpdatedEvent?.Invoke(beatmapLevelPacks, 0);
+
+                }
+                else if (selectedCellIndex == 1)
+                {
                     IBeatmapLevelPack[] beatmapLevelPacks = CustomLevelPackCollectionAccessor(ref beatmapLevelsModel).beatmapLevelPacks;
                     LevelCollectionTableViewUpdatedEvent?.Invoke(beatmapLevelPacks, 0);
                 }
-                else if (selectedCellIndex == 1)
+                else if (selectedCellIndex == 2)
                 {
                     SetupList(currentParentManager: PlaylistLibUtils.playlistManager);
                 }
@@ -214,18 +223,31 @@ namespace PlaylistManager.UI
 
         #endregion
 
-        public void LevelCategoryUpdated(SelectLevelCategoryViewController.LevelCategory levelCategory)
+        public void LevelCategoryUpdated(SelectLevelCategoryViewController.LevelCategory levelCategory, bool viewControllerActivated)
         {
             if (levelCategory == SelectLevelCategoryViewController.LevelCategory.CustomSongs)
             {
                 bottomScreen.gameObject.SetActive(true);
                 rootTransform.gameObject.SetActive(true);
-                SetupList();
+                if (viewControllerActivated)
+                {
+                    SetupList(currentParentManager);
+                }
+                else
+                {
+                    AnnotatedBeatmapLevelCollectionsViewController_SetData.SetDataEvent += AnnotatedBeatmapLevelCollectionsViewController_SetData_SetDataEvent;
+                }
             }
             else
             {
                 rootTransform.gameObject.SetActive(false);
             }
+        }
+
+        private void AnnotatedBeatmapLevelCollectionsViewController_SetData_SetDataEvent()
+        {
+            AnnotatedBeatmapLevelCollectionsViewController_SetData.SetDataEvent -= AnnotatedBeatmapLevelCollectionsViewController_SetData_SetDataEvent;
+            SetupList(currentParentManager);
         }
 
         [UIValue("folder-text")]

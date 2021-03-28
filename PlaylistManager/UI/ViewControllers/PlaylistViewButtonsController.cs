@@ -244,7 +244,7 @@ namespace PlaylistManager.UI
             }
         }
 
-        public void LevelCategoryUpdated(SelectLevelCategoryViewController.LevelCategory levelCategory)
+        public void LevelCategoryUpdated(SelectLevelCategoryViewController.LevelCategory levelCategory, bool _)
         {
             if (levelCategory != SelectLevelCategoryViewController.LevelCategory.CustomSongs)
             {

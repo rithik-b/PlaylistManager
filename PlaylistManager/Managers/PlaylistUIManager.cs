@@ -57,7 +57,7 @@ namespace PlaylistManager.Managers
         {
             foreach (ILevelCategoryUpdater levelCategoryUpdater in levelCategoryUpdaters)
             {
-                levelCategoryUpdater.LevelCategoryUpdated(levelCategory);
+                levelCategoryUpdater.LevelCategoryUpdated(levelCategory, false);
             }
         }
 
@@ -65,7 +65,7 @@ namespace PlaylistManager.Managers
         {
             foreach (ILevelCategoryUpdater levelCategoryUpdater in levelCategoryUpdaters)
             {
-                levelCategoryUpdater.LevelCategoryUpdated(selectLevelCategoryViewController.selectedLevelCategory);
+                levelCategoryUpdater.LevelCategoryUpdated(selectLevelCategoryViewController.selectedLevelCategory, true);
             }
         }
 
@@ -73,7 +73,7 @@ namespace PlaylistManager.Managers
         {
             foreach (ILevelCategoryUpdater levelCategoryUpdater in levelCategoryUpdaters)
             {
-                levelCategoryUpdater.LevelCategoryUpdated(SelectLevelCategoryViewController.LevelCategory.None);
+                levelCategoryUpdater.LevelCategoryUpdated(SelectLevelCategoryViewController.LevelCategory.None, false);
             }
         }
 
