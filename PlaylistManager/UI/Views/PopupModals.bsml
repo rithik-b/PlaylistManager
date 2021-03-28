@@ -3,16 +3,16 @@
 		<vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' spacing='3' pad='3' preferred-width='60' preferred-height='30'>
 			<text text='~yes-no-text' word-wrapping='true' align='Center' />
 			<horizontal>
-				<button text='~yes-button-text' on-click='yes-button-pressed' click-event='close-yes-no' />
-				<button text='~no-button-text' on-click='no-button-pressed' click-event='close-yes-no' />
+				<button text='~yes-button-text' on-click='yes-button-pressed' />
+				<button text='~no-button-text' on-click='no-button-pressed' />
 			</horizontal>
 		</vertical>
 	</modal>
 	<modal id='ok-modal' show-event='open-ok' hide-event='close-ok' clickerino-offerino-closerino="false" size-delta-x='60' size-delta-y='30'>
 		<vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' spacing='3' pad='3' preferred-width='60' preferred-height='30'>
 			<text text='~ok-text' word-wrapping='true' align='Center' />
-			<button text='~ok-button-text' on-click='ok-button-pressed' click-event='close-ok' />
+			<button text='~ok-button-text' on-click='ok-button-pressed' />
 		</vertical>
 	</modal>
-	<modal-keyboard id='keyboard' show-event='open-keyboard' hide-event='close-keyboard' clickerino-offerino-closerino='true' clear-on-open='true' on-enter='keyboard-enter'></modal-keyboard>
+	<modal-keyboard id='keyboard' show-event='open-keyboard' hide-event='close-keyboard' clickerino-offerino-closerino='false' clear-on-open='true' on-enter='keyboard-enter'></modal-keyboard>
 </bg>

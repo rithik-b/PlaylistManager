@@ -11,21 +11,25 @@ namespace PlaylistManager.Managers
     internal class PlaylistUIManager : IInitializable, IDisposable
     {
         private readonly AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
-        private readonly StandardLevelDetailViewController standardLevelDetailViewController;
         private readonly SelectLevelCategoryViewController selectLevelCategoryViewController;
+        private readonly LevelSelectionNavigationController levelSelectionNavigationController;
+        private readonly StandardLevelDetailViewController standardLevelDetailViewController;
 
         private readonly List<ILevelCategoryUpdater> levelCategoryUpdaters;
+        private readonly IStackedModalView stackedModalView;
         private readonly List<IRefreshable> refreshables;
         private readonly IPlatformUserModel platformUserModel;
 
-        internal PlaylistUIManager(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, SelectLevelCategoryViewController selectLevelCategoryViewController,
-            StandardLevelDetailViewController standardLevelDetailViewController, List<ILevelCategoryUpdater> levelCategoryUpdaters, List<IRefreshable> refreshables, IPlatformUserModel platformUserModel)
+        internal PlaylistUIManager(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, SelectLevelCategoryViewController selectLevelCategoryViewController, LevelSelectionNavigationController levelSelectionNavigationController, 
+            StandardLevelDetailViewController standardLevelDetailViewController, List<ILevelCategoryUpdater> levelCategoryUpdaters, IStackedModalView stackedModalView, List<IRefreshable> refreshables, IPlatformUserModel platformUserModel)
         {
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
             this.selectLevelCategoryViewController = selectLevelCategoryViewController;
+            this.levelSelectionNavigationController = levelSelectionNavigationController;
             this.standardLevelDetailViewController = standardLevelDetailViewController;
 
             this.levelCategoryUpdaters = levelCategoryUpdaters;
+            this.stackedModalView = stackedModalView;
             this.refreshables = refreshables;
             this.platformUserModel = platformUserModel;
         }
@@ -36,6 +40,8 @@ namespace PlaylistManager.Managers
             selectLevelCategoryViewController.didSelectLevelCategoryEvent += SelectLevelCategoryViewController_didSelectLevelCategoryEvent;
             selectLevelCategoryViewController.didActivateEvent += SelectLevelCategoryViewController_didActivateEvent;
             selectLevelCategoryViewController.didDeactivateEvent += SelectLevelCategoryViewController_didDeactivateEvent;
+
+            stackedModalView.ModalDismissedEvent += StackedModalView_ModalDismissedEvent;
 
             // Whenever a refresh is requested
             PlaylistLibUtils.playlistManager.PlaylistsRefreshRequested += PlaylistManager_PlaylistsRefreshRequested;
@@ -49,6 +55,8 @@ namespace PlaylistManager.Managers
             selectLevelCategoryViewController.didSelectLevelCategoryEvent -= SelectLevelCategoryViewController_didSelectLevelCategoryEvent;
             selectLevelCategoryViewController.didActivateEvent -= SelectLevelCategoryViewController_didActivateEvent;
             selectLevelCategoryViewController.didDeactivateEvent -= SelectLevelCategoryViewController_didDeactivateEvent;
+
+            stackedModalView.ModalDismissedEvent -= StackedModalView_ModalDismissedEvent;
 
             PlaylistLibUtils.playlistManager.PlaylistsRefreshRequested -= PlaylistManager_PlaylistsRefreshRequested;
         }
@@ -75,6 +83,11 @@ namespace PlaylistManager.Managers
             {
                 levelCategoryUpdater.LevelCategoryUpdated(SelectLevelCategoryViewController.LevelCategory.None, false);
             }
+        }
+
+        private void StackedModalView_ModalDismissedEvent()
+        {
+            levelSelectionNavigationController.canvasGroup.alpha = 0.2f;
         }
 
         private void PlaylistManager_PlaylistsRefreshRequested(object sender, string requester)

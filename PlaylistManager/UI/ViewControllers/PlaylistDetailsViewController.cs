@@ -128,7 +128,7 @@ namespace PlaylistManager.UI
             }
             else if (PlaylistAllowDuplicates != playlistAllowDuplicates)
             {
-                popupModalsController.ShowYesNoModal(modalTransform, "Are you sure you want to turn off duplicates for this playlist? This will also delete all duplicate songs from this playlist.", DeleteDuplicates, noButtonPressedCallback: DontDeleteDuplicates);
+                popupModalsController.ShowYesNoModal(modalTransform, "Are you sure you want to turn off duplicates for this playlist? This will also delete all duplicate songs from this playlist.", DeleteDuplicates, noButtonPressedCallback: DontDeleteDuplicates, animateDismiss: false);
             }
         }
 

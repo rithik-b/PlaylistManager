@@ -155,11 +155,11 @@ namespace PlaylistManager.UI
                 try
                 {
                     parentManager.StorePlaylist(selectedPlaylist);
-                    popupModalsController.ShowOkModal(modalTransform, string.Format("Song successfully added to {0}", selectedPlaylist.collectionName), null);
+                    popupModalsController.ShowOkModal(modalTransform, string.Format("Song successfully added to {0}", selectedPlaylist.collectionName), null, animateDismiss: false);
                 }
                 catch (Exception e)
                 {
-                    popupModalsController.ShowOkModal(modalTransform, "An error occured while adding song to playlist.", null);
+                    popupModalsController.ShowOkModal(modalTransform, "An error occured while adding song to playlist.", null, animateDismiss: false);
                     Plugin.Log.Critical(string.Format("An exception was thrown while adding a song to a playlist.\nException Message: {0}", e.Message));
                 }
                 finally
@@ -205,7 +205,7 @@ namespace PlaylistManager.UI
         [UIAction("open-keyboard")]
         private void OpenKeyboard()
         {
-            popupModalsController.ShowKeyboard(modalTransform, CreatePlaylist);
+            popupModalsController.ShowKeyboard(modalTransform, CreatePlaylist, animateDismiss: false);
         }
 
         private void CreatePlaylist(string playlistName)
