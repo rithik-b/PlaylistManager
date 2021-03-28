@@ -43,7 +43,7 @@ namespace PlaylistManager.UI
             viewport.AddComponent<RectMask2D>().padding = new Vector4(0f, 0f, -1.9f, 0f);
             RectTransform rectTransform = annotatedBeatmapLevelCollectionsTableView.gameObject.GetComponent<RectTransform>();
             rectTransform.anchorMax = new Vector2(0.78f, 1.0f);
-            rectTransform.transform.localPosition = new Vector3(-10f, -6.5f, 0f);
+            rectTransform.transform.localPosition = new Vector3(-6f, -6.5f, 0f);
 
             // Set buttons and scroll speed
             ScrollView scrollView = annotatedBeatmapLevelCollectionsTableView.gameObject.GetComponent<ScrollView>();

@@ -67,9 +67,10 @@ namespace PlaylistManager.UI
         {
             BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.FoldersView.bsml"), bottomScreen.gameObject, this);
             rootTransform.gameObject.SetActive(false);
+            rootTransform.gameObject.name = "PlaylistManagerFoldersView";
         }
 
-        private void SetupList(BeatSaberPlaylistsLib.PlaylistManager currentParentManager = null)
+        private void SetupList(BeatSaberPlaylistsLib.PlaylistManager currentParentManager, bool viewControllerActivated = false)
         {
             customListTableData.tableView.ClearSelection();
             customListTableData.data.Clear();
@@ -113,8 +114,11 @@ namespace PlaylistManager.UI
                     deleteButton.interactable = true;
                 }
 
-                IAnnotatedBeatmapLevelCollection[] annotatedBeatmapLevelCollections = currentParentManager.GetAllPlaylists(false);
-                LevelCollectionTableViewUpdatedEvent?.Invoke(annotatedBeatmapLevelCollections, 0);
+                if (!viewControllerActivated)
+                {
+                    IAnnotatedBeatmapLevelCollection[] annotatedBeatmapLevelCollections = currentParentManager.GetAllPlaylists(false);
+                    LevelCollectionTableViewUpdatedEvent?.Invoke(annotatedBeatmapLevelCollections, 0);
+                }
             }
 
             customListTableData.tableView.ReloadData();
@@ -133,14 +137,14 @@ namespace PlaylistManager.UI
             {
                 if (selectedCellIndex == 0)
                 {
-                    IBeatmapLevelPack[] beatmapLevelPacks = CustomLevelPackCollectionAccessor(ref beatmapLevelsModel).beatmapLevelPacks.Concat(PlaylistLibUtils.playlistManager.GetAllPlaylists(true)).ToArray();
-                    LevelCollectionTableViewUpdatedEvent?.Invoke(beatmapLevelPacks, 0);
+                    IAnnotatedBeatmapLevelCollection[] annotatedBeatmapLevelCollections = CustomLevelPackCollectionAccessor(ref beatmapLevelsModel).beatmapLevelPacks.Concat(PlaylistLibUtils.playlistManager.GetAllPlaylists(true)).ToArray();
+                    LevelCollectionTableViewUpdatedEvent?.Invoke(annotatedBeatmapLevelCollections, 0);
 
                 }
                 else if (selectedCellIndex == 1)
                 {
-                    IBeatmapLevelPack[] beatmapLevelPacks = CustomLevelPackCollectionAccessor(ref beatmapLevelsModel).beatmapLevelPacks;
-                    LevelCollectionTableViewUpdatedEvent?.Invoke(beatmapLevelPacks, 0);
+                    IAnnotatedBeatmapLevelCollection[] annotatedBeatmapLevelCollections = CustomLevelPackCollectionAccessor(ref beatmapLevelsModel).beatmapLevelPacks;
+                    LevelCollectionTableViewUpdatedEvent?.Invoke(annotatedBeatmapLevelCollections, 0);
                 }
                 else if (selectedCellIndex == 2)
                 {
@@ -232,7 +236,7 @@ namespace PlaylistManager.UI
                 rootTransform.gameObject.SetActive(true);
                 if (viewControllerActivated)
                 {
-                    SetupList(currentParentManager);
+                    SetupList(currentParentManager, true);
                 }
                 else
                 {

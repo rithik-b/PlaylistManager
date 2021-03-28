@@ -1,4 +1,4 @@
 ﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
-	<page-button id='left-button' direction='Left' anchor-pos-x='-51' anchor-pos-y='-3.25' />
-	<page-button id='right-button' direction='Right' anchor-pos-x='33' anchor-pos-y='-3.25' />
+	<page-button id='left-button' direction='Left' anchor-pos-x='-48' anchor-pos-y='-3.25' />
+	<page-button id='right-button' direction='Right' anchor-pos-x='38' anchor-pos-y='-3.25' />
 </bg>
