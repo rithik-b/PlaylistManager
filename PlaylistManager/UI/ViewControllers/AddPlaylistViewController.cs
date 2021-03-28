@@ -13,6 +13,7 @@ using BeatSaberPlaylistsLib.Types;
 using BeatSaberMarkupLanguage.Parser;
 using System.IO;
 using System.ComponentModel;
+using System.Collections.Generic;
 
 namespace PlaylistManager.UI
 {
@@ -23,7 +24,7 @@ namespace PlaylistManager.UI
 
         private BeatSaberPlaylistsLib.PlaylistManager parentManager;
         private BeatSaberPlaylistsLib.PlaylistManager[] childManagers;
-        private BeatSaberPlaylistsLib.Types.IPlaylist[] childPlaylists;
+        private List<BeatSaberPlaylistsLib.Types.IPlaylist> childPlaylists;
 
         private readonly Sprite folderIcon;
         private bool parsed;
@@ -74,7 +75,8 @@ namespace PlaylistManager.UI
             customListTableData.data.Clear();
             this.parentManager = parentManager;
             childManagers = parentManager.GetChildManagers().ToArray();
-            childPlaylists = parentManager.GetAllPlaylists(false);
+            var childPlaylists = parentManager.GetAllPlaylists(false);
+            this.childPlaylists = childPlaylists.ToList();
 
             foreach (BeatSaberPlaylistsLib.PlaylistManager playlistManager in childManagers)
             {
@@ -117,6 +119,7 @@ namespace PlaylistManager.UI
             {
                 if (!playlist.AllowDuplicates)
                 {
+                    childPlaylists.Remove(playlist);
                     return;
                 }
                 subName += " (contains song)";
@@ -150,20 +153,7 @@ namespace PlaylistManager.UI
                 }
                 finally
                 {
-                    string subName = string.Format("{0} songs", selectedPlaylist.beatmapLevelCollection.beatmapLevels.Length);
-                    if (Array.Exists(selectedPlaylist.beatmapLevelCollection.beatmapLevels, level => level.levelID == standardLevelDetailViewController.selectedDifficultyBeatmap.level.levelID))
-                    {
-                        if (!selectedPlaylist.AllowDuplicates)
-                        {
-                            customListTableData.data.RemoveAt(index);
-                        }
-                        else
-                        {
-                            subName += " (contains song)";
-                            customListTableData.data[index] = new CustomCellInfo(selectedPlaylist.collectionName, subName, selectedPlaylist.coverImage);
-                        }
-                    }
-                    customListTableData.tableView.RefreshCellsContent();
+                    ShowPlaylistsForManager(parentManager);
                 }
             }
         }
