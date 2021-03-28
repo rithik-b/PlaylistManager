@@ -9,7 +9,8 @@
 			<list id='list' pref-height='50' select-cell='select-cell' list-style='List'></list>
 			<page-button event-click='list#PageDown' direction='Down' ignore-layout='true' anchor-min-y='-0.8' anchor-pos-x='25' anchor-pos-y='-10' pref-width='12'></page-button>
 		</vertical>
-		<button id ='create-playlist-button' text='+' on-click='open-keyboard' anchor-pos-x ='5' anchor-pos-y='-70' ></button>
+		<button id ='create-playlist-button' text='+' hover-hint='Create a new playlist' on-click='open-keyboard' anchor-pos-x ='5' anchor-pos-y='-70' ></button>
 		<button text='x' click-event='close-modal' anchor-pos-x ='60' anchor-pos-y='-5' />
+		<checkbox-setting id='highlight-checkbox' text='Highlight Selected Difficulty' value='highlight-difficulty' bind-value='true' apply-on-change='true' anchor-pos-x='0' anchor-pos-y='-67.5' />
 	</modal>
 </bg>

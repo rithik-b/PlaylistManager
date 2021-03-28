@@ -33,6 +33,9 @@ namespace PlaylistManager.UI
         [UIComponent("list")]
         public CustomListTableData customListTableData;
 
+        [UIComponent("highlight-checkbox")]
+        private readonly RectTransform highlightCheckboxTransform;
+
         [UIComponent("modal")]
         private readonly RectTransform modalTransform;
 
@@ -55,6 +58,7 @@ namespace PlaylistManager.UI
             {
                 BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.AddPlaylistView.bsml"), standardLevelDetailViewController.transform.Find("LevelDetail").gameObject, this);
                 modalPosition = modalTransform.position; // Position can change if SongBrowser is clicked while modal is opened so storing here
+                highlightCheckboxTransform.transform.localScale *= 0.5f;
                 parsed = true;
             }
             modalTransform.position = modalPosition; // Reset position
@@ -140,7 +144,14 @@ namespace PlaylistManager.UI
             {
                 index -= childManagers.Length;
                 var selectedPlaylist = childPlaylists[index];
-                selectedPlaylist.Add(standardLevelDetailViewController.selectedDifficultyBeatmap.level);
+                if (HighlightDifficulty)
+                {
+                    selectedPlaylist.Add(standardLevelDetailViewController.selectedDifficultyBeatmap);
+                }
+                else
+                {
+                    selectedPlaylist.Add(standardLevelDetailViewController.selectedDifficultyBeatmap.level);
+                }
                 try
                 {
                     parentManager.StorePlaylist(selectedPlaylist);
@@ -168,6 +179,17 @@ namespace PlaylistManager.UI
         private string FolderText
         {
             get => parentManager == null ? "" : Path.GetFileName(parentManager.PlaylistPath);
+        }
+
+        [UIValue("highlight-difficulty")]
+        private bool HighlightDifficulty
+        {
+            get => PluginConfig.Instance.HighlightDifficulty;
+            set
+            {
+                PluginConfig.Instance.HighlightDifficulty = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(HighlightDifficulty)));
+            }
         }
 
         [UIValue("back-active")]

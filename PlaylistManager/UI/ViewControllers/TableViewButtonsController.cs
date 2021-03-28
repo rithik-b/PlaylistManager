@@ -43,17 +43,13 @@ namespace PlaylistManager.UI
             viewport.AddComponent<RectMask2D>().padding = new Vector4(0f, 0f, -1.9f, 0f);
             RectTransform rectTransform = annotatedBeatmapLevelCollectionsTableView.gameObject.GetComponent<RectTransform>();
             rectTransform.anchorMax = new Vector2(0.78f, 1.0f);
+            rectTransform.transform.localPosition = new Vector3(-10f, -6.5f, 0f);
 
             // Set buttons and scroll speed
             ScrollView scrollView = annotatedBeatmapLevelCollectionsTableView.gameObject.GetComponent<ScrollView>();
             FieldAccessor<ScrollView, Button>.Set(ref scrollView, "_pageUpButton", leftButton);
             FieldAccessor<ScrollView, Button>.Set(ref scrollView, "_pageDownButton", rightButton);
             FieldAccessor<ScrollView, float>.Set(ref scrollView, "_joystickScrollSpeed", 60f * PluginConfig.Instance.PlaylistScrollSpeed);
-
-            // Tried doing it in BSML anchor pos and did not work
-            leftButton.transform.localPosition = new Vector3(-51f, 0f, 0f);
-            rightButton.transform.localPosition = new Vector3(33f, 0f, 0f);
-            rectTransform.transform.localPosition = new Vector3(-10f, -6.5f, 0f);
         }
     }
 }

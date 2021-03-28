@@ -9,5 +9,6 @@
 				<text-page text='~playlist-description' />
 			</vertical>
 		</vertical>
+		<button text='x' click-event='close-modal' anchor-pos-x ='65' anchor-pos-y='-5' />
 	</modal>
 </bg>
