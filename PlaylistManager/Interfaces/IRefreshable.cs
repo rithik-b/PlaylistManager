@@ -2,6 +2,6 @@
 {
     interface IRefreshable
     {
-        void Refresh();
+        public void Refresh();
     }
 }
