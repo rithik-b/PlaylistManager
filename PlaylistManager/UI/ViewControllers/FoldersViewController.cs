@@ -1,6 +1,7 @@
 ﻿using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
+using BeatSaberMarkupLanguage.FloatingScreen;
 using HMUI;
 using IPA.Utilities;
 using PlaylistManager.HarmonyPatches;
@@ -18,12 +19,11 @@ using Zenject;
 
 namespace PlaylistManager.UI
 {
-    public class FoldersViewController : IInitializable, ILevelCategoryUpdater, INotifyPropertyChanged, ILevelCollectionsTableUpdater, IDisposable
+    public class FoldersViewController : IInitializable, IDisposable, INotifyPropertyChanged, ILevelCollectionsTableUpdater, ILevelCategoryUpdater, IMultiplayerGameStateUpdater
     {
-        private readonly HMUI.Screen bottomScreen;
+        FloatingScreen floatingScreen;
         private readonly LevelCollectionNavigationController levelCollectionNavigationController;
         private readonly PopupModalsController popupModalsController;
-        private readonly Sprite customSongsCover;
         private BeatmapLevelsModel beatmapLevelsModel;
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -33,7 +33,6 @@ namespace PlaylistManager.UI
         private List<BeatSaberPlaylistsLib.PlaylistManager> currentManagers;
 
         public static readonly FieldAccessor<HierarchyManager, ScreenSystem>.Accessor ScreenSystemAccessor = FieldAccessor<HierarchyManager, ScreenSystem>.GetAccessor("_screenSystem");
-        public static readonly FieldAccessor<CustomLevelLoader, Sprite>.Accessor DefaultPackCoverAccessor = FieldAccessor<CustomLevelLoader, Sprite>.GetAccessor("_defaultPackCover");
         public static readonly FieldAccessor<BeatmapLevelsModel, IBeatmapLevelPackCollection>.Accessor CustomLevelPackCollectionAccessor = FieldAccessor<BeatmapLevelsModel, IBeatmapLevelPackCollection>.GetAccessor("_customLevelPackCollection");
 
         [UIComponent("root")]
@@ -51,26 +50,25 @@ namespace PlaylistManager.UI
         [UIComponent("folder-list")]
         public CustomListTableData customListTableData;
 
-        public FoldersViewController(HierarchyManager hierarchyManager, LevelCollectionNavigationController levelCollectionNavigationController, PopupModalsController popupModalsController, CustomLevelLoader customLevelLoader, BeatmapLevelsModel beatmapLevelsModel)
+        public FoldersViewController(LevelCollectionNavigationController levelCollectionNavigationController, PopupModalsController popupModalsController, BeatmapLevelsModel beatmapLevelsModel)
         {
-            ScreenSystem screenSystem = ScreenSystemAccessor(ref hierarchyManager);
-            bottomScreen = screenSystem.bottomScreen;
-
             this.levelCollectionNavigationController = levelCollectionNavigationController;
             this.popupModalsController = popupModalsController;
             this.beatmapLevelsModel = beatmapLevelsModel;
-
-            customSongsCover = DefaultPackCoverAccessor(ref customLevelLoader);
         }
 
         public void Initialize()
         {
-            BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.FoldersView.bsml"), bottomScreen.gameObject, this);
+            floatingScreen = FloatingScreen.CreateFloatingScreen(new Vector2(75, 25), false, new Vector3(0f, 0.2f, 2.5f), new Quaternion(0, 0, 0, 0));
+            floatingScreen.transform.eulerAngles = new Vector3(60, 0, 0);
+            floatingScreen.transform.localScale = new Vector3(0.03f, 0.03f, 0.03f);
+
+            BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.FoldersView.bsml"), floatingScreen.gameObject, this);
             rootTransform.gameObject.SetActive(false);
             rootTransform.gameObject.name = "PlaylistManagerFoldersView";
         }
 
-        private void SetupList(BeatSaberPlaylistsLib.PlaylistManager currentParentManager, bool viewControllerActivated = false)
+        private void SetupList(BeatSaberPlaylistsLib.PlaylistManager currentParentManager, bool setBeatmapLevelCollections = true)
         {
             customListTableData.tableView.ClearSelection();
             customListTableData.data.Clear();
@@ -81,10 +79,10 @@ namespace PlaylistManager.UI
                 CustomListTableData.CustomCellInfo customCellInfo = new CustomListTableData.CustomCellInfo("Level Packs", icon: BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.LevelPacks.png"));
                 customListTableData.data.Add(customCellInfo);
 
-                customCellInfo = new CustomListTableData.CustomCellInfo("Custom Songs", icon: customSongsCover);
+                customCellInfo = new CustomListTableData.CustomCellInfo("Custom Songs", icon: BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.CustomPacks.png"));
                 customListTableData.data.Add(customCellInfo);
 
-                customCellInfo = new CustomListTableData.CustomCellInfo("Folders", icon: BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.FolderIcon.png"));
+                customCellInfo = new CustomListTableData.CustomCellInfo("Folders", icon: BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.Folders.png"));
                 customListTableData.data.Add(customCellInfo);
 
                 backTransform.gameObject.SetActive(false);
@@ -114,7 +112,7 @@ namespace PlaylistManager.UI
                     deleteButton.interactable = true;
                 }
 
-                if (!viewControllerActivated)
+                if (setBeatmapLevelCollections)
                 {
                     IAnnotatedBeatmapLevelCollection[] annotatedBeatmapLevelCollections = currentParentManager.GetAllPlaylists(false);
                     LevelCollectionTableViewUpdatedEvent?.Invoke(annotatedBeatmapLevelCollections, 0);
@@ -232,11 +230,10 @@ namespace PlaylistManager.UI
         {
             if (levelCategory == SelectLevelCategoryViewController.LevelCategory.CustomSongs)
             {
-                bottomScreen.gameObject.SetActive(true);
                 rootTransform.gameObject.SetActive(true);
                 if (viewControllerActivated)
                 {
-                    SetupList(currentParentManager, true);
+                    SetupList(currentParentManager, false);
                 }
                 else
                 {
@@ -249,10 +246,26 @@ namespace PlaylistManager.UI
             }
         }
 
+        public void MultiplayerGameStateUpdated(MultiplayerGameState multiplayerGameState)
+        {
+            if (multiplayerGameState == MultiplayerGameState.None)
+            {
+                floatingScreen.transform.position = new Vector3(0f, 0.2f, 2.5f);
+                floatingScreen.transform.eulerAngles = new Vector3(60, 0, 0);
+                floatingScreen.transform.localScale = new Vector3(0.03f, 0.03f, 0.03f);
+            }
+            else if (multiplayerGameState == MultiplayerGameState.Lobby)
+            {
+                floatingScreen.transform.position = new Vector3(0f, 1.3f, 1.6f);
+                floatingScreen.transform.eulerAngles = new Vector3(0, 0, 0);
+                floatingScreen.transform.localScale = new Vector3(0.015f, 0.015f, 0.015f);
+            }
+        }
+
         private void AnnotatedBeatmapLevelCollectionsViewController_SetData_SetDataEvent()
         {
             AnnotatedBeatmapLevelCollectionsViewController_SetData.SetDataEvent -= AnnotatedBeatmapLevelCollectionsViewController_SetData_SetDataEvent;
-            SetupList(currentParentManager);
+            SetupList(null, false);
         }
 
         public void Dispose()

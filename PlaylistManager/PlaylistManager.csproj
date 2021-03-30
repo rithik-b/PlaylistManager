@@ -30,7 +30,11 @@
 
     <ItemGroup>
         <Reference Include="BeatmapCore">
-          <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber_Data\Managed\BeatmapCore.dll</HintPath>
+          <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BeatmapCore.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="BGNet">
+          <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BGNet.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine">

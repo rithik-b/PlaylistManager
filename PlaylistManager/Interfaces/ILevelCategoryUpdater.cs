@@ -2,6 +2,6 @@
 {
     interface ILevelCategoryUpdater
     {
-        void LevelCategoryUpdated(SelectLevelCategoryViewController.LevelCategory levelCategory, bool viewControllerActivated);
+        public void LevelCategoryUpdated(SelectLevelCategoryViewController.LevelCategory levelCategory, bool viewControllerActivated);
     }
 }

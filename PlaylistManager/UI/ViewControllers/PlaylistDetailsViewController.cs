@@ -119,6 +119,16 @@ namespace PlaylistManager.UI
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistDescription)));
         }
 
+        [UIAction("string-formatter")]
+        private string StringFormatter(string inputString)
+        {
+            if (inputString.Length > 20)
+            {
+                return inputString.Substring(0, 15) + "...";
+            }
+            return inputString;
+        }
+
         [UIAction("duplicates-toggled")]
         private void DuplicatesToggled(bool playlistAllowDuplicates)
         {

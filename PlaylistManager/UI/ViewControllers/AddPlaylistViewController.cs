@@ -77,6 +77,7 @@ namespace PlaylistManager.UI
         internal void ShowPlaylistsForManager(BeatSaberPlaylistsLib.PlaylistManager parentManager)
         {
             customListTableData.data.Clear();
+
             this.parentManager = parentManager;
             childManagers = parentManager.GetChildManagers().ToArray();
             var childPlaylists = parentManager.GetAllPlaylists(false);
@@ -210,19 +211,27 @@ namespace PlaylistManager.UI
 
         private void CreatePlaylist(string playlistName)
         {
+            BeatSaberPlaylistsLib.Types.IPlaylist playlist;
             if (string.IsNullOrWhiteSpace(playlistName))
             {
                 return;
             }
             if (!PluginConfig.Instance.DefaultImageDisabled)
             {
-                PlaylistLibUtils.CreatePlaylist(playlistName, PluginConfig.Instance.AuthorName, parentManager);
+                playlist = PlaylistLibUtils.CreatePlaylist(playlistName, PluginConfig.Instance.AuthorName, parentManager);
             }
             else
             {
-                PlaylistLibUtils.CreatePlaylist(playlistName, PluginConfig.Instance.AuthorName, "", parentManager);
+                playlist = PlaylistLibUtils.CreatePlaylist(playlistName, PluginConfig.Instance.AuthorName, "", parentManager);
             }
-            ShowPlaylistsForManager(parentManager);
+            if (playlist is IDeferredSpriteLoad deferredSpriteLoadPlaylist && !deferredSpriteLoadPlaylist.SpriteWasLoaded)
+            {
+                _ = playlist.coverImage;
+                deferredSpriteLoadPlaylist.SpriteLoaded -= DeferredSpriteLoadPlaylist_SpriteLoaded;
+                deferredSpriteLoadPlaylist.SpriteLoaded += DeferredSpriteLoadPlaylist_SpriteLoaded;
+            }
+            childPlaylists.Add(playlist);
+            customListTableData.tableView.ReloadData();
         }
 
         #endregion
