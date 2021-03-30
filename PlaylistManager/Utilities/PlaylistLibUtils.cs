@@ -58,7 +58,7 @@ namespace PlaylistManager.Utilities
         {
             Color = System.Drawing.Color.White,
             DrawStyle = DrawStyle.Normal,
-            Font = new Font("arial", 80, FontStyle.Regular),
+            Font = new Font("teko", 80, FontStyle.Regular),
             StringFormat = new StringFormat()
             {
                 Alignment = StringAlignment.Center,
@@ -74,6 +74,10 @@ namespace PlaylistManager.Utilities
 
         internal static Sprite DrawFolderIcon(string str)
         {
+            if (str.Length > 15)
+            {
+                str = str.Substring(0, 15) + "...";
+            }
             Image img = ImageUtilities.DrawString("\n"+str, Image.FromStream(GetFolderImageStream()), defaultDrawSettings);
             MemoryStream ms = new MemoryStream();
             img.Save(ms, ImageFormat.Png);
