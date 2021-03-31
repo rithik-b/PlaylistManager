@@ -27,6 +27,8 @@ namespace PlaylistManager.UI
         private BeatmapLevelsModel beatmapLevelsModel;
 
         private FloatingScreen floatingScreen;
+        private readonly Sprite customPacksIcon;
+        private readonly Sprite foldersIcon;
 
         public event PropertyChangedEventHandler PropertyChanged;
         public event System.Action<IAnnotatedBeatmapLevelCollection[], int> LevelCollectionTableViewUpdatedEvent;
@@ -58,6 +60,9 @@ namespace PlaylistManager.UI
             this.levelSelectionNavigationController = levelSelectionNavigationController;
             this.popupModalsController = popupModalsController;
             this.beatmapLevelsModel = beatmapLevelsModel;
+
+            customPacksIcon = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.CustomPacks.png");
+            foldersIcon = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.Folders.png");
         }
 
         public void Initialize()
@@ -71,6 +76,24 @@ namespace PlaylistManager.UI
             rootTransform.gameObject.name = "PlaylistManagerFoldersView";
         }
 
+        public void SetupDimensions()
+        {
+            if (!multiplayerLevelSelectionFlowCoordinator.isActivated)
+            {
+                floatingScreen.transform.position = new Vector3(0f, 0.1f, 2.25f);
+                floatingScreen.transform.eulerAngles = new Vector3(75, 0, 0);
+                floatingScreen.transform.localScale = new Vector3(0.03f, 0.03f, 0.03f);
+            }
+            else
+            {
+                Vector3 foldersPosition = levelSelectionNavigationController.transform.position;
+                foldersPosition.y += 0.73f;
+                floatingScreen.transform.eulerAngles = new Vector3(0, 0, 0);
+                floatingScreen.transform.localScale = new Vector3(0.015f, 0.015f, 0.015f);
+                floatingScreen.transform.position = foldersPosition;
+            }
+        }
+
         private void SetupList(BeatSaberPlaylistsLib.PlaylistManager currentParentManager, bool setBeatmapLevelCollections = true)
         {
             customListTableData.tableView.ClearSelection();
@@ -82,10 +105,10 @@ namespace PlaylistManager.UI
                 CustomListTableData.CustomCellInfo customCellInfo = new CustomListTableData.CustomCellInfo("Level Packs", icon: BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.LevelPacks.png"));
                 customListTableData.data.Add(customCellInfo);
 
-                customCellInfo = new CustomListTableData.CustomCellInfo("Custom Songs", icon: BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.CustomPacks.png"));
+                customCellInfo = new CustomListTableData.CustomCellInfo("Custom Songs", icon: customPacksIcon);
                 customListTableData.data.Add(customCellInfo);
 
-                customCellInfo = new CustomListTableData.CustomCellInfo("Folders", icon: BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.Folders.png"));
+                customCellInfo = new CustomListTableData.CustomCellInfo("Folders", icon: foldersIcon);
                 customListTableData.data.Add(customCellInfo);
 
                 backTransform.gameObject.SetActive(false);
@@ -257,24 +280,6 @@ namespace PlaylistManager.UI
             else
             {
                 rootTransform.gameObject.SetActive(false);
-            }
-        }
-
-        public void SetupDimensions()
-        {
-            if (!multiplayerLevelSelectionFlowCoordinator.isActivated)
-            {
-                floatingScreen.transform.position = new Vector3(0f, 0.1f, 2.25f);
-                floatingScreen.transform.eulerAngles = new Vector3(75, 0, 0);
-                floatingScreen.transform.localScale = new Vector3(0.03f, 0.03f, 0.03f);
-            }
-            else
-            {
-                Vector3 foldersPosition = levelSelectionNavigationController.transform.position;
-                foldersPosition.y += 0.73f;
-                floatingScreen.transform.eulerAngles = new Vector3(0, 0, 0);
-                floatingScreen.transform.localScale = new Vector3(0.015f, 0.015f, 0.015f);
-                floatingScreen.transform.position = foldersPosition;
             }
         }
 

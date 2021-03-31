@@ -17,7 +17,7 @@ using System.Collections.Generic;
 
 namespace PlaylistManager.UI
 {
-    public class AddPlaylistViewController : INotifyPropertyChanged
+    public class AddPlaylistModalController : INotifyPropertyChanged
     {
         private readonly StandardLevelDetailViewController standardLevelDetailViewController;
         private readonly PopupModalsController popupModalsController;
@@ -44,7 +44,7 @@ namespace PlaylistManager.UI
         [UIParams]
         private readonly BSMLParserParams parserParams;
 
-        public AddPlaylistViewController(StandardLevelDetailViewController standardLevelDetailViewController, PopupModalsController popupModalsController)
+        public AddPlaylistModalController(StandardLevelDetailViewController standardLevelDetailViewController, PopupModalsController popupModalsController)
         {
             this.standardLevelDetailViewController = standardLevelDetailViewController;
             this.popupModalsController = popupModalsController;
@@ -56,7 +56,7 @@ namespace PlaylistManager.UI
         {
             if (!parsed)
             {
-                BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.AddPlaylistView.bsml"), standardLevelDetailViewController.transform.Find("LevelDetail").gameObject, this);
+                BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.AddPlaylistModal.bsml"), standardLevelDetailViewController.transform.Find("LevelDetail").gameObject, this);
                 modalPosition = modalTransform.position; // Position can change if SongBrowser is clicked while modal is opened so storing here
                 highlightCheckboxTransform.transform.localScale *= 0.5f;
                 parsed = true;

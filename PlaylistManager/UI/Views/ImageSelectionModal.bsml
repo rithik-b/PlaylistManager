@@ -1,0 +1,10 @@
+﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
+	<modal id='modal' show-event='open-modal' hide-event='close-modal' clickerino-offerino-closerino='true' anchor-pos-x='-23.5' anchor-pos-y='0.5' size-delta-x='35' size-delta-y='65' move-to-center='false'>
+		<vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' preferred-width='20' preferred-height='60' anchor-pos-x='-7' anchor-pos-y='-2' >
+			<list id='list' cell-size='20' select-cell='select-cell' list-style='Box' />
+		</vertical>
+		<page-button event-click='list#PageUp' direction='Up' ignore-layout='true' anchor-min-y='0.8' anchor-pos-x='10' anchor-pos-y='-4' pref-width='12' />
+		<page-button event-click='list#PageDown' direction='Down' ignore-layout='true' anchor-min-y='-0.8' anchor-pos-x='10' anchor-pos-y='-2' pref-width='12' />
+		<button text='^' click-event='close-modal' anchor-pos-x ='29.5' anchor-pos-y='-3.5' />
+	</modal>
+</bg>
