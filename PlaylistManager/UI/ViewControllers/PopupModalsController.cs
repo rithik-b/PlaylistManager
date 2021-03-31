@@ -12,7 +12,7 @@ namespace PlaylistManager.UI
 {
     public class PopupModalsController : INotifyPropertyChanged, IStackedModalView
     {
-        private readonly LevelCollectionNavigationController levelCollectionNavigationController;
+        private readonly LevelSelectionNavigationController levelSelectionNavigationController;
         private bool parsed;
         private bool animateDismiss;
         public event PropertyChangedEventHandler PropertyChanged;
@@ -63,16 +63,16 @@ namespace PlaylistManager.UI
         [UIParams]
         private readonly BSMLParserParams parserParams;
 
-        public PopupModalsController(LevelCollectionNavigationController levelCollectionNavigationController)
+        public PopupModalsController(LevelSelectionNavigationController levelSelectionNavigationController)
         {
-            this.levelCollectionNavigationController = levelCollectionNavigationController;
+            this.levelSelectionNavigationController = levelSelectionNavigationController;
         }
 
         private void Parse()
         {
             if (!parsed)
             {
-                BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.PopupModals.bsml"), levelCollectionNavigationController.gameObject, this);
+                BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.PopupModals.bsml"), levelSelectionNavigationController.gameObject, this);
                 yesNoModalPosition = yesNoModalTransform.position;
                 okModalPosition = okModalTransform.position;
                 parsed = true;

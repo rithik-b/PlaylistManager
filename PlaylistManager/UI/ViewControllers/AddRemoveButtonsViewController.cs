@@ -16,7 +16,7 @@ namespace PlaylistManager.UI
         private StandardLevelDetailViewController standardLevelDetailViewController;
         private LevelCollectionTableView levelCollectionTableView;
         private readonly LevelCollectionNavigationController levelCollectionNavigationController;
-        private readonly AddPlaylistViewController addPlaylistController;
+        private readonly AddPlaylistModalController addPlaylistController;
         private readonly PopupModalsController popupModalsController;
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -37,7 +37,7 @@ namespace PlaylistManager.UI
         private RectTransform rootTransform;
 
         public AddRemoveButtonsViewController(StandardLevelDetailViewController standardLevelDetailViewController, LevelCollectionViewController levelCollectionViewController, LevelCollectionNavigationController levelCollectionNavigationController,
-               AddPlaylistViewController addPlaylistController, PopupModalsController popupModalsController)
+               AddPlaylistModalController addPlaylistController, PopupModalsController popupModalsController)
         {
             this.standardLevelDetailViewController = standardLevelDetailViewController;
             levelCollectionTableView = LevelCollectionTableViewAccessor(ref levelCollectionViewController);

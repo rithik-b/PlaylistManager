@@ -1,20 +1,26 @@
 ﻿using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
+using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.Parser;
 using BeatSaberPlaylistsLib.Blist;
 using BeatSaberPlaylistsLib.Legacy;
 using BeatSaberPlaylistsLib.Types;
 using HMUI;
 using PlaylistManager.Interfaces;
+using System;
 using System.ComponentModel;
+using System.IO;
 using System.Reflection;
 using UnityEngine;
+using Zenject;
 
 namespace PlaylistManager.UI
 {
-    public class PlaylistDetailsViewController : ILevelCollectionUpdater, INotifyPropertyChanged
+    public class PlaylistDetailsViewController : IInitializable, IDisposable, ILevelCollectionUpdater, INotifyPropertyChanged
     {
         private readonly LevelPackDetailViewController levelPackDetailViewController;
+        private readonly ImageView levelPackImageView;
+        private readonly ImageSelectionModalController imageSelectionModalController;
         private readonly PopupModalsController popupModalsController;
 
         private Vector3 modalPosition;
@@ -28,6 +34,9 @@ namespace PlaylistManager.UI
 
         [UIComponent("modal")]
         private readonly RectTransform modalTransform;
+
+        [UIComponent("playlist-cover")]
+        private readonly ClickableImage playlistCoverView;
 
         [UIParams]
         private readonly BSMLParserParams parserParams;
@@ -100,11 +109,28 @@ namespace PlaylistManager.UI
             get => selectedPlaylist == null ? "" : selectedPlaylist.Description;
         }
 
-        public PlaylistDetailsViewController(LevelPackDetailViewController levelPackDetailViewController, PopupModalsController popupModalsController)
+        public PlaylistDetailsViewController(LevelPackDetailViewController levelPackDetailViewController, ImageSelectionModalController imageSelectionModalController, PopupModalsController popupModalsController)
         {
             this.levelPackDetailViewController = levelPackDetailViewController;
+            levelPackImageView = levelPackDetailViewController.transform.Find("Detail").Find("PackImage").GetComponent<ImageView>();
+            this.imageSelectionModalController = imageSelectionModalController;
             this.popupModalsController = popupModalsController;
             parsed = false;
+        }
+
+        public void Initialize()
+        {
+            imageSelectionModalController.ImageSelectedEvent += ImageSelectionModalController_ImageSelectedEvent;
+        }
+
+        public void Dispose()
+        {
+            imageSelectionModalController.ImageSelectedEvent -= ImageSelectionModalController_ImageSelectedEvent;
+
+            if (this.selectedPlaylist != null)
+            {
+                this.selectedPlaylist.SpriteLoaded -= SelectedPlaylist_SpriteLoaded;
+            }
         }
 
         private void Parse()
@@ -131,6 +157,7 @@ namespace PlaylistManager.UI
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AuthorHint)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistAllowDuplicates)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistDescription)));
+            playlistCoverView.sprite = selectedPlaylist.Sprite;
         }
 
         [UIAction("string-formatter")]
@@ -156,6 +183,13 @@ namespace PlaylistManager.UI
             }
         }
 
+        [UIAction("playlist-cover-clicked")]
+        private void OpenImageSelectionModal()
+        {
+            imageSelectionModalController.ShowModal();
+        }
+
+
         private void DeleteDuplicates()
         {
             PlaylistAllowDuplicates = false;
@@ -168,6 +202,11 @@ namespace PlaylistManager.UI
 
         public void LevelCollectionUpdated(IAnnotatedBeatmapLevelCollection annotatedBeatmapLevelCollection, BeatSaberPlaylistsLib.PlaylistManager parentManager)
         {
+            if (this.selectedPlaylist != null)
+            {
+                this.selectedPlaylist.SpriteLoaded -= SelectedPlaylist_SpriteLoaded;
+            }
+
             if (annotatedBeatmapLevelCollection is Playlist selectedPlaylist)
             {
                 this.selectedPlaylist = selectedPlaylist;
@@ -178,6 +217,32 @@ namespace PlaylistManager.UI
                 this.selectedPlaylist = null;
                 this.parentManager = null;
             }
+        }
+
+        private void ImageSelectionModalController_ImageSelectedEvent(string selectedImagePath)
+        {
+            selectedPlaylist.SpriteLoaded += SelectedPlaylist_SpriteLoaded;
+            try
+            {
+                using (FileStream imageStream = File.Open(selectedImagePath, FileMode.Open))
+                {
+                    selectedPlaylist.SetCover(imageStream);
+                    _ = selectedPlaylist.Sprite;
+                }
+                parentManager.StorePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
+            }
+            catch (Exception e)
+            {
+                popupModalsController.ShowOkModal(modalTransform, "There was an error loading this image. Check logs for more details.", null, animateDismiss: false);
+                Plugin.Log.Critical("Could not load " + selectedImagePath + "\nException message: " + e.Message);
+            }
+        }
+
+        private void SelectedPlaylist_SpriteLoaded(object sender, EventArgs e)
+        {
+            playlistCoverView.sprite = selectedPlaylist.Sprite;
+            levelPackImageView.sprite = selectedPlaylist.Sprite;
+            selectedPlaylist.SpriteLoaded -= SelectedPlaylist_SpriteLoaded;
         }
     }
 }
