@@ -33,6 +33,8 @@ namespace PlaylistManager.UI
         private string _okText = "";
         private string _okButtonText = "Ok";
 
+        private string _keyboardText = "";
+
         [UIComponent("root")]
         private readonly RectTransform rootTransform;
 
@@ -208,12 +210,15 @@ namespace PlaylistManager.UI
 
         #region Keyboard
 
-        internal void ShowKeyboard(Transform parent, KeyboardPressed keyboardPressedCallback, bool animateDismiss = true)
+        // Methods
+
+        internal void ShowKeyboard(Transform parent, KeyboardPressed keyboardPressedCallback, string keyboardText = "", bool animateDismiss = true)
         {
             Parse();
             keyboardTransform.transform.SetParent(parent);
             keyboardPressed = keyboardPressedCallback;
             this.animateDismiss = animateDismiss;
+            KeyboardText = keyboardText;
             parserParams.EmitEvent("close-keyboard");
             parserParams.EmitEvent("open-keyboard");
         }
@@ -226,6 +231,15 @@ namespace PlaylistManager.UI
             keyboardModalView.Hide(animateDismiss, modalDismissed);
             keyboardPressed = null;
             keyboardTransform.transform.SetParent(rootTransform);
+        }
+
+        // Values
+
+        [UIValue("keyboard-text")]
+        private string KeyboardText
+        {
+            get => _keyboardText;
+            set => _keyboardText = value;
         }
 
         #endregion

@@ -44,6 +44,12 @@ namespace PlaylistManager.UI
             }
         }
 
+        [UIValue("name-hint")]
+        private string NameHint
+        {
+            get => selectedPlaylist != null && selectedPlaylist.Title.Length > 15 ? selectedPlaylist.Title : "";
+        }
+
         [UIValue("playlist-author")]
         private string PlaylistAuthor
         {
@@ -54,6 +60,12 @@ namespace PlaylistManager.UI
                 parentManager.StorePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistAuthor)));
             }
+        }
+
+        [UIValue("author-hint")]
+        private string AuthorHint
+        {
+            get => selectedPlaylist != null && selectedPlaylist.Author.Length > 15 ? selectedPlaylist.Author : "";
         }
 
         [UIValue("playlist-allow-duplicates")]
@@ -114,7 +126,9 @@ namespace PlaylistManager.UI
 
             // Update values
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistName)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NameHint)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistAuthor)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AuthorHint)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistAllowDuplicates)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistDescription)));
         }
@@ -122,7 +136,7 @@ namespace PlaylistManager.UI
         [UIAction("string-formatter")]
         private string StringFormatter(string inputString)
         {
-            if (inputString.Length > 20)
+            if (inputString.Length > 15)
             {
                 return inputString.Substring(0, 15) + "...";
             }

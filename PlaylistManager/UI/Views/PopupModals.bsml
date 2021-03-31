@@ -14,5 +14,5 @@
 			<button text='~ok-button-text' on-click='ok-button-pressed' />
 		</vertical>
 	</modal>
-	<modal-keyboard id='keyboard' show-event='open-keyboard' hide-event='close-keyboard' clickerino-offerino-closerino='false' clear-on-open='true' on-enter='keyboard-enter'></modal-keyboard>
+	<modal-keyboard id='keyboard' value='keyboard-text' show-event='open-keyboard' hide-event='close-keyboard' clickerino-offerino-closerino='true' on-enter='keyboard-enter'></modal-keyboard>
 </bg>
