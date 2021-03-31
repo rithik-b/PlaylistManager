@@ -25,17 +25,17 @@ namespace PlaylistManager.UI
         private readonly PopupModalsController popupModalsController;
         private readonly PlaylistDetailsViewController playlistDetailsViewController;
         private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
-        private AnnotatedBeatmapLevelCollectionsTableView annotatedBeatmapLevelCollectionsTableView;
 
         private int downloadingBeatmapCollectionIdx;
+        private IAnnotatedBeatmapLevelCollection[] downloadingBeatmapLevelCollections;
         private CancellationTokenSource tokenSource;
         private Playlist selectedPlaylist;
         private BeatSaberPlaylistsLib.PlaylistManager parentManager;
 
-        public event Action<IAnnotatedBeatmapLevelCollection[], int> LevelCollectionTableViewUpdatedEvent;
+        public static readonly FieldAccessor<AnnotatedBeatmapLevelCollectionsViewController, IReadOnlyList<IAnnotatedBeatmapLevelCollection>>.Accessor AnnotatedBeatmapLevelCollectionsAccessor = 
+            FieldAccessor<AnnotatedBeatmapLevelCollectionsViewController, IReadOnlyList<IAnnotatedBeatmapLevelCollection>>.GetAccessor("_annotatedBeatmapLevelCollections");
 
-        public static readonly FieldAccessor<AnnotatedBeatmapLevelCollectionsViewController, AnnotatedBeatmapLevelCollectionsTableView>.Accessor AnnotatedBeatmapLevelCollectionsTableViewAccessor =
-            FieldAccessor<AnnotatedBeatmapLevelCollectionsViewController, AnnotatedBeatmapLevelCollectionsTableView>.GetAccessor("_annotatedBeatmapLevelCollectionsTableView");
+        public event Action<IAnnotatedBeatmapLevelCollection[], int> LevelCollectionTableViewUpdatedEvent;
 
         [UIComponent("root")]
         private readonly Transform rootTransform;
@@ -50,7 +50,6 @@ namespace PlaylistManager.UI
             this.popupModalsController = popupModalsController;
             this.playlistDetailsViewController = playlistDetailsViewController;
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
-            annotatedBeatmapLevelCollectionsTableView = AnnotatedBeatmapLevelCollectionsTableViewAccessor(ref annotatedBeatmapLevelCollectionsViewController);
 
             tokenSource = new CancellationTokenSource();
         }
@@ -92,7 +91,7 @@ namespace PlaylistManager.UI
             try
             {
                 parentManager.DeletePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
-                var annotatedBeatmapLevelCollections = parentManager.GetAllPlaylists(false);
+                IAnnotatedBeatmapLevelCollection[] annotatedBeatmapLevelCollections = parentManager.GetAllPlaylists(false);
                 int selectedIndex = annotatedBeatmapLevelCollectionsViewController.selectedItemIndex;
                 LevelCollectionTableViewUpdatedEvent?.Invoke(annotatedBeatmapLevelCollections, selectedIndex - 1);
             }
@@ -147,6 +146,7 @@ namespace PlaylistManager.UI
 
             popupModalsController.OkText = "Download Complete!";
             popupModalsController.OkButtonText = "Ok";
+            downloadingBeatmapLevelCollections = AnnotatedBeatmapLevelCollectionsAccessor(ref annotatedBeatmapLevelCollectionsViewController).ToArray();
             downloadingBeatmapCollectionIdx = annotatedBeatmapLevelCollectionsViewController.selectedItemIndex;
             SongCore.Loader.Instance.RefreshSongs(false);
             LevelFilteringNavigationController_UpdateSecondChildControllerContent.SecondChildControllerUpdatedEvent += LevelFilteringNavigationController_UpdateSecondChildControllerContent_SecondChildControllerUpdatedEvent;
@@ -159,9 +159,7 @@ namespace PlaylistManager.UI
 
         private void LevelFilteringNavigationController_UpdateSecondChildControllerContent_SecondChildControllerUpdatedEvent()
         {
-            IBeatmapLevelPack[] beatmapLevelPacks = parentManager.GetAllPlaylists(false);
-            annotatedBeatmapLevelCollectionsViewController.SetData(beatmapLevelPacks, downloadingBeatmapCollectionIdx, false);
-            annotatedBeatmapLevelCollectionsViewController.HandleDidSelectAnnotatedBeatmapLevelCollection(annotatedBeatmapLevelCollectionsTableView, beatmapLevelPacks[downloadingBeatmapCollectionIdx]);
+            LevelCollectionTableViewUpdatedEvent?.Invoke(downloadingBeatmapLevelCollections, downloadingBeatmapCollectionIdx);
             LevelFilteringNavigationController_UpdateSecondChildControllerContent.SecondChildControllerUpdatedEvent -= LevelFilteringNavigationController_UpdateSecondChildControllerContent_SecondChildControllerUpdatedEvent;
         }
 

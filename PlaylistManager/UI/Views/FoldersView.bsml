@@ -9,7 +9,7 @@
 				<button text='+' hover-hint='Create a new folder' on-click='create-folder' />
 			</horizontal>
 		</horizontal>
-		<horizontal horizontal-fit='PreferredSize' preferred-width='75' preferred-height='15' align-to-center='true'>
+		<horizontal horizontal-fit='PreferredSize' preferred-width='72' preferred-height='15' align-to-center='true'>
 			<page-button event-click='folder-list#PageUp' direction='Left' />
 			<list id='folder-list' cell-size='15' list-direction='Horizontal' list-style='Box' select-cell='folder-select' />
 			<page-button event-click='folder-list#PageDown' direction='Right' />

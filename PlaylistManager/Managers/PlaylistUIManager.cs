@@ -14,28 +14,23 @@ namespace PlaylistManager.Managers
         private readonly SelectLevelCategoryViewController selectLevelCategoryViewController;
         private readonly LevelSelectionNavigationController levelSelectionNavigationController;
         private readonly StandardLevelDetailViewController standardLevelDetailViewController;
-        private readonly LobbyGameState lobbyGameState;
 
         private readonly List<ILevelCategoryUpdater> levelCategoryUpdaters;
         private readonly IStackedModalView stackedModalView;
         private readonly List<IRefreshable> refreshables;
-        private readonly IMultiplayerGameStateUpdater multiplayerGameStateUpdater;
         private readonly IPlatformUserModel platformUserModel;
 
         internal PlaylistUIManager(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, SelectLevelCategoryViewController selectLevelCategoryViewController, LevelSelectionNavigationController levelSelectionNavigationController, 
-            StandardLevelDetailViewController standardLevelDetailViewController, LobbyGameState lobbyGameState, List<ILevelCategoryUpdater> levelCategoryUpdaters, IStackedModalView stackedModalView, List<IRefreshable> refreshables,
-            IMultiplayerGameStateUpdater multiplayerGameStateUpdater, IPlatformUserModel platformUserModel)
+            StandardLevelDetailViewController standardLevelDetailViewController, List<ILevelCategoryUpdater> levelCategoryUpdaters, IStackedModalView stackedModalView, List<IRefreshable> refreshables, IPlatformUserModel platformUserModel)
         {
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
             this.selectLevelCategoryViewController = selectLevelCategoryViewController;
             this.levelSelectionNavigationController = levelSelectionNavigationController;
             this.standardLevelDetailViewController = standardLevelDetailViewController;
-            this.lobbyGameState = lobbyGameState;
 
             this.levelCategoryUpdaters = levelCategoryUpdaters;
             this.stackedModalView = stackedModalView;
             this.refreshables = refreshables;
-            this.multiplayerGameStateUpdater = multiplayerGameStateUpdater;
             this.platformUserModel = platformUserModel;
         }
 
@@ -48,9 +43,6 @@ namespace PlaylistManager.Managers
 
             // When a stacked modal is dismissed
             stackedModalView.ModalDismissedEvent += StackedModalView_ModalDismissedEvent;
-
-            // When the multiplayer state changes
-            lobbyGameState.gameStateDidChangeEvent += LobbyGameState_gameStateDidChangeEvent;
 
             // Whenever a refresh is requested
             PlaylistLibUtils.playlistManager.PlaylistsRefreshRequested += PlaylistManager_PlaylistsRefreshRequested;
@@ -97,11 +89,6 @@ namespace PlaylistManager.Managers
         private void StackedModalView_ModalDismissedEvent()
         {
             levelSelectionNavigationController.canvasGroup.alpha = 0.2f;
-        }
-
-        private void LobbyGameState_gameStateDidChangeEvent(MultiplayerGameState multiplayerGameState)
-        {
-            multiplayerGameStateUpdater.MultiplayerGameStateUpdated(multiplayerGameState);
         }
 
         private void PlaylistManager_PlaylistsRefreshRequested(object sender, string requester)

@@ -19,12 +19,14 @@ using Zenject;
 
 namespace PlaylistManager.UI
 {
-    public class FoldersViewController : IInitializable, IDisposable, INotifyPropertyChanged, ILevelCollectionsTableUpdater, ILevelCategoryUpdater, IMultiplayerGameStateUpdater
+    public class FoldersViewController : IInitializable, IDisposable, INotifyPropertyChanged, ILevelCollectionsTableUpdater, ILevelCategoryUpdater
     {
-        FloatingScreen floatingScreen;
-        private readonly LevelCollectionNavigationController levelCollectionNavigationController;
+        private readonly MultiplayerLevelSelectionFlowCoordinator multiplayerLevelSelectionFlowCoordinator;
+        private readonly LevelSelectionNavigationController levelSelectionNavigationController;
         private readonly PopupModalsController popupModalsController;
         private BeatmapLevelsModel beatmapLevelsModel;
+
+        private FloatingScreen floatingScreen;
 
         public event PropertyChangedEventHandler PropertyChanged;
         public event System.Action<IAnnotatedBeatmapLevelCollection[], int> LevelCollectionTableViewUpdatedEvent;
@@ -50,9 +52,10 @@ namespace PlaylistManager.UI
         [UIComponent("folder-list")]
         public CustomListTableData customListTableData;
 
-        public FoldersViewController(LevelCollectionNavigationController levelCollectionNavigationController, PopupModalsController popupModalsController, BeatmapLevelsModel beatmapLevelsModel)
+        public FoldersViewController(MultiplayerLevelSelectionFlowCoordinator multiplayerLevelSelectionFlowCoordinator, LevelSelectionNavigationController levelSelectionNavigationController, PopupModalsController popupModalsController, BeatmapLevelsModel beatmapLevelsModel)
         {
-            this.levelCollectionNavigationController = levelCollectionNavigationController;
+            this.multiplayerLevelSelectionFlowCoordinator = multiplayerLevelSelectionFlowCoordinator;
+            this.levelSelectionNavigationController = levelSelectionNavigationController;
             this.popupModalsController = popupModalsController;
             this.beatmapLevelsModel = beatmapLevelsModel;
         }
@@ -170,7 +173,7 @@ namespace PlaylistManager.UI
         [UIAction("create-folder")]
         private void CreateFolder()
         {
-            popupModalsController.ShowKeyboard(levelCollectionNavigationController.transform, CreateKeyboardEnter);
+            popupModalsController.ShowKeyboard(levelSelectionNavigationController.transform, CreateKeyboardEnter);
         }
 
         private void CreateKeyboardEnter(string folderName)
@@ -180,11 +183,18 @@ namespace PlaylistManager.UI
                 folderName = string.Join("_", folderName.Replace("/", "").Replace("\\", "").Split(' '));
                 BeatSaberPlaylistsLib.PlaylistManager childManager = currentParentManager.CreateChildManager(folderName);
 
-                CustomListTableData.CustomCellInfo customCellInfo = new CustomListTableData.CustomCellInfo(folderName, icon: PlaylistLibUtils.DrawFolderIcon(folderName));
-                customListTableData.data.Add(customCellInfo);
-                customListTableData.tableView.ReloadData();
-                customListTableData.tableView.ClearSelection();
-                currentManagers.Add(childManager);
+                if (currentManagers.Contains(childManager))
+                {
+                    popupModalsController.ShowOkModal(levelSelectionNavigationController.transform, "\"" + folderName + "\" already exists! Please use a different name.", null);
+                }
+                else
+                {
+                    CustomListTableData.CustomCellInfo customCellInfo = new CustomListTableData.CustomCellInfo(folderName, icon: PlaylistLibUtils.DrawFolderIcon(folderName));
+                    customListTableData.data.Add(customCellInfo);
+                    customListTableData.tableView.ReloadData();
+                    customListTableData.tableView.ClearSelection();
+                    currentManagers.Add(childManager);
+                }
             }
         }
 
@@ -195,7 +205,7 @@ namespace PlaylistManager.UI
         [UIAction("rename-folder")]
         private void RenameButtonClicked()
         {
-            popupModalsController.ShowKeyboard(levelCollectionNavigationController.transform, RenameKeyboardEnter);
+            popupModalsController.ShowKeyboard(levelSelectionNavigationController.transform, RenameKeyboardEnter, keyboardText: Path.GetFileName(currentParentManager.PlaylistPath));
         }
 
         private void RenameKeyboardEnter(string folderName)
@@ -203,8 +213,11 @@ namespace PlaylistManager.UI
             if (!string.IsNullOrEmpty(folderName))
             {
                 folderName = folderName.Replace("/", "").Replace("\\", "");
-                currentParentManager.RenameManager(folderName);
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FolderText)));
+                if (folderName != Path.GetFileName(currentParentManager.PlaylistPath))
+                {
+                    currentParentManager.RenameManager(folderName);
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FolderText)));
+                }
             }
         }
 
@@ -215,7 +228,7 @@ namespace PlaylistManager.UI
         [UIAction("delete-folder")]
         private void DeleteButtonClicked()
         {
-            popupModalsController.ShowYesNoModal(levelCollectionNavigationController.transform, string.Format("Are you sure you want to delete {0} along with all playlists and subfolders?", Path.GetFileName(currentParentManager.PlaylistPath)), DeleteConfirm);
+            popupModalsController.ShowYesNoModal(levelSelectionNavigationController.transform, string.Format("Are you sure you want to delete {0} along with all playlists and subfolders?", Path.GetFileName(currentParentManager.PlaylistPath)), DeleteConfirm);
         }
 
         private void DeleteConfirm()
@@ -231,6 +244,7 @@ namespace PlaylistManager.UI
             if (levelCategory == SelectLevelCategoryViewController.LevelCategory.CustomSongs)
             {
                 rootTransform.gameObject.SetActive(true);
+                SetupDimensions();
                 if (viewControllerActivated)
                 {
                     SetupList(currentParentManager, false);
@@ -246,19 +260,21 @@ namespace PlaylistManager.UI
             }
         }
 
-        public void MultiplayerGameStateUpdated(MultiplayerGameState multiplayerGameState)
+        public void SetupDimensions()
         {
-            if (multiplayerGameState == MultiplayerGameState.None)
+            if (!multiplayerLevelSelectionFlowCoordinator.isActivated)
             {
-                floatingScreen.transform.position = new Vector3(0f, 0.2f, 2.5f);
-                floatingScreen.transform.eulerAngles = new Vector3(60, 0, 0);
+                floatingScreen.transform.position = new Vector3(0f, 0.1f, 2.25f);
+                floatingScreen.transform.eulerAngles = new Vector3(75, 0, 0);
                 floatingScreen.transform.localScale = new Vector3(0.03f, 0.03f, 0.03f);
             }
-            else if (multiplayerGameState == MultiplayerGameState.Lobby)
+            else
             {
-                floatingScreen.transform.position = new Vector3(0f, 1.3f, 1.6f);
+                Vector3 foldersPosition = levelSelectionNavigationController.transform.position;
+                foldersPosition.y += 0.73f;
                 floatingScreen.transform.eulerAngles = new Vector3(0, 0, 0);
                 floatingScreen.transform.localScale = new Vector3(0.015f, 0.015f, 0.015f);
+                floatingScreen.transform.position = foldersPosition;
             }
         }
 
@@ -276,7 +292,22 @@ namespace PlaylistManager.UI
         [UIValue("folder-text")]
         private string FolderText
         {
-            get => currentParentManager == null ? "" : Path.GetFileName(currentParentManager.PlaylistPath);
+            get
+            {
+                if (currentParentManager == null)
+                {
+                    return "";
+                }
+                else
+                {
+                    string folderName = Path.GetFileName(currentParentManager.PlaylistPath);
+                    if (folderName.Length > 15)
+                    {
+                        return folderName.Substring(0, 15) + "...";
+                    }
+                    return folderName;
+                }
+            }
         }
     }
 }
