@@ -103,6 +103,8 @@ namespace PlaylistManager.UI
             customListTableData.tableView.ReloadData();
             customListTableData.tableView.ScrollToCellWithIdx(0, TableView.ScrollPositionType.Beginning, false);
 
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UpButtonEnabled)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DownButtonEnabled)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(BackActive)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FolderText)));
         }
@@ -113,6 +115,8 @@ namespace PlaylistManager.UI
             {
                 ShowPlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)deferredSpriteLoadPlaylist);
                 customListTableData.tableView.ReloadData();
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UpButtonEnabled)));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DownButtonEnabled)));
                 (deferredSpriteLoadPlaylist).SpriteLoaded -= DeferredSpriteLoadPlaylist_SpriteLoaded;
             }
         }
@@ -156,11 +160,11 @@ namespace PlaylistManager.UI
                 try
                 {
                     parentManager.StorePlaylist(selectedPlaylist);
-                    popupModalsController.ShowOkModal(modalTransform, string.Format("Song successfully added to {0}", selectedPlaylist.collectionName), null, animateDismiss: false);
+                    popupModalsController.ShowOkModal(modalTransform, string.Format("Song successfully added to {0}", selectedPlaylist.collectionName), null, animateParentCanvas: false);
                 }
                 catch (Exception e)
                 {
-                    popupModalsController.ShowOkModal(modalTransform, "An error occured while adding song to playlist.", null, animateDismiss: false);
+                    popupModalsController.ShowOkModal(modalTransform, "An error occured while adding song to playlist.", null, animateParentCanvas: false);
                     Plugin.Log.Critical(string.Format("An exception was thrown while adding a song to a playlist.\nException Message: {0}", e.Message));
                 }
                 finally
@@ -199,6 +203,18 @@ namespace PlaylistManager.UI
             get => parentManager != null && parentManager.Parent != null;
         }
 
+        [UIValue("up-button-enabled")]
+        private bool UpButtonEnabled
+        {
+            get => customListTableData != null && customListTableData.data.Count > 6;
+        }
+
+        [UIValue("down-button-enabled")]
+        private bool DownButtonEnabled
+        {
+            get => customListTableData != null && customListTableData.data.Count > 6;
+        }
+
         #endregion
 
         #region Create Playlist
@@ -206,7 +222,7 @@ namespace PlaylistManager.UI
         [UIAction("open-keyboard")]
         private void OpenKeyboard()
         {
-            popupModalsController.ShowKeyboard(modalTransform, CreatePlaylist, animateDismiss: false);
+            popupModalsController.ShowKeyboard(modalTransform, CreatePlaylist, animateParentCanvas: false);
         }
 
         private void CreatePlaylist(string playlistName)
@@ -222,7 +238,7 @@ namespace PlaylistManager.UI
             }
             else
             {
-                playlist = PlaylistLibUtils.CreatePlaylist(playlistName, PluginConfig.Instance.AuthorName, "", parentManager);
+                playlist = PlaylistLibUtils.CreatePlaylist(playlistName, PluginConfig.Instance.AuthorName, parentManager, false);
             }
             if (playlist is IDeferredSpriteLoad deferredSpriteLoadPlaylist && !deferredSpriteLoadPlaylist.SpriteWasLoaded)
             {
