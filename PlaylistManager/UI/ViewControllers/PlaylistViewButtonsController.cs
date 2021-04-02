@@ -83,7 +83,7 @@ namespace PlaylistManager.UI
         [UIAction("delete-click")]
         private void OnDelete()
         {
-            popupModalsController.ShowYesNoModal(rootTransform, string.Format("Are you sure you would like to delete {0}?", annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection.collectionName), DeleteButtonPressed);
+            popupModalsController.ShowYesNoModal(rootTransform, string.Format("Are you sure you would like to delete {0}?", selectedPlaylist.Title), DeleteButtonPressed);
         }
 
         private void DeleteButtonPressed()
@@ -91,9 +91,10 @@ namespace PlaylistManager.UI
             try
             {
                 parentManager.DeletePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
-                IAnnotatedBeatmapLevelCollection[] annotatedBeatmapLevelCollections = parentManager.GetAllPlaylists(false);
                 int selectedIndex = annotatedBeatmapLevelCollectionsViewController.selectedItemIndex;
-                LevelCollectionTableViewUpdatedEvent?.Invoke(annotatedBeatmapLevelCollections, selectedIndex - 1);
+                List<IAnnotatedBeatmapLevelCollection> annotatedBeatmapLevelCollections = AnnotatedBeatmapLevelCollectionsAccessor(ref annotatedBeatmapLevelCollectionsViewController).ToList();
+                annotatedBeatmapLevelCollections.RemoveAt(selectedIndex);
+                LevelCollectionTableViewUpdatedEvent?.Invoke(annotatedBeatmapLevelCollections.ToArray(), selectedIndex - 1);
             }
             catch (Exception e)
             {
@@ -189,7 +190,7 @@ namespace PlaylistManager.UI
             try
             {
                 playlistStream = new MemoryStream(await DownloaderUtils.instance.DownloadFileToBytesAsync(syncURL, tokenSource.Token));
-                ((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist).RemoveAll((playlistSong) => true); // Clear all songs
+                ((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist).Clear(); // Clear all songs
                 PlaylistLibUtils.playlistManager.DefaultHandler.Populate(playlistStream, (BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
             }
             catch (Exception e)

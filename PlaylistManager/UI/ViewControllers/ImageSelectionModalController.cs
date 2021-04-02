@@ -3,9 +3,12 @@ using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.Parser;
 using HMUI;
+using IPA.Utilities;
+using PlaylistManager.Types;
 using PlaylistManager.Utilities;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -14,15 +17,19 @@ using static BeatSaberMarkupLanguage.Components.CustomListTableData;
 
 namespace PlaylistManager.UI
 {
-    public class ImageSelectionModalController
+    public class ImageSelectionModalController : INotifyPropertyChanged
     {
         private readonly LevelPackDetailViewController levelPackDetailViewController;
+        private readonly PopupModalsController popupModalsController;
 
         private readonly string IMAGES_PATH = Path.Combine(PlaylistLibUtils.playlistManager.PlaylistPath, "CoverImages");
-        private Dictionary<string, Sprite> coverImages;
+        private readonly Sprite playlistManagerIcon;
+        private Dictionary<string, CoverImage> coverImages;
         private bool parsed;
+        private int selectedIndex;
 
-        public event Action<string> ImageSelectedEvent;
+        public event Action<byte[]> ImageSelectedEvent;
+        public event PropertyChangedEventHandler PropertyChanged;
 
         [UIComponent("list")]
         public CustomListTableData customListTableData;
@@ -30,17 +37,22 @@ namespace PlaylistManager.UI
         [UIComponent("modal")]
         private readonly RectTransform modalTransform;
 
+        [UIComponent("modal")]
+        private ModalView modalView;
+
         private Vector3 modalPosition;
 
         [UIParams]
         private readonly BSMLParserParams parserParams;
 
-        public ImageSelectionModalController(LevelPackDetailViewController levelPackDetailViewController)
+        public ImageSelectionModalController(LevelPackDetailViewController levelPackDetailViewController, PopupModalsController popupModalsController)
         {
             this.levelPackDetailViewController = levelPackDetailViewController;
+            this.popupModalsController = popupModalsController;
             Directory.CreateDirectory(IMAGES_PATH);
             File.Create(Path.Combine(IMAGES_PATH, ".plignore"));
-            coverImages = new Dictionary<string, Sprite>();
+            coverImages = new Dictionary<string, CoverImage>();
+            playlistManagerIcon = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.Logo.png");
             parsed = false;
         }
 
@@ -50,6 +62,7 @@ namespace PlaylistManager.UI
             {
                 BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.ImageSelectionModal.bsml"), levelPackDetailViewController.transform.Find("Detail").gameObject, this);
                 modalPosition = modalTransform.position;
+                FieldAccessor<ModalView, bool>.Set(ref modalView, "_animateParentCanvas", false);
                 parsed = true;
             }
             modalTransform.position = modalPosition;
@@ -65,12 +78,9 @@ namespace PlaylistManager.UI
 
         private void LoadImages()
         {
-            foreach (var coverImage in coverImages)
+            foreach (var imageToDelete in coverImages.Where(coverImage => !File.Exists(coverImage.Key)).ToList())
             {
-                if (!File.Exists(coverImage.Key))
-                {
-                    coverImages.Remove(coverImage.Key);
-                }
+                coverImages.Remove(imageToDelete.Key);
             }
 
             string[] ext = { "jpg", "png" };
@@ -80,20 +90,7 @@ namespace PlaylistManager.UI
             {
                 if (!coverImages.ContainsKey(file))
                 {
-                    try
-                    {
-                        using (FileStream imageStream = File.Open(file, FileMode.Open))
-                        {
-                            byte[] imageBytes = new byte[imageStream.Length];
-                            imageStream.Read(imageBytes, 0, (int)imageStream.Length);
-                            Sprite coverImageSprite = BeatSaberMarkupLanguage.Utilities.LoadSpriteRaw(imageBytes);
-                            coverImages.Add(file, coverImageSprite);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Plugin.Log.Critical("Could not load " + file + "\nException message: " + e.Message);
-                    }
+                    coverImages.Add(file, new CoverImage(file));
                 }
             }
         }
@@ -102,24 +99,96 @@ namespace PlaylistManager.UI
         {
             customListTableData.data.Clear();
 
+            // First add default image
+            customListTableData.data.Add(new CustomCellInfo("PlaylistManager Icon", "Default", playlistManagerIcon));
+
             LoadImages();
             foreach (var coverImage in coverImages)
             {
-                customListTableData.data.Add(new CustomCellInfo(Path.GetFileName(coverImage.Key), coverImage.Key, coverImage.Value));
+                if(!coverImage.Value.SpriteWasLoaded && !coverImage.Value.Blacklist)
+                {
+                    coverImage.Value.SpriteLoaded += CoverImage_SpriteLoaded;
+                    _ = coverImage.Value.Sprite;
+                }
+                else if(coverImage.Value.SpriteWasLoaded)
+                {
+                    customListTableData.data.Add(new CustomCellInfo(Path.GetFileName(coverImage.Key), coverImage.Key, coverImage.Value.Sprite));
+                }
             }
-
             customListTableData.tableView.ReloadData();
             customListTableData.tableView.ScrollToCellWithIdx(0, TableView.ScrollPositionType.Beginning, false);
+
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UpButtonEnabled)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DownButtonEnabled)));
+        }
+
+        private void CoverImage_SpriteLoaded(object sender, EventArgs e)
+        {
+            if (sender is CoverImage coverImage)
+            {
+                if (coverImage.SpriteWasLoaded)
+                {
+                    customListTableData.data.Add(new CustomCellInfo(Path.GetFileName(coverImage.Path), coverImage.Path, coverImage.Sprite));
+                    customListTableData.tableView.ReloadData();
+
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UpButtonEnabled)));
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DownButtonEnabled)));
+                }
+                coverImage.SpriteLoaded -= CoverImage_SpriteLoaded;
+            }
         }
 
         [UIAction("select-cell")]
         private void OnCellSelect(TableView tableView, int index)
         {
             customListTableData.tableView.ClearSelection();
+            selectedIndex = index;
+            popupModalsController.ShowYesNoModal(modalTransform, "Are you sure you want to change the image of the playlist? This cannot be reverted.", ChangeImage, animateParentCanvas: false);
+        }
 
-            ImageSelectedEvent?.Invoke(customListTableData.data[index].subtext);
+        private void ChangeImage()
+        {
+            if (selectedIndex == 0)
+            {
+                using (Stream imageStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("PlaylistManager.Icons.Logo.png"))
+                {
+                    byte[] imageBytes = new byte[imageStream.Length];
+                    imageStream.Read(imageBytes, 0, (int)imageStream.Length);
+                    ImageSelectedEvent?.Invoke(imageBytes);
+                    parserParams.EmitEvent("close-modal");
+                }
+            }
+            else
+            {
+                string selectedImagePath = customListTableData.data[selectedIndex].subtext;
+                try
+                {
+                    using (FileStream imageStream = File.Open(selectedImagePath, FileMode.Open))
+                    {
+                        byte[] imageBytes = new byte[imageStream.Length];
+                        imageStream.Read(imageBytes, 0, (int)imageStream.Length);
+                        ImageSelectedEvent?.Invoke(imageBytes);
+                        parserParams.EmitEvent("close-modal");
+                    }
+                }
+                catch (Exception e)
+                {
+                    popupModalsController.ShowOkModal(modalTransform, "There was an error loading this image. Check logs for more details.", null, animateParentCanvas: false);
+                    Plugin.Log.Critical("Could not load " + selectedImagePath + "\nException message: " + e.Message);
+                }
+            }
+        }
 
-            parserParams.EmitEvent("close-modal");
+        [UIValue("up-button-enabled")]
+        private bool UpButtonEnabled
+        {
+            get => customListTableData != null && customListTableData.data.Count > 3;
+        }
+
+        [UIValue("down-button-enabled")]
+        private bool DownButtonEnabled
+        {
+            get => customListTableData != null && customListTableData.data.Count > 3;
         }
     }
 }

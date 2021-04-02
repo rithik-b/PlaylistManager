@@ -11,7 +11,6 @@ namespace PlaylistManager
     public class PlaylistDataManager : IInitializable, IDisposable
     {
         private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
-        private readonly AnnotatedBeatmapLevelCollectionsTableView annotatedBeatmapLevelCollectionsTableView;
         private readonly LevelPackDetailViewController levelPackDetailViewController;
         private readonly LevelFilteringNavigationController levelFilteringNavigationController;
 
@@ -23,16 +22,12 @@ namespace PlaylistManager
         public BeatSaberPlaylistsLib.Types.IPlaylistSong selectedPlaylistSong;
         public BeatSaberPlaylistsLib.PlaylistManager parentManager;
 
-        public static readonly FieldAccessor<AnnotatedBeatmapLevelCollectionsViewController, AnnotatedBeatmapLevelCollectionsTableView>.Accessor AnnotatedBeatmapLevelCollectionsTableViewAccessor = 
-            FieldAccessor<AnnotatedBeatmapLevelCollectionsViewController, AnnotatedBeatmapLevelCollectionsTableView>.GetAccessor("_annotatedBeatmapLevelCollectionsTableView");
-
         private readonly BeatmapLevelPack emptyBeatmapLevelPack;
 
         internal PlaylistDataManager(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, LevelPackDetailViewController levelPackDetailViewController, LevelFilteringNavigationController levelFilteringNavigationController,
             List<ILevelCollectionUpdater> levelCollectionUpdaters, List<ILevelCollectionsTableUpdater> levelCollectionsTableUpdaters, List<IPreviewBeatmapLevelUpdater> previewBeatmapLevelUpdaters)
         {
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
-            annotatedBeatmapLevelCollectionsTableView = AnnotatedBeatmapLevelCollectionsTableViewAccessor(ref annotatedBeatmapLevelCollectionsViewController);
             this.levelPackDetailViewController = levelPackDetailViewController;
             this.levelFilteringNavigationController = levelFilteringNavigationController;
 
@@ -113,7 +108,6 @@ namespace PlaylistManager
             if (annotatedBeatmapLevelCollections.Length != 0)
             {
                 annotatedBeatmapLevelCollectionsViewController.SetData(annotatedBeatmapLevelCollections, indexToSelect, false);
-                annotatedBeatmapLevelCollectionsViewController.HandleDidSelectAnnotatedBeatmapLevelCollection(annotatedBeatmapLevelCollectionsTableView, annotatedBeatmapLevelCollections[indexToSelect]);
                 levelFilteringNavigationController.HandleAnnotatedBeatmapLevelCollectionsViewControllerDidSelectAnnotatedBeatmapLevelCollection(annotatedBeatmapLevelCollections[indexToSelect]);
             }
             else
@@ -121,7 +115,6 @@ namespace PlaylistManager
                 annotatedBeatmapLevelCollections = new IBeatmapLevelPack[1];
                 annotatedBeatmapLevelCollections[0] = emptyBeatmapLevelPack;
                 annotatedBeatmapLevelCollectionsViewController.SetData(annotatedBeatmapLevelCollections, 0, true);
-                annotatedBeatmapLevelCollectionsViewController.HandleDidSelectAnnotatedBeatmapLevelCollection(annotatedBeatmapLevelCollectionsTableView, annotatedBeatmapLevelCollections[0]);
                 levelFilteringNavigationController.HandleAnnotatedBeatmapLevelCollectionsViewControllerDidSelectAnnotatedBeatmapLevelCollection(annotatedBeatmapLevelCollections[0]);
             }
         }

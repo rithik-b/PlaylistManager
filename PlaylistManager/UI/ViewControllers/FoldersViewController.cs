@@ -4,10 +4,8 @@ using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.FloatingScreen;
 using HMUI;
 using IPA.Utilities;
-using PlaylistManager.HarmonyPatches;
 using PlaylistManager.Interfaces;
 using PlaylistManager.Utilities;
-using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -19,7 +17,7 @@ using Zenject;
 
 namespace PlaylistManager.UI
 {
-    public class FoldersViewController : IInitializable, IDisposable, INotifyPropertyChanged, ILevelCollectionsTableUpdater, ILevelCategoryUpdater
+    public class FoldersViewController : IInitializable, INotifyPropertyChanged, ILevelCollectionsTableUpdater, ILevelCategoryUpdater
     {
         private readonly MultiplayerLevelSelectionFlowCoordinator multiplayerLevelSelectionFlowCoordinator;
         private readonly LevelSelectionNavigationController levelSelectionNavigationController;
@@ -27,7 +25,9 @@ namespace PlaylistManager.UI
         private BeatmapLevelsModel beatmapLevelsModel;
 
         private FloatingScreen floatingScreen;
+        private readonly Sprite levelPacksIcon;
         private readonly Sprite customPacksIcon;
+        private readonly Sprite playlistsIcon;
         private readonly Sprite foldersIcon;
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -36,7 +36,6 @@ namespace PlaylistManager.UI
         private BeatSaberPlaylistsLib.PlaylistManager currentParentManager;
         private List<BeatSaberPlaylistsLib.PlaylistManager> currentManagers;
 
-        public static readonly FieldAccessor<HierarchyManager, ScreenSystem>.Accessor ScreenSystemAccessor = FieldAccessor<HierarchyManager, ScreenSystem>.GetAccessor("_screenSystem");
         public static readonly FieldAccessor<BeatmapLevelsModel, IBeatmapLevelPackCollection>.Accessor CustomLevelPackCollectionAccessor = FieldAccessor<BeatmapLevelsModel, IBeatmapLevelPackCollection>.GetAccessor("_customLevelPackCollection");
 
         [UIComponent("root")]
@@ -61,7 +60,9 @@ namespace PlaylistManager.UI
             this.popupModalsController = popupModalsController;
             this.beatmapLevelsModel = beatmapLevelsModel;
 
+            levelPacksIcon = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.LevelPacks.png");
             customPacksIcon = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.CustomPacks.png");
+            playlistsIcon = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.Playlists.png");
             foldersIcon = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.Folders.png");
         }
 
@@ -80,7 +81,7 @@ namespace PlaylistManager.UI
         {
             if (!multiplayerLevelSelectionFlowCoordinator.isActivated)
             {
-                floatingScreen.transform.position = new Vector3(0f, 0.1f, 2.25f);
+                floatingScreen.transform.position = new Vector3(0f, 0.1f, 2.5f);
                 floatingScreen.transform.eulerAngles = new Vector3(75, 0, 0);
                 floatingScreen.transform.localScale = new Vector3(0.03f, 0.03f, 0.03f);
             }
@@ -102,10 +103,13 @@ namespace PlaylistManager.UI
 
             if (currentParentManager == null)
             {
-                CustomListTableData.CustomCellInfo customCellInfo = new CustomListTableData.CustomCellInfo("Level Packs", icon: BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.LevelPacks.png"));
+                CustomListTableData.CustomCellInfo customCellInfo = new CustomListTableData.CustomCellInfo("Level Packs", icon: levelPacksIcon);
                 customListTableData.data.Add(customCellInfo);
 
                 customCellInfo = new CustomListTableData.CustomCellInfo("Custom Songs", icon: customPacksIcon);
+                customListTableData.data.Add(customCellInfo);
+
+                customCellInfo = new CustomListTableData.CustomCellInfo("Playlists", icon: playlistsIcon);
                 customListTableData.data.Add(customCellInfo);
 
                 customCellInfo = new CustomListTableData.CustomCellInfo("Folders", icon: foldersIcon);
@@ -150,8 +154,14 @@ namespace PlaylistManager.UI
             if (currentParentManager == null)
             {
                 customListTableData.tableView.SelectCellWithIdx(0);
-                Select(customListTableData.tableView, 0);
+                if (setBeatmapLevelCollections)
+                {
+                    Select(customListTableData.tableView, 0);
+                }
             }
+
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LeftButtonEnabled)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(RightButtonEnabled)));
         }
 
         [UIAction("folder-select")]
@@ -171,6 +181,11 @@ namespace PlaylistManager.UI
                     LevelCollectionTableViewUpdatedEvent?.Invoke(annotatedBeatmapLevelCollections, 0);
                 }
                 else if (selectedCellIndex == 2)
+                {
+                    IAnnotatedBeatmapLevelCollection[] annotatedBeatmapLevelCollections = PlaylistLibUtils.playlistManager.GetAllPlaylists(true);
+                    LevelCollectionTableViewUpdatedEvent?.Invoke(annotatedBeatmapLevelCollections, 0);
+                }
+                else if (selectedCellIndex == 3)
                 {
                     SetupList(currentParentManager: PlaylistLibUtils.playlistManager);
                 }
@@ -201,9 +216,9 @@ namespace PlaylistManager.UI
 
         private void CreateKeyboardEnter(string folderName)
         {
+            folderName = folderName.Replace("/", "").Replace("\\", "").Replace(".", "");
             if (!string.IsNullOrEmpty(folderName))
             {
-                folderName = string.Join("_", folderName.Replace("/", "").Replace("\\", "").Split(' '));
                 BeatSaberPlaylistsLib.PlaylistManager childManager = currentParentManager.CreateChildManager(folderName);
 
                 if (currentManagers.Contains(childManager))
@@ -233,9 +248,9 @@ namespace PlaylistManager.UI
 
         private void RenameKeyboardEnter(string folderName)
         {
+            folderName = folderName.Replace("/", "").Replace("\\", "").Replace(".", "");
             if (!string.IsNullOrEmpty(folderName))
             {
-                folderName = folderName.Replace("/", "").Replace("\\", "");
                 if (folderName != Path.GetFileName(currentParentManager.PlaylistPath))
                 {
                     currentParentManager.RenameManager(folderName);
@@ -274,7 +289,7 @@ namespace PlaylistManager.UI
                 }
                 else
                 {
-                    AnnotatedBeatmapLevelCollectionsViewController_SetData.SetDataEvent += AnnotatedBeatmapLevelCollectionsViewController_SetData_SetDataEvent;
+                    SetupList(null, false);
                 }
             }
             else
@@ -283,23 +298,12 @@ namespace PlaylistManager.UI
             }
         }
 
-        private void AnnotatedBeatmapLevelCollectionsViewController_SetData_SetDataEvent()
-        {
-            AnnotatedBeatmapLevelCollectionsViewController_SetData.SetDataEvent -= AnnotatedBeatmapLevelCollectionsViewController_SetData_SetDataEvent;
-            SetupList(null, false);
-        }
-
-        public void Dispose()
-        {
-            AnnotatedBeatmapLevelCollectionsViewController_SetData.SetDataEvent -= AnnotatedBeatmapLevelCollectionsViewController_SetData_SetDataEvent;
-        }
-
         [UIValue("folder-text")]
         private string FolderText
         {
             get
             {
-                if (currentParentManager == null)
+                if (currentParentManager == null || !Directory.Exists(currentParentManager.PlaylistPath))
                 {
                     return "";
                 }
@@ -313,6 +317,18 @@ namespace PlaylistManager.UI
                     return folderName;
                 }
             }
+        }
+
+        [UIValue("left-button-enabled")]
+        private bool LeftButtonEnabled
+        {
+            get => customListTableData != null && customListTableData.data.Count > 4;
+        }
+
+        [UIValue("right-button-enabled")]
+        private bool RightButtonEnabled
+        {
+            get => customListTableData != null && customListTableData.data.Count > 4;
         }
     }
 }

@@ -2,21 +2,18 @@
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Parser;
 using HMUI;
-using PlaylistManager.Interfaces;
-using System;
+using IPA.Utilities;
 using System.ComponentModel;
 using System.Reflection;
 using UnityEngine;
 
 namespace PlaylistManager.UI
 {
-    public class PopupModalsController : INotifyPropertyChanged, IStackedModalView
+    public class PopupModalsController : INotifyPropertyChanged
     {
         private readonly LevelSelectionNavigationController levelSelectionNavigationController;
         private bool parsed;
-        private bool animateDismiss;
         public event PropertyChangedEventHandler PropertyChanged;
-        public event Action ModalDismissedEvent;
 
         public delegate void ButtonPressed();
         private ButtonPressed yesButtonPressed;
@@ -42,7 +39,7 @@ namespace PlaylistManager.UI
         private readonly RectTransform yesNoModalTransform;
 
         [UIComponent("yes-no-modal")]
-        private readonly ModalView yesNoModalView;
+        private ModalView yesNoModalView;
 
         private Vector3 yesNoModalPosition;
 
@@ -50,7 +47,7 @@ namespace PlaylistManager.UI
         private readonly RectTransform okModalTransform;
 
         [UIComponent("ok-modal")]
-        private readonly ModalView okModalView;
+        private ModalView okModalView;
 
         private Vector3 okModalPosition;
 
@@ -58,7 +55,7 @@ namespace PlaylistManager.UI
         private readonly RectTransform keyboardTransform;
 
         [UIComponent("keyboard")]
-        private readonly ModalView keyboardModalView;
+        private ModalView keyboardModalView;
 
         [UIParams]
         private readonly BSMLParserParams parserParams;
@@ -83,17 +80,18 @@ namespace PlaylistManager.UI
 
         // Methods
 
-        internal void ShowYesNoModal(Transform parent, string text, ButtonPressed yesButtonPressedCallback, string yesButtonText = "Yes", string noButtonText = "No", ButtonPressed noButtonPressedCallback = null, bool animateDismiss = true)
+        internal void ShowYesNoModal(Transform parent, string text, ButtonPressed yesButtonPressedCallback, string yesButtonText = "Yes", string noButtonText = "No", ButtonPressed noButtonPressedCallback = null, bool animateParentCanvas = true)
         {
             Parse();
             yesNoModalTransform.position = yesNoModalPosition;
+            keyboardTransform.transform.SetParent(rootTransform);
             yesNoModalTransform.transform.SetParent(parent);
             YesNoText = text;
             YesButtonText = yesButtonText;
             NoButtonText = noButtonText;
             yesButtonPressed = yesButtonPressedCallback;
             noButtonPressed = noButtonPressedCallback;
-            this.animateDismiss = animateDismiss;
+            FieldAccessor<ModalView, bool>.Set(ref yesNoModalView, "_animateParentCanvas", animateParentCanvas);
             parserParams.EmitEvent("close-yes-no");
             parserParams.EmitEvent("open-yes-no");
         }
@@ -102,8 +100,6 @@ namespace PlaylistManager.UI
         private void YesButtonPressed()
         {
             yesButtonPressed?.Invoke();
-            Action modalDismissed = animateDismiss ? null : ModalDismissedEvent;
-            yesNoModalView.Hide(animateDismiss, modalDismissed);
             yesButtonPressed = null;
             yesNoModalTransform.transform.SetParent(rootTransform);
         }
@@ -112,8 +108,6 @@ namespace PlaylistManager.UI
         private void NoButtonPressed()
         {
             noButtonPressed?.Invoke();
-            Action modalDismissed = animateDismiss ? null : ModalDismissedEvent;
-            yesNoModalView.Hide(animateDismiss, modalDismissed);
             noButtonPressed = null;
             yesNoModalTransform.transform.SetParent(rootTransform);
         }
@@ -159,15 +153,16 @@ namespace PlaylistManager.UI
 
         // Methods
 
-        internal void ShowOkModal(Transform parent, string text, ButtonPressed buttonPressedCallback, string okButtonText = "Ok", bool animateDismiss = true)
+        internal void ShowOkModal(Transform parent, string text, ButtonPressed buttonPressedCallback, string okButtonText = "Ok", bool animateParentCanvas = true)
         {
             Parse();
             okModalTransform.position = okModalPosition;
+            keyboardTransform.transform.SetParent(rootTransform);
             okModalTransform.transform.SetParent(parent);
             OkText = text;
             OkButtonText = okButtonText;
             okButtonPressed = buttonPressedCallback;
-            this.animateDismiss = animateDismiss;
+            FieldAccessor<ModalView, bool>.Set(ref okModalView, "_animateParentCanvas", animateParentCanvas);
             parserParams.EmitEvent("close-ok");
             parserParams.EmitEvent("open-ok");
         }
@@ -176,8 +171,6 @@ namespace PlaylistManager.UI
         private void OkButtonPressed()
         {
             okButtonPressed?.Invoke();
-            Action modalDismissed = animateDismiss ? null : ModalDismissedEvent;
-            okModalView.Hide(animateDismiss, modalDismissed);
             okButtonPressed = null;
             okModalTransform.transform.SetParent(rootTransform);
         }
@@ -212,12 +205,13 @@ namespace PlaylistManager.UI
 
         // Methods
 
-        internal void ShowKeyboard(Transform parent, KeyboardPressed keyboardPressedCallback, string keyboardText = "", bool animateDismiss = true)
+        internal void ShowKeyboard(Transform parent, KeyboardPressed keyboardPressedCallback, string keyboardText = "", bool animateParentCanvas = true)
         {
-            Parse();
+            Parse(); 
+            keyboardTransform.transform.SetParent(rootTransform);
             keyboardTransform.transform.SetParent(parent);
             keyboardPressed = keyboardPressedCallback;
-            this.animateDismiss = animateDismiss;
+            FieldAccessor<ModalView, bool>.Set(ref keyboardModalView, "_animateParentCanvas", animateParentCanvas);
             KeyboardText = keyboardText;
             parserParams.EmitEvent("close-keyboard");
             parserParams.EmitEvent("open-keyboard");
@@ -227,8 +221,6 @@ namespace PlaylistManager.UI
         private void KeyboardEnter(string keyboardText)
         {
             keyboardPressed?.Invoke(keyboardText);
-            Action modalDismissed = animateDismiss ? null : ModalDismissedEvent;
-            keyboardModalView.Hide(animateDismiss, modalDismissed);
             keyboardPressed = null;
             keyboardTransform.transform.SetParent(rootTransform);
         }

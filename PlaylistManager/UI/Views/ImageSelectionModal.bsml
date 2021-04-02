@@ -1,10 +1,11 @@
 ﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
-	<modal id='modal' show-event='open-modal' hide-event='close-modal' clickerino-offerino-closerino='true' anchor-pos-x='-23.5' anchor-pos-y='0.5' size-delta-x='35' size-delta-y='65' move-to-center='false'>
-		<vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' preferred-width='20' preferred-height='60' anchor-pos-x='-7' anchor-pos-y='-2' >
-			<list id='list' cell-size='20' select-cell='select-cell' list-style='Box' />
+	<modal id='modal' show-event='open-modal' hide-event='close-modal' clickerino-offerino-closerino='true' anchor-pos-x='-23.5' anchor-pos-y='-2.5' size-delta-x='35' size-delta-y='65' move-to-center='false'>
+		<vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' anchor-pos-x='-7' anchor-pos-y='-3' >
+			<list id='list' cell-size='18' preferred-width='18' preferred-height='54' select-cell='select-cell' list-style='Box' align-to-center='true' />
 		</vertical>
-		<page-button event-click='list#PageUp' direction='Up' ignore-layout='true' anchor-min-y='0.8' anchor-pos-x='10' anchor-pos-y='-4' pref-width='12' />
-		<page-button event-click='list#PageDown' direction='Down' ignore-layout='true' anchor-min-y='-0.8' anchor-pos-x='10' anchor-pos-y='-2' pref-width='12' />
+		<page-button event-click='list#PageUp' direction='Up' ignore-layout='true' anchor-min-y='0.8' anchor-pos-x='10' anchor-pos-y='-4' pref-width='12' active='~up-button-enabled' />
+		<page-button event-click='list#PageDown' direction='Down' ignore-layout='true' anchor-min-y='-0.8' anchor-pos-x='10' anchor-pos-y='-2' pref-width='12' active='~down-button-enabled' />
 		<button text='^' click-event='close-modal' anchor-pos-x ='29.5' anchor-pos-y='-3.5' />
+		<button text='❓' anchor-pos-x ='20.5' anchor-pos-y='-3.5' hover-hint='Images can be added to the Playlists\CoverImages folder.' />
 	</modal>
 </bg>
