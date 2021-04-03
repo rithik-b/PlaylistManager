@@ -122,7 +122,7 @@ namespace PlaylistManager.UI
         [UIValue("playlist-name")]
         private string PlaylistName
         {
-            get => selectedPlaylist == null || selectedPlaylist.Title == null ? "" : selectedPlaylist.Title;
+            get => selectedPlaylist == null || selectedPlaylist.Title == null ? " " : selectedPlaylist.Title;
             set
             {
                 selectedPlaylist.Title = value;
@@ -134,13 +134,13 @@ namespace PlaylistManager.UI
         [UIValue("name-hint")]
         private string NameHint
         {
-            get => PlaylistName.Length > 15 ? PlaylistName : "";
+            get => PlaylistName;
         }
 
         [UIValue("playlist-author")]
         private string PlaylistAuthor
         {
-            get => selectedPlaylist == null || selectedPlaylist.Author == null ? "" : selectedPlaylist.Author;
+            get => selectedPlaylist == null || selectedPlaylist.Author == null ? " " : selectedPlaylist.Author;
             set
             {
                 selectedPlaylist.Author = value;
@@ -152,7 +152,7 @@ namespace PlaylistManager.UI
         [UIValue("author-hint")]
         private string AuthorHint
         {
-            get => PlaylistAuthor.Length > 15 ? PlaylistAuthor : "";
+            get => PlaylistAuthor;
         }
 
         [UIValue("playlist-description")]

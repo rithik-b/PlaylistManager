@@ -94,7 +94,8 @@ namespace PlaylistManager.UI
                 int selectedIndex = annotatedBeatmapLevelCollectionsViewController.selectedItemIndex;
                 List<IAnnotatedBeatmapLevelCollection> annotatedBeatmapLevelCollections = AnnotatedBeatmapLevelCollectionsAccessor(ref annotatedBeatmapLevelCollectionsViewController).ToList();
                 annotatedBeatmapLevelCollections.RemoveAt(selectedIndex);
-                LevelCollectionTableViewUpdatedEvent?.Invoke(annotatedBeatmapLevelCollections.ToArray(), selectedIndex - 1);
+                selectedIndex--;
+                LevelCollectionTableViewUpdatedEvent?.Invoke(annotatedBeatmapLevelCollections.ToArray(), selectedIndex < 0 ? 0 : selectedIndex);
             }
             catch (Exception e)
             {

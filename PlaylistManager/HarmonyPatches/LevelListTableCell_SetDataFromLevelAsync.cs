@@ -6,7 +6,7 @@ namespace PlaylistManager.HarmonyPatches
 {
     [HarmonyPatch(typeof(LevelListTableCell))]
     [HarmonyPatch("SetDataFromLevelAsync", MethodType.Normal)]
-    public class LevelListTableCellSetDataFromLevel
+    public class LevelListTableCell_SetDataFromLevelAsync
     {
         static void Postfix(IPreviewBeatmapLevel level, bool isFavorite, ref TextMeshProUGUI ____songAuthorText, TextMeshProUGUI ____songDurationText)
         {
