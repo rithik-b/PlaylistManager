@@ -211,7 +211,7 @@ namespace PlaylistManager.UI
                     selectedPlaylist.SetCustomData("syncURL", syncURL);
                 }
 
-                PlaylistLibUtils.playlistManager.StorePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
+                parentManager.StorePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
                 await DownloadPlaylistAsync();
                 popupModalsController.ShowOkModal(rootTransform, "Playlist Synced", null);
             }
