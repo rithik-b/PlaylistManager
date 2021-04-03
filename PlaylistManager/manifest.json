@@ -5,7 +5,7 @@
     "author": "PixelBoom",
     "version": "1.0.0",
     "description": "Load, Create, Edit, Organize Playlists and Download their Songs in Beat Saber.",
-    "gameVersion": "1.14.0",
+    "gameVersion": "1.13.4",
     "dependsOn": {
         "BSIPA": "^4.1.6",
         "SongCore": "^3.3.1",
