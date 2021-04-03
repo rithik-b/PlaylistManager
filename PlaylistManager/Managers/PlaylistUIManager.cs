@@ -15,18 +15,18 @@ namespace PlaylistManager.Managers
         private readonly StandardLevelDetailViewController standardLevelDetailViewController;
 
         private readonly List<ILevelCategoryUpdater> levelCategoryUpdaters;
-        private readonly List<IRefreshable> refreshables;
+        private readonly IRefreshable refreshable;
         private readonly IPlatformUserModel platformUserModel;
 
         internal PlaylistUIManager(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, SelectLevelCategoryViewController selectLevelCategoryViewController, 
-            StandardLevelDetailViewController standardLevelDetailViewController, List<ILevelCategoryUpdater> levelCategoryUpdaters, List<IRefreshable> refreshables, IPlatformUserModel platformUserModel)
+            StandardLevelDetailViewController standardLevelDetailViewController, List<ILevelCategoryUpdater> levelCategoryUpdaters, IRefreshable refreshable, IPlatformUserModel platformUserModel)
         {
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
             this.selectLevelCategoryViewController = selectLevelCategoryViewController;
             this.standardLevelDetailViewController = standardLevelDetailViewController;
 
             this.levelCategoryUpdaters = levelCategoryUpdaters;
-            this.refreshables = refreshables;
+            this.refreshable = refreshable;
             this.platformUserModel = platformUserModel;
         }
 
@@ -80,10 +80,7 @@ namespace PlaylistManager.Managers
         private void PlaylistManager_PlaylistsRefreshRequested(object sender, string requester)
         {
             Plugin.Log.Info("Refresh requested by: " + requester);
-            foreach (IRefreshable refreshable in refreshables)
-            {
-                refreshable.Refresh();
-            }
+            refreshable.Refresh();
         }
 
         private async Task AssignAuthor()

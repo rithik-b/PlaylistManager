@@ -248,6 +248,7 @@ namespace PlaylistManager.UI
             }
             childPlaylists.Add(playlist);
             customListTableData.tableView.ReloadData();
+            PlaylistLibUtils.playlistManager.RequestRefresh("PlaylistManager (plugin)");
         }
 
         #endregion

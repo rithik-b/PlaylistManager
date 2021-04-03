@@ -11,7 +11,7 @@ using System.Collections.Generic;
 
 namespace PlaylistManager.UI
 {
-    public class AddRemoveButtonsViewController : IInitializable, IPreviewBeatmapLevelUpdater, ILevelCollectionUpdater, IRefreshable, INotifyPropertyChanged
+    public class AddRemoveButtonsViewController : IInitializable, IPreviewBeatmapLevelUpdater, ILevelCollectionUpdater, INotifyPropertyChanged
     {
         private StandardLevelDetailViewController standardLevelDetailViewController;
         private LevelCollectionTableView levelCollectionTableView;
@@ -30,8 +30,6 @@ namespace PlaylistManager.UI
             FieldAccessor<LevelCollectionViewController, LevelCollectionTableView>.GetAccessor("_levelCollectionTableView");
         public static readonly FieldAccessor<LevelCollectionTableView, HashSet<string>>.Accessor FavoriteLevelIdsAccessor =
             FieldAccessor<LevelCollectionTableView, HashSet<string>>.GetAccessor("_favoriteLevelIds");
-        public static readonly FieldAccessor<StandardLevelDetailViewController, IPreviewBeatmapLevel>.Accessor PreviewBeatmapLevelAccessor =
-            FieldAccessor<StandardLevelDetailViewController, IPreviewBeatmapLevel>.GetAccessor("_previewBeatmapLevel");
 
         [UIComponent("root")]
         private RectTransform rootTransform;
@@ -144,11 +142,6 @@ namespace PlaylistManager.UI
                 this.selectedPlaylist = null;
                 this.parentManager = null;
             }
-        }
-
-        public void Refresh()
-        {
-            PreviewBeatmapLevelUpdated(PreviewBeatmapLevelAccessor(ref standardLevelDetailViewController));
         }
     }
 }

@@ -10,7 +10,7 @@ namespace PlaylistManager
 {
     public class PlaylistDataManager : IInitializable, IDisposable
     {
-        private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
+        private readonly AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
         private readonly LevelPackDetailViewController levelPackDetailViewController;
         private readonly LevelFilteringNavigationController levelFilteringNavigationController;
 
@@ -35,12 +35,13 @@ namespace PlaylistManager
             this.levelCollectionsTableUpdaters = levelCollectionsTableUpdaters;
             this.previewBeatmapLevelUpdaters = previewBeatmapLevelUpdaters;
 
-            emptyBeatmapLevelPack = new BeatmapLevelPack(CustomLevelLoader.kCustomLevelPackPrefixId + "playlistmanager_empty", "Empty", "Empty", BeatSaberMarkupLanguage.Utilities.ImageResources.BlankSprite, new BeatmapLevelCollection(new IPreviewBeatmapLevel[0]));
+            emptyBeatmapLevelPack = new BeatmapLevelPack(CustomLevelLoader.kCustomLevelPackPrefixId + "CustomLevels", "Custom Levels", "Custom Levels", BeatSaberMarkupLanguage.Utilities.ImageResources.BlankSprite, new BeatmapLevelCollection(new IPreviewBeatmapLevel[0]));
         }
 
         public void Initialize()
         {
             levelPackDetailViewController.didActivateEvent += LevelPackDetailViewController_didActivateEvent;
+            levelFilteringNavigationController.didSelectAnnotatedBeatmapLevelCollectionEvent += LevelFilteringNavigationController_didSelectAnnotatedBeatmapLevelCollectionEvent;
             annotatedBeatmapLevelCollectionsViewController.didSelectAnnotatedBeatmapLevelCollectionEvent += AnnotatedBeatmapLevelCollectionsViewController_didSelectAnnotatedBeatmapLevelCollectionEvent;
             LevelCollectionTableView_HandleDidSelectRowEvent.DidSelectLevelEvent += LevelCollectionTableView_DidSelectLevelEvent;
 
@@ -53,6 +54,7 @@ namespace PlaylistManager
         public void Dispose()
         {
             levelPackDetailViewController.didActivateEvent -= LevelPackDetailViewController_didActivateEvent;
+            levelFilteringNavigationController.didSelectAnnotatedBeatmapLevelCollectionEvent -= LevelFilteringNavigationController_didSelectAnnotatedBeatmapLevelCollectionEvent;
             annotatedBeatmapLevelCollectionsViewController.didSelectAnnotatedBeatmapLevelCollectionEvent -= AnnotatedBeatmapLevelCollectionsViewController_didSelectAnnotatedBeatmapLevelCollectionEvent;
             LevelCollectionTableView_HandleDidSelectRowEvent.DidSelectLevelEvent -= LevelCollectionTableView_DidSelectLevelEvent;
 
@@ -64,7 +66,15 @@ namespace PlaylistManager
 
         private void LevelPackDetailViewController_didActivateEvent(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
-            AnnotatedBeatmapLevelCollectionsViewController_didSelectAnnotatedBeatmapLevelCollectionEvent(annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection);
+            if (annotatedBeatmapLevelCollectionsViewController.isActiveAndEnabled)
+            {
+                AnnotatedBeatmapLevelCollectionsViewController_didSelectAnnotatedBeatmapLevelCollectionEvent(annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection);
+            }
+        }
+
+        private void LevelFilteringNavigationController_didSelectAnnotatedBeatmapLevelCollectionEvent(LevelFilteringNavigationController _, IAnnotatedBeatmapLevelCollection annotatedBeatmapLevelCollection, UnityEngine.GameObject __, BeatmapCharacteristicSO ___)
+        {
+            AnnotatedBeatmapLevelCollectionsViewController_didSelectAnnotatedBeatmapLevelCollectionEvent(annotatedBeatmapLevelCollection);
         }
 
         private void AnnotatedBeatmapLevelCollectionsViewController_didSelectAnnotatedBeatmapLevelCollectionEvent(IAnnotatedBeatmapLevelCollection annotatedBeatmapLevelCollection)
