@@ -1,26 +1,35 @@
 # PlaylistManager
-This plugin allows for viewing and ingame management of playlists as well as the ability to download missing songs, just like the pre-1.6.0 days :)
+Load, Create, Edit, Organize Playlists and Download their Songs in Beat Saber.
 
 ## Features
-- View playlists ingame (R.I.P. PlaylistLoaderLite)
-- Add custom songs and OST songs to playlists
-- Create playlists
-![Add to and Create Playlists](https://github.com/rithik-b/PlaylistManager/blob/master/img/add.gif?raw=true)
-- Remove songs from playlists
-![Remove songs from Playlists](https://github.com/rithik-b/PlaylistManager/blob/master/img/remove.gif?raw=true)
-- Delete playlists
+- View Playlists
+	- View songs
+	- View metadata such as title, author, description and cover image
+	- View suggested difficulties
+- Edit Playlists
+	- Add custom songs and OST songs to playlists (along with specific difficulties)
+	- Remove songs from playlists
+	- Edit the title, author and cover image
+- Manage Playlists
+	- Create playlists
+	- Delete playlists
+	- Create folders to store playlists in
+	- Delete folders
 - Download missing songs in playlists
 - Sync some playlists with the internet (example map pools)
-![Delete, Download missing songs and Sync Playlists Playlists](https://github.com/rithik-b/PlaylistManager/blob/master/img/view.png?raw=true)
 
 ## Download
-Download the latest version of the mod (v0.2.4) [here](https://github.com/rithik-b/PlaylistManager/releases/tag/0.2.4 "here").
+Download the latest version of the mod (v1.0.0) [here](https://github.com/rithik-b/PlaylistManager/releases/tag/1.0.0 "here").
 To install, move the dll to your Plugins folder.
 
 **SongCore**, **BeatSaverSharp**, **BeatSaberMarkupLanguage (BSML)**, **SiraUtil** and **BeatSaberPlaylistsLib** are required for this mod, so please download the latest version from ModAssistant.
 
+## Usage instructions
+To load playlists, store all playlists in the "Playlists" folder in your Beat Saber install. You may also create folders inside the Playlists folder to further organize your playlists. Supported formats are .json, .bplist and .blist
+Cover images go into the "CoverImages" folder and the supported formats are .jpg and .png
+
 ## Issues and Support
-If you encounter any issues with this mod, PM me on Discord PixelBoom#0001 or file an Issue on GitHub and I'll fix it as soon as I can For support with the mod, DM me or ask a question on the #pc-mod-support channel on the BSMG discord
+If you encounter any issues with this mod, DM me on Discord PixelBoom#0001 or file an Issue on GitHub and I'll fix it as soon as I can For support with the mod, DM me or ask a question on the #pc-help channel on the BSMG discord
 
 ## Contribution
 If you're a developer and would like to contribute to this mod, your contributions are welcome! Just submit a PR and I will take a look at it.
