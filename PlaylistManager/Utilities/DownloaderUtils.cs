@@ -52,13 +52,14 @@ namespace PlaylistManager.Utilities
                 {
                     if (e is BeatSaverSharp.Exceptions.RateLimitExceededException rateLimitException)
                     {
-                        var timeRemaining = rateLimitException.RateLimit.Reset.Millisecond - DateTime.Now.Millisecond;
-                        await Task.Delay(timeRemaining).ConfigureAwait(false);
+                        double timeRemaining = (rateLimitException.RateLimit.Reset - DateTime.Now).TotalMilliseconds;
+                        timeRemaining = timeRemaining > 0 ? timeRemaining : 0;
+                        await Task.Delay((int)timeRemaining);
                         continue;
                     }
                     else if (!(e is TaskCanceledException))
                     {
-                        Plugin.Log.Critical(string.Format("Failed to download Song {0}. Exception: {1}", key, e.Message));
+                        Plugin.Log.Critical(string.Format("Failed to download Song {0}. Exception: {1}", key, e.ToString()));
                     }
                     songDownloaded = true;
                 }
@@ -81,13 +82,14 @@ namespace PlaylistManager.Utilities
                 {
                     if (e is BeatSaverSharp.Exceptions.RateLimitExceededException rateLimitException)
                     {
-                        var timeRemaining = rateLimitException.RateLimit.Reset.Millisecond - DateTime.Now.Millisecond;
-                        await Task.Delay(timeRemaining).ConfigureAwait(false);
+                        double timeRemaining = (rateLimitException.RateLimit.Reset - DateTime.Now).TotalMilliseconds;
+                        timeRemaining = timeRemaining > 0 ? timeRemaining : 0;
+                        await Task.Delay((int)timeRemaining);
                         continue;
                     }
                     else if (!(e is TaskCanceledException))
                     {
-                        Plugin.Log.Critical(string.Format("Failed to download Song {0}. Exception: {1}", hash, e.Message));
+                        Plugin.Log.Critical(string.Format("Failed to download Song {0}. Exception: {1}", hash, e.ToString()));
                     }
                     songDownloaded = true;
                 }
