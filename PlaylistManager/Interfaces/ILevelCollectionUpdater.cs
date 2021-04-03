@@ -2,7 +2,6 @@
 {
     interface ILevelCollectionUpdater
     {
-        void LevelCollectionUpdated();
-        void LevelCategoryUpdated(SelectLevelCategoryViewController.LevelCategory levelCategory);
+        public void LevelCollectionUpdated(IAnnotatedBeatmapLevelCollection annotatedBeatmapLevelCollection, BeatSaberPlaylistsLib.PlaylistManager parentManager);
     }
 }

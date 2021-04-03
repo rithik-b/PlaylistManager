@@ -31,7 +31,7 @@ namespace PlaylistManager
             Log = logger;
             Log.Info("PlaylistManager initialized.");
             harmony = new Harmony(HarmonyId);
-            zenjector.OnMenu<PlaylistViewInstaller>();
+            zenjector.OnMenu<PlaylistManagerMenuInstaller>();
             DownloaderUtils.Init();
         }
 

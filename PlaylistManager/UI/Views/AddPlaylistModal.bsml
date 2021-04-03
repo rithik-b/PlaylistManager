@@ -1,0 +1,16 @@
+﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
+	<modal id='modal' show-event='open-modal' hide-event='close-modal' clickerino-offerino-closerino="true" anchor-pos-y='15' size-delta-x='65' size-delta-y='75' move-to-center='false'>
+		<bg active='~back-active'>
+			<button text='&lt;' on-click='back-button-pressed' anchor-pos-x ='5' anchor-pos-y='-5' />
+			<text text='~folder-text' anchor-pos-x ='45' anchor-pos-y='-15' />
+		</bg>
+		<vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' anchor-pos-y='-3' size-delta-y='0'>
+			<page-button event-click='list#PageUp' direction='Up' ignore-layout='true' anchor-min-y='0.8' anchor-pos-x='25' anchor-pos-y='9' pref-width='12' active='~up-button-enabled' />
+			<list id='list' pref-height='50' select-cell='select-cell' list-style='List' />
+			<page-button event-click='list#PageDown' direction='Down' ignore-layout='true' anchor-min-y='-0.8' anchor-pos-x='25' anchor-pos-y='-10' pref-width='12' active='~down-button-enabled' />
+		</vertical>
+		<button id ='create-playlist-button' text='+' hover-hint='Create a new playlist' on-click='open-keyboard' anchor-pos-x ='5' anchor-pos-y='-70' />
+		<button text='x' click-event='close-modal' anchor-pos-x ='60' anchor-pos-y='-5' />
+		<checkbox-setting id='highlight-checkbox' text='Highlight Selected Difficulty' value='highlight-difficulty' bind-value='true' apply-on-change='true' anchor-pos-x='0' anchor-pos-y='-67.5' />
+	</modal>
+</bg>

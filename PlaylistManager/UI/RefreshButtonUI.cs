@@ -21,6 +21,8 @@ namespace PlaylistManager.UI
 
         private void SongsLoaded(Loader _, System.Collections.Concurrent.ConcurrentDictionary<string, CustomPreviewBeatmapLevel> songs)
         {
+            PlaylistLibUtils.playlistManager.RefreshPlaylists(true);
+
             if (_progressBar == null)
             {
                 _progressBar = ProgressBar.Create();

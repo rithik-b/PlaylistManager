@@ -39,30 +39,60 @@ namespace PlaylistManager.Utilities
         public async Task BeatmapDownloadByKey(string key, CancellationToken token, IProgress<double> progress = null, bool direct = false)
         {
             var options = new StandardRequestOptions { Token = token, Progress = progress };
-            var song = await beatSaverInstance.Key(key, options);
-            try
-            {
-                await BeatSaverBeatmapDownload(song, options, direct);
-            }
-            catch (Exception e)
-            {
-                if (!(e is TaskCanceledException))
-                    Plugin.Log.Critical(string.Format("Failed to download Song {0}", key));
+            bool songDownloaded = false;
+            while(!songDownloaded)
+            { 
+                try
+                {
+                    var song = await beatSaverInstance.Key(key, options);
+                    await BeatSaverBeatmapDownload(song, options, direct);
+                    songDownloaded = true;
+                }
+                catch (Exception e)
+                {
+                    if (e is BeatSaverSharp.Exceptions.RateLimitExceededException rateLimitException)
+                    {
+                        double timeRemaining = (rateLimitException.RateLimit.Reset - DateTime.Now).TotalMilliseconds;
+                        timeRemaining = timeRemaining > 0 ? timeRemaining : 0;
+                        await Task.Delay((int)timeRemaining);
+                        continue;
+                    }
+                    else if (!(e is TaskCanceledException))
+                    {
+                        Plugin.Log.Critical(string.Format("Failed to download Song {0}. Exception: {1}", key, e.ToString()));
+                    }
+                    songDownloaded = true;
+                }
             }
         }
 
         public async Task BeatmapDownloadByHash(string hash, CancellationToken token, IProgress<double> progress = null, bool direct = false)
         {
             var options = new StandardRequestOptions { Token = token, Progress = progress };
-            var song = await beatSaverInstance.Hash(hash, options);
-            try
+            bool songDownloaded = false;
+            while (!songDownloaded)
             {
-                await BeatSaverBeatmapDownload(song, options, direct);
-            }
-            catch (Exception e)
-            {
-                if (!(e is TaskCanceledException))
-                    Plugin.Log.Critical(string.Format("Failed to download Song {0}", hash));
+                try
+                {
+                    var song = await beatSaverInstance.Hash(hash, options);
+                    await BeatSaverBeatmapDownload(song, options, direct);
+                    songDownloaded = true;
+                }
+                catch (Exception e)
+                {
+                    if (e is BeatSaverSharp.Exceptions.RateLimitExceededException rateLimitException)
+                    {
+                        double timeRemaining = (rateLimitException.RateLimit.Reset - DateTime.Now).TotalMilliseconds;
+                        timeRemaining = timeRemaining > 0 ? timeRemaining : 0;
+                        await Task.Delay((int)timeRemaining);
+                        continue;
+                    }
+                    else if (!(e is TaskCanceledException))
+                    {
+                        Plugin.Log.Critical(string.Format("Failed to download Song {0}. Exception: {1}", hash, e.ToString()));
+                    }
+                    songDownloaded = true;
+                }
             }
         }
 
@@ -101,7 +131,7 @@ namespace PlaylistManager.Utilities
                     basePath = songName;
                 }
                 basePath = string.Join("", basePath.Split(Path.GetInvalidFileNameChars().Concat(Path.GetInvalidPathChars()).ToArray()));
-                string path = customSongsPath + "/" + basePath;
+                string path = Path.Combine(customSongsPath, basePath);
                 
                 if (!overwrite && Directory.Exists(path))
                 {

@@ -12,7 +12,9 @@ namespace PlaylistManager.Configuration
         public virtual string AuthorName { get; set; } = nameof(PlaylistManager);
         public virtual bool AutomaticAuthorName { get; set; } = true;
         public virtual bool DefaultImageDisabled { get; set; } = false;
+        public virtual bool DefaultAllowDuplicates { get; set; } = true;
         public virtual float PlaylistScrollSpeed { get; set; } = 1;
+        public virtual bool HighlightDifficulty { get; set; } = true;
 
         /// <summary>
         /// Call this to force BSIPA to update the config file. This is also called by BSIPA if it detects the file was modified.
