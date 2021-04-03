@@ -1,3 +1,5 @@
+![Logo](https://github.com/rithik-b/PlaylistManager/blob/master/img/logo.png?raw=true)
+
 # PlaylistManager
 Load, Create, Edit, Organize Playlists and Download their Songs in Beat Saber.
 
@@ -37,3 +39,5 @@ If you're a developer and would like to contribute to this mod, your contributio
 ## Special Thanks
 Huge thanks for both Auros and Zingabopp for their co-operation as well as their contribution to this mod.
 Auros helped me do a full plugin rewrite with Zenject, allowing for a more optimized mod and Zingabopp created the BeatSaberPlaylistsLib library, which is what I depend on with this mod.
+
+![Screenshot](https://github.com/rithik-b/PlaylistManager/blob/master/img/screenshot.png?raw=true)
