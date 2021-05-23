@@ -20,7 +20,7 @@ namespace PlaylistManager.UI
     public class FoldersViewController : IInitializable, INotifyPropertyChanged, ILevelCollectionsTableUpdater, ILevelCategoryUpdater, IRefreshable
     {
         private readonly AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
-        private readonly MultiplayerLevelSelectionFlowCoordinator multiplayerLevelSelectionFlowCoordinator;
+        private readonly MainFlowCoordinator mainFlowCoordinator;
         private readonly LevelSelectionNavigationController levelSelectionNavigationController;
         private readonly PopupModalsController popupModalsController;
         private BeatmapLevelsModel beatmapLevelsModel;
@@ -55,10 +55,10 @@ namespace PlaylistManager.UI
         [UIComponent("folder-list")]
         public CustomListTableData customListTableData;
 
-        public FoldersViewController(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, MultiplayerLevelSelectionFlowCoordinator multiplayerLevelSelectionFlowCoordinator, LevelSelectionNavigationController levelSelectionNavigationController, PopupModalsController popupModalsController, BeatmapLevelsModel beatmapLevelsModel)
+        public FoldersViewController(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, MainFlowCoordinator mainFlowCoordinator, LevelSelectionNavigationController levelSelectionNavigationController, PopupModalsController popupModalsController, BeatmapLevelsModel beatmapLevelsModel)
         {
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
-            this.multiplayerLevelSelectionFlowCoordinator = multiplayerLevelSelectionFlowCoordinator;
+            this.mainFlowCoordinator = mainFlowCoordinator;
             this.levelSelectionNavigationController = levelSelectionNavigationController;
             this.popupModalsController = popupModalsController;
             this.beatmapLevelsModel = beatmapLevelsModel;
@@ -84,7 +84,7 @@ namespace PlaylistManager.UI
 
         public void SetupDimensions()
         {
-            if (!multiplayerLevelSelectionFlowCoordinator.isActivated)
+            if (!(mainFlowCoordinator.YoungestChildFlowCoordinatorOrSelf() is MultiplayerLevelSelectionFlowCoordinator))
             {
                 floatingScreen.transform.position = new Vector3(0f, 0.1f, 2.5f);
                 floatingScreen.transform.eulerAngles = new Vector3(75, 0, 0);
