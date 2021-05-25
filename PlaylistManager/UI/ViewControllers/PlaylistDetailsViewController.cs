@@ -126,6 +126,11 @@ namespace PlaylistManager.UI
             set
             {
                 selectedPlaylist.Title = value;
+                if (!selectedPlaylist.HasCover)
+                {
+                    selectedPlaylist.SpriteLoaded += SelectedPlaylist_SpriteLoaded;
+                    selectedPlaylist.RaiseCoverImageChangedForDefaultCover();
+                }
                 parentManager.StorePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistName)));
             }
