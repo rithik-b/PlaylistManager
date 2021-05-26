@@ -83,9 +83,12 @@ namespace PlaylistManager.UI
             var childPlaylists = parentManager.GetAllPlaylists(false);
             this.childPlaylists = childPlaylists.ToList();
 
-            foreach (BeatSaberPlaylistsLib.PlaylistManager playlistManager in childManagers)
+            if (!PluginConfig.Instance.FoldersDisabled)
             {
-                customListTableData.data.Add(new CustomCellInfo(Path.GetFileName(playlistManager.PlaylistPath), "Folder", folderIcon));
+                foreach (BeatSaberPlaylistsLib.PlaylistManager playlistManager in childManagers)
+                {
+                    customListTableData.data.Add(new CustomCellInfo(Path.GetFileName(playlistManager.PlaylistPath), "Folder", folderIcon));
+                }
             }
             foreach (BeatSaberPlaylistsLib.Types.IPlaylist playlist in childPlaylists)
             {

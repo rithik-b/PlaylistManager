@@ -1,6 +1,6 @@
 ﻿namespace PlaylistManager.Interfaces
 {
-    interface IRefreshable
+    interface IPMRefreshable
     {
         public void Refresh();
     }

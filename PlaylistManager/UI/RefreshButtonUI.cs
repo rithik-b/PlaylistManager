@@ -1,5 +1,6 @@
 ﻿using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.MenuButtons;
+using PlaylistManager.Configuration;
 using PlaylistManager.Utilities;
 using SongCore;
 using System;
@@ -21,13 +22,13 @@ namespace PlaylistManager.UI
 
         private void SongsLoaded(Loader _, System.Collections.Concurrent.ConcurrentDictionary<string, CustomPreviewBeatmapLevel> songs)
         {
-            PlaylistLibUtils.playlistManager.RefreshPlaylists(true);
+            PlaylistLibUtils.playlistManager.RefreshPlaylists(!PluginConfig.Instance.FoldersDisabled);
 
             if (_progressBar == null)
             {
                 _progressBar = ProgressBar.Create();
             }
-            int numPlaylists = PlaylistLibUtils.playlistManager.GetAllPlaylists(true).Length;
+            int numPlaylists = PlaylistLibUtils.playlistManager.GetAllPlaylists(!PluginConfig.Instance.FoldersDisabled).Length;
 
             _progressBar.enabled = true;
             _progressBar.ShowMessage(string.Format("\n{0} playlists loaded.", numPlaylists), MESSAGE_TIME);

@@ -6,8 +6,7 @@ using Zenject;
 using BeatSaberPlaylistsLib.Types;
 using UnityEngine;
 using System.ComponentModel;
-using IPA.Utilities;
-using System.Collections.Generic;
+using PlaylistManager.Utilities;
 
 namespace PlaylistManager.UI
 {
@@ -26,11 +25,6 @@ namespace PlaylistManager.UI
         private bool _addActive;
         private bool _removeActive;
 
-        public static readonly FieldAccessor<LevelCollectionViewController, LevelCollectionTableView>.Accessor LevelCollectionTableViewAccessor =
-            FieldAccessor<LevelCollectionViewController, LevelCollectionTableView>.GetAccessor("_levelCollectionTableView");
-        public static readonly FieldAccessor<LevelCollectionTableView, HashSet<string>>.Accessor FavoriteLevelIdsAccessor =
-            FieldAccessor<LevelCollectionTableView, HashSet<string>>.GetAccessor("_favoriteLevelIds");
-
         [UIComponent("root")]
         private RectTransform rootTransform;
 
@@ -38,7 +32,7 @@ namespace PlaylistManager.UI
                AddPlaylistModalController addPlaylistController, PopupModalsController popupModalsController)
         {
             this.standardLevelDetailViewController = standardLevelDetailViewController;
-            levelCollectionTableView = LevelCollectionTableViewAccessor(ref levelCollectionViewController);
+            levelCollectionTableView = Accessors.LevelCollectionTableViewAccessor(ref levelCollectionViewController);
             this.levelCollectionNavigationController = levelCollectionNavigationController;
             this.addPlaylistController = addPlaylistController;
             this.popupModalsController = popupModalsController;
@@ -93,7 +87,7 @@ namespace PlaylistManager.UI
             parentManager.StorePlaylist(selectedPlaylist);
 
             levelCollectionTableView.ClearSelection();
-            levelCollectionTableView.SetData(selectedPlaylist.beatmapLevelCollection.beatmapLevels, FavoriteLevelIdsAccessor(ref levelCollectionTableView), false);
+            levelCollectionTableView.SetData(selectedPlaylist.beatmapLevelCollection.beatmapLevels, Accessors.FavoriteLevelIdsAccessor(ref levelCollectionTableView), false);
             levelCollectionNavigationController.HideDetailViewController();
         }
 

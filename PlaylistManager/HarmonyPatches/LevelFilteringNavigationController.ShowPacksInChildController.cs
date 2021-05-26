@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using HarmonyLib;
 using PlaylistManager.Utilities;
+using PlaylistManager.Configuration;
 
 namespace PlaylistManager.HarmonyPatches
 {
@@ -17,7 +18,7 @@ namespace PlaylistManager.HarmonyPatches
             // Checks if this is the playlists view
             if (beatmapLevelPacks[0] is CustomBeatmapLevelPack)
             {
-                beatmapLevelPacks = beatmapLevelPacks.ToArray().AddRangeToArray(PlaylistLibUtils.playlistManager.GetAllPlaylists(true));
+                beatmapLevelPacks = beatmapLevelPacks.ToArray().AddRangeToArray(PlaylistLibUtils.playlistManager.GetAllPlaylists(!PluginConfig.Instance.FoldersDisabled));
             }
         }
     }

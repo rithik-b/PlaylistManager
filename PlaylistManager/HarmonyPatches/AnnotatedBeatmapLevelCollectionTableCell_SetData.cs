@@ -1,9 +1,9 @@
 ﻿using System;
 using HarmonyLib;
-using IPA.Utilities;
 using UnityEngine.UI;
 using BeatSaberPlaylistsLib.Types;
 using System.Runtime.CompilerServices;
+using PlaylistManager.Utilities;
 
 /*
  * Original Author: Auros
@@ -16,10 +16,6 @@ namespace PlaylistManager.HarmonyPatches
     public class AnnotatedBeatmapLevelCollectionTableCell_SetData
     {
         public static readonly ConditionalWeakTable<IDeferredSpriteLoad, AnnotatedBeatmapLevelCollectionTableCell> EventTable = new ConditionalWeakTable<IDeferredSpriteLoad, AnnotatedBeatmapLevelCollectionTableCell>();
-        public static readonly FieldAccessor<AnnotatedBeatmapLevelCollectionTableCell, Image>.Accessor CoverImageAccessor
-            = FieldAccessor<AnnotatedBeatmapLevelCollectionTableCell, Image>.GetAccessor("_coverImage");
-        public static readonly FieldAccessor<AnnotatedBeatmapLevelCollectionTableCell, IAnnotatedBeatmapLevelCollection>.Accessor BeatmapCollectionAccessor
-             = FieldAccessor<AnnotatedBeatmapLevelCollectionTableCell, IAnnotatedBeatmapLevelCollection>.GetAccessor("_annotatedBeatmapLevelCollection");
 
         static void Postfix(AnnotatedBeatmapLevelCollectionTableCell __instance, ref IAnnotatedBeatmapLevelCollection annotatedBeatmapLevelCollection, ref Image ____coverImage)
         {
@@ -48,13 +44,13 @@ namespace PlaylistManager.HarmonyPatches
             {
                 if (EventTable.TryGetValue(deferredSpriteLoad, out AnnotatedBeatmapLevelCollectionTableCell tableCell))
                 {
-                    IAnnotatedBeatmapLevelCollection collection = BeatmapCollectionAccessor(ref tableCell);
+                    IAnnotatedBeatmapLevelCollection collection = Accessors.BeatmapCollectionAccessor(ref tableCell);
                     if (collection == deferredSpriteLoad)
                     {
 #if DEBUG
                         Plugin.Log.Debug($"Updating image for {collection.collectionName}");
 #endif
-                        CoverImageAccessor(ref tableCell).sprite = deferredSpriteLoad.Sprite;
+                        Accessors.CoverImageAccessor(ref tableCell).sprite = deferredSpriteLoad.Sprite;
                     }
                     else
                     {

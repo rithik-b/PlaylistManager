@@ -10,9 +10,6 @@ namespace PlaylistManager.UI
 {
     public class SettingsViewController : IInitializable, IDisposable, INotifyPropertyChanged
     {
-        [UIComponent("name-setting")]
-        private readonly StringSetting nameSetting;
-
         public event PropertyChangedEventHandler PropertyChanged;
 
         [UIValue("author-name")]
@@ -22,26 +19,19 @@ namespace PlaylistManager.UI
             set => PluginConfig.Instance.AuthorName = value;
         }
 
+        [UIValue("name-interactable")]
+        private bool NameInteractable => !AutomaticAuthorName;
+
         [UIValue("auto-name")]
         public bool AutomaticAuthorName
         {
-            get
-            {
-                nameSetting.interactable = !PluginConfig.Instance.AutomaticAuthorName;
-                return PluginConfig.Instance.AutomaticAuthorName;
-            }
+            get => PluginConfig.Instance.AutomaticAuthorName;
             set
             {
                 PluginConfig.Instance.AutomaticAuthorName = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AutomaticAuthorName)));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NameInteractable)));
             }
-        }
-
-        [UIValue("no-image")]
-        public bool DefaultImageDisabled
-        {
-            get => PluginConfig.Instance.DefaultImageDisabled;
-            set => PluginConfig.Instance.DefaultImageDisabled = value;
         }
 
         [UIValue("allow-duplicates")]
@@ -56,6 +46,43 @@ namespace PlaylistManager.UI
         {
             get => PluginConfig.Instance.PlaylistScrollSpeed;
             set => PluginConfig.Instance.PlaylistScrollSpeed = value;
+        }
+
+        [UIValue("no-image")]
+        public bool DefaultImageDisabled
+        {
+            get => PluginConfig.Instance.DefaultImageDisabled;
+            set => PluginConfig.Instance.DefaultImageDisabled = value;
+        }
+
+        [UIValue("no-folders")]
+        public bool FoldersDisabled
+        {
+            get => PluginConfig.Instance.FoldersDisabled;
+            set
+            {
+                PluginConfig.Instance.FoldersDisabled = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FoldersDisabled)));
+            }
+        }
+
+        [UIValue("no-folders-interactable")]
+        private bool FoldersDisabledInteractable => !ManagementDisabled;
+
+        [UIValue("no-management")]
+        public bool ManagementDisabled
+        {
+            get => PluginConfig.Instance.ManagementDisabled;
+            set
+            {
+                PluginConfig.Instance.ManagementDisabled = value;
+                if (value)
+                {
+                    FoldersDisabled = true;
+                }
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ManagementDisabled)));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FoldersDisabledInteractable)));
+            }
         }
 
         public void Initialize() => BSMLSettings.instance.AddSettingsMenu(nameof(PlaylistManager), "PlaylistManager.UI.Views.Settings.bsml", this);

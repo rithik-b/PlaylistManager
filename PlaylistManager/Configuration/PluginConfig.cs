@@ -1,7 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 using IPA.Config.Stores;
-using PlaylistManager.Utilities;
 
 [assembly: InternalsVisibleTo(GeneratedStore.AssemblyVisibilityTarget)]
 namespace PlaylistManager.Configuration
@@ -12,6 +10,9 @@ namespace PlaylistManager.Configuration
         public virtual string AuthorName { get; set; } = nameof(PlaylistManager);
         public virtual bool AutomaticAuthorName { get; set; } = true;
         public virtual bool DefaultImageDisabled { get; set; } = false;
+        public virtual bool FoldersDisabled { get; set; } = false;
+        public virtual bool ManagementDisabled { get; set; } = false;
+
         public virtual bool DefaultAllowDuplicates { get; set; } = true;
         public virtual float PlaylistScrollSpeed { get; set; } = 1;
         public virtual bool HighlightDifficulty { get; set; } = true;

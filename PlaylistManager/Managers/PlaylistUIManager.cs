@@ -15,11 +15,11 @@ namespace PlaylistManager.Managers
         private readonly StandardLevelDetailViewController standardLevelDetailViewController;
 
         private readonly List<ILevelCategoryUpdater> levelCategoryUpdaters;
-        private readonly IRefreshable refreshable;
+        private readonly IPMRefreshable refreshable;
         private readonly IPlatformUserModel platformUserModel;
 
         internal PlaylistUIManager(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, SelectLevelCategoryViewController selectLevelCategoryViewController, 
-            StandardLevelDetailViewController standardLevelDetailViewController, List<ILevelCategoryUpdater> levelCategoryUpdaters, IRefreshable refreshable, IPlatformUserModel platformUserModel)
+            StandardLevelDetailViewController standardLevelDetailViewController, List<ILevelCategoryUpdater> levelCategoryUpdaters, IPMRefreshable refreshable, IPlatformUserModel platformUserModel)
         {
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
             this.selectLevelCategoryViewController = selectLevelCategoryViewController;

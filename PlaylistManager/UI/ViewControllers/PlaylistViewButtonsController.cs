@@ -32,9 +32,6 @@ namespace PlaylistManager.UI
         private Playlist selectedPlaylist;
         private BeatSaberPlaylistsLib.PlaylistManager parentManager;
 
-        public static readonly FieldAccessor<AnnotatedBeatmapLevelCollectionsViewController, IReadOnlyList<IAnnotatedBeatmapLevelCollection>>.Accessor AnnotatedBeatmapLevelCollectionsAccessor = 
-            FieldAccessor<AnnotatedBeatmapLevelCollectionsViewController, IReadOnlyList<IAnnotatedBeatmapLevelCollection>>.GetAccessor("_annotatedBeatmapLevelCollections");
-
         public event Action<IAnnotatedBeatmapLevelCollection[], int> LevelCollectionTableViewUpdatedEvent;
 
         [UIComponent("root")]
@@ -92,7 +89,7 @@ namespace PlaylistManager.UI
             {
                 parentManager.DeletePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
                 int selectedIndex = annotatedBeatmapLevelCollectionsViewController.selectedItemIndex;
-                List<IAnnotatedBeatmapLevelCollection> annotatedBeatmapLevelCollections = AnnotatedBeatmapLevelCollectionsAccessor(ref annotatedBeatmapLevelCollectionsViewController).ToList();
+                List<IAnnotatedBeatmapLevelCollection> annotatedBeatmapLevelCollections = Accessors.AnnotatedBeatmapLevelCollectionsAccessor(ref annotatedBeatmapLevelCollectionsViewController).ToList();
                 annotatedBeatmapLevelCollections.RemoveAt(selectedIndex);
                 selectedIndex--;
                 LevelCollectionTableViewUpdatedEvent?.Invoke(annotatedBeatmapLevelCollections.ToArray(), selectedIndex < 0 ? 0 : selectedIndex);
@@ -148,7 +145,7 @@ namespace PlaylistManager.UI
 
             popupModalsController.OkText = "Download Complete!";
             popupModalsController.OkButtonText = "Ok";
-            downloadingBeatmapLevelCollections = AnnotatedBeatmapLevelCollectionsAccessor(ref annotatedBeatmapLevelCollectionsViewController).ToArray();
+            downloadingBeatmapLevelCollections = Accessors.AnnotatedBeatmapLevelCollectionsAccessor(ref annotatedBeatmapLevelCollectionsViewController).ToArray();
             downloadingBeatmapCollectionIdx = annotatedBeatmapLevelCollectionsViewController.selectedItemIndex;
             SongCore.Loader.Instance.RefreshSongs(false);
             LevelFilteringNavigationController_UpdateSecondChildControllerContent.SecondChildControllerUpdatedEvent += LevelFilteringNavigationController_UpdateSecondChildControllerContent_SecondChildControllerUpdatedEvent;
