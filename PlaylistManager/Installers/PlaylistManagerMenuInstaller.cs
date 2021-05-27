@@ -11,7 +11,7 @@ namespace PlaylistManager.Installers
         {
             if (!PluginConfig.Instance.ManagementDisabled)
             {
-                Container.BindInterfacesTo<AddRemoveButtonsViewController>().AsSingle();
+                Container.BindInterfacesTo<LevelDetailButtonsViewController>().AsSingle();
                 Container.BindInterfacesAndSelfTo<AddPlaylistModalController>().AsSingle();
                 Container.BindInterfacesTo<PlaylistViewButtonsController>().AsSingle();
                 Container.BindInterfacesAndSelfTo<PlaylistDetailsViewController>().AsSingle();
@@ -30,7 +30,7 @@ namespace PlaylistManager.Installers
 
             Container.BindInterfacesTo<SettingsViewController>().AsSingle();
             Container.BindInterfacesTo<TableViewButtonsController>().AsSingle();
-            Container.BindInterfacesTo<DifficultyHighlighter>().AsSingle();
+            Container.BindInterfacesAndSelfTo<DifficultyHighlighter>().AsSingle();
             Container.BindInterfacesTo<RefreshButtonUI>().AsSingle();
 
             Container.BindInterfacesTo<PlaylistUIManager>().AsSingle();

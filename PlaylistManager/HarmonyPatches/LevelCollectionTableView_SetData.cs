@@ -1,50 +1,33 @@
 ﻿using BeatSaberPlaylistsLib.Types;
 using HarmonyLib;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Reflection.Emit;
 
 namespace PlaylistManager.HarmonyPatches
 {
-    [HarmonyPatch(typeof(LevelCollectionViewController))]
+    [HarmonyPatch(typeof(LevelCollectionTableView))]
     [HarmonyPatch("SetData", MethodType.Normal)]
     public class LevelCollectionTableView_SetData
     {
-        internal static readonly MethodInfo _replaceWithPlaylistSongs = SymbolExtensions.GetMethodInfo((IBeatmapLevelCollection beatmapLevelCollection) => ReplaceWithPlaylistSongs(beatmapLevelCollection));
+        /*
+         * Since SongBrowser (or other filter mods) can set the TableView directly without the need of using Playlist or other collection types
+         * This patch will unwrap them
+         */
 
-        internal static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+        internal static void Prefix(ref IPreviewBeatmapLevel[] previewBeatmapLevels)
         {
-            List<CodeInstruction> codes = new List<CodeInstruction>(instructions);
-            int index = -1;
-            for (int i = 0; i < codes.Count - 2; i++)
+            // Safe to assume if first song is IPlaylistSong, there will be more
+            if (previewBeatmapLevels.Length != 0 && previewBeatmapLevels[0] is IPlaylistSong)
             {
-                if (codes[i + 1].opcode == OpCodes.Callvirt && codes[i + 1].operand.ToString() == "IPreviewBeatmapLevel[] get_beatmapLevels()" )
+                // Clone so the filtered collection we originally got will still have the PlaylistLib types
+                previewBeatmapLevels = (IPreviewBeatmapLevel[])previewBeatmapLevels.Clone();
+                for (int i = 0; i < previewBeatmapLevels.Length; i++)
                 {
-                    if (codes[i].opcode == OpCodes.Ldarg_1 && codes[i + 2].opcode == OpCodes.Stloc_0)
+                    // If statement anyway for safety
+                    if (previewBeatmapLevels[i] is IPlaylistSong playlistSong)
                     {
-                        index = i + 1;
+                        previewBeatmapLevels[i] = playlistSong.PreviewBeatmapLevel;
                     }
                 }
             }
-            if (index != -1)
-            {
-                codes[index] = new CodeInstruction(OpCodes.Callvirt, _replaceWithPlaylistSongs);
-            }
-            return codes.AsEnumerable();
-        }
-
-        internal static IPreviewBeatmapLevel[] ReplaceWithPlaylistSongs(IBeatmapLevelCollection beatmapLevelCollection)
-        {
-            if (beatmapLevelCollection is BeatSaberPlaylistsLib.Legacy.LegacyPlaylist legacyPlaylist)
-            {
-                return legacyPlaylist.BeatmapLevels;
-            }
-            if (beatmapLevelCollection is BeatSaberPlaylistsLib.Blist.BlistPlaylist blistPlaylist)
-            {
-                return blistPlaylist.BeatmapLevels;
-            }
-            return beatmapLevelCollection.beatmapLevels;
         }
     }
 }

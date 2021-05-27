@@ -7,42 +7,52 @@ using BeatSaberPlaylistsLib.Types;
 using UnityEngine;
 using System.ComponentModel;
 using PlaylistManager.Utilities;
+using System;
 
 namespace PlaylistManager.UI
 {
-    public class AddRemoveButtonsViewController : IInitializable, IPreviewBeatmapLevelUpdater, ILevelCollectionUpdater, INotifyPropertyChanged
+    public class LevelDetailButtonsViewController : IInitializable, IDisposable, IPreviewBeatmapLevelUpdater, ILevelCollectionUpdater, INotifyPropertyChanged
     {
         private StandardLevelDetailViewController standardLevelDetailViewController;
         private LevelCollectionTableView levelCollectionTableView;
         private readonly LevelCollectionNavigationController levelCollectionNavigationController;
         private readonly AddPlaylistModalController addPlaylistController;
         private readonly PopupModalsController popupModalsController;
+        private readonly DifficultyHighlighter difficultyHighlighter;
 
         public event PropertyChangedEventHandler PropertyChanged;
         private IPreviewBeatmapLevel selectedBeatmapLevel;
         private BeatSaberPlaylistsLib.Types.IPlaylist selectedPlaylist;
         private BeatSaberPlaylistsLib.PlaylistManager parentManager;
         private bool _addActive;
-        private bool _removeActive;
+        private bool _isPlaylistSong;
+        private bool selectedDifficultyHighlighted;
 
         [UIComponent("root")]
         private RectTransform rootTransform;
 
-        public AddRemoveButtonsViewController(StandardLevelDetailViewController standardLevelDetailViewController, LevelCollectionViewController levelCollectionViewController, LevelCollectionNavigationController levelCollectionNavigationController,
-               AddPlaylistModalController addPlaylistController, PopupModalsController popupModalsController)
+        public LevelDetailButtonsViewController(StandardLevelDetailViewController standardLevelDetailViewController, LevelCollectionViewController levelCollectionViewController, LevelCollectionNavigationController levelCollectionNavigationController,
+               AddPlaylistModalController addPlaylistController, PopupModalsController popupModalsController, DifficultyHighlighter difficultyHighlighter)
         {
             this.standardLevelDetailViewController = standardLevelDetailViewController;
             levelCollectionTableView = Accessors.LevelCollectionTableViewAccessor(ref levelCollectionViewController);
             this.levelCollectionNavigationController = levelCollectionNavigationController;
             this.addPlaylistController = addPlaylistController;
             this.popupModalsController = popupModalsController;
+            this.difficultyHighlighter = difficultyHighlighter;
         }
 
         public void Initialize()
         {
-            BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.AddRemoveButtonsView.bsml"), standardLevelDetailViewController.transform.Find("LevelDetail").gameObject, this);
+            BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.LevelDetailButtonsView.bsml"), standardLevelDetailViewController.transform.Find("LevelDetail").gameObject, this);
             rootTransform.transform.localScale *= 0.7f;
             AddActive = false;
+            difficultyHighlighter.selectedDifficultyChanged += DifficultyHighlighter_selectedDifficultyChanged;
+        }
+
+        public void Dispose()
+        {
+            difficultyHighlighter.selectedDifficultyChanged -= DifficultyHighlighter_selectedDifficultyChanged;
         }
 
         #region Add Button
@@ -91,18 +101,45 @@ namespace PlaylistManager.UI
             levelCollectionNavigationController.HideDetailViewController();
         }
 
-        [UIValue("remove-active")]
-        private bool RemoveActive
+        #endregion
+
+        #region Highlight Difficulty Button
+
+        [UIAction("highlight-button-click")]
+        private void HighlightButtonClick()
         {
-            get => _removeActive;
-            set
-            {
-                _removeActive = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(RemoveActive)));
-            }
+            difficultyHighlighter.ToggleSelectedDifficultyHighlight();
+            parentManager.StorePlaylist(selectedPlaylist);
+            selectedDifficultyHighlighted = !selectedDifficultyHighlighted;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(HighlightButtonText)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(HighlightButtonHover)));
         }
 
+        private void DifficultyHighlighter_selectedDifficultyChanged(bool selectedDifficultyHighlighted)
+        {
+            this.selectedDifficultyHighlighted = selectedDifficultyHighlighted;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(HighlightButtonText)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(HighlightButtonHover)));
+        }
+
+        [UIValue("highlight-button-text")]
+        private string HighlightButtonText => selectedDifficultyHighlighted ? "⬛" : "⬜";
+
+        [UIValue("highlight-button-hover")]
+        private string HighlightButtonHover => selectedDifficultyHighlighted ? "Unhighlight selected difficulty" : "Highlight selected difficulty";
+
         #endregion
+
+        [UIValue("playlist-song")]
+        private bool IsPlaylistSong
+        {
+            get => _isPlaylistSong;
+            set
+            {
+                _isPlaylistSong = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsPlaylistSong)));
+            }
+        }
 
         public void PreviewBeatmapLevelUpdated(IPreviewBeatmapLevel beatmapLevel)
         {
@@ -110,17 +147,17 @@ namespace PlaylistManager.UI
             if (beatmapLevel.levelID.EndsWith(" WIP"))
             {
                 AddActive = false;
-                RemoveActive = false;
+                IsPlaylistSong = false;
             }
             else if (beatmapLevel is IPlaylistSong)
             {
                 AddActive = true;
-                RemoveActive = true;
+                IsPlaylistSong = true;
             }
             else
             {
                 AddActive = true;
-                RemoveActive = false;
+                IsPlaylistSong = false;
             }
         }
 
