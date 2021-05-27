@@ -230,7 +230,7 @@ namespace PlaylistManager.UI
         [UIAction("playlist-cover-clicked")]
         private void OpenImageSelectionModal()
         {
-            imageSelectionModalController.ShowModal();
+            imageSelectionModalController.ShowModal((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
         }
 
         private void ImageSelectionModalController_ImageSelectedEvent(byte[] imageBytes)

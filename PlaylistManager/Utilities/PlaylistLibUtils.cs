@@ -88,6 +88,8 @@ namespace PlaylistManager.Utilities
             return BeatSaberMarkupLanguage.Utilities.LoadSpriteRaw(ms.ToArray());
         }
 
+        internal static Sprite GeneratePlaylistIcon(BeatSaberPlaylistsLib.Types.IPlaylist playlist) => BeatSaberMarkupLanguage.Utilities.LoadSpriteRaw(BeatSaberPlaylistsLib.Utilities.GenerateCoverForPlaylist(playlist).ToArray());
+
         #endregion
     }
 }
