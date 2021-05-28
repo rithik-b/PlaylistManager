@@ -58,30 +58,14 @@ namespace PlaylistManager.UI
         public bool FoldersDisabled
         {
             get => PluginConfig.Instance.FoldersDisabled;
-            set
-            {
-                PluginConfig.Instance.FoldersDisabled = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FoldersDisabled)));
-            }
+            set => PluginConfig.Instance.FoldersDisabled = value;
         }
-
-        [UIValue("no-folders-interactable")]
-        private bool FoldersDisabledInteractable => !ManagementDisabled;
 
         [UIValue("no-management")]
         public bool ManagementDisabled
         {
             get => PluginConfig.Instance.ManagementDisabled;
-            set
-            {
-                PluginConfig.Instance.ManagementDisabled = value;
-                if (value)
-                {
-                    FoldersDisabled = true;
-                }
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ManagementDisabled)));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FoldersDisabledInteractable)));
-            }
+            set => PluginConfig.Instance.ManagementDisabled = value;
         }
 
         public void Initialize() => BSMLSettings.instance.AddSettingsMenu(nameof(PlaylistManager), "PlaylistManager.UI.Views.Settings.bsml", this);

@@ -21,7 +21,7 @@ namespace PlaylistManager.Utilities
 
         public static BeatSaberPlaylistsLib.Types.IPlaylist CreatePlaylist(string playlistName, string playlistAuthorName, BeatSaberPlaylistsLib.PlaylistManager playlistManager, bool defaultCover = true)
         {
-            string playlistFolderPath = Path.Combine(Environment.CurrentDirectory, "Playlists");
+            string playlistFolderPath = playlistManager.PlaylistPath;
             string playlistFileName = string.Join("_", playlistName.Replace("/", "").Replace("\\", "").Replace(".", "").Split(' '));
             if (string.IsNullOrEmpty(playlistFileName))
             {
