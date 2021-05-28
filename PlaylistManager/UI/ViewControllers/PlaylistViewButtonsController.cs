@@ -28,6 +28,8 @@ namespace PlaylistManager.UI
         private int downloadingBeatmapCollectionIdx;
         private IAnnotatedBeatmapLevelCollection[] downloadingBeatmapLevelCollections;
         private CancellationTokenSource tokenSource;
+        private SemaphoreSlim downloadPauseSemaphore;
+        private bool preferCustomArchiveURL;
         private Playlist selectedPlaylist;
         private BeatSaberPlaylistsLib.PlaylistManager parentManager;
 
@@ -48,6 +50,8 @@ namespace PlaylistManager.UI
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
 
             tokenSource = new CancellationTokenSource();
+            downloadPauseSemaphore = new SemaphoreSlim(0, 1);
+            preferCustomArchiveURL = true;
         }
 
         public void Initialize()
@@ -129,9 +133,38 @@ namespace PlaylistManager.UI
             tokenSource.Dispose();
             tokenSource = new CancellationTokenSource();
 
+            preferCustomArchiveURL = true;
+            bool shownCustomArchiveWarning = false;
+
             for (int i = 0; i < missingSongs.Count; i++)
             {
-                if (!string.IsNullOrEmpty(missingSongs[i].Hash))
+                if (preferCustomArchiveURL)
+                {
+                    if (missingSongs[i].TryGetCustomData("customArchiveURL", out object outCustomArchiveURL))
+                    {
+                        string customArchiveURL = (string)outCustomArchiveURL;
+                        string identifier = PlaylistLibUtils.GetIdentifierForPlaylistSong(missingSongs[i]);
+                        if (identifier == "")
+                        {
+                            continue;
+                        }
+
+                        if (!shownCustomArchiveWarning)
+                        {
+                            shownCustomArchiveWarning = true;
+                            popupModalsController.ShowYesNoModal(rootTransform, "This playlist uses mirror download links. Would you like to use them?", 
+                                CustomArchivePreferred, noButtonPressedCallback: CustomArchiveNotPreferred, animateParentCanvas: false);
+                            await downloadPauseSemaphore.WaitAsync();
+                            if (!preferCustomArchiveURL)
+                            {
+                                i--;
+                                continue;
+                            }
+                        }
+                        await DownloaderUtils.instance.BeatmapDownloadByCustomURL(customArchiveURL, identifier, tokenSource.Token);
+                    }
+                }
+                else if (!string.IsNullOrEmpty(missingSongs[i].Hash))
                 {
                     await DownloaderUtils.instance.BeatmapDownloadByHash(missingSongs[i].Hash, tokenSource.Token);
                 }
@@ -155,6 +188,18 @@ namespace PlaylistManager.UI
             tokenSource.Cancel();
         }
 
+        private void CustomArchivePreferred()
+        {
+            preferCustomArchiveURL = true;
+            downloadPauseSemaphore.Release();
+        }
+
+        private void CustomArchiveNotPreferred()
+        {
+            preferCustomArchiveURL = false;
+            downloadPauseSemaphore.Release();
+        }
+
         private void LevelFilteringNavigationController_UpdateSecondChildControllerContent_SecondChildControllerUpdatedEvent()
         {
             LevelCollectionTableViewUpdatedEvent?.Invoke(downloadingBeatmapLevelCollections, downloadingBeatmapCollectionIdx);
@@ -168,9 +213,7 @@ namespace PlaylistManager.UI
         [UIAction("sync-click")]
         private async Task SyncPlaylistAsync()
         {
-            object outSyncURL;
-
-            if (!selectedPlaylist.TryGetCustomData("syncURL", out outSyncURL))
+            if (!selectedPlaylist.TryGetCustomData("syncURL", out object outSyncURL))
             {
                 popupModalsController.ShowOkModal(rootTransform, "Error: The selected playlist cannot be synced", null);
                 return;

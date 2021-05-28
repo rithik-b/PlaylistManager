@@ -4,6 +4,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Reflection;
 using BeatSaberPlaylistsLib;
+using BeatSaberPlaylistsLib.Types;
 using PlaylistManager.Configuration;
 using UnityEngine;
 
@@ -54,6 +55,23 @@ namespace PlaylistManager.Utilities
 
             playlistManager.StorePlaylist(playlist);
             return playlist;
+        }
+
+        public static string GetIdentifierForPlaylistSong(IPlaylistSong playlistSong)
+        {
+            if (playlistSong.Identifiers.HasFlag(Identifier.Hash))
+            {
+                return playlistSong.Hash;
+            }
+            if (playlistSong.Identifiers.HasFlag(Identifier.Key))
+            {
+                return playlistSong.Key;
+            }
+            if (playlistSong.Identifiers.HasFlag(Identifier.LevelId))
+            {
+                return playlistSong.LevelId;
+            }
+            return "";
         }
 
         #region Image
