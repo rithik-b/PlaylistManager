@@ -3,7 +3,6 @@ using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberPlaylistsLib.Blist;
 using BeatSaberPlaylistsLib.Legacy;
 using BeatSaberPlaylistsLib.Types;
-using IPA.Utilities;
 using PlaylistManager.HarmonyPatches;
 using PlaylistManager.Interfaces;
 using PlaylistManager.Utilities;
@@ -113,11 +112,11 @@ namespace PlaylistManager.UI
             List<IPlaylistSong> missingSongs;
             if (selectedPlaylist is BlistPlaylist blistPlaylist)
             {
-                missingSongs = blistPlaylist.Where(s => s.PreviewBeatmapLevel == null).Select(s => s).ToList();
+                missingSongs = blistPlaylist.Where(s => s.PreviewBeatmapLevel == null).Distinct(IPlaylistSongComparer<BlistPlaylistSong>.Default).ToList();
             }
             else if (selectedPlaylist is LegacyPlaylist legacyPlaylist)
             {
-                missingSongs = legacyPlaylist.Where(s => s.PreviewBeatmapLevel == null).Select(s => s).ToList();
+                missingSongs = legacyPlaylist.Where(s => s.PreviewBeatmapLevel == null).Distinct(IPlaylistSongComparer<LegacyPlaylistSong>.Default).ToList();
             }
             else
             {
@@ -132,13 +131,13 @@ namespace PlaylistManager.UI
 
             for (int i = 0; i < missingSongs.Count; i++)
             {
-                if (!string.IsNullOrEmpty(missingSongs[i].Key))
-                {
-                    await DownloaderUtils.instance.BeatmapDownloadByKey(missingSongs[i].Key.ToLower(), tokenSource.Token);
-                }
-                else if (!string.IsNullOrEmpty(missingSongs[i].Hash))
+                if (!string.IsNullOrEmpty(missingSongs[i].Hash))
                 {
                     await DownloaderUtils.instance.BeatmapDownloadByHash(missingSongs[i].Hash, tokenSource.Token);
+                }
+                else if (!string.IsNullOrEmpty(missingSongs[i].Key))
+                {
+                    await DownloaderUtils.instance.BeatmapDownloadByKey(missingSongs[i].Key.ToLower(), tokenSource.Token);
                 }
                 popupModalsController.OkText = string.Format("{0}/{1} songs downloaded", i + 1, missingSongs.Count);
             }
