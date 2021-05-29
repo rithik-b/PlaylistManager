@@ -2,20 +2,17 @@
 using System.Collections.Generic;
 using HarmonyLib;
 using PlaylistManager.Utilities;
+using PlaylistManager.Configuration;
 
 namespace PlaylistManager.HarmonyPatches
 {
     [HarmonyPatch(typeof(LevelFilteringNavigationController))]
     [HarmonyPatch("ShowPacksInSecondChildController", MethodType.Normal)]
-    public class AnnotatedBeatmapLevelCollectionsViewController_SetData
+    public class LevelFilteringNavigationController_ShowPacksInChildController
     {
-        internal static void Prefix(ref IReadOnlyList<IBeatmapLevelPack> beatmapLevelPacks)
+        internal static void Prefix(ref IReadOnlyList<IBeatmapLevelPack> beatmapLevelPacks, ref SelectLevelCategoryViewController ____selectLevelCategoryViewController)
         {
-            // Check if annotatedBeatmapLevelCollections is empty (Versus Tab)
-            if (beatmapLevelPacks.Count == 0)
-                return;
-            // Checks if this is the playlists view
-            if (beatmapLevelPacks[0] is CustomBeatmapLevelPack)
+            if (____selectLevelCategoryViewController.selectedLevelCategory == SelectLevelCategoryViewController.LevelCategory.CustomSongs)
             {
                 beatmapLevelPacks = beatmapLevelPacks.ToArray().AddRangeToArray(PlaylistLibUtils.playlistManager.GetAllPlaylists(true));
             }

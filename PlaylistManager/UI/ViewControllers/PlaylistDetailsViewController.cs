@@ -126,6 +126,11 @@ namespace PlaylistManager.UI
             set
             {
                 selectedPlaylist.Title = value;
+                if (!selectedPlaylist.HasCover)
+                {
+                    selectedPlaylist.SpriteLoaded += SelectedPlaylist_SpriteLoaded;
+                    selectedPlaylist.RaiseCoverImageChangedForDefaultCover();
+                }
                 parentManager.StorePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistName)));
             }
@@ -225,7 +230,7 @@ namespace PlaylistManager.UI
         [UIAction("playlist-cover-clicked")]
         private void OpenImageSelectionModal()
         {
-            imageSelectionModalController.ShowModal();
+            imageSelectionModalController.ShowModal((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
         }
 
         private void ImageSelectionModalController_ImageSelectedEvent(byte[] imageBytes)

@@ -68,12 +68,12 @@ namespace PlaylistManager.UI
             modalTransform.position = modalPosition;
         }
 
-        internal void ShowModal()
+        internal void ShowModal(BeatSaberPlaylistsLib.Types.IPlaylist playlist)
         {
             Parse();
             parserParams.EmitEvent("close-modal");
             parserParams.EmitEvent("open-modal");
-            ShowImages();
+            ShowImages(playlist);
         }
 
         private void LoadImages()
@@ -95,11 +95,14 @@ namespace PlaylistManager.UI
             }
         }
 
-        private void ShowImages()
+        private void ShowImages(BeatSaberPlaylistsLib.Types.IPlaylist playlist)
         {
             customListTableData.data.Clear();
 
-            // First add default image
+            // Add clear image
+            customListTableData.data.Add(new CustomCellInfo("Clear Icon", "Clear", PlaylistLibUtils.GeneratePlaylistIcon(playlist)));
+
+            // Add default image
             customListTableData.data.Add(new CustomCellInfo("PlaylistManager Icon", "Default", playlistManagerIcon));
 
             LoadImages();
@@ -149,6 +152,11 @@ namespace PlaylistManager.UI
         private void ChangeImage()
         {
             if (selectedIndex == 0)
+            {
+                ImageSelectedEvent?.Invoke(null);
+                parserParams.EmitEvent("close-modal");
+            }
+            else if (selectedIndex == 1)
             {
                 using (Stream imageStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("PlaylistManager.Icons.Logo.png"))
                 {

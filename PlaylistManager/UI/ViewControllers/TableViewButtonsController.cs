@@ -3,6 +3,7 @@ using BeatSaberMarkupLanguage.Attributes;
 using HMUI;
 using IPA.Utilities;
 using PlaylistManager.Configuration;
+using PlaylistManager.Utilities;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
@@ -13,9 +14,6 @@ namespace PlaylistManager.UI
     public class TableViewButtonsController : IInitializable
     {
         private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsTableViewController;
-
-        public static readonly FieldAccessor<AnnotatedBeatmapLevelCollectionsViewController, AnnotatedBeatmapLevelCollectionsTableView>.Accessor AnnotatedBeatmapLevelCollectionsTableViewAccessor =
-            FieldAccessor<AnnotatedBeatmapLevelCollectionsViewController, AnnotatedBeatmapLevelCollectionsTableView>.GetAccessor("_annotatedBeatmapLevelCollectionsTableView");
 
         [UIComponent("left-button")]
         private readonly Button leftButton;
@@ -36,13 +34,14 @@ namespace PlaylistManager.UI
 
         private void SetupButtons()
         {
-            AnnotatedBeatmapLevelCollectionsTableView annotatedBeatmapLevelCollectionsTableView = AnnotatedBeatmapLevelCollectionsTableViewAccessor(ref annotatedBeatmapLevelCollectionsTableViewController);
+            AnnotatedBeatmapLevelCollectionsTableView annotatedBeatmapLevelCollectionsTableView = Accessors.AnnotatedBeatmapLevelCollectionsTableViewAccessor(ref annotatedBeatmapLevelCollectionsTableViewController);
             
             // Added RectMask2D to viewport to prevent the visual bug of playlist cells over buttons
             GameObject viewport = annotatedBeatmapLevelCollectionsTableView.transform.GetChild(0).gameObject;
             viewport.AddComponent<RectMask2D>().padding = new Vector4(0f, 0f, -1.9f, 0f);
             RectTransform rectTransform = annotatedBeatmapLevelCollectionsTableView.gameObject.GetComponent<RectTransform>();
             rectTransform.anchorMax = new Vector2(0.78f, 1.0f);
+            rectTransform.sizeDelta = new Vector2(-0.39f, 0);
             rectTransform.transform.localPosition = new Vector3(-6f, -6.5f, 0f);
 
             // Set buttons and scroll speed

@@ -3,7 +3,6 @@ using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberPlaylistsLib.Blist;
 using BeatSaberPlaylistsLib.Legacy;
 using BeatSaberPlaylistsLib.Types;
-using IPA.Utilities;
 using PlaylistManager.HarmonyPatches;
 using PlaylistManager.Interfaces;
 using PlaylistManager.Utilities;
@@ -29,11 +28,10 @@ namespace PlaylistManager.UI
         private int downloadingBeatmapCollectionIdx;
         private IAnnotatedBeatmapLevelCollection[] downloadingBeatmapLevelCollections;
         private CancellationTokenSource tokenSource;
+        private SemaphoreSlim downloadPauseSemaphore;
+        private bool preferCustomArchiveURL;
         private Playlist selectedPlaylist;
         private BeatSaberPlaylistsLib.PlaylistManager parentManager;
-
-        public static readonly FieldAccessor<AnnotatedBeatmapLevelCollectionsViewController, IReadOnlyList<IAnnotatedBeatmapLevelCollection>>.Accessor AnnotatedBeatmapLevelCollectionsAccessor = 
-            FieldAccessor<AnnotatedBeatmapLevelCollectionsViewController, IReadOnlyList<IAnnotatedBeatmapLevelCollection>>.GetAccessor("_annotatedBeatmapLevelCollections");
 
         public event Action<IAnnotatedBeatmapLevelCollection[], int> LevelCollectionTableViewUpdatedEvent;
 
@@ -52,6 +50,8 @@ namespace PlaylistManager.UI
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
 
             tokenSource = new CancellationTokenSource();
+            downloadPauseSemaphore = new SemaphoreSlim(0, 1);
+            preferCustomArchiveURL = true;
         }
 
         public void Initialize()
@@ -92,7 +92,7 @@ namespace PlaylistManager.UI
             {
                 parentManager.DeletePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
                 int selectedIndex = annotatedBeatmapLevelCollectionsViewController.selectedItemIndex;
-                List<IAnnotatedBeatmapLevelCollection> annotatedBeatmapLevelCollections = AnnotatedBeatmapLevelCollectionsAccessor(ref annotatedBeatmapLevelCollectionsViewController).ToList();
+                List<IAnnotatedBeatmapLevelCollection> annotatedBeatmapLevelCollections = Accessors.AnnotatedBeatmapLevelCollectionsAccessor(ref annotatedBeatmapLevelCollectionsViewController).ToList();
                 annotatedBeatmapLevelCollections.RemoveAt(selectedIndex);
                 selectedIndex--;
                 LevelCollectionTableViewUpdatedEvent?.Invoke(annotatedBeatmapLevelCollections.ToArray(), selectedIndex < 0 ? 0 : selectedIndex);
@@ -116,11 +116,11 @@ namespace PlaylistManager.UI
             List<IPlaylistSong> missingSongs;
             if (selectedPlaylist is BlistPlaylist blistPlaylist)
             {
-                missingSongs = blistPlaylist.Where(s => s.PreviewBeatmapLevel == null).Select(s => s).ToList();
+                missingSongs = blistPlaylist.Where(s => s.PreviewBeatmapLevel == null).Distinct(IPlaylistSongComparer<BlistPlaylistSong>.Default).ToList();
             }
             else if (selectedPlaylist is LegacyPlaylist legacyPlaylist)
             {
-                missingSongs = legacyPlaylist.Where(s => s.PreviewBeatmapLevel == null).Select(s => s).ToList();
+                missingSongs = legacyPlaylist.Where(s => s.PreviewBeatmapLevel == null).Distinct(IPlaylistSongComparer<LegacyPlaylistSong>.Default).ToList();
             }
             else
             {
@@ -133,22 +133,48 @@ namespace PlaylistManager.UI
             tokenSource.Dispose();
             tokenSource = new CancellationTokenSource();
 
+            preferCustomArchiveURL = true;
+            bool shownCustomArchiveWarning = false;
+
             for (int i = 0; i < missingSongs.Count; i++)
             {
-                if (!string.IsNullOrEmpty(missingSongs[i].Key))
+                if (preferCustomArchiveURL && missingSongs[i].TryGetCustomData("customArchiveURL", out object outCustomArchiveURL))
                 {
-                    await DownloaderUtils.instance.BeatmapDownloadByKey(missingSongs[i].Key.ToLower(), tokenSource.Token);
+                    string customArchiveURL = (string)outCustomArchiveURL;
+                    string identifier = PlaylistLibUtils.GetIdentifierForPlaylistSong(missingSongs[i]);
+                    if (identifier == "")
+                    {
+                        continue;
+                    }
+
+                    if (!shownCustomArchiveWarning)
+                    {
+                        shownCustomArchiveWarning = true;
+                        popupModalsController.ShowYesNoModal(rootTransform, "This playlist uses mirror download links. Would you like to use them?", 
+                            CustomArchivePreferred, noButtonPressedCallback: CustomArchiveNotPreferred, animateParentCanvas: false);
+                        await downloadPauseSemaphore.WaitAsync();
+                        if (!preferCustomArchiveURL)
+                        {
+                            i--;
+                            continue;
+                        }
+                    }
+                    await DownloaderUtils.instance.BeatmapDownloadByCustomURL(customArchiveURL, identifier, tokenSource.Token);
                 }
                 else if (!string.IsNullOrEmpty(missingSongs[i].Hash))
                 {
                     await DownloaderUtils.instance.BeatmapDownloadByHash(missingSongs[i].Hash, tokenSource.Token);
+                }
+                else if (!string.IsNullOrEmpty(missingSongs[i].Key))
+                {
+                    await DownloaderUtils.instance.BeatmapDownloadByKey(missingSongs[i].Key.ToLower(), tokenSource.Token);
                 }
                 popupModalsController.OkText = string.Format("{0}/{1} songs downloaded", i + 1, missingSongs.Count);
             }
 
             popupModalsController.OkText = "Download Complete!";
             popupModalsController.OkButtonText = "Ok";
-            downloadingBeatmapLevelCollections = AnnotatedBeatmapLevelCollectionsAccessor(ref annotatedBeatmapLevelCollectionsViewController).ToArray();
+            downloadingBeatmapLevelCollections = Accessors.AnnotatedBeatmapLevelCollectionsAccessor(ref annotatedBeatmapLevelCollectionsViewController).ToArray();
             downloadingBeatmapCollectionIdx = annotatedBeatmapLevelCollectionsViewController.selectedItemIndex;
             SongCore.Loader.Instance.RefreshSongs(false);
             LevelFilteringNavigationController_UpdateSecondChildControllerContent.SecondChildControllerUpdatedEvent += LevelFilteringNavigationController_UpdateSecondChildControllerContent_SecondChildControllerUpdatedEvent;
@@ -157,6 +183,18 @@ namespace PlaylistManager.UI
         private void CancelButtonPressed()
         {
             tokenSource.Cancel();
+        }
+
+        private void CustomArchivePreferred()
+        {
+            preferCustomArchiveURL = true;
+            downloadPauseSemaphore.Release();
+        }
+
+        private void CustomArchiveNotPreferred()
+        {
+            preferCustomArchiveURL = false;
+            downloadPauseSemaphore.Release();
         }
 
         private void LevelFilteringNavigationController_UpdateSecondChildControllerContent_SecondChildControllerUpdatedEvent()
@@ -172,9 +210,7 @@ namespace PlaylistManager.UI
         [UIAction("sync-click")]
         private async Task SyncPlaylistAsync()
         {
-            object outSyncURL;
-
-            if (!selectedPlaylist.TryGetCustomData("syncURL", out outSyncURL))
+            if (!selectedPlaylist.TryGetCustomData("syncURL", out object outSyncURL))
             {
                 popupModalsController.ShowOkModal(rootTransform, "Error: The selected playlist cannot be synced", null);
                 return;

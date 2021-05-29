@@ -4,6 +4,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Reflection;
 using BeatSaberPlaylistsLib;
+using BeatSaberPlaylistsLib.Types;
 using PlaylistManager.Configuration;
 using UnityEngine;
 
@@ -11,6 +12,8 @@ namespace PlaylistManager.Utilities
 {
     public class PlaylistLibUtils
     {
+        private static readonly string EASTER_EGG_URL = "https://raw.githubusercontent.com/rithik-b/PlaylistManager/master/img/easteregg.bplist";
+
         public static BeatSaberPlaylistsLib.PlaylistManager playlistManager
         {
             get
@@ -21,7 +24,7 @@ namespace PlaylistManager.Utilities
 
         public static BeatSaberPlaylistsLib.Types.IPlaylist CreatePlaylist(string playlistName, string playlistAuthorName, BeatSaberPlaylistsLib.PlaylistManager playlistManager, bool defaultCover = true)
         {
-            string playlistFolderPath = Path.Combine(Environment.CurrentDirectory, "Playlists");
+            string playlistFolderPath = playlistManager.PlaylistPath;
             string playlistFileName = string.Join("_", playlistName.Replace("/", "").Replace("\\", "").Replace(".", "").Split(' '));
             if (string.IsNullOrEmpty(playlistFileName))
             {
@@ -52,8 +55,31 @@ namespace PlaylistManager.Utilities
                 playlist.AllowDuplicates = false;
             }
 
+            // Easter Egg
+            if (PluginConfig.Instance.AuthorName.ToUpper().Contains("BINTER") && playlistName.ToUpper().Contains("TECH"))
+            {
+                playlist.SetCustomData("syncURL", EASTER_EGG_URL);
+            }
+
             playlistManager.StorePlaylist(playlist);
             return playlist;
+        }
+
+        public static string GetIdentifierForPlaylistSong(IPlaylistSong playlistSong)
+        {
+            if (playlistSong.Identifiers.HasFlag(Identifier.Hash))
+            {
+                return playlistSong.Hash;
+            }
+            if (playlistSong.Identifiers.HasFlag(Identifier.Key))
+            {
+                return playlistSong.Key;
+            }
+            if (playlistSong.Identifiers.HasFlag(Identifier.LevelId))
+            {
+                return playlistSong.LevelId;
+            }
+            return "";
         }
 
         #region Image
@@ -87,6 +113,8 @@ namespace PlaylistManager.Utilities
             img.Save(ms, ImageFormat.Png);
             return BeatSaberMarkupLanguage.Utilities.LoadSpriteRaw(ms.ToArray());
         }
+
+        internal static Sprite GeneratePlaylistIcon(BeatSaberPlaylistsLib.Types.IPlaylist playlist) => BeatSaberMarkupLanguage.Utilities.LoadSpriteRaw(BeatSaberPlaylistsLib.Utilities.GenerateCoverForPlaylist(playlist).ToArray());
 
         #endregion
     }
