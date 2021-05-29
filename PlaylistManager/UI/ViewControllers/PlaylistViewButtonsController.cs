@@ -138,31 +138,28 @@ namespace PlaylistManager.UI
 
             for (int i = 0; i < missingSongs.Count; i++)
             {
-                if (preferCustomArchiveURL)
+                if (preferCustomArchiveURL && missingSongs[i].TryGetCustomData("customArchiveURL", out object outCustomArchiveURL))
                 {
-                    if (missingSongs[i].TryGetCustomData("customArchiveURL", out object outCustomArchiveURL))
+                    string customArchiveURL = (string)outCustomArchiveURL;
+                    string identifier = PlaylistLibUtils.GetIdentifierForPlaylistSong(missingSongs[i]);
+                    if (identifier == "")
                     {
-                        string customArchiveURL = (string)outCustomArchiveURL;
-                        string identifier = PlaylistLibUtils.GetIdentifierForPlaylistSong(missingSongs[i]);
-                        if (identifier == "")
+                        continue;
+                    }
+
+                    if (!shownCustomArchiveWarning)
+                    {
+                        shownCustomArchiveWarning = true;
+                        popupModalsController.ShowYesNoModal(rootTransform, "This playlist uses mirror download links. Would you like to use them?", 
+                            CustomArchivePreferred, noButtonPressedCallback: CustomArchiveNotPreferred, animateParentCanvas: false);
+                        await downloadPauseSemaphore.WaitAsync();
+                        if (!preferCustomArchiveURL)
                         {
+                            i--;
                             continue;
                         }
-
-                        if (!shownCustomArchiveWarning)
-                        {
-                            shownCustomArchiveWarning = true;
-                            popupModalsController.ShowYesNoModal(rootTransform, "This playlist uses mirror download links. Would you like to use them?", 
-                                CustomArchivePreferred, noButtonPressedCallback: CustomArchiveNotPreferred, animateParentCanvas: false);
-                            await downloadPauseSemaphore.WaitAsync();
-                            if (!preferCustomArchiveURL)
-                            {
-                                i--;
-                                continue;
-                            }
-                        }
-                        await DownloaderUtils.instance.BeatmapDownloadByCustomURL(customArchiveURL, identifier, tokenSource.Token);
                     }
+                    await DownloaderUtils.instance.BeatmapDownloadByCustomURL(customArchiveURL, identifier, tokenSource.Token);
                 }
                 else if (!string.IsNullOrEmpty(missingSongs[i].Hash))
                 {

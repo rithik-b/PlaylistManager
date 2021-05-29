@@ -12,6 +12,8 @@ namespace PlaylistManager.Utilities
 {
     public class PlaylistLibUtils
     {
+        private static readonly string EASTER_EGG_URL = "https://raw.githubusercontent.com/rithik-b/PlaylistManager/master/img/easteregg.bplist";
+
         public static BeatSaberPlaylistsLib.PlaylistManager playlistManager
         {
             get
@@ -51,6 +53,12 @@ namespace PlaylistManager.Utilities
             if (!PluginConfig.Instance.DefaultAllowDuplicates)
             {
                 playlist.AllowDuplicates = false;
+            }
+
+            // Easter Egg
+            if (PluginConfig.Instance.AuthorName.ToUpper().Contains("BINTER") && playlistName.ToUpper().Contains("TECH"))
+            {
+                playlist.SetCustomData("syncURL", EASTER_EGG_URL);
             }
 
             playlistManager.StorePlaylist(playlist);
