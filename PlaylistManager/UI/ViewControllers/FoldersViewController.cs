@@ -3,6 +3,7 @@ using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.FloatingScreen;
 using HMUI;
+using IPA.Utilities;
 using PlaylistManager.HarmonyPatches;
 using PlaylistManager.Interfaces;
 using PlaylistManager.Utilities;
@@ -24,6 +25,7 @@ namespace PlaylistManager.UI
         private readonly MainFlowCoordinator mainFlowCoordinator;
         private readonly LevelSelectionNavigationController levelSelectionNavigationController;
         private readonly PopupModalsController popupModalsController;
+        private readonly HoverHintController hoverHintController;
         private BeatmapLevelsModel beatmapLevelsModel;
 
         private FloatingScreen floatingScreen;
@@ -33,7 +35,7 @@ namespace PlaylistManager.UI
         private readonly Sprite foldersIcon;
 
         public event PropertyChangedEventHandler PropertyChanged;
-        public event System.Action<IAnnotatedBeatmapLevelCollection[], int> LevelCollectionTableViewUpdatedEvent;
+        public event Action<IAnnotatedBeatmapLevelCollection[], int> LevelCollectionTableViewUpdatedEvent;
 
         private BeatSaberPlaylistsLib.PlaylistManager currentParentManager;
         private List<BeatSaberPlaylistsLib.PlaylistManager> currentManagers;
@@ -54,12 +56,14 @@ namespace PlaylistManager.UI
         [UIComponent("folder-list")]
         public CustomListTableData customListTableData;
 
-        public FoldersViewController(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, MainFlowCoordinator mainFlowCoordinator, LevelSelectionNavigationController levelSelectionNavigationController, PopupModalsController popupModalsController, BeatmapLevelsModel beatmapLevelsModel)
+        public FoldersViewController(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, MainFlowCoordinator mainFlowCoordinator, 
+            LevelSelectionNavigationController levelSelectionNavigationController, PopupModalsController popupModalsController, HoverHintController hoverHintController, BeatmapLevelsModel beatmapLevelsModel)
         {
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
             this.mainFlowCoordinator = mainFlowCoordinator;
             this.levelSelectionNavigationController = levelSelectionNavigationController;
             this.popupModalsController = popupModalsController;
+            this.hoverHintController = hoverHintController;
             this.beatmapLevelsModel = beatmapLevelsModel;
 
             levelPacksIcon = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.LevelPacks.png");
@@ -165,9 +169,40 @@ namespace PlaylistManager.UI
             if (currentParentManager == null)
             {
                 customListTableData.tableView.SelectCellWithIdx(0);
+
+                // Add hover hint
+                TableCell[] visibleCells = customListTableData.tableView.visibleCells.ToArray();
+                for (int i = 0; i < visibleCells.Length; i++)
+                {
+                    HoverHint hoverHint = visibleCells[i].GetComponent<HoverHint>();
+                    if (hoverHint == null)
+                    {
+                        hoverHint = visibleCells[i].gameObject.AddComponent<HoverHint>();
+                        hoverHint.SetField("_hoverHintController", hoverHintController);
+                    }
+                    else
+                    {
+                        hoverHint.enabled = true;
+                    }
+                    hoverHint.text = customListTableData.data[i].text;
+                }
+
                 if (setBeatmapLevelCollections)
                 {
                     Select(customListTableData.tableView, 0);
+                }
+            }
+            else
+            {
+                // Disable hover hint
+                TableCell[] visibleCells = customListTableData.tableView.visibleCells.ToArray();
+                for (int i = 0; i < visibleCells.Length; i++)
+                {
+                    HoverHint hoverHint = visibleCells[i].GetComponent<HoverHint>();
+                    if (hoverHint != null)
+                    {
+                        hoverHint.enabled = false;
+                    }
                 }
             }
 
