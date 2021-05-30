@@ -9,7 +9,11 @@ namespace PlaylistManager.HarmonyPatches
         internal static IPreviewBeatmapLevel[] beatmapLevels;
         internal static void Prefix(ref IBeatmapLevelCollection beatmapLevelCollection)
         {
-            if (beatmapLevelCollection is BeatSaberPlaylistsLib.Legacy.LegacyPlaylist legacyPlaylist)
+            if (beatmapLevelCollection == null)
+            {
+                beatmapLevels = new IPreviewBeatmapLevel[0];
+            }
+            else if (beatmapLevelCollection is BeatSaberPlaylistsLib.Legacy.LegacyPlaylist legacyPlaylist)
             {
                 beatmapLevels = legacyPlaylist.BeatmapLevels;
             }

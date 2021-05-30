@@ -3,7 +3,7 @@
     "id": "PlaylistManager",
     "name": "PlaylistManager",
     "author": "PixelBoom",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "description": "Load, Create, Edit, Organize Playlists and Download their Songs in Beat Saber.",
     "gameVersion": "1.16.1",
     "dependsOn": {
