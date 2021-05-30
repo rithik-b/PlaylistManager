@@ -21,12 +21,13 @@ Load, Create, Edit, Organize Playlists and Download their Songs in Beat Saber.
 - Sync some playlists with the internet (example map pools)
 
 ## Download
-Download the latest version of the mod (v1.0.0) [here](https://github.com/rithik-b/PlaylistManager/releases/tag/1.0.0 "here").
+Download the latest version of the mod (v1.1.1) [here](https://github.com/rithik-b/PlaylistManager/releases/tag/1.1.1 "here").
 To install, move the dll to your Plugins folder.
 
 **SongCore**, **BeatSaverSharp**, **BeatSaberMarkupLanguage (BSML)**, **SiraUtil** and **BeatSaberPlaylistsLib** are required for this mod, so please download the latest version from ModAssistant.
 
 ## Usage instructions
+To view instructions on how to access all the features of the mod, [click here.](https://github.com/rithik-b/PlaylistManager/blob/master/Guides/GettingStarted.md)
 To load playlists, store all playlists in the "Playlists" folder in your Beat Saber install. You may also create folders inside the Playlists folder to further organize your playlists. Supported formats are `.json`, `.bplist` and `.blist`
 Cover images go into the "Playlists\CoverImages" folder and the supported formats are `.jpg` and `.png`
 
