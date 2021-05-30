@@ -28,8 +28,6 @@ To install, move the dll to your Plugins folder.
 
 ## Usage instructions
 To view instructions on how to access all the features of the mod, [click here.](https://github.com/rithik-b/PlaylistManager/blob/master/Guides/GettingStarted.md)
-To load playlists, store all playlists in the "Playlists" folder in your Beat Saber install. You may also create folders inside the Playlists folder to further organize your playlists. Supported formats are `.json`, `.bplist` and `.blist`
-Cover images go into the "Playlists\CoverImages" folder and the supported formats are `.jpg` and `.png`
 
 ## Issues and Support
 If you encounter any issues with this mod, DM me on Discord PixelBoom#0001 or file an Issue on GitHub and I'll fix it as soon as I can For support with the mod, DM me or ask a question on the #pc-help channel on the BSMG discord
