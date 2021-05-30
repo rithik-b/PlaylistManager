@@ -3,8 +3,10 @@ using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.FloatingScreen;
 using HMUI;
+using PlaylistManager.HarmonyPatches;
 using PlaylistManager.Interfaces;
 using PlaylistManager.Utilities;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -16,7 +18,7 @@ using Zenject;
 
 namespace PlaylistManager.UI
 {
-    public class FoldersViewController : IInitializable, INotifyPropertyChanged, ILevelCollectionsTableUpdater, ILevelCategoryUpdater, IPMRefreshable
+    public class FoldersViewController : IInitializable, IDisposable, INotifyPropertyChanged, ILevelCollectionsTableUpdater, ILevelCategoryUpdater, IPMRefreshable
     {
         private readonly AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
         private readonly MainFlowCoordinator mainFlowCoordinator;
@@ -77,6 +79,13 @@ namespace PlaylistManager.UI
             BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.FoldersView.bsml"), floatingScreen.gameObject, this);
             rootTransform.gameObject.SetActive(false);
             rootTransform.gameObject.name = "PlaylistManagerFoldersView";
+
+            LevelFilteringNavigationController_ShowPacksInChildController.AllPacksViewSelectedEvent += LevelFilteringNavigationController_ShowPacksInChildController_AllPacksViewSelectedEvent;
+        }
+
+        public void Dispose()
+        {
+            LevelFilteringNavigationController_ShowPacksInChildController.AllPacksViewSelectedEvent -= LevelFilteringNavigationController_ShowPacksInChildController_AllPacksViewSelectedEvent;
         }
 
         public void SetupDimensions()
@@ -293,17 +302,18 @@ namespace PlaylistManager.UI
                 {
                     SetupList(currentParentManager, false);
                 }
-                else
-                {
-                    SetupList(null, false);
-                    folderMode = FolderMode.AllPacks;
-                }
             }
             else
             {
                 rootTransform.gameObject.SetActive(false);
                 folderMode = FolderMode.None;
             }
+        }
+
+        private void LevelFilteringNavigationController_ShowPacksInChildController_AllPacksViewSelectedEvent()
+        {
+            SetupList(null, false);
+            folderMode = FolderMode.AllPacks;
         }
 
         public void Refresh()
