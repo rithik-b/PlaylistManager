@@ -1,5 +1,4 @@
-﻿using System;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Reflection;
@@ -30,13 +29,14 @@ namespace PlaylistManager.Utilities
             {
                 playlistFileName = "playlist";
             }
-            string playlistPath = Path.Combine(playlistFolderPath, playlistFileName + ".blist");
+            string extension = playlistManager.DefaultHandler?.DefaultExtension;
+            string playlistPath = Path.Combine(playlistFolderPath, playlistFileName + "." + extension);
             string originalPlaylistPath = Path.Combine(playlistFolderPath, playlistFileName);
             int dupNum = 0;
             while (File.Exists(playlistPath))
             {
                 dupNum++;
-                playlistPath = originalPlaylistPath + string.Format("({0}).blist", dupNum);
+                playlistPath = originalPlaylistPath + string.Format("({0}).{1}", dupNum, extension);
                 playlistFileName = playlistFileName + string.Format("({0})", dupNum);
             }
 
