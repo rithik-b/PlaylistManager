@@ -8,6 +8,7 @@ using UnityEngine;
 using System.ComponentModel;
 using PlaylistManager.Utilities;
 using System;
+using PlaylistManager.Configuration;
 
 namespace PlaylistManager.UI
 {
@@ -97,7 +98,15 @@ namespace PlaylistManager.UI
             parentManager.StorePlaylist(selectedPlaylist);
 
             levelCollectionTableView.ClearSelection();
-            levelCollectionTableView.SetData(selectedPlaylist.beatmapLevelCollection.beatmapLevels, Accessors.FavoriteLevelIdsAccessor(ref levelCollectionTableView), false);
+            if (PluginConfig.Instance.AuthorName.ToUpper().Contains("GOOBIE"))
+            {
+                levelCollectionNavigationController.SetDataForPack(selectedPlaylist, true, true, true, "Goobie Cute");
+            }
+            else
+            {
+                levelCollectionNavigationController.SetDataForPack(selectedPlaylist, true, true, true, "Play");
+            }
+
             levelCollectionNavigationController.HideDetailViewController();
         }
 
