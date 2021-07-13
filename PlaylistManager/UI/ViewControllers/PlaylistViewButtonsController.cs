@@ -167,13 +167,20 @@ namespace PlaylistManager.UI
                 }
                 else if (!string.IsNullOrEmpty(missingSongs[i].Key))
                 {
-                    await DownloaderUtils.instance.BeatmapDownloadByKey(missingSongs[i].Key.ToLower(), tokenSource.Token);
+                    string hash = await DownloaderUtils.instance.BeatmapDownloadByKey(missingSongs[i].Key.ToLower(), tokenSource.Token);
+                    if (!string.IsNullOrEmpty(hash))
+                    {
+                        missingSongs[i].Hash = hash;
+                    }
                 }
                 popupModalsController.OkText = string.Format("{0}/{1} songs downloaded", i + 1, missingSongs.Count);
             }
 
             popupModalsController.OkText = "Download Complete!";
             popupModalsController.OkButtonText = "Ok";
+
+            parentManager.StorePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
+
             downloadingBeatmapLevelCollections = Accessors.AnnotatedBeatmapLevelCollectionsAccessor(ref annotatedBeatmapLevelCollectionsViewController).ToArray();
             downloadingBeatmapCollectionIdx = annotatedBeatmapLevelCollectionsViewController.selectedItemIndex;
             SongCore.Loader.Instance.RefreshSongs(false);
@@ -247,7 +254,6 @@ namespace PlaylistManager.UI
                     selectedPlaylist.SetCustomData("syncURL", syncURL);
                 }
 
-                parentManager.StorePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
                 await DownloadPlaylistAsync();
                 popupModalsController.ShowOkModal(rootTransform, "Playlist Synced", null);
             }

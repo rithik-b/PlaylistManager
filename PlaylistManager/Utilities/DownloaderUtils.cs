@@ -36,7 +36,7 @@ namespace PlaylistManager.Utilities
             await ExtractZipAsync(zip, customSongsPath, songInfo: song).ConfigureAwait(false);
         }
 
-        public async Task BeatmapDownloadByKey(string key, CancellationToken token, IProgress<double> progress = null, bool direct = false)
+        public async Task<string> BeatmapDownloadByKey(string key, CancellationToken token, IProgress<double> progress = null, bool direct = false)
         {
             var options = new StandardRequestOptions { Token = token, Progress = progress };
             bool songDownloaded = false;
@@ -45,8 +45,12 @@ namespace PlaylistManager.Utilities
                 try
                 {
                     var song = await beatSaverInstance.Key(key, options);
-                    await BeatSaverBeatmapDownload(song, options, direct);
+                    if (SongCore.Loader.GetLevelByHash(song.Hash) == null)
+                    {
+                        await BeatSaverBeatmapDownload(song, options, direct);
+                    }
                     songDownloaded = true;
+                    return song.Hash;
                 }
                 catch (Exception e)
                 {
@@ -64,6 +68,7 @@ namespace PlaylistManager.Utilities
                     songDownloaded = true;
                 }
             }
+            return "";
         }
 
         public async Task BeatmapDownloadByHash(string hash, CancellationToken token, IProgress<double> progress = null, bool direct = false)

@@ -63,9 +63,9 @@ namespace PlaylistManager.UI
         {
             imageSelectionModalController.ImageSelectedEvent -= ImageSelectionModalController_ImageSelectedEvent;
 
-            if (this.selectedPlaylist != null)
+            if (selectedPlaylist != null)
             {
-                this.selectedPlaylist.SpriteLoaded -= SelectedPlaylist_SpriteLoaded;
+                selectedPlaylist.SpriteLoaded -= SelectedPlaylist_SpriteLoaded;
             }
         }
 
