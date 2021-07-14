@@ -41,6 +41,9 @@ namespace PlaylistManager.UI
         [UIComponent("playlist-cover")]
         private readonly ClickableImage playlistCoverView;
 
+        [UIComponent("text-page")]
+        private readonly TextPageScrollView descriptionTextPage;
+
         [UIParams]
         private readonly BSMLParserParams parserParams;
 
@@ -99,6 +102,7 @@ namespace PlaylistManager.UI
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistAllowDuplicates)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistDescription)));
             playlistCoverView.sprite = selectedPlaylist.Sprite;
+            descriptionTextPage.ScrollTo(0, true);
         }
 
         #region Name, Author, Description

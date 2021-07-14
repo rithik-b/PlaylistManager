@@ -4,9 +4,8 @@
 			<string-setting id='name-setting' text='Name' value='playlist-name' apply-on-change='true' bind-value='true' formatter='string-formatter' hover-hint='~name-hint' />
 			<string-setting id='author-setting' text='Author' value='playlist-author' apply-on-change='true' bind-value='true' formatter='string-formatter' hover-hint='~author-hint' />
 			<checkbox-setting text='Allow Duplicates' value='playlist-allow-duplicates' on-change='duplicates-toggled' set-event='duplicates-set' bind-value='true' />
-			<text text='Description' />
-			<vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' preferred-width='65' preferred-height='30' spacing='2'>
-				<text-page text='~playlist-description' />
+			<vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' preferred-width='65' preferred-height='25'>
+				<text-page id='text-page' text='~playlist-description' />
 			</vertical>
 		</vertical>
 		<clickable-image id='playlist-cover' hover-hint='Set Image' on-click='playlist-cover-clicked' anchor-pos-x ='-23' anchor-pos-y='28' />
