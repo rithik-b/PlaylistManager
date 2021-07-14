@@ -3,6 +3,7 @@
 		<vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' anchor-pos-y='-12' preferred-width='65' preferred-height='60'>
 			<string-setting id='name-setting' text='Name' value='playlist-name' apply-on-change='true' bind-value='true' formatter='string-formatter' hover-hint='~name-hint' />
 			<string-setting id='author-setting' text='Author' value='playlist-author' apply-on-change='true' bind-value='true' formatter='string-formatter' hover-hint='~author-hint' />
+			<checkbox-setting text='Read Only' value='playlist-read-only' on-change='read-only-toggled' set-event='read-only-set' bind-value='true' active='~read-only-visible' />
 			<checkbox-setting text='Allow Duplicates' value='playlist-allow-duplicates' on-change='duplicates-toggled' set-event='duplicates-set' bind-value='true' />
 			<vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' preferred-width='65' preferred-height='25'>
 				<text-page id='text-page' text='~playlist-description' />

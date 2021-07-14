@@ -8,8 +8,10 @@ using BeatSaberPlaylistsLib.Types;
 using HMUI;
 using IPA.Utilities;
 using PlaylistManager.Interfaces;
+using PlaylistManager.Utilities;
 using System;
 using System.ComponentModel;
+using System.IO;
 using System.Reflection;
 using UnityEngine;
 using Zenject;
@@ -98,7 +100,8 @@ namespace PlaylistManager.UI
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistName)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NameHint)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistAuthor)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AuthorHint)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AuthorHint))); 
+            UpdateReadOnly();
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistAllowDuplicates)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistDescription)));
             playlistCoverView.sprite = selectedPlaylist.Sprite;
@@ -170,6 +173,66 @@ namespace PlaylistManager.UI
 
         #endregion
 
+        #region Read Only
+
+        // Methods
+
+        [UIAction("read-only-toggled")]
+        private void ReadOnlyToggled(bool playlistReadOnly)
+        {
+            if (playlistReadOnly)
+            {
+                playlistReadOnly = true;
+            }
+            else if (PlaylistAllowDuplicates != PlaylistReadOnly)
+            {
+                popupModalsController.ShowYesNoModal(modalTransform, "To turn off read only, this playlist will be cloned and writing will be enabled on the clone. Proceed?", ClonePlaylist, noButtonPressedCallback: UpdateReadOnly, animateParentCanvas: false);
+            }
+        }
+
+        private void ClonePlaylist()
+        {
+            string playlistPath = Path.Combine(parentManager.PlaylistPath, $"{selectedPlaylist.Filename}.{selectedPlaylist.SuggestedExtension}");
+            if (File.Exists(playlistPath))
+            {
+                BeatSaberPlaylistsLib.Types.IPlaylist clonedPlaylist = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.DefaultHandler?.Deserialize(File.OpenRead(playlistPath));
+                clonedPlaylist.ReadOnly = false;
+                parentManager.StorePlaylist(clonedPlaylist);
+                PlaylistLibUtils.playlistManager.RequestRefresh("PlaylistManager (plugin)");
+                popupModalsController.ShowOkModal(modalTransform, "Playlist Cloned!", null, animateParentCanvas: false);
+            }
+            else
+            {
+                popupModalsController.ShowOkModal(modalTransform, "An error occured while trying to clone the playlist. Please try again later.", null, animateParentCanvas: false);
+            }
+            UpdateReadOnly();
+        }
+
+        private void UpdateReadOnly()
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistReadOnly)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ReadOnlyVisible)));
+        }
+
+        // Values
+
+        [UIValue("playlist-read-only")]
+        private bool PlaylistReadOnly
+        {
+            get => selectedPlaylist == null ? false : selectedPlaylist.ReadOnly;
+            set
+            {
+                selectedPlaylist.ReadOnly = value;
+                parentManager.StorePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
+                UpdateReadOnly();
+            }
+        }
+
+        [UIValue("read-only-visible")]
+        private bool ReadOnlyVisible => PlaylistReadOnly;
+
+        #endregion
+
         #region Allow Duplicates
 
         // Methods
@@ -187,15 +250,9 @@ namespace PlaylistManager.UI
             }
         }
 
-        private void DeleteDuplicates()
-        {
-            PlaylistAllowDuplicates = false;
-        }
+        private void DeleteDuplicates() => PlaylistAllowDuplicates = false;
 
-        private void DontDeleteDuplicates()
-        {
-            PlaylistAllowDuplicates = true;
-        }
+        private void DontDeleteDuplicates() => PlaylistAllowDuplicates = true;
 
         // Values
 
