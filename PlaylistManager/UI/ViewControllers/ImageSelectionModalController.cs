@@ -50,8 +50,18 @@ namespace PlaylistManager.UI
         {
             this.levelPackDetailViewController = levelPackDetailViewController;
             this.popupModalsController = popupModalsController;
-            Directory.CreateDirectory(IMAGES_PATH);
-            File.Create(Path.Combine(IMAGES_PATH, ".plignore"));
+
+            // Have to do this in case directory perms are not given
+            try
+            {
+                Directory.CreateDirectory(IMAGES_PATH);
+                File.Create(Path.Combine(IMAGES_PATH, ".plignore"));
+            }
+            catch (Exception e)
+            {
+                Plugin.Log.Error($"Could not make images path.\nExcepton:{e.Message}");
+            }
+
             coverImages = new Dictionary<string, CoverImage>();
             playlistManagerIcon = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.Logo.png");
             parsed = false;
