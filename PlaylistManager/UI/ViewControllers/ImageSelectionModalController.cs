@@ -12,6 +12,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using UnityEngine;
 using static BeatSaberMarkupLanguage.Components.CustomListTableData;
 
@@ -24,7 +25,7 @@ namespace PlaylistManager.UI
 
         private readonly string IMAGES_PATH = Path.Combine(PlaylistLibUtils.playlistManager.PlaylistPath, "CoverImages");
         private readonly Sprite playlistManagerIcon;
-        private Dictionary<string, CoverImage> coverImages;
+        private readonly Dictionary<string, CoverImage> coverImages;
         private bool parsed;
         private int selectedIndex;
 
@@ -120,6 +121,7 @@ namespace PlaylistManager.UI
             }
             customListTableData.tableView.ReloadData();
             customListTableData.tableView.ScrollToCellWithIdx(0, TableView.ScrollPositionType.Beginning, false);
+            _ = ViewControllerMonkeyCleanup();
 
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UpButtonEnabled)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DownButtonEnabled)));
@@ -132,7 +134,13 @@ namespace PlaylistManager.UI
                 if (coverImage.SpriteWasLoaded)
                 {
                     customListTableData.data.Add(new CustomCellInfo(Path.GetFileName(coverImage.Path), coverImage.Path, coverImage.Sprite));
-                    customListTableData.tableView.ReloadData();
+                    customListTableData.tableView.ReloadDataKeepingPosition();
+
+                    if (customListTableData.data.Count == 4)
+                    {
+                        customListTableData.tableView.AddCellToReusableCells(customListTableData.tableView.dataSource.CellForIdx(customListTableData.tableView, 3));
+                    }
+                    _ = ViewControllerMonkeyCleanup();
 
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UpButtonEnabled)));
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DownButtonEnabled)));
@@ -184,6 +192,16 @@ namespace PlaylistManager.UI
                     popupModalsController.ShowOkModal(modalTransform, "There was an error loading this image. Check logs for more details.", null, animateParentCanvas: false);
                     Plugin.Log.Critical("Could not load " + selectedImagePath + "\nException message: " + e.Message);
                 }
+            }
+        }
+
+        private async Task ViewControllerMonkeyCleanup()
+        {
+            await SiraUtil.Utilities.PauseChamp;
+            ImageView[] imageViews = customListTableData.tableView.GetComponentsInChildren<ImageView>(true);
+            foreach (var imageView in imageViews)
+            {
+                imageView.SetField("_skew", 0f);
             }
         }
 
