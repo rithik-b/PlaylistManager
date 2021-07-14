@@ -118,6 +118,7 @@ namespace PlaylistManager.UI
         {
             popupModalsController.ShowOkModal(rootTransform, "", CancelButtonPressed, "Cancel");
 
+            UpdateMissingSongs();
             if (MissingSongs == null)
             {
                 popupModalsController.OkText = "Error: The selected playlist cannot be downloaded.";
