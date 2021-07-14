@@ -23,24 +23,7 @@ namespace PlaylistManager.Utilities
 
         public static BeatSaberPlaylistsLib.Types.IPlaylist CreatePlaylist(string playlistName, string playlistAuthorName, BeatSaberPlaylistsLib.PlaylistManager playlistManager, bool defaultCover = true)
         {
-            string playlistFolderPath = playlistManager.PlaylistPath;
-            string playlistFileName = string.Join("_", playlistName.Replace("/", "").Replace("\\", "").Replace(".", "").Split(' '));
-            if (string.IsNullOrEmpty(playlistFileName))
-            {
-                playlistFileName = "playlist";
-            }
-            string extension = playlistManager.DefaultHandler?.DefaultExtension;
-            string playlistPath = Path.Combine(playlistFolderPath, playlistFileName + "." + extension);
-            string originalPlaylistPath = Path.Combine(playlistFolderPath, playlistFileName);
-            int dupNum = 0;
-            while (File.Exists(playlistPath))
-            {
-                dupNum++;
-                playlistPath = originalPlaylistPath + string.Format("({0}).{1}", dupNum, extension);
-                playlistFileName = playlistFileName + string.Format("({0})", dupNum);
-            }
-
-            BeatSaberPlaylistsLib.Types.IPlaylist playlist = playlistManager.CreatePlaylist(playlistFileName, playlistName, playlistAuthorName, "");
+            BeatSaberPlaylistsLib.Types.IPlaylist playlist = playlistManager.CreatePlaylist("", playlistName, playlistAuthorName, "");
 
             if (defaultCover)
             {
