@@ -14,6 +14,7 @@ using BeatSaberMarkupLanguage.Parser;
 using System.IO;
 using System.ComponentModel;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace PlaylistManager.UI
 {
@@ -28,6 +29,7 @@ namespace PlaylistManager.UI
 
         private readonly Sprite folderIcon;
         private bool parsed;
+        private readonly SemaphoreSlim imageLoadSemaphore = new SemaphoreSlim(1, 1);
         public event PropertyChangedEventHandler PropertyChanged;
 
         [UIComponent("list")]
@@ -74,7 +76,7 @@ namespace PlaylistManager.UI
             ShowPlaylistsForManager(PlaylistLibUtils.playlistManager);
         }
 
-        internal void ShowPlaylistsForManager(BeatSaberPlaylistsLib.PlaylistManager parentManager)
+        internal async void ShowPlaylistsForManager(BeatSaberPlaylistsLib.PlaylistManager parentManager)
         {
             customListTableData.data.Clear();
 
@@ -91,9 +93,10 @@ namespace PlaylistManager.UI
             {
                 if (playlist is IDeferredSpriteLoad deferredSpriteLoadPlaylist && !deferredSpriteLoadPlaylist.SpriteWasLoaded)
                 {
-                    _ = playlist.coverImage;
+                    await imageLoadSemaphore.WaitAsync();
                     deferredSpriteLoadPlaylist.SpriteLoaded -= DeferredSpriteLoadPlaylist_SpriteLoaded;
                     deferredSpriteLoadPlaylist.SpriteLoaded += DeferredSpriteLoadPlaylist_SpriteLoaded;
+                    _ = playlist.coverImage;
                 }
                 else
                 {
@@ -113,11 +116,15 @@ namespace PlaylistManager.UI
         {
             if (sender is IDeferredSpriteLoad deferredSpriteLoadPlaylist)
             {
-                ShowPlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)deferredSpriteLoadPlaylist);
-                customListTableData.tableView.ReloadData();
+                if (parentManager.GetAllPlaylists(false).Contains((BeatSaberPlaylistsLib.Types.IPlaylist)deferredSpriteLoadPlaylist))
+                {
+                    ShowPlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)deferredSpriteLoadPlaylist);
+                }
+                customListTableData.tableView.ReloadDataKeepingPosition();
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UpButtonEnabled)));
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DownButtonEnabled)));
                 (deferredSpriteLoadPlaylist).SpriteLoaded -= DeferredSpriteLoadPlaylist_SpriteLoaded;
+                imageLoadSemaphore.Release();
             }
         }
 
