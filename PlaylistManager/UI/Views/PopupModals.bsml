@@ -1,6 +1,6 @@
 ﻿<bg id="root" xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
-	<modal id='yes-no-modal' show-event='open-yes-no' hide-event='close-yes-no' clickerino-offerino-closerino='false' size-delta-x='60' size-delta-y='30'>
-		<vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' spacing='3' pad='3' preferred-width='60' preferred-height='30'>
+	<modal id='yes-no-modal' show-event='open-yes-no' hide-event='close-yes-no' clickerino-offerino-closerino='false' size-delta-x='65' size-delta-y='35'>
+		<vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' spacing='3' preferred-width='60' preferred-height='30'>
 			<text text='~yes-no-text' word-wrapping='true' align='Center' />
 			<horizontal>
 				<primary-button text='~yes-button-text' on-click='yes-button-pressed' click-event='close-yes-no' />
@@ -8,8 +8,8 @@
 			</horizontal>
 		</vertical>
 	</modal>
-	<modal id='ok-modal' show-event='open-ok' hide-event='close-ok' clickerino-offerino-closerino='false' size-delta-x='60' size-delta-y='30'>
-		<vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' spacing='3' pad='3' preferred-width='60' preferred-height='30'>
+	<modal id='ok-modal' show-event='open-ok' hide-event='close-ok' clickerino-offerino-closerino='false' size-delta-x='65' size-delta-y='35'>
+		<vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' spacing='3' preferred-width='60' preferred-height='30'>
 			<text text='~ok-text' word-wrapping='true' align='Center' />
 			<button text='~ok-button-text' on-click='ok-button-pressed' click-event='close-ok' />
 		</vertical>
