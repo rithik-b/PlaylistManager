@@ -19,7 +19,6 @@ namespace PlaylistManager.UI
     public class PlaylistDetailsViewController : IInitializable, IDisposable, ILevelCollectionUpdater, INotifyPropertyChanged
     {
         private readonly LevelPackDetailViewController levelPackDetailViewController;
-        private LevelCollectionNavigationController levelCollectionNavigationController;
         private readonly ImageSelectionModalController imageSelectionModalController;
         private readonly PopupModalsController popupModalsController;
 
@@ -45,10 +44,9 @@ namespace PlaylistManager.UI
         [UIParams]
         private readonly BSMLParserParams parserParams;
 
-        public PlaylistDetailsViewController(LevelPackDetailViewController levelPackDetailViewController, LevelCollectionNavigationController levelCollectionNavigationController, ImageSelectionModalController imageSelectionModalController, PopupModalsController popupModalsController)
+        public PlaylistDetailsViewController(LevelPackDetailViewController levelPackDetailViewController, ImageSelectionModalController imageSelectionModalController, PopupModalsController popupModalsController)
         {
             this.levelPackDetailViewController = levelPackDetailViewController;
-            this.levelCollectionNavigationController = levelCollectionNavigationController;
             this.imageSelectionModalController = imageSelectionModalController;
             this.popupModalsController = popupModalsController;
             parsed = false;
@@ -252,9 +250,6 @@ namespace PlaylistManager.UI
         private void SelectedPlaylist_SpriteLoaded(object sender, EventArgs e)
         {
             playlistCoverView.sprite = selectedPlaylist.Sprite;
-            levelPackDetailViewController.SetData((IBeatmapLevelPack)selectedPlaylist);
-            levelPackDetailViewController.ShowContent(LevelPackDetailViewController.ContentType.Owned);
-            FieldAccessor<LevelCollectionNavigationController, IBeatmapLevelPack>.Set(ref levelCollectionNavigationController, "_levelPack", (IBeatmapLevelPack)selectedPlaylist);
             selectedPlaylist.SpriteLoaded -= SelectedPlaylist_SpriteLoaded;
         }
 

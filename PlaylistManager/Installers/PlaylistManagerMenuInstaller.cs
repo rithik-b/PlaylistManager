@@ -28,9 +28,12 @@ namespace PlaylistManager.Installers
                 Container.BindInterfacesTo<FoldersViewController>().AsSingle();
             }
 
-            Container.BindInterfacesTo<SettingsViewController>().AsSingle();
+
             Container.BindInterfacesTo<TableViewButtonsController>().AsSingle();
+            Container.BindInterfacesTo<CoverImageUpdater>().AsSingle();
             Container.BindInterfacesAndSelfTo<DifficultyHighlighter>().AsSingle();
+
+            Container.BindInterfacesTo<SettingsViewController>().AsSingle();
             Container.BindInterfacesTo<RefreshButtonUI>().AsSingle();
 
             Container.BindInterfacesTo<PlaylistUIManager>().AsSingle();
