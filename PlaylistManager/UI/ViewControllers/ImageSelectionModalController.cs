@@ -63,7 +63,7 @@ namespace PlaylistManager.UI
             {
                 BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.ImageSelectionModal.bsml"), levelPackDetailViewController.transform.Find("Detail").gameObject, this);
                 modalPosition = modalTransform.position;
-                FieldAccessor<ModalView, bool>.Set(ref modalView, "_animateParentCanvas", false);
+                modalView.SetField("_animateParentCanvas", false);
                 parsed = true;
             }
             modalTransform.position = modalPosition;

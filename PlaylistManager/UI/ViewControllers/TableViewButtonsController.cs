@@ -46,9 +46,9 @@ namespace PlaylistManager.UI
 
             // Set buttons and scroll speed
             ScrollView scrollView = annotatedBeatmapLevelCollectionsTableView.gameObject.GetComponent<ScrollView>();
-            FieldAccessor<ScrollView, Button>.Set(ref scrollView, "_pageUpButton", leftButton);
-            FieldAccessor<ScrollView, Button>.Set(ref scrollView, "_pageDownButton", rightButton);
-            FieldAccessor<ScrollView, float>.Set(ref scrollView, "_joystickScrollSpeed", 60f * PluginConfig.Instance.PlaylistScrollSpeed);
+            scrollView.SetField("_pageUpButton", leftButton);
+            scrollView.SetField("_pageDownButton", rightButton);
+            scrollView.SetField("_joystickScrollSpeed", 60f * PluginConfig.Instance.PlaylistScrollSpeed);
         }
     }
 }

@@ -91,7 +91,7 @@ namespace PlaylistManager.UI
             NoButtonText = noButtonText;
             yesButtonPressed = yesButtonPressedCallback;
             noButtonPressed = noButtonPressedCallback;
-            FieldAccessor<ModalView, bool>.Set(ref yesNoModalView, "_animateParentCanvas", animateParentCanvas);
+            yesNoModalView.SetField("_animateParentCanvas", animateParentCanvas);
             parserParams.EmitEvent("close-yes-no");
             parserParams.EmitEvent("open-yes-no");
         }
@@ -162,7 +162,7 @@ namespace PlaylistManager.UI
             OkText = text;
             OkButtonText = okButtonText;
             okButtonPressed = buttonPressedCallback;
-            FieldAccessor<ModalView, bool>.Set(ref okModalView, "_animateParentCanvas", animateParentCanvas);
+            okModalView.SetField("_animateParentCanvas", animateParentCanvas);
             parserParams.EmitEvent("close-ok");
             parserParams.EmitEvent("open-ok");
         }
@@ -211,7 +211,7 @@ namespace PlaylistManager.UI
             keyboardTransform.transform.SetParent(rootTransform);
             keyboardTransform.transform.SetParent(parent);
             keyboardPressed = keyboardPressedCallback;
-            FieldAccessor<ModalView, bool>.Set(ref keyboardModalView, "_animateParentCanvas", animateParentCanvas);
+            keyboardModalView.SetField("_animateParentCanvas", animateParentCanvas);
             KeyboardText = keyboardText;
             parserParams.EmitEvent("close-keyboard");
             parserParams.EmitEvent("open-keyboard");

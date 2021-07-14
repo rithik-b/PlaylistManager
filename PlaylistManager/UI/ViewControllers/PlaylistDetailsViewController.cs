@@ -77,10 +77,10 @@ namespace PlaylistManager.UI
                 modalPosition = modalTransform.position;
 
                 ModalView nameKeyboardModal = nameSettingTransform.Find("BSMLModalKeyboard").GetComponent<ModalView>();
-                FieldAccessor<ModalView, bool>.Set(ref nameKeyboardModal, "_animateParentCanvas", false);
+                nameKeyboardModal.SetField("_animateParentCanvas", false);
 
                 ModalView authorKeyboardModal = authorSettingTransform.Find("BSMLModalKeyboard").GetComponent<ModalView>();
-                FieldAccessor<ModalView, bool>.Set(ref authorKeyboardModal, "_animateParentCanvas", false);
+                authorKeyboardModal.SetField("_animateParentCanvas", false);
 
                 parsed = true;
             }
