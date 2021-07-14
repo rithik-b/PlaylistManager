@@ -8,6 +8,7 @@ using PlaylistManager.Interfaces;
 using PlaylistManager.Utilities;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -18,22 +19,26 @@ using Zenject;
 
 namespace PlaylistManager.UI
 {
-    public class PlaylistViewButtonsController : IInitializable, IDisposable, ILevelCollectionUpdater, ILevelCategoryUpdater, ILevelCollectionsTableUpdater
+    public class PlaylistViewButtonsController : IInitializable, IDisposable, INotifyPropertyChanged, ILevelCollectionUpdater, ILevelCategoryUpdater, ILevelCollectionsTableUpdater
     {
         private readonly LevelPackDetailViewController levelPackDetailViewController;
         private readonly PopupModalsController popupModalsController;
         private readonly PlaylistDetailsViewController playlistDetailsViewController;
         private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
 
-        private int downloadingBeatmapCollectionIdx;
-        private IAnnotatedBeatmapLevelCollection[] downloadingBeatmapLevelCollections;
+        private Playlist selectedPlaylist;
+        private BeatSaberPlaylistsLib.PlaylistManager parentManager;
+        private List<IPlaylistSong> _missingSongs;
+
         private CancellationTokenSource tokenSource;
         private SemaphoreSlim downloadPauseSemaphore;
         private bool preferCustomArchiveURL;
-        private Playlist selectedPlaylist;
-        private BeatSaberPlaylistsLib.PlaylistManager parentManager;
+
+        private int downloadingBeatmapCollectionIdx;
+        private IAnnotatedBeatmapLevelCollection[] downloadingBeatmapLevelCollections;
 
         public event Action<IAnnotatedBeatmapLevelCollection[], int> LevelCollectionTableViewUpdatedEvent;
+        public event PropertyChangedEventHandler PropertyChanged;
 
         [UIComponent("root")]
         private readonly Transform rootTransform;
@@ -113,35 +118,26 @@ namespace PlaylistManager.UI
         {
             popupModalsController.ShowOkModal(rootTransform, "", CancelButtonPressed, "Cancel");
 
-            List<IPlaylistSong> missingSongs;
-            if (selectedPlaylist is BlistPlaylist blistPlaylist)
-            {
-                missingSongs = blistPlaylist.Where(s => s.PreviewBeatmapLevel == null).Distinct(IPlaylistSongComparer<BlistPlaylistSong>.Default).ToList();
-            }
-            else if (selectedPlaylist is LegacyPlaylist legacyPlaylist)
-            {
-                missingSongs = legacyPlaylist.Where(s => s.PreviewBeatmapLevel == null).Distinct(IPlaylistSongComparer<LegacyPlaylistSong>.Default).ToList();
-            }
-            else
+            if (MissingSongs == null)
             {
                 popupModalsController.OkText = "Error: The selected playlist cannot be downloaded.";
                 popupModalsController.OkButtonText = "Ok";
                 return;
             }
 
-            popupModalsController.OkText = string.Format("{0}/{1} songs downloaded", 0, missingSongs.Count);
+            popupModalsController.OkText = string.Format("{0}/{1} songs downloaded", 0, MissingSongs.Count);
             tokenSource.Dispose();
             tokenSource = new CancellationTokenSource();
 
             preferCustomArchiveURL = true;
             bool shownCustomArchiveWarning = false;
 
-            for (int i = 0; i < missingSongs.Count; i++)
+            for (int i = 0; i < MissingSongs.Count; i++)
             {
-                if (preferCustomArchiveURL && missingSongs[i].TryGetCustomData("customArchiveURL", out object outCustomArchiveURL))
+                if (preferCustomArchiveURL && MissingSongs[i].TryGetCustomData("customArchiveURL", out object outCustomArchiveURL))
                 {
                     string customArchiveURL = (string)outCustomArchiveURL;
-                    string identifier = PlaylistLibUtils.GetIdentifierForPlaylistSong(missingSongs[i]);
+                    string identifier = PlaylistLibUtils.GetIdentifierForPlaylistSong(MissingSongs[i]);
                     if (identifier == "")
                     {
                         continue;
@@ -161,19 +157,19 @@ namespace PlaylistManager.UI
                     }
                     await DownloaderUtils.instance.BeatmapDownloadByCustomURL(customArchiveURL, identifier, tokenSource.Token);
                 }
-                else if (!string.IsNullOrEmpty(missingSongs[i].Hash))
+                else if (!string.IsNullOrEmpty(MissingSongs[i].Hash))
                 {
-                    await DownloaderUtils.instance.BeatmapDownloadByHash(missingSongs[i].Hash, tokenSource.Token);
+                    await DownloaderUtils.instance.BeatmapDownloadByHash(MissingSongs[i].Hash, tokenSource.Token);
                 }
-                else if (!string.IsNullOrEmpty(missingSongs[i].Key))
+                else if (!string.IsNullOrEmpty(MissingSongs[i].Key))
                 {
-                    string hash = await DownloaderUtils.instance.BeatmapDownloadByKey(missingSongs[i].Key.ToLower(), tokenSource.Token);
+                    string hash = await DownloaderUtils.instance.BeatmapDownloadByKey(MissingSongs[i].Key.ToLower(), tokenSource.Token);
                     if (!string.IsNullOrEmpty(hash))
                     {
-                        missingSongs[i].Hash = hash;
+                        MissingSongs[i].Hash = hash;
                     }
                 }
-                popupModalsController.OkText = string.Format("{0}/{1} songs downloaded", i + 1, missingSongs.Count);
+                popupModalsController.OkText = string.Format("{0}/{1} songs downloaded", i + 1, MissingSongs.Count);
             }
 
             popupModalsController.OkText = "Download Complete!";
@@ -207,8 +203,52 @@ namespace PlaylistManager.UI
         private void LevelFilteringNavigationController_UpdateSecondChildControllerContent_SecondChildControllerUpdatedEvent()
         {
             LevelCollectionTableViewUpdatedEvent?.Invoke(downloadingBeatmapLevelCollections, downloadingBeatmapCollectionIdx);
+            UpdateMissingSongs();
             LevelFilteringNavigationController_UpdateSecondChildControllerContent.SecondChildControllerUpdatedEvent -= LevelFilteringNavigationController_UpdateSecondChildControllerContent_SecondChildControllerUpdatedEvent;
         }
+
+        private void UpdateMissingSongs()
+        {
+            if (selectedPlaylist is LegacyPlaylist legacyPlaylist)
+            {
+                MissingSongs = legacyPlaylist.Where(s => s.PreviewBeatmapLevel == null).Distinct(IPlaylistSongComparer<IPlaylistSong>.Default).ToList();
+            }
+            else if (selectedPlaylist is BlistPlaylist blistPlaylist)
+            {
+                MissingSongs = blistPlaylist.Where(s => s.PreviewBeatmapLevel == null).Distinct(IPlaylistSongComparer<IPlaylistSong>.Default).ToList();
+            }
+            else
+            {
+                MissingSongs = null;
+            }
+        }
+
+        private List<IPlaylistSong> MissingSongs
+        {
+            get => _missingSongs;
+            set
+            {
+                _missingSongs = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DownloadInteractable)));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DownloadHint)));
+            }
+        }
+
+        [UIValue("download-hint")]
+        private string DownloadHint
+        {
+            get
+            {
+                if (DownloadInteractable)
+                {
+                    return $"Download {MissingSongs.Count} missing songs.";
+                }
+                return "All songs already downloaded";
+            }
+        }
+
+        [UIValue("download-interactable")]
+        private bool DownloadInteractable => MissingSongs != null && MissingSongs.Count > 0;
 
         #endregion
 
@@ -267,6 +307,7 @@ namespace PlaylistManager.UI
             {
                 this.selectedPlaylist = selectedPlaylist;
                 this.parentManager = parentManager;
+                UpdateMissingSongs();
 
                 rootTransform.gameObject.SetActive(true);
                 if (selectedPlaylist.TryGetCustomData("syncURL", out _))
@@ -282,6 +323,7 @@ namespace PlaylistManager.UI
             {
                 this.selectedPlaylist = null;
                 this.parentManager = null;
+                MissingSongs = null;
                 rootTransform.gameObject.SetActive(false);
             }
         }
