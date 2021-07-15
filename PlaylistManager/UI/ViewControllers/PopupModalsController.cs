@@ -24,8 +24,12 @@ namespace PlaylistManager.UI
         private KeyboardPressed keyboardPressed;
 
         private string _yesNoText = "";
+        private string _checkboxText = "";
         private string _yesButtonText = "Yes";
         private string _noButtonText = "No";
+
+        private bool _checkboxValue = false;
+        private bool _checkboxActive = false;
 
         private string _okText = "";
         private string _okButtonText = "Ok";
@@ -80,18 +84,26 @@ namespace PlaylistManager.UI
 
         // Methods
 
-        internal void ShowYesNoModal(Transform parent, string text, ButtonPressed yesButtonPressedCallback, string yesButtonText = "Yes", string noButtonText = "No", ButtonPressed noButtonPressedCallback = null, bool animateParentCanvas = true)
+        internal void ShowYesNoModal(Transform parent, string text, ButtonPressed yesButtonPressedCallback, string yesButtonText = "Yes", string noButtonText = "No", ButtonPressed noButtonPressedCallback = null, bool animateParentCanvas = true, string checkboxText = "")
         {
             Parse();
             yesNoModalTransform.position = yesNoModalPosition;
             keyboardTransform.transform.SetParent(rootTransform);
             yesNoModalTransform.transform.SetParent(parent);
+
             YesNoText = text;
             YesButtonText = yesButtonText;
             NoButtonText = noButtonText;
+
             yesButtonPressed = yesButtonPressedCallback;
             noButtonPressed = noButtonPressedCallback;
-            FieldAccessor<ModalView, bool>.Set(ref yesNoModalView, "_animateParentCanvas", animateParentCanvas);
+
+            CheckboxText = checkboxText;
+            CheckboxValue = false;
+            CheckboxActive = !string.IsNullOrEmpty(checkboxText);
+
+            yesNoModalView.SetField("_animateParentCanvas", animateParentCanvas);
+
             parserParams.EmitEvent("close-yes-no");
             parserParams.EmitEvent("open-yes-no");
         }
@@ -111,6 +123,9 @@ namespace PlaylistManager.UI
             noButtonPressed = null;
             yesNoModalTransform.transform.SetParent(rootTransform);
         }
+
+        [UIAction("toggle-checkbox")]
+        private void ToggleCheckbox() => CheckboxValue = !CheckboxValue;
 
         // Values
 
@@ -147,6 +162,41 @@ namespace PlaylistManager.UI
             }
         }
 
+        [UIValue("checkbox-text")]
+        private string CheckboxText
+        {
+            get => _checkboxText;
+            set
+            {
+                _checkboxText = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CheckboxText)));
+            }
+        }
+
+        [UIValue("checkbox-active")]
+        private bool CheckboxActive
+        {
+            get => _checkboxActive;
+            set
+            {
+                _checkboxActive = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CheckboxActive)));
+            }
+        }
+
+        [UIValue("checkbox")]
+        private string Checkbox => CheckboxValue ? "☑" : "⬜";
+
+        public bool CheckboxValue
+        {
+            get => _checkboxValue;
+            private set
+            {
+                _checkboxValue = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Checkbox)));
+            }
+        }
+
         #endregion
 
         #region Ok Modal
@@ -159,10 +209,13 @@ namespace PlaylistManager.UI
             okModalTransform.position = okModalPosition;
             keyboardTransform.transform.SetParent(rootTransform);
             okModalTransform.transform.SetParent(parent);
+
             OkText = text;
             OkButtonText = okButtonText;
             okButtonPressed = buttonPressedCallback;
-            FieldAccessor<ModalView, bool>.Set(ref okModalView, "_animateParentCanvas", animateParentCanvas);
+
+            okModalView.SetField("_animateParentCanvas", animateParentCanvas);
+
             parserParams.EmitEvent("close-ok");
             parserParams.EmitEvent("open-ok");
         }
@@ -210,9 +263,13 @@ namespace PlaylistManager.UI
             Parse(); 
             keyboardTransform.transform.SetParent(rootTransform);
             keyboardTransform.transform.SetParent(parent);
-            keyboardPressed = keyboardPressedCallback;
-            FieldAccessor<ModalView, bool>.Set(ref keyboardModalView, "_animateParentCanvas", animateParentCanvas);
+
             KeyboardText = keyboardText;
+
+            keyboardPressed = keyboardPressedCallback;
+
+            keyboardModalView.SetField("_animateParentCanvas", animateParentCanvas);
+
             parserParams.EmitEvent("close-keyboard");
             parserParams.EmitEvent("open-keyboard");
         }

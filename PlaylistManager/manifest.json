@@ -1,9 +1,9 @@
-﻿{
+{
     "$schema": "https://raw.githubusercontent.com/bsmg/BSIPA-MetadataFileSchema/master/Schema.json",
     "id": "PlaylistManager",
     "name": "PlaylistManager",
     "author": "PixelBoom",
-    "version": "1.1.1",
+    "version": "1.2.0",
     "description": "Load, Create, Edit, Organize Playlists and Download their Songs in Beat Saber.",
     "gameVersion": "1.16.1",
     "dependsOn": {
@@ -11,7 +11,7 @@
         "SongCore": "^3.4.0",
         "BeatSaberMarkupLanguage": "^1.5.3",
         "SiraUtil": "^2.5.5",
-        "BeatSaberPlaylistsLib": "^1.3.0",
+        "BeatSaberPlaylistsLib": "^1.4.0",
         "BeatSaverSharp": "^2.0.1"
     }
 }

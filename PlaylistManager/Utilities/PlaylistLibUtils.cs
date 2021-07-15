@@ -1,5 +1,4 @@
-﻿using System;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Reflection;
@@ -24,23 +23,7 @@ namespace PlaylistManager.Utilities
 
         public static BeatSaberPlaylistsLib.Types.IPlaylist CreatePlaylist(string playlistName, string playlistAuthorName, BeatSaberPlaylistsLib.PlaylistManager playlistManager, bool defaultCover = true)
         {
-            string playlistFolderPath = playlistManager.PlaylistPath;
-            string playlistFileName = string.Join("_", playlistName.Replace("/", "").Replace("\\", "").Replace(".", "").Split(' '));
-            if (string.IsNullOrEmpty(playlistFileName))
-            {
-                playlistFileName = "playlist";
-            }
-            string playlistPath = Path.Combine(playlistFolderPath, playlistFileName + ".blist");
-            string originalPlaylistPath = Path.Combine(playlistFolderPath, playlistFileName);
-            int dupNum = 0;
-            while (File.Exists(playlistPath))
-            {
-                dupNum++;
-                playlistPath = originalPlaylistPath + string.Format("({0}).blist", dupNum);
-                playlistFileName = playlistFileName + string.Format("({0})", dupNum);
-            }
-
-            BeatSaberPlaylistsLib.Types.IPlaylist playlist = playlistManager.CreatePlaylist(playlistFileName, playlistName, playlistAuthorName, "");
+            BeatSaberPlaylistsLib.Types.IPlaylist playlist = playlistManager.CreatePlaylist("", playlistName, playlistAuthorName, "");
 
             if (defaultCover)
             {
@@ -56,7 +39,7 @@ namespace PlaylistManager.Utilities
             }
 
             // Easter Egg
-            if (PluginConfig.Instance.AuthorName.ToUpper().Contains("BINTER") && playlistName.ToUpper().Contains("TECH"))
+            if (PluginConfig.Instance.AuthorName.ToUpper().Contains("BINTER") && playlistName.ToUpper().Contains("TECH") && PluginConfig.Instance.EasterEggs)
             {
                 playlist.SetCustomData("syncURL", EASTER_EGG_URL);
             }

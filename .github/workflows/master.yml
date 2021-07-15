@@ -1,0 +1,53 @@
+﻿name: Build
+
+on:
+    workflow_dispatch:
+    push:
+        branches: [ master ]
+        paths:
+            - 'PlaylistManager.sln'
+            - 'PlaylistManager/**'
+            - '.github/workflows/master.yml'
+
+jobs:
+    Build:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - name: Setup dotnet
+              uses: actions/setup-dotnet@v1
+              with:
+                  dotnet-version: 5.0.x
+            - name: GetStrippedRefs
+              env:
+                  FILES_URL: ${{ secrets.BSFILES_URL }}
+              run: wget --no-check-certificate "$FILES_URL" -q -O bsfiles.zip
+            - name: ExtractRefs
+              run: unzip -q -n bsfiles.zip -d ${{github.workspace}}/Refs
+            - name: Download Mod Dependencies
+              uses: Goobwabber/download-beatmods-deps@1.2
+              with:
+                  manifest: ${{github.workspace}}/PlaylistManager/manifest.json
+            - name: Download Playlists Lib
+              uses: dawidd6/action-download-artifact@v2.14.0
+              with:
+                workflow: BuildMaster.yml
+                workflow_conclusion: success
+                name: BeatSaberPlaylistsLib_BS
+                repo: rithik-b/BeatSaberPlaylistsLib
+                path: ${{github.workspace}}/Refs
+            - name: Build
+              id: Build
+              run: dotnet build --configuration Release
+            - name: GitStatus
+              run: git status
+            - name: Echo Filename
+              run: echo $BUILDTEXT \($ASSEMBLYNAME\)
+              env:
+                  BUILDTEXT: Filename=${{ steps.Build.outputs.filename }}
+                  ASSEMBLYNAME: AssemblyName=${{ steps.Build.outputs.assemblyname }}
+            - name: Upload Artifact
+              uses: actions/upload-artifact@v1
+              with:
+                  name: ${{ steps.Build.outputs.filename }}
+                  path: ${{ steps.Build.outputs.artifactpath }}

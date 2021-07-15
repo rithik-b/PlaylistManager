@@ -14,6 +14,7 @@ using BeatSaberMarkupLanguage.Parser;
 using System.IO;
 using System.ComponentModel;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace PlaylistManager.UI
 {
@@ -80,7 +81,7 @@ namespace PlaylistManager.UI
 
             this.parentManager = parentManager;
             childManagers = parentManager.GetChildManagers().ToArray();
-            var childPlaylists = parentManager.GetAllPlaylists(false);
+            var childPlaylists = parentManager.GetAllPlaylists(false).Where(playlist => !playlist.ReadOnly);
             this.childPlaylists = childPlaylists.ToList();
 
             foreach (BeatSaberPlaylistsLib.PlaylistManager playlistManager in childManagers)
@@ -91,9 +92,9 @@ namespace PlaylistManager.UI
             {
                 if (playlist is IDeferredSpriteLoad deferredSpriteLoadPlaylist && !deferredSpriteLoadPlaylist.SpriteWasLoaded)
                 {
-                    _ = playlist.coverImage;
                     deferredSpriteLoadPlaylist.SpriteLoaded -= DeferredSpriteLoadPlaylist_SpriteLoaded;
                     deferredSpriteLoadPlaylist.SpriteLoaded += DeferredSpriteLoadPlaylist_SpriteLoaded;
+                    _ = playlist.coverImage;
                 }
                 else
                 {
@@ -113,8 +114,11 @@ namespace PlaylistManager.UI
         {
             if (sender is IDeferredSpriteLoad deferredSpriteLoadPlaylist)
             {
-                ShowPlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)deferredSpriteLoadPlaylist);
-                customListTableData.tableView.ReloadData();
+                if (parentManager.GetAllPlaylists(false).Contains((BeatSaberPlaylistsLib.Types.IPlaylist)deferredSpriteLoadPlaylist))
+                {
+                    ShowPlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)deferredSpriteLoadPlaylist);
+                }
+                customListTableData.tableView.ReloadDataKeepingPosition();
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UpButtonEnabled)));
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DownButtonEnabled)));
                 (deferredSpriteLoadPlaylist).SpriteLoaded -= DeferredSpriteLoadPlaylist_SpriteLoaded;

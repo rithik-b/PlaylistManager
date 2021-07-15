@@ -8,6 +8,7 @@ using UnityEngine;
 using System.ComponentModel;
 using PlaylistManager.Utilities;
 using System;
+using PlaylistManager.Configuration;
 
 namespace PlaylistManager.UI
 {
@@ -97,7 +98,18 @@ namespace PlaylistManager.UI
             parentManager.StorePlaylist(selectedPlaylist);
 
             levelCollectionTableView.ClearSelection();
-            levelCollectionTableView.SetData(selectedPlaylist.beatmapLevelCollection.beatmapLevels, Accessors.FavoriteLevelIdsAccessor(ref levelCollectionTableView), false);
+
+            // The cutie list
+            if ((PluginConfig.Instance.AuthorName.ToUpper().Contains("GOOBIE") || PluginConfig.Instance.AuthorName.ToUpper().Contains("ERIS") || 
+                 PluginConfig.Instance.AuthorName.ToUpper().Contains("PINK") || PluginConfig.Instance.AuthorName.ToUpper().Contains("CANDL3"))  && PluginConfig.Instance.EasterEggs)
+            {
+                levelCollectionNavigationController.SetDataForPack(selectedPlaylist, true, true, true, $"{PluginConfig.Instance.AuthorName} Cute");
+            }
+            else
+            {
+                levelCollectionNavigationController.SetDataForPack(selectedPlaylist, true, true, true, "Play");
+            }
+
             levelCollectionNavigationController.HideDetailViewController();
         }
 
@@ -149,7 +161,7 @@ namespace PlaylistManager.UI
                 AddActive = false;
                 IsPlaylistSong = false;
             }
-            else if (beatmapLevel is IPlaylistSong)
+            else if (beatmapLevel is IPlaylistSong && selectedPlaylist is { ReadOnly: false })
             {
                 AddActive = true;
                 IsPlaylistSong = true;

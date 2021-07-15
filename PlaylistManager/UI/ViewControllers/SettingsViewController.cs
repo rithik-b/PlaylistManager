@@ -47,6 +47,13 @@ namespace PlaylistManager.UI
             set => PluginConfig.Instance.PlaylistScrollSpeed = value;
         }
 
+        [UIValue("easter-eggs")]
+        public bool EasterEggs
+        {
+            get => PluginConfig.Instance.EasterEggs;
+            set => PluginConfig.Instance.EasterEggs = value;
+        }
+
         [UIValue("no-image")]
         public bool DefaultImageDisabled
         {

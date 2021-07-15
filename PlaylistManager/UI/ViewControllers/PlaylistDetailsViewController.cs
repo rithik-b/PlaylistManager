@@ -8,8 +8,10 @@ using BeatSaberPlaylistsLib.Types;
 using HMUI;
 using IPA.Utilities;
 using PlaylistManager.Interfaces;
+using PlaylistManager.Utilities;
 using System;
 using System.ComponentModel;
+using System.IO;
 using System.Reflection;
 using UnityEngine;
 using Zenject;
@@ -19,7 +21,6 @@ namespace PlaylistManager.UI
     public class PlaylistDetailsViewController : IInitializable, IDisposable, ILevelCollectionUpdater, INotifyPropertyChanged
     {
         private readonly LevelPackDetailViewController levelPackDetailViewController;
-        private LevelCollectionNavigationController levelCollectionNavigationController;
         private readonly ImageSelectionModalController imageSelectionModalController;
         private readonly PopupModalsController popupModalsController;
 
@@ -42,13 +43,15 @@ namespace PlaylistManager.UI
         [UIComponent("playlist-cover")]
         private readonly ClickableImage playlistCoverView;
 
+        [UIComponent("text-page")]
+        private readonly TextPageScrollView descriptionTextPage;
+
         [UIParams]
         private readonly BSMLParserParams parserParams;
 
-        public PlaylistDetailsViewController(LevelPackDetailViewController levelPackDetailViewController, LevelCollectionNavigationController levelCollectionNavigationController, ImageSelectionModalController imageSelectionModalController, PopupModalsController popupModalsController)
+        public PlaylistDetailsViewController(LevelPackDetailViewController levelPackDetailViewController, ImageSelectionModalController imageSelectionModalController, PopupModalsController popupModalsController)
         {
             this.levelPackDetailViewController = levelPackDetailViewController;
-            this.levelCollectionNavigationController = levelCollectionNavigationController;
             this.imageSelectionModalController = imageSelectionModalController;
             this.popupModalsController = popupModalsController;
             parsed = false;
@@ -63,9 +66,9 @@ namespace PlaylistManager.UI
         {
             imageSelectionModalController.ImageSelectedEvent -= ImageSelectionModalController_ImageSelectedEvent;
 
-            if (this.selectedPlaylist != null)
+            if (selectedPlaylist != null)
             {
-                this.selectedPlaylist.SpriteLoaded -= SelectedPlaylist_SpriteLoaded;
+                selectedPlaylist.SpriteLoaded -= SelectedPlaylist_SpriteLoaded;
             }
         }
 
@@ -77,10 +80,10 @@ namespace PlaylistManager.UI
                 modalPosition = modalTransform.position;
 
                 ModalView nameKeyboardModal = nameSettingTransform.Find("BSMLModalKeyboard").GetComponent<ModalView>();
-                FieldAccessor<ModalView, bool>.Set(ref nameKeyboardModal, "_animateParentCanvas", false);
+                nameKeyboardModal.SetField("_animateParentCanvas", false);
 
                 ModalView authorKeyboardModal = authorSettingTransform.Find("BSMLModalKeyboard").GetComponent<ModalView>();
-                FieldAccessor<ModalView, bool>.Set(ref authorKeyboardModal, "_animateParentCanvas", false);
+                authorKeyboardModal.SetField("_animateParentCanvas", false);
 
                 parsed = true;
             }
@@ -97,10 +100,12 @@ namespace PlaylistManager.UI
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistName)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NameHint)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistAuthor)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AuthorHint)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AuthorHint))); 
+            UpdateReadOnly();
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistAllowDuplicates)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistDescription)));
             playlistCoverView.sprite = selectedPlaylist.Sprite;
+            descriptionTextPage.ScrollTo(0, true);
         }
 
         #region Name, Author, Description
@@ -168,6 +173,71 @@ namespace PlaylistManager.UI
 
         #endregion
 
+        #region Read Only
+
+        // Methods
+
+        [UIAction("read-only-toggled")]
+        private void ReadOnlyToggled(bool playlistReadOnly)
+        {
+            if (playlistReadOnly)
+            {
+                playlistReadOnly = true;
+            }
+            else if (PlaylistAllowDuplicates != PlaylistReadOnly)
+            {
+                popupModalsController.ShowYesNoModal(modalTransform, "To turn off read only, this playlist will be cloned and writing will be enabled on the clone. Proceed?", ClonePlaylist, noButtonPressedCallback: UpdateReadOnly, animateParentCanvas: false);
+            }
+        }
+
+        private void ClonePlaylist()
+        {
+            string playlistPath = Path.Combine(parentManager.PlaylistPath, $"{selectedPlaylist.Filename}.{selectedPlaylist.SuggestedExtension}");
+            if (File.Exists(playlistPath))
+            {
+                BeatSaberPlaylistsLib.Types.IPlaylist clonedPlaylist = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.DefaultHandler?.Deserialize(File.OpenRead(playlistPath));
+                clonedPlaylist.ReadOnly = false;
+                parentManager.StorePlaylist(clonedPlaylist);
+                PlaylistLibUtils.playlistManager.RequestRefresh("PlaylistManager (plugin)");
+                popupModalsController.ShowOkModal(modalTransform, "Playlist Cloned!", null, animateParentCanvas: false);
+            }
+            else
+            {
+                popupModalsController.ShowOkModal(modalTransform, "An error occured while trying to clone the playlist. Please try again later.", null, animateParentCanvas: false);
+            }
+            UpdateReadOnly();
+        }
+
+        private void UpdateReadOnly()
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistReadOnly)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ReadOnlyVisible)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Editable)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CoverHint)));
+        }
+
+        // Values
+
+        [UIValue("playlist-read-only")]
+        private bool PlaylistReadOnly
+        {
+            get => selectedPlaylist == null ? false : selectedPlaylist.ReadOnly;
+            set
+            {
+                selectedPlaylist.ReadOnly = value;
+                parentManager.StorePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
+                UpdateReadOnly();
+            }
+        }
+
+        [UIValue("read-only-visible")]
+        private bool ReadOnlyVisible => PlaylistReadOnly;
+
+        [UIValue("editable")]
+        private bool Editable => !PlaylistReadOnly;
+
+        #endregion
+
         #region Allow Duplicates
 
         // Methods
@@ -185,15 +255,9 @@ namespace PlaylistManager.UI
             }
         }
 
-        private void DeleteDuplicates()
-        {
-            PlaylistAllowDuplicates = false;
-        }
+        private void DeleteDuplicates() => PlaylistAllowDuplicates = false;
 
-        private void DontDeleteDuplicates()
-        {
-            PlaylistAllowDuplicates = true;
-        }
+        private void DontDeleteDuplicates() => PlaylistAllowDuplicates = true;
 
         // Values
 
@@ -230,7 +294,10 @@ namespace PlaylistManager.UI
         [UIAction("playlist-cover-clicked")]
         private void OpenImageSelectionModal()
         {
-            imageSelectionModalController.ShowModal((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
+            if (!PlaylistReadOnly)
+            {
+                imageSelectionModalController.ShowModal((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
+            }
         }
 
         private void ImageSelectionModalController_ImageSelectedEvent(byte[] imageBytes)
@@ -252,11 +319,11 @@ namespace PlaylistManager.UI
         private void SelectedPlaylist_SpriteLoaded(object sender, EventArgs e)
         {
             playlistCoverView.sprite = selectedPlaylist.Sprite;
-            levelPackDetailViewController.SetData((IBeatmapLevelPack)selectedPlaylist);
-            levelPackDetailViewController.ShowContent(LevelPackDetailViewController.ContentType.Owned);
-            FieldAccessor<LevelCollectionNavigationController, IBeatmapLevelPack>.Set(ref levelCollectionNavigationController, "_levelPack", (IBeatmapLevelPack)selectedPlaylist);
             selectedPlaylist.SpriteLoaded -= SelectedPlaylist_SpriteLoaded;
         }
+
+        [UIValue("cover-hint")]
+        private string CoverHint => PlaylistReadOnly ? "Cover Image" : "Set Cover";
 
         #endregion
 
