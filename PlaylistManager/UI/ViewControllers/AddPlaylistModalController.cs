@@ -29,7 +29,6 @@ namespace PlaylistManager.UI
 
         private readonly Sprite folderIcon;
         private bool parsed;
-        private readonly SemaphoreSlim imageLoadSemaphore = new SemaphoreSlim(1, 1);
         public event PropertyChangedEventHandler PropertyChanged;
 
         [UIComponent("list")]
@@ -76,7 +75,7 @@ namespace PlaylistManager.UI
             ShowPlaylistsForManager(PlaylistLibUtils.playlistManager);
         }
 
-        internal async void ShowPlaylistsForManager(BeatSaberPlaylistsLib.PlaylistManager parentManager)
+        internal void ShowPlaylistsForManager(BeatSaberPlaylistsLib.PlaylistManager parentManager)
         {
             customListTableData.data.Clear();
 
@@ -93,7 +92,6 @@ namespace PlaylistManager.UI
             {
                 if (playlist is IDeferredSpriteLoad deferredSpriteLoadPlaylist && !deferredSpriteLoadPlaylist.SpriteWasLoaded)
                 {
-                    await imageLoadSemaphore.WaitAsync();
                     deferredSpriteLoadPlaylist.SpriteLoaded -= DeferredSpriteLoadPlaylist_SpriteLoaded;
                     deferredSpriteLoadPlaylist.SpriteLoaded += DeferredSpriteLoadPlaylist_SpriteLoaded;
                     _ = playlist.coverImage;
@@ -124,7 +122,6 @@ namespace PlaylistManager.UI
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UpButtonEnabled)));
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DownButtonEnabled)));
                 (deferredSpriteLoadPlaylist).SpriteLoaded -= DeferredSpriteLoadPlaylist_SpriteLoaded;
-                imageLoadSemaphore.Release();
             }
         }
 
