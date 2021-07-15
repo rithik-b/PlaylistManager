@@ -2,6 +2,10 @@
 	<modal id='yes-no-modal' show-event='open-yes-no' hide-event='close-yes-no' clickerino-offerino-closerino='false' size-delta-x='65' size-delta-y='35'>
 		<vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' spacing='3' preferred-width='60' preferred-height='30'>
 			<text text='~yes-no-text' word-wrapping='true' align='Center' />
+			<horizontal horizontal-fit='PreferredSize' spacing='1' active='~checkbox-active'>
+				<button text='~checkbox' on-click='toggle-checkbox' italics='false' pref-width='6' pref-height='7' />
+				<text text='~checkbox-text' italics='true' word-wrapping='true' align='Left' />
+			</horizontal>
 			<horizontal>
 				<primary-button text='~yes-button-text' on-click='yes-button-pressed' click-event='close-yes-no' />
 				<button text='~no-button-text' on-click='no-button-pressed' click-event='close-yes-no' />

@@ -88,25 +88,45 @@ namespace PlaylistManager.UI
         [UIAction("delete-click")]
         private void OnDelete()
         {
-            popupModalsController.ShowYesNoModal(rootTransform, string.Format("Are you sure you would like to delete {0}?", selectedPlaylist.Title), DeleteButtonPressed);
+            int numberOfSongs = ((IAnnotatedBeatmapLevelCollection)selectedPlaylist).beatmapLevelCollection.beatmapLevels.Length;
+            string checkboxText = numberOfSongs > 0 ? $"Also delete all {numberOfSongs} songs from the game." : "";
+            popupModalsController.ShowYesNoModal(rootTransform, $"Are you sure you would like to delete the playlist \"{selectedPlaylist.Title}\"?", DeleteButtonPressed, checkboxText: checkboxText);
         }
 
         private void DeleteButtonPressed()
         {
             try
             {
-                parentManager.DeletePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
-                int selectedIndex = annotatedBeatmapLevelCollectionsViewController.selectedItemIndex;
-                List<IAnnotatedBeatmapLevelCollection> annotatedBeatmapLevelCollections = Accessors.AnnotatedBeatmapLevelCollectionsAccessor(ref annotatedBeatmapLevelCollectionsViewController).ToList();
-                annotatedBeatmapLevelCollections.RemoveAt(selectedIndex);
-                selectedIndex--;
-                LevelCollectionTableViewUpdatedEvent?.Invoke(annotatedBeatmapLevelCollections.ToArray(), selectedIndex < 0 ? 0 : selectedIndex);
+                if (popupModalsController.CheckboxValue)
+                {
+                    DeleteSongs();
+                }
+                DeletePlaylist();
             }
             catch (Exception e)
             {
                 popupModalsController.ShowOkModal(rootTransform, "Error: Playlist cannot be deleted.", null);
                 Plugin.Log.Critical(string.Format("An exception was thrown while deleting a playlist.\nException message:{0}", e));
             }
+        }
+
+        private void DeleteSongs()
+        {
+            IPreviewBeatmapLevel[] beatmapLevels = ((IAnnotatedBeatmapLevelCollection)selectedPlaylist).beatmapLevelCollection.beatmapLevels;
+            foreach (CustomPreviewBeatmapLevel beatmapLevel in beatmapLevels.OfType<CustomPreviewBeatmapLevel>())
+            {
+                SongCore.Loader.Instance.DeleteSong(beatmapLevel.customLevelPath);
+            }
+        }
+
+        private void DeletePlaylist()
+        {
+            parentManager.DeletePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
+            int selectedIndex = annotatedBeatmapLevelCollectionsViewController.selectedItemIndex;
+            List<IAnnotatedBeatmapLevelCollection> annotatedBeatmapLevelCollections = Accessors.AnnotatedBeatmapLevelCollectionsAccessor(ref annotatedBeatmapLevelCollectionsViewController).ToList();
+            annotatedBeatmapLevelCollections.RemoveAt(selectedIndex);
+            selectedIndex--;
+            LevelCollectionTableViewUpdatedEvent?.Invoke(annotatedBeatmapLevelCollections.ToArray(), selectedIndex < 0 ? 0 : selectedIndex);
         }
 
         #endregion
