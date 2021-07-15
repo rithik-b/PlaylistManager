@@ -39,7 +39,7 @@ namespace PlaylistManager.Utilities
             }
 
             // Easter Egg
-            if (PluginConfig.Instance.AuthorName.ToUpper().Contains("BINTER") && playlistName.ToUpper().Contains("TECH"))
+            if (PluginConfig.Instance.AuthorName.ToUpper().Contains("BINTER") && playlistName.ToUpper().Contains("TECH") && PluginConfig.Instance.EasterEggs)
             {
                 playlist.SetCustomData("syncURL", EASTER_EGG_URL);
             }

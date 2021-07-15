@@ -80,7 +80,6 @@ namespace PlaylistManager.UI
             playlistDetailsViewController.ShowDetails();
         }
 
-
         #endregion
 
         #region Delete

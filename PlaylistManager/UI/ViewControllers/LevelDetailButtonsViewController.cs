@@ -98,9 +98,12 @@ namespace PlaylistManager.UI
             parentManager.StorePlaylist(selectedPlaylist);
 
             levelCollectionTableView.ClearSelection();
-            if (PluginConfig.Instance.AuthorName.ToUpper().Contains("GOOBIE"))
+
+            // The cutie list
+            if ((PluginConfig.Instance.AuthorName.ToUpper().Contains("GOOBIE") || PluginConfig.Instance.AuthorName.ToUpper().Contains("ERIS") || 
+                 PluginConfig.Instance.AuthorName.ToUpper().Contains("PINK") || PluginConfig.Instance.AuthorName.ToUpper().Contains("CANDL3"))  && PluginConfig.Instance.EasterEggs)
             {
-                levelCollectionNavigationController.SetDataForPack(selectedPlaylist, true, true, true, "Goobie Cute");
+                levelCollectionNavigationController.SetDataForPack(selectedPlaylist, true, true, true, $"{PluginConfig.Instance.AuthorName} Cute");
             }
             else
             {
