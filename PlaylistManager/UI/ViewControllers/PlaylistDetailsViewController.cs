@@ -212,6 +212,8 @@ namespace PlaylistManager.UI
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistReadOnly)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ReadOnlyVisible)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Editable)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CoverHint)));
         }
 
         // Values
@@ -230,6 +232,9 @@ namespace PlaylistManager.UI
 
         [UIValue("read-only-visible")]
         private bool ReadOnlyVisible => PlaylistReadOnly;
+
+        [UIValue("editable")]
+        private bool Editable => !PlaylistReadOnly;
 
         #endregion
 
@@ -289,7 +294,10 @@ namespace PlaylistManager.UI
         [UIAction("playlist-cover-clicked")]
         private void OpenImageSelectionModal()
         {
-            imageSelectionModalController.ShowModal((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
+            if (!PlaylistReadOnly)
+            {
+                imageSelectionModalController.ShowModal((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
+            }
         }
 
         private void ImageSelectionModalController_ImageSelectedEvent(byte[] imageBytes)
@@ -313,6 +321,9 @@ namespace PlaylistManager.UI
             playlistCoverView.sprite = selectedPlaylist.Sprite;
             selectedPlaylist.SpriteLoaded -= SelectedPlaylist_SpriteLoaded;
         }
+
+        [UIValue("cover-hint")]
+        private string CoverHint => PlaylistReadOnly ? "Cover Image" : "Set Cover";
 
         #endregion
 

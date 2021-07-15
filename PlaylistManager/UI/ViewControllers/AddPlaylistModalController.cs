@@ -82,7 +82,7 @@ namespace PlaylistManager.UI
 
             this.parentManager = parentManager;
             childManagers = parentManager.GetChildManagers().ToArray();
-            var childPlaylists = parentManager.GetAllPlaylists(false);
+            var childPlaylists = parentManager.GetAllPlaylists(false).Where(playlist => !playlist.ReadOnly);
             this.childPlaylists = childPlaylists.ToList();
 
             foreach (BeatSaberPlaylistsLib.PlaylistManager playlistManager in childManagers)

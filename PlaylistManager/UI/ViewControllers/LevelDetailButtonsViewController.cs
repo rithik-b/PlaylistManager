@@ -158,7 +158,7 @@ namespace PlaylistManager.UI
                 AddActive = false;
                 IsPlaylistSong = false;
             }
-            else if (beatmapLevel is IPlaylistSong)
+            else if (beatmapLevel is IPlaylistSong && selectedPlaylist is { ReadOnly: false })
             {
                 AddActive = true;
                 IsPlaylistSong = true;
