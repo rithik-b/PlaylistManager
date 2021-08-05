@@ -1,4 +1,5 @@
 ﻿using BeatSaverSharp;
+using BeatSaverSharp.Models;
 using System;
 using System.IO;
 using System.IO.Compression;
@@ -21,47 +22,39 @@ namespace PlaylistManager.Utilities
         public static void Init()
         {
             instance = new DownloaderUtils();
-            HttpOptions options = new HttpOptions(name: typeof(DownloaderUtils).Assembly.GetName().Name, version: typeof(DownloaderUtils).Assembly.GetName().Version);
+            BeatSaverOptions options = new BeatSaverOptions(applicationName: typeof(DownloaderUtils).Assembly.GetName().Name, version: typeof(DownloaderUtils).Assembly.GetName().Version);
             instance.beatSaverInstance = new BeatSaver(options);
         }
 
-        private async Task BeatSaverBeatmapDownload(Beatmap song, StandardRequestOptions options, bool direct)
+        private async Task BeatSaverBeatmapDownload(Beatmap song, CancellationToken token, IProgress<double> progress = null)
         {
             string customSongsPath = CustomLevelPathHelper.customLevelsDirectoryPath;
             if (!Directory.Exists(customSongsPath))
             {
                 Directory.CreateDirectory(customSongsPath);
             }
-            var zip = await song.ZipBytes(direct, options).ConfigureAwait(false);
+            var zip = await song.LatestVersion.DownloadZIP(token, progress).ConfigureAwait(false);
             await ExtractZipAsync(zip, customSongsPath, songInfo: song).ConfigureAwait(false);
         }
 
-        public async Task<string> BeatmapDownloadByKey(string key, CancellationToken token, IProgress<double> progress = null, bool direct = false)
+        public async Task<string> BeatmapDownloadByKey(string key, CancellationToken token, IProgress<double> progress = null)
         {
-            var options = new StandardRequestOptions { Token = token, Progress = progress };
             bool songDownloaded = false;
             while(!songDownloaded)
             { 
                 try
                 {
-                    var song = await beatSaverInstance.Key(key, options);
-                    if (SongCore.Loader.GetLevelByHash(song.Hash) == null)
+                    var song = await beatSaverInstance.Beatmap(key, token);
+                    if (SongCore.Loader.GetLevelByHash(song.LatestVersion.Hash) == null)
                     {
-                        await BeatSaverBeatmapDownload(song, options, direct);
+                        await BeatSaverBeatmapDownload(song, token, progress);
                     }
                     songDownloaded = true;
-                    return song.Hash;
+                    return song.LatestVersion.Hash;
                 }
                 catch (Exception e)
                 {
-                    if (e is BeatSaverSharp.Exceptions.RateLimitExceededException rateLimitException)
-                    {
-                        double timeRemaining = (rateLimitException.RateLimit.Reset - DateTime.Now).TotalMilliseconds;
-                        timeRemaining = timeRemaining > 0 ? timeRemaining : 0;
-                        await Task.Delay((int)timeRemaining);
-                        continue;
-                    }
-                    else if (!(e is TaskCanceledException))
+                    if (!(e is TaskCanceledException))
                     {
                         Plugin.Log.Critical(string.Format("Failed to download Song {0}. Exception: {1}", key, e.ToString()));
                     }
@@ -71,28 +64,20 @@ namespace PlaylistManager.Utilities
             return "";
         }
 
-        public async Task BeatmapDownloadByHash(string hash, CancellationToken token, IProgress<double> progress = null, bool direct = false)
+        public async Task BeatmapDownloadByHash(string hash, CancellationToken token, IProgress<double> progress = null)
         {
-            var options = new StandardRequestOptions { Token = token, Progress = progress };
             bool songDownloaded = false;
             while (!songDownloaded)
             {
                 try
                 {
-                    var song = await beatSaverInstance.Hash(hash, options);
-                    await BeatSaverBeatmapDownload(song, options, direct);
+                    var song = await beatSaverInstance.BeatmapByHash(hash, token);
+                    await BeatSaverBeatmapDownload(song, token, progress);
                     songDownloaded = true;
                 }
                 catch (Exception e)
                 {
-                    if (e is BeatSaverSharp.Exceptions.RateLimitExceededException rateLimitException)
-                    {
-                        double timeRemaining = (rateLimitException.RateLimit.Reset - DateTime.Now).TotalMilliseconds;
-                        timeRemaining = timeRemaining > 0 ? timeRemaining : 0;
-                        await Task.Delay((int)timeRemaining);
-                        continue;
-                    }
-                    else if (!(e is TaskCanceledException))
+                    if (!(e is TaskCanceledException))
                     {
                         Plugin.Log.Critical(string.Format("Failed to download Song {0}. Exception: {1}", hash, e.ToString()));
                     }
@@ -129,7 +114,7 @@ namespace PlaylistManager.Utilities
                 string basePath = "";
                 if (songInfo != null)
                 {
-                    basePath = songInfo.Key + " (" + songInfo.Metadata.SongName + " - " + songInfo.Metadata.LevelAuthorName + ")";
+                    basePath = songInfo.ID + " (" + songInfo.Metadata.SongName + " - " + songInfo.Metadata.LevelAuthorName + ")";
                 }
                 else
                 {
