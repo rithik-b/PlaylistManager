@@ -26,14 +26,15 @@ namespace PlaylistManager.Utilities
             instance.beatSaverInstance = new BeatSaver(options);
         }
 
-        private async Task BeatSaverBeatmapDownload(Beatmap song, CancellationToken token, IProgress<double> progress = null)
+        private async Task BeatSaverBeatmapDownload(Beatmap song, BeatmapVersion songversion, CancellationToken token, IProgress<double> progress = null)
         {
             string customSongsPath = CustomLevelPathHelper.customLevelsDirectoryPath;
             if (!Directory.Exists(customSongsPath))
             {
                 Directory.CreateDirectory(customSongsPath);
             }
-            var zip = await song.LatestVersion.DownloadZIP(token, progress).ConfigureAwait(false);
+            var zip = await songversion.DownloadZIP(token, progress).ConfigureAwait(false);
+            
             await ExtractZipAsync(zip, customSongsPath, songInfo: song).ConfigureAwait(false);
         }
 
@@ -45,9 +46,10 @@ namespace PlaylistManager.Utilities
                 try
                 {
                     var song = await beatSaverInstance.Beatmap(key, token);
+                    // A key is not enough to identify a specific version. So just get the latest one.
                     if (SongCore.Loader.GetLevelByHash(song.LatestVersion.Hash) == null)
                     {
-                        await BeatSaverBeatmapDownload(song, token, progress);
+                        await BeatSaverBeatmapDownload(song, song.LatestVersion, token, progress);
                     }
                     songDownloaded = true;
                     return song.LatestVersion.Hash;
@@ -72,7 +74,30 @@ namespace PlaylistManager.Utilities
                 try
                 {
                     var song = await beatSaverInstance.BeatmapByHash(hash, token);
-                    await BeatSaverBeatmapDownload(song, token, progress);
+                    if (song == null)
+                    {
+                        Plugin.Log.Critical(string.Format("Failed to download Song {0}. Unable to find a beatmap for that hash.", hash));
+                        return;
+                    }
+
+                    BeatmapVersion matchingVersion = null;
+                    foreach (BeatmapVersion version in song.Versions)
+                    {
+                        if (hash.ToLowerInvariant() == version.Hash.ToLowerInvariant())
+                        {
+                            matchingVersion = version;
+                        }
+                    }
+                    
+                    // Just download exact hash matches for now. Updating to a newer version of a song based on a hash should require some user interaction or option setting.
+                    if (matchingVersion != null)
+                    {
+                        await BeatSaverBeatmapDownload(song, matchingVersion, token, progress);
+                    }
+                    else
+                    {
+                        Plugin.Log.Critical(string.Format("Failed to download Song {0}. Unable to find a matching version for that hash.", hash));
+                    }
                     songDownloaded = true;
                 }
                 catch (Exception e)
