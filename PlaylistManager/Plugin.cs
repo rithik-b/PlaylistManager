@@ -32,7 +32,6 @@ namespace PlaylistManager
             Log.Info("PlaylistManager initialized.");
             harmony = new Harmony(HarmonyId);
             zenjector.OnMenu<PlaylistManagerMenuInstaller>();
-            DownloaderUtils.Init();
         }
 
         #region BSIPA Config
@@ -47,6 +46,10 @@ namespace PlaylistManager
         [OnEnable]
         public void OnEnable()
         {
+            if (DownloaderUtils.instance == null)
+            {
+                DownloaderUtils.Init();
+            }
             harmony.PatchAll(Assembly.GetExecutingAssembly());
         }
 
