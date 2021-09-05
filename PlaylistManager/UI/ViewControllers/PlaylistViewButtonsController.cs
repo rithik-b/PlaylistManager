@@ -3,6 +3,7 @@ using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberPlaylistsLib.Blist;
 using BeatSaberPlaylistsLib.Legacy;
 using BeatSaberPlaylistsLib.Types;
+using PlaylistManager.Configuration;
 using PlaylistManager.HarmonyPatches;
 using PlaylistManager.Interfaces;
 using PlaylistManager.Utilities;
@@ -313,11 +314,28 @@ namespace PlaylistManager.UI
                 {
                     selectedPlaylist.SetCustomData("syncURL", syncURL);
                 }
-
-                await DownloadPlaylistAsync();
-                popupModalsController.ShowOkModal(rootTransform, "Playlist Synced", null);
+                switch (PluginConfig.Instance.SyncOption)
+                {
+                    case PluginConfig.SyncOptions.On:
+                        DownloadAccepted();
+                        break;
+                    case PluginConfig.SyncOptions.Off:
+                        DownloadRejected();
+                        break;
+                    case PluginConfig.SyncOptions.Ask:
+                        popupModalsController.ShowYesNoModal(rootTransform, "Would you like to download the songs after syncing?", DownloadAccepted, noButtonPressedCallback: DownloadRejected);
+                        break;
+                }
             }
         }
+
+        private async void DownloadAccepted()
+        {
+            await DownloadPlaylistAsync();
+            popupModalsController.ShowOkModal(rootTransform, "Playlist Synced", null);
+        }
+
+        private void DownloadRejected() => popupModalsController.ShowOkModal(rootTransform, "Playlist Synced", null);
 
         #endregion
 

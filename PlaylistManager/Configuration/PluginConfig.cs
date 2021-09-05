@@ -1,5 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using IPA.Config.Stores;
+using IPA.Config.Stores.Attributes;
+using IPA.Config.Stores.Converters;
 
 [assembly: InternalsVisibleTo(GeneratedStore.AssemblyVisibilityTarget)]
 namespace PlaylistManager.Configuration
@@ -17,6 +19,10 @@ namespace PlaylistManager.Configuration
         public virtual bool HighlightDifficulty { get; set; } = true;
         public virtual bool EasterEggs { get; set; } = false;
 
+        [UseConverter(typeof(EnumConverter<SyncOptions>))]
+        [NonNullable]
+        public virtual SyncOptions SyncOption { get; set; } = PluginConfig.SyncOptions.On;
+
         /// <summary>
         /// Call this to force BSIPA to update the config file. This is also called by BSIPA if it detects the file was modified.
         /// </summary>
@@ -31,6 +37,13 @@ namespace PlaylistManager.Configuration
         public virtual void CopyFrom(PluginConfig other)
         {
             // This instance's members populated from other
+        }
+
+        public enum SyncOptions
+        {
+            Off,
+            On,
+            Ask
         }
     }
 }

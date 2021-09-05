@@ -47,6 +47,13 @@ namespace PlaylistManager.UI
             set => PluginConfig.Instance.PlaylistScrollSpeed = value;
         }
 
+        [UIValue("sync-option")]
+        private int SyncOption
+        {
+            get => (int)PluginConfig.Instance.SyncOption;
+            set => PluginConfig.Instance.SyncOption = (PluginConfig.SyncOptions)value;
+        }
+
         [UIValue("easter-eggs")]
         public bool EasterEggs
         {
@@ -73,6 +80,12 @@ namespace PlaylistManager.UI
         {
             get => PluginConfig.Instance.ManagementDisabled;
             set => PluginConfig.Instance.ManagementDisabled = value;
+        }
+
+        [UIAction("sync-formatter")]
+        private string PositionFormatter(int index)
+        {
+            return ((PluginConfig.SyncOptions)index).ToString();
         }
 
         public void Initialize() => BSMLSettings.instance.AddSettingsMenu(nameof(PlaylistManager), "PlaylistManager.UI.Views.Settings.bsml", this);
