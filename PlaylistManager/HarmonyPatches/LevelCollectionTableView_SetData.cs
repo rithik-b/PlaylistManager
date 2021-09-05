@@ -17,6 +17,7 @@ namespace PlaylistManager.HarmonyPatches
             // Safe to assume if first song is IPlaylistSong, there will be more
             if (previewBeatmapLevels.Length != 0 && previewBeatmapLevels[0] is IPlaylistSong)
             {
+                LevelCollectionViewController_SetData.beatmapLevels = previewBeatmapLevels;
                 // Clone so the filtered collection we originally got will still have the PlaylistLib types
                 previewBeatmapLevels = (IPreviewBeatmapLevel[])previewBeatmapLevels.Clone();
                 for (int i = 0; i < previewBeatmapLevels.Length; i++)
