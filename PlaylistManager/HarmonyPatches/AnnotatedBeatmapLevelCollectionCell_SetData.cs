@@ -12,14 +12,14 @@ using PlaylistManager.Utilities;
 
 namespace PlaylistManager.HarmonyPatches
 {
-    [HarmonyPatch(typeof(AnnotatedBeatmapLevelCollectionTableCell), nameof(AnnotatedBeatmapLevelCollectionTableCell.SetData))]
-    public class AnnotatedBeatmapLevelCollectionTableCell_SetData
+    [HarmonyPatch(typeof(AnnotatedBeatmapLevelCollectionCell), nameof(AnnotatedBeatmapLevelCollectionCell.SetData))]
+    public class AnnotatedBeatmapLevelCollectionCell_SetData
     {
-        public static readonly ConditionalWeakTable<IDeferredSpriteLoad, AnnotatedBeatmapLevelCollectionTableCell> EventTable = new ConditionalWeakTable<IDeferredSpriteLoad, AnnotatedBeatmapLevelCollectionTableCell>();
+        public static readonly ConditionalWeakTable<IDeferredSpriteLoad, AnnotatedBeatmapLevelCollectionCell> EventTable = new ConditionalWeakTable<IDeferredSpriteLoad, AnnotatedBeatmapLevelCollectionCell>();
 
-        static void Postfix(AnnotatedBeatmapLevelCollectionTableCell __instance, ref IAnnotatedBeatmapLevelCollection annotatedBeatmapLevelCollection, ref Image ____coverImage)
+        static void Postfix(AnnotatedBeatmapLevelCollectionCell __instance, ref IAnnotatedBeatmapLevelCollection annotatedBeatmapLevelCollection, ref Image ____coverImage)
         {
-            AnnotatedBeatmapLevelCollectionTableCell cell = __instance;
+            AnnotatedBeatmapLevelCollectionCell cell = __instance;
             if (annotatedBeatmapLevelCollection is IDeferredSpriteLoad deferredSpriteLoad)
             {
                 if (deferredSpriteLoad.SpriteWasLoaded)
@@ -28,7 +28,7 @@ namespace PlaylistManager.HarmonyPatches
                     Plugin.Log.Debug($"Sprite was already loaded for {(deferredSpriteLoad as IAnnotatedBeatmapLevelCollection).collectionName}");
 #endif
                 }
-                if (EventTable.TryGetValue(deferredSpriteLoad, out AnnotatedBeatmapLevelCollectionTableCell existing))
+                if (EventTable.TryGetValue(deferredSpriteLoad, out AnnotatedBeatmapLevelCollectionCell existing))
                 {
                     EventTable.Remove(deferredSpriteLoad);
                 }
@@ -42,7 +42,7 @@ namespace PlaylistManager.HarmonyPatches
         {
             if (sender is IDeferredSpriteLoad deferredSpriteLoad)
             {
-                if (EventTable.TryGetValue(deferredSpriteLoad, out AnnotatedBeatmapLevelCollectionTableCell tableCell))
+                if (EventTable.TryGetValue(deferredSpriteLoad, out AnnotatedBeatmapLevelCollectionCell tableCell))
                 {
                     IAnnotatedBeatmapLevelCollection collection = Accessors.BeatmapCollectionAccessor(ref tableCell);
                     if (collection == deferredSpriteLoad)

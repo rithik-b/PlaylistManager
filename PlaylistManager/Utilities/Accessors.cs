@@ -1,15 +1,16 @@
 ﻿using HMUI;
 using IPA.Utilities;
 using System.Collections.Generic;
-using UnityEngine.UI;
 
 namespace PlaylistManager.Utilities
 {
     internal class Accessors
     {
-        public static readonly FieldAccessor<AnnotatedBeatmapLevelCollectionTableCell, Image>.Accessor CoverImageAccessor = FieldAccessor<AnnotatedBeatmapLevelCollectionTableCell, Image>.GetAccessor("_coverImage");
-        public static readonly FieldAccessor<AnnotatedBeatmapLevelCollectionTableCell, IAnnotatedBeatmapLevelCollection>.Accessor BeatmapCollectionAccessor = FieldAccessor<AnnotatedBeatmapLevelCollectionTableCell, IAnnotatedBeatmapLevelCollection>.GetAccessor("_annotatedBeatmapLevelCollection");
-        public static readonly FieldAccessor<AnnotatedBeatmapLevelCollectionsViewController, AnnotatedBeatmapLevelCollectionsTableView>.Accessor AnnotatedBeatmapLevelCollectionsTableViewAccessor = FieldAccessor<AnnotatedBeatmapLevelCollectionsViewController, AnnotatedBeatmapLevelCollectionsTableView>.GetAccessor("_annotatedBeatmapLevelCollectionsTableView");
+        public static readonly FieldAccessor<AnnotatedBeatmapLevelCollectionCell, ImageView>.Accessor CoverImageAccessor = FieldAccessor<AnnotatedBeatmapLevelCollectionCell, ImageView>.GetAccessor("_coverImage");
+        public static readonly FieldAccessor<AnnotatedBeatmapLevelCollectionCell, IAnnotatedBeatmapLevelCollection>.Accessor BeatmapCollectionAccessor = FieldAccessor<AnnotatedBeatmapLevelCollectionCell, IAnnotatedBeatmapLevelCollection>.GetAccessor("_annotatedBeatmapLevelCollection");
+
+        public static readonly FieldAccessor<AnnotatedBeatmapLevelCollectionsViewController, AnnotatedBeatmapLevelCollectionsGridView>.Accessor AnnotatedBeatmapLevelCollectionsGridViewAccessor = FieldAccessor<AnnotatedBeatmapLevelCollectionsViewController, AnnotatedBeatmapLevelCollectionsGridView>.GetAccessor("_annotatedBeatmapLevelCollectionsGridView");
+        public static readonly FieldAccessor<AnnotatedBeatmapLevelCollectionsGridView, AnnotatedBeatmapLevelCollectionsGridViewAnimator>.Accessor AnnotatedBeatmapLevelCollectionsGridViewAnimatorAccessor = FieldAccessor<AnnotatedBeatmapLevelCollectionsGridView, AnnotatedBeatmapLevelCollectionsGridViewAnimator>.GetAccessor("_animator");
         public static readonly FieldAccessor<AnnotatedBeatmapLevelCollectionsViewController, IReadOnlyList<IAnnotatedBeatmapLevelCollection>>.Accessor AnnotatedBeatmapLevelCollectionsAccessor = FieldAccessor<AnnotatedBeatmapLevelCollectionsViewController, IReadOnlyList<IAnnotatedBeatmapLevelCollection>>.GetAccessor("_annotatedBeatmapLevelCollections");
         public static readonly FieldAccessor<BeatmapLevelsModel, IBeatmapLevelPackCollection>.Accessor CustomLevelPackCollectionAccessor = FieldAccessor<BeatmapLevelsModel, IBeatmapLevelPackCollection>.GetAccessor("_customLevelPackCollection");
         public static readonly FieldAccessor<LevelCollectionViewController, LevelCollectionTableView>.Accessor LevelCollectionTableViewAccessor = FieldAccessor<LevelCollectionViewController, LevelCollectionTableView>.GetAccessor("_levelCollectionTableView");
