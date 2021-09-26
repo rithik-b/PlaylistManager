@@ -348,7 +348,7 @@ namespace PlaylistManager.UI
                 UpdateMissingSongs();
 
                 rootTransform.gameObject.SetActive(true);
-                if (selectedPlaylist.TryGetCustomData("syncURL", out _))
+                if (selectedPlaylist.TryGetCustomData("syncURL", out object syncURLObj) && syncURLObj is string syncURL && !string.IsNullOrWhiteSpace(syncURL))
                 {
                     syncButtonTransform.gameObject.SetActive(true);
                 }
