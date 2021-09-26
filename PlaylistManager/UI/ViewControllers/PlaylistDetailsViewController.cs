@@ -22,6 +22,7 @@ namespace PlaylistManager.UI
         private readonly LevelPackDetailViewController levelPackDetailViewController;
         private readonly ImageSelectionModalController imageSelectionModalController;
         private readonly PopupModalsController popupModalsController;
+        private readonly IVRPlatformHelper platformHelper;
 
         private bool parsed;
         private Playlist selectedPlaylist;
@@ -43,16 +44,18 @@ namespace PlaylistManager.UI
         private readonly ClickableImage playlistCoverView;
 
         [UIComponent("text-page")]
-        private readonly TextPageScrollView descriptionTextPage;
+        private TextPageScrollView descriptionTextPage;
 
         [UIParams]
         private readonly BSMLParserParams parserParams;
 
-        public PlaylistDetailsViewController(LevelPackDetailViewController levelPackDetailViewController, ImageSelectionModalController imageSelectionModalController, PopupModalsController popupModalsController)
+        public PlaylistDetailsViewController(LevelPackDetailViewController levelPackDetailViewController, ImageSelectionModalController imageSelectionModalController,
+            PopupModalsController popupModalsController, IVRPlatformHelper platformHelper)
         {
             this.levelPackDetailViewController = levelPackDetailViewController;
             this.imageSelectionModalController = imageSelectionModalController;
             this.popupModalsController = popupModalsController;
+            this.platformHelper = platformHelper;
             parsed = false;
         }
 
@@ -77,16 +80,23 @@ namespace PlaylistManager.UI
             {
                 BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.PlaylistDetailsView.bsml"), levelPackDetailViewController.transform.Find("Detail").gameObject, this);
                 modalPosition = modalTransform.position;
-
-                ModalView nameKeyboardModal = nameSettingTransform.Find("BSMLModalKeyboard").GetComponent<ModalView>();
-                Accessors.AnimateCanvasAccessor(ref nameKeyboardModal) = false;
-
-                ModalView authorKeyboardModal = authorSettingTransform.Find("BSMLModalKeyboard").GetComponent<ModalView>();
-                Accessors.AnimateCanvasAccessor(ref authorKeyboardModal) = false;
-
-                parsed = true;
             }
             modalTransform.position = modalPosition;
+        }
+
+        [UIAction("#post-parse")]
+        private void PostParse()
+        {
+            parsed = true;
+
+            ModalView nameKeyboardModal = nameSettingTransform.Find("BSMLModalKeyboard").GetComponent<ModalView>();
+            Accessors.AnimateCanvasAccessor(ref nameKeyboardModal) = false;
+
+            ModalView authorKeyboardModal = authorSettingTransform.Find("BSMLModalKeyboard").GetComponent<ModalView>();
+            Accessors.AnimateCanvasAccessor(ref authorKeyboardModal) = false;
+
+            ScrollView scrollView = descriptionTextPage;
+            Accessors.PlatformHelperAccessor(ref scrollView) = platformHelper;
         }
 
         internal void ShowDetails()
