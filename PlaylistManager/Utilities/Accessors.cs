@@ -99,6 +99,9 @@ namespace PlaylistManager.Utilities
         public static readonly FieldAccessor<BeatmapLevelsModel, IBeatmapLevelPackCollection>.Accessor CustomLevelPackCollectionAccessor =
             FieldAccessor<BeatmapLevelsModel, IBeatmapLevelPackCollection>.GetAccessor("_customLevelPackCollection");
 
+        public static readonly FieldAccessor<LevelCollectionNavigationController, IBeatmapLevelPack>.Accessor LevelPackAccessor =
+            FieldAccessor<LevelCollectionNavigationController, IBeatmapLevelPack>.GetAccessor("_levelPack");
+
         public static readonly FieldAccessor<LevelCollectionViewController, LevelCollectionTableView>.Accessor LevelCollectionTableViewAccessor =
             FieldAccessor<LevelCollectionViewController, LevelCollectionTableView>.GetAccessor("_levelCollectionTableView");
 
@@ -113,7 +116,13 @@ namespace PlaylistManager.Utilities
 
         public static readonly FieldAccessor<SegmentedControl, List<SegmentedControlCell>>.Accessor SegmentedControllerCellsAccessor = 
             FieldAccessor<SegmentedControl, List<SegmentedControlCell>>.GetAccessor("_cells");
-        
+
+        public static readonly FieldAccessor<HoverHint, HoverHintController>.Accessor HoverHintControllerAccessor = FieldAccessor<HoverHint, HoverHintController>.GetAccessor("_hoverHintController");
+
+        public static readonly FieldAccessor<ModalView, bool>.Accessor AnimateCanvasAccessor = FieldAccessor<ModalView, bool>.GetAccessor("_animateParentCanvas");
+
+        public static readonly FieldAccessor<ImageView, float>.Accessor SkewAccessor = FieldAccessor<ImageView, float>.GetAccessor("_skew");
+
         #endregion
     }
 }

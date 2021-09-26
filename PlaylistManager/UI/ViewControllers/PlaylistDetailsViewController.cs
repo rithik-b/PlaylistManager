@@ -6,7 +6,6 @@ using BeatSaberPlaylistsLib.Blist;
 using BeatSaberPlaylistsLib.Legacy;
 using BeatSaberPlaylistsLib.Types;
 using HMUI;
-using IPA.Utilities;
 using PlaylistManager.Interfaces;
 using PlaylistManager.Utilities;
 using System;
@@ -80,10 +79,10 @@ namespace PlaylistManager.UI
                 modalPosition = modalTransform.position;
 
                 ModalView nameKeyboardModal = nameSettingTransform.Find("BSMLModalKeyboard").GetComponent<ModalView>();
-                nameKeyboardModal.SetField("_animateParentCanvas", false);
+                Accessors.AnimateCanvasAccessor(ref nameKeyboardModal) = false;
 
                 ModalView authorKeyboardModal = authorSettingTransform.Find("BSMLModalKeyboard").GetComponent<ModalView>();
-                authorKeyboardModal.SetField("_animateParentCanvas", false);
+                Accessors.AnimateCanvasAccessor(ref authorKeyboardModal) = false;
 
                 parsed = true;
             }

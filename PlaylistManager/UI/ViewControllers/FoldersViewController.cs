@@ -3,7 +3,6 @@ using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.FloatingScreen;
 using HMUI;
-using IPA.Utilities;
 using PlaylistManager.HarmonyPatches;
 using PlaylistManager.Interfaces;
 using PlaylistManager.Utilities;
@@ -188,7 +187,7 @@ namespace PlaylistManager.UI
                     if (hoverHint == null)
                     {
                         hoverHint = visibleCells[i].gameObject.AddComponent<HoverHint>();
-                        hoverHint.SetField("_hoverHintController", hoverHintController);
+                        Accessors.HoverHintControllerAccessor(ref hoverHint) = hoverHintController;
                     }
                     else
                     {

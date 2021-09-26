@@ -3,7 +3,6 @@ using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.Parser;
 using HMUI;
-using IPA.Utilities;
 using PlaylistManager.Types;
 using PlaylistManager.Utilities;
 using System;
@@ -84,11 +83,11 @@ namespace PlaylistManager.UI
         private void PostParse()
         {
             parsed = true;
-            modalView.SetField("_animateParentCanvas", false);
+            Accessors.AnimateCanvasAccessor(ref modalView) = false;
 
             ScrollView scrollView = customListTableData.tableView.GetComponent<ScrollView>();
             Accessors.PlatformHelperAccessor(ref scrollView) = platformHelper;
-            Utilities.Utils.TransferScrollBar(bsmlScrollView, scrollView);
+            Utils.TransferScrollBar(bsmlScrollView, scrollView);
         }
 
         internal void ShowModal(BeatSaberPlaylistsLib.Types.IPlaylist playlist)
@@ -215,9 +214,9 @@ namespace PlaylistManager.UI
         {
             await SiraUtil.Utilities.PauseChamp;
             ImageView[] imageViews = customListTableData.tableView.GetComponentsInChildren<ImageView>(true);
-            foreach (var imageView in imageViews)
+            for (int i = 0; i < imageViews.Length; i++)
             {
-                imageView.SetField("_skew", 0f);
+                Accessors.SkewAccessor(ref imageViews[i]) = 0f;
             }
         }
     }
