@@ -4,6 +4,10 @@ using UnityEngine.UI;
 using BeatSaberPlaylistsLib.Types;
 using System.Runtime.CompilerServices;
 using PlaylistManager.Utilities;
+using HMUI;
+using UnityEngine;
+using System.Linq;
+using PlaylistManager.Configuration;
 
 /*
  * Original Author: Auros
@@ -13,11 +17,12 @@ using PlaylistManager.Utilities;
 namespace PlaylistManager.HarmonyPatches
 {
     [HarmonyPatch(typeof(AnnotatedBeatmapLevelCollectionCell), nameof(AnnotatedBeatmapLevelCollectionCell.SetData))]
-    public class AnnotatedBeatmapLevelCollectionCell_SetData
+    internal class AnnotatedBeatmapLevelCollectionCell_SetData
     {
-        public static readonly ConditionalWeakTable<IDeferredSpriteLoad, AnnotatedBeatmapLevelCollectionCell> EventTable = new ConditionalWeakTable<IDeferredSpriteLoad, AnnotatedBeatmapLevelCollectionCell>();
+        private static readonly ConditionalWeakTable<IDeferredSpriteLoad, AnnotatedBeatmapLevelCollectionCell> EventTable = new ConditionalWeakTable<IDeferredSpriteLoad, AnnotatedBeatmapLevelCollectionCell>();
+        private static HoverHintController hoverHintController;
 
-        static void Postfix(AnnotatedBeatmapLevelCollectionCell __instance, ref IAnnotatedBeatmapLevelCollection annotatedBeatmapLevelCollection, ref Image ____coverImage)
+        private static void Postfix(AnnotatedBeatmapLevelCollectionCell __instance, ref IAnnotatedBeatmapLevelCollection annotatedBeatmapLevelCollection, ref Image ____coverImage)
         {
             AnnotatedBeatmapLevelCollectionCell cell = __instance;
             if (annotatedBeatmapLevelCollection is IDeferredSpriteLoad deferredSpriteLoad)
@@ -36,9 +41,27 @@ namespace PlaylistManager.HarmonyPatches
                 deferredSpriteLoad.SpriteLoaded -= OnSpriteLoaded;
                 deferredSpriteLoad.SpriteLoaded += OnSpriteLoaded;
             }
+
+            if (PluginConfig.Instance.PlaylistHoverHints)
+            {
+                HoverHint hoverHint = __instance.GetComponent<HoverHint>();
+
+                if (hoverHint == null)
+                {
+                    hoverHint = __instance.gameObject.AddComponent<HoverHint>();
+                    if (hoverHintController == null)
+                    {
+                        // Forgive me lord but this must be done...
+                        hoverHintController = Resources.FindObjectsOfTypeAll<HoverHintController>().FirstOrDefault();
+                    }
+                    Accessors.HoverHintControllerAccessor(ref hoverHint) = hoverHintController;
+                }
+
+                hoverHint.text = annotatedBeatmapLevelCollection.collectionName;
+            }
         }
 
-        public static void OnSpriteLoaded(object sender, EventArgs e)
+        private static void OnSpriteLoaded(object sender, EventArgs e)
         {
             if (sender is IDeferredSpriteLoad deferredSpriteLoad)
             {

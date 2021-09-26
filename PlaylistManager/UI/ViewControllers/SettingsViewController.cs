@@ -54,6 +54,13 @@ namespace PlaylistManager.UI
             set => PluginConfig.Instance.SyncOption = (PluginConfig.SyncOptions)value;
         }
 
+        [UIValue("hover-hint")]
+        public bool PlaylistHoverHints
+        {
+            get => PluginConfig.Instance.PlaylistHoverHints;
+            set => PluginConfig.Instance.PlaylistHoverHints = value;
+        }
+
         [UIValue("blurred-art")]
         public bool BlurredArt
         {
@@ -95,7 +102,7 @@ namespace PlaylistManager.UI
             return ((PluginConfig.SyncOptions)index).ToString();
         }
 
-        public void Initialize() => BSMLSettings.instance.AddSettingsMenu(nameof(PlaylistManager), "PlaylistManager.UI.Views.Settings.bsml", this);
+        public void Initialize() => BSMLSettings.instance.AddSettingsMenu(nameof(PlaylistManager), "PlaylistManager.UI.Views.SettingsView.bsml", this);
         public void Dispose() => BSMLSettings.instance.RemoveSettingsMenu(this);
     }
 }
