@@ -70,6 +70,7 @@ namespace PlaylistManager.UI
             // Getting Viewport and Content
             RectTransform viewport = Accessors.ViewportAccessor(ref annotatedBeatmapLevelCollectionsGridViewAnimator);
             RectTransform content = Accessors.ContentAccessor(ref annotatedBeatmapLevelCollectionsGridViewAnimator);
+            content.localPosition = Vector3.zero;
 
             // Breaking up ScrollBar from ScrollView
             scrollBar = bsmlScrollView.transform.Find("ScrollBar");

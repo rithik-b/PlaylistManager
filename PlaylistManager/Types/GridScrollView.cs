@@ -10,10 +10,11 @@ namespace PlaylistManager.Types
 		private AnnotatedBeatmapLevelCollectionsGridView annotatedBeatmapLevelCollectionsGridView;
 		private AnnotatedBeatmapLevelCollectionsGridViewAnimator annotatedBeatmapLevelCollectionsGridViewAnimator;
 
+		private float zeroPos;
+		private float endPos;
+
 		private float contentSize => _contentRectTransform.rect.height;
 		private float currentPos => _contentRectTransform.localPosition.y;
-		private float zeroPos => -(contentSize - 15) / 2;
-		private float endPos => -zeroPos - (_fixedCellSize * 4);
 
 		public void Init(RectTransform viewport, RectTransform contentRectTransform, Button pageUpButton, Button pageDownButton, VerticalScrollIndicator verticalScrollIndicator)
         {
@@ -34,8 +35,12 @@ namespace PlaylistManager.Types
         {
 			enabled = true;
 			UpdateContentSize();
-			_verticalScrollIndicator.transform.localPosition = new Vector3(-4, -8, 0);
+
+			zeroPos = -(contentSize - 15) / 2;
+			endPos = -zeroPos - (_fixedCellSize * 4);
+
 			_destinationPos = annotatedBeatmapLevelCollectionsGridViewAnimator.GetContentYOffset();
+			_verticalScrollIndicator.transform.localPosition = new Vector3(-4, -8, 0);
 		}
 
 		public void OnLeave()
@@ -48,6 +53,7 @@ namespace PlaylistManager.Types
 		{
 			SetContentSize(contentSize);
 			bool active = contentSize - (_fixedCellSize * 5) > 0f;
+
 			_pageUpButton.gameObject.SetActive(active); 
 			_pageDownButton.gameObject.SetActive(active);
 			_verticalScrollIndicator.gameObject.SetActive(active);
@@ -68,7 +74,7 @@ namespace PlaylistManager.Types
         public override void SetDestinationPos(float value)
         {
 			float difference = contentSize - (_fixedCellSize * 4);
-            if (difference < 0f)
+            if (difference <= 0f)
             {
                 _destinationPos = zeroPos;
                 return;
@@ -76,7 +82,8 @@ namespace PlaylistManager.Types
 			_destinationPos = Mathf.Clamp(value, zeroPos, endPos);
 		}
 
-		public override void UpdateVerticalScrollIndicator(float posY)
+		// We ignore the position given here since it is normalized
+		public override void UpdateVerticalScrollIndicator(float _)
         {
 			if (_verticalScrollIndicator != null)
 			{
