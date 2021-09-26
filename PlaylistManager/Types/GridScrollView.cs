@@ -39,6 +39,7 @@ namespace PlaylistManager.Types
 			zeroPos = -(contentSize - 15) / 2;
 			endPos = -zeroPos - (_fixedCellSize * 4);
 			_destinationPos = annotatedBeatmapLevelCollectionsGridViewAnimator.GetContentYOffset();
+			RefreshButtons();
 		}
 
 		public void OnLeave()
