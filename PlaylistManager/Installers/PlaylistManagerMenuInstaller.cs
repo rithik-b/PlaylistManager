@@ -29,7 +29,7 @@ namespace PlaylistManager.Installers
             }
 
 
-            Container.BindInterfacesTo<TableViewButtonsController>().AsSingle();
+            Container.BindInterfacesTo<PlaylistsGridViewController>().AsSingle();
             Container.BindInterfacesTo<CoverImageUpdater>().AsSingle();
             Container.BindInterfacesAndSelfTo<DifficultyHighlighter>().AsSingle();
 

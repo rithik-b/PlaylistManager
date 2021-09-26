@@ -25,7 +25,7 @@ namespace PlaylistManager.HarmonyPatches
                 if (deferredSpriteLoad.SpriteWasLoaded)
                 {
 #if DEBUG
-                    Plugin.Log.Debug($"Sprite was already loaded for {(deferredSpriteLoad as IAnnotatedBeatmapLevelCollection).collectionName}");
+                    //Plugin.Log.Debug($"Sprite was already loaded for {(deferredSpriteLoad as IAnnotatedBeatmapLevelCollection).collectionName}");
 #endif
                 }
                 if (EventTable.TryGetValue(deferredSpriteLoad, out AnnotatedBeatmapLevelCollectionCell existing))
@@ -48,7 +48,7 @@ namespace PlaylistManager.HarmonyPatches
                     if (collection == deferredSpriteLoad)
                     {
 #if DEBUG
-                        Plugin.Log.Debug($"Updating image for {collection.collectionName}");
+                        //Plugin.Log.Debug($"Updating image for {collection.collectionName}");
 #endif
                         Accessors.CoverImageAccessor(ref tableCell).sprite = deferredSpriteLoad.Sprite;
                     }
