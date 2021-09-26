@@ -54,6 +54,13 @@ namespace PlaylistManager.UI
             set => PluginConfig.Instance.SyncOption = (PluginConfig.SyncOptions)value;
         }
 
+        [UIValue("blurred-art")]
+        public bool BlurredArt
+        {
+            get => PluginConfig.Instance.BlurredArt;
+            set => PluginConfig.Instance.BlurredArt = value;
+        }
+
         [UIValue("easter-eggs")]
         public bool EasterEggs
         {

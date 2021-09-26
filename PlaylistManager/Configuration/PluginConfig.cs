@@ -15,6 +15,7 @@ namespace PlaylistManager.Configuration
         public virtual bool FoldersDisabled { get; set; } = false;
         public virtual bool ManagementDisabled { get; set; } = false;
         public virtual bool DefaultAllowDuplicates { get; set; } = true;
+        public virtual bool BlurredArt { get; set; } = true;
         public virtual float PlaylistScrollSpeed { get; set; } = 1;
         public virtual bool HighlightDifficulty { get; set; } = true;
         public virtual bool EasterEggs { get; set; } = false;
