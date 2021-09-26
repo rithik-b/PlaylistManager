@@ -1,7 +1,6 @@
 ﻿using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
 using HMUI;
-using IPA.Utilities;
 using PlaylistManager.HarmonyPatches;
 using PlaylistManager.Types;
 using PlaylistManager.Utilities;
@@ -39,8 +38,9 @@ namespace PlaylistManager.UI
         public void Initialize()
         {
             annotatedBeatmapLevelCollectionsGridView = Accessors.AnnotatedBeatmapLevelCollectionsGridViewAccessor(ref annotatedBeatmapLevelCollectionsTableViewController);
-            annotatedBeatmapLevelCollectionsGridViewAnimator = Accessors.AnnotatedBeatmapLevelCollectionsGridViewAnimatorAccessor(ref annotatedBeatmapLevelCollectionsGridView);
+            annotatedBeatmapLevelCollectionsGridViewAnimator = Accessors.GridViewAnimatorAccessor(ref annotatedBeatmapLevelCollectionsGridView);
 
+            // Removing last column of GridView to make space for our scroller
             RectTransform rectTransform = annotatedBeatmapLevelCollectionsGridView.gameObject.GetComponent<RectTransform>();
             rectTransform.sizeDelta = new Vector2(-10f, 0);
             rectTransform.localPosition = new Vector3(-5f, -7.5f, 0);
@@ -51,42 +51,51 @@ namespace PlaylistManager.UI
         public void Dispose()
         {
             AnnotatedBeatmapLevelCollectionsGridViewAnimator_Init.OnGridViewInit -= AnnotatedBeatmapLevelCollectionsGridViewAnimator_Init_OnGridViewInit;
+            annotatedBeatmapLevelCollectionsTableViewController.didOpenBeatmapLevelCollectionsEvent -= AnnotatedBeatmapLevelCollectionsGridView_didOpenAnnotatedBeatmapLevelCollectionEvent;
+            annotatedBeatmapLevelCollectionsTableViewController.didCloseBeatmapLevelCollectionsEvent -= AnnotatedBeatmapLevelCollectionsGridView_didCloseAnnotatedBeatmapLevelCollectionEvent;
         }
 
         private void AnnotatedBeatmapLevelCollectionsGridViewAnimator_Init_OnGridViewInit()
         {
             AnnotatedBeatmapLevelCollectionsGridViewAnimator_Init.OnGridViewInit -= AnnotatedBeatmapLevelCollectionsGridViewAnimator_Init_OnGridViewInit;
-            BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.TableViewButtons.bsml"), annotatedBeatmapLevelCollectionsTableViewController.gameObject, this);
+            BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.PlaylistsGridView.bsml"), annotatedBeatmapLevelCollectionsTableViewController.gameObject, this);
         }
 
         [UIAction("#post-parse")]
         private void PostParse()
         {
-            annotatedBeatmapLevelCollectionsGridView.GetField<PageControl, AnnotatedBeatmapLevelCollectionsGridView>("_pageControl").gameObject.SetActive(false);
+            // Removing PageControl as it looks really ugly with a lot of playlists, scroll indicator replaces this
+            Accessors.PageControlAccessor(ref annotatedBeatmapLevelCollectionsGridView).gameObject.SetActive(false);
 
+            // Getting Viewport and Content
+            RectTransform viewport = Accessors.ViewportAccessor(ref annotatedBeatmapLevelCollectionsGridViewAnimator);
+            RectTransform content = Accessors.ContentAccessor(ref annotatedBeatmapLevelCollectionsGridViewAnimator);
+
+            // Breaking up ScrollBar from ScrollView
             scrollBar = bsmlScrollView.transform.Find("ScrollBar");
             scrollBar.SetParent(vertical);
-            Button pageUpButton = bsmlScrollView.GetField<Button, ScrollView>("_pageUpButton");
-            Button pageDownButton = bsmlScrollView.GetField<Button, ScrollView>("_pageDownButton");
-            VerticalScrollIndicator verticalScrollIndicator = bsmlScrollView.GetField<VerticalScrollIndicator, ScrollView>("_verticalScrollIndicator");
+            vertical.SetParent(viewport);
+            Button pageUpButton = Accessors.PageUpAccessor(ref bsmlScrollView);
+            Button pageDownButton = Accessors.PageDownAccessor(ref bsmlScrollView);
+            VerticalScrollIndicator verticalScrollIndicator = Accessors.ScrollIndicatorAccessor(ref bsmlScrollView);
             GameObject.Destroy(bsmlScrollView.gameObject);
             scrollBar.gameObject.SetActive(false);
 
+            // Adding GridScrollView to GridView
             annotatedBeatmapLevelCollectionsGridView.gameObject.SetActive(false);
             annotatedBeatmapLevelCollectionsGridView.gameObject.AddComponent<EventSystemListener>();
             gridScrollView = annotatedBeatmapLevelCollectionsGridView.gameObject.AddComponent<GridScrollView>();
+            ScrollView scrollView = gridScrollView as ScrollView;
 
-            RectTransform viewport = annotatedBeatmapLevelCollectionsGridViewAnimator.GetField<RectTransform, AnnotatedBeatmapLevelCollectionsGridViewAnimator>("_viewportTransform");
-            RectTransform content = annotatedBeatmapLevelCollectionsGridViewAnimator.GetField<RectTransform, AnnotatedBeatmapLevelCollectionsGridViewAnimator>("_contentTransform");
-
-            vertical.SetParent(viewport);
+            // Initializing GridScrollView
             gridScrollView.Init(viewport, content, pageUpButton, pageDownButton, verticalScrollIndicator);
-            (gridScrollView as ScrollView).SetField("_platformHelper", platformHelper);
+            Accessors.PlatformHelperAccessor(ref scrollView) = platformHelper;
             annotatedBeatmapLevelCollectionsGridView.gameObject.SetActive(true);
+            gridScrollView.enabled = false;
 
+            // Subbing to events
             annotatedBeatmapLevelCollectionsTableViewController.didOpenBeatmapLevelCollectionsEvent += AnnotatedBeatmapLevelCollectionsGridView_didOpenAnnotatedBeatmapLevelCollectionEvent;
             annotatedBeatmapLevelCollectionsTableViewController.didCloseBeatmapLevelCollectionsEvent += AnnotatedBeatmapLevelCollectionsGridView_didCloseAnnotatedBeatmapLevelCollectionEvent;
-            gridScrollView.enabled = false;
         }
 
         private void AnnotatedBeatmapLevelCollectionsGridView_didOpenAnnotatedBeatmapLevelCollectionEvent()
