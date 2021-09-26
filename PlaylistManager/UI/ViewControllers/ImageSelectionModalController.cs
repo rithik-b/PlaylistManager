@@ -8,7 +8,6 @@ using PlaylistManager.Types;
 using PlaylistManager.Utilities;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -18,10 +17,11 @@ using static BeatSaberMarkupLanguage.Components.CustomListTableData;
 
 namespace PlaylistManager.UI
 {
-    public class ImageSelectionModalController : INotifyPropertyChanged
+    public class ImageSelectionModalController
     {
         private readonly LevelPackDetailViewController levelPackDetailViewController;
         private readonly PopupModalsController popupModalsController;
+        private readonly IVRPlatformHelper platformHelper;
 
         private readonly string IMAGES_PATH = Path.Combine(PlaylistLibUtils.playlistManager.PlaylistPath, "CoverImages");
         private readonly Sprite playlistManagerIcon;
@@ -30,10 +30,12 @@ namespace PlaylistManager.UI
         private int selectedIndex;
 
         public event Action<byte[]> ImageSelectedEvent;
-        public event PropertyChangedEventHandler PropertyChanged;
 
         [UIComponent("list")]
         public CustomListTableData customListTableData;
+
+        [UIComponent("scroll-view")]
+        private ScrollView bsmlScrollView;
 
         [UIComponent("modal")]
         private readonly RectTransform modalTransform;
@@ -46,10 +48,11 @@ namespace PlaylistManager.UI
         [UIParams]
         private readonly BSMLParserParams parserParams;
 
-        public ImageSelectionModalController(LevelPackDetailViewController levelPackDetailViewController, PopupModalsController popupModalsController)
+        public ImageSelectionModalController(LevelPackDetailViewController levelPackDetailViewController, PopupModalsController popupModalsController, IVRPlatformHelper platformHelper)
         {
             this.levelPackDetailViewController = levelPackDetailViewController;
             this.popupModalsController = popupModalsController;
+            this.platformHelper = platformHelper;
 
             // Have to do this in case directory perms are not given
             try
@@ -73,10 +76,19 @@ namespace PlaylistManager.UI
             {
                 BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.ImageSelectionModal.bsml"), levelPackDetailViewController.transform.Find("Detail").gameObject, this);
                 modalPosition = modalTransform.position;
-                modalView.SetField("_animateParentCanvas", false);
-                parsed = true;
             }
             modalTransform.position = modalPosition;
+        }
+
+        [UIAction("#post-parse")]
+        private void PostParse()
+        {
+            parsed = true;
+            modalView.SetField("_animateParentCanvas", false);
+
+            ScrollView scrollView = customListTableData.tableView.GetComponent<ScrollView>();
+            Accessors.PlatformHelperAccessor(ref scrollView) = platformHelper;
+            Utilities.Utils.TransferScrollBar(bsmlScrollView, scrollView);
         }
 
         internal void ShowModal(BeatSaberPlaylistsLib.Types.IPlaylist playlist)
@@ -132,9 +144,6 @@ namespace PlaylistManager.UI
             customListTableData.tableView.ReloadData();
             customListTableData.tableView.ScrollToCellWithIdx(0, TableView.ScrollPositionType.Beginning, false);
             _ = ViewControllerMonkeyCleanup();
-
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UpButtonEnabled)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DownButtonEnabled)));
         }
 
         private void CoverImage_SpriteLoaded(object sender, EventArgs e)
@@ -151,9 +160,6 @@ namespace PlaylistManager.UI
                         customListTableData.tableView.AddCellToReusableCells(customListTableData.tableView.dataSource.CellForIdx(customListTableData.tableView, 3));
                     }
                     _ = ViewControllerMonkeyCleanup();
-
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UpButtonEnabled)));
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DownButtonEnabled)));
                 }
                 coverImage.SpriteLoaded -= CoverImage_SpriteLoaded;
             }
@@ -213,18 +219,6 @@ namespace PlaylistManager.UI
             {
                 imageView.SetField("_skew", 0f);
             }
-        }
-
-        [UIValue("up-button-enabled")]
-        private bool UpButtonEnabled
-        {
-            get => customListTableData != null && customListTableData.data.Count > 3;
-        }
-
-        [UIValue("down-button-enabled")]
-        private bool DownButtonEnabled
-        {
-            get => customListTableData != null && customListTableData.data.Count > 3;
         }
     }
 }
