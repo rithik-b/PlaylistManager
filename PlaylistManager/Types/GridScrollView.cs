@@ -11,7 +11,9 @@ namespace PlaylistManager.Types
 		private AnnotatedBeatmapLevelCollectionsGridViewAnimator annotatedBeatmapLevelCollectionsGridViewAnimator;
 
 		private float contentSize => _contentRectTransform.rect.height;
+		private float currentPos => _contentRectTransform.localPosition.y;
 		private float zeroPos => -(contentSize - 15) / 2;
+		private float endPos => -zeroPos - (_fixedCellSize * 4);
 
 		public void Init(RectTransform viewport, RectTransform contentRectTransform, Button pageUpButton, Button pageDownButton, VerticalScrollIndicator verticalScrollIndicator)
         {
@@ -32,7 +34,8 @@ namespace PlaylistManager.Types
         {
 			enabled = true;
 			UpdateContentSize();
-            _destinationPos = annotatedBeatmapLevelCollectionsGridViewAnimator.GetContentYOffset();
+			_verticalScrollIndicator.transform.localPosition = new Vector3(-4, -8, 0);
+			_destinationPos = annotatedBeatmapLevelCollectionsGridViewAnimator.GetContentYOffset();
 		}
 
 		public void OnLeave()
@@ -41,7 +44,14 @@ namespace PlaylistManager.Types
 			enabled = false;
         }
 
-		public override void UpdateContentSize() => SetContentSize(contentSize);
+		public override void UpdateContentSize()
+		{
+			SetContentSize(contentSize);
+			bool active = contentSize - (_fixedCellSize * 5) > 0f;
+			_pageUpButton.gameObject.SetActive(active); 
+			_pageDownButton.gameObject.SetActive(active);
+			_verticalScrollIndicator.gameObject.SetActive(active);
+		}
 
 		public override void RefreshButtons()
 		{
@@ -51,26 +61,26 @@ namespace PlaylistManager.Types
 			}
 			if (_pageDownButton != null)
 			{
-				_pageDownButton.interactable = (_destinationPos < -zeroPos - 0.001f);
+				_pageDownButton.interactable = (_destinationPos < endPos - 0.001f);
 			}
 		}
 
         public override void SetDestinationPos(float value)
         {
-            float difference = contentSize - _fixedCellSize;
+			float difference = contentSize - (_fixedCellSize * 4);
             if (difference < 0f)
             {
                 _destinationPos = zeroPos;
                 return;
             }
-            _destinationPos = Mathf.Clamp(value, zeroPos, -zeroPos - 60);
-        }
+			_destinationPos = Mathf.Clamp(value, zeroPos, endPos);
+		}
 
-        public override void UpdateVerticalScrollIndicator(float posY)
+		public override void UpdateVerticalScrollIndicator(float posY)
         {
 			if (_verticalScrollIndicator != null)
 			{
-				_verticalScrollIndicator.progress = (posY - zeroPos) / contentSize;
+				_verticalScrollIndicator.progress = (currentPos - zeroPos) / (endPos - zeroPos);
 			}
 		}
     }

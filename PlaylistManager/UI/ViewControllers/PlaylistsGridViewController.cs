@@ -27,6 +27,9 @@ namespace PlaylistManager.UI
         [UIComponent("scroll-view")]
         private ScrollView bsmlScrollView;
 
+        [UIComponent("vertical")]
+        private RectTransform vertical;
+
         public PlaylistsGridViewController(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsTableViewController, IVRPlatformHelper platformHelper)
         {
             this.annotatedBeatmapLevelCollectionsTableViewController = annotatedBeatmapLevelCollectionsTableViewController;
@@ -62,12 +65,12 @@ namespace PlaylistManager.UI
             annotatedBeatmapLevelCollectionsGridView.GetField<PageControl, AnnotatedBeatmapLevelCollectionsGridView>("_pageControl").gameObject.SetActive(false);
 
             scrollBar = bsmlScrollView.transform.Find("ScrollBar");
-            scrollBar.SetParent(annotatedBeatmapLevelCollectionsTableViewController.transform);
-            scrollBar.SetAsFirstSibling();
+            scrollBar.SetParent(vertical);
             Button pageUpButton = bsmlScrollView.GetField<Button, ScrollView>("_pageUpButton");
             Button pageDownButton = bsmlScrollView.GetField<Button, ScrollView>("_pageDownButton");
             VerticalScrollIndicator verticalScrollIndicator = bsmlScrollView.GetField<VerticalScrollIndicator, ScrollView>("_verticalScrollIndicator");
             GameObject.Destroy(bsmlScrollView.gameObject);
+            scrollBar.gameObject.SetActive(false);
 
             annotatedBeatmapLevelCollectionsGridView.gameObject.SetActive(false);
             annotatedBeatmapLevelCollectionsGridView.gameObject.AddComponent<EventSystemListener>();
@@ -76,6 +79,7 @@ namespace PlaylistManager.UI
             RectTransform viewport = annotatedBeatmapLevelCollectionsGridViewAnimator.GetField<RectTransform, AnnotatedBeatmapLevelCollectionsGridViewAnimator>("_viewportTransform");
             RectTransform content = annotatedBeatmapLevelCollectionsGridViewAnimator.GetField<RectTransform, AnnotatedBeatmapLevelCollectionsGridViewAnimator>("_contentTransform");
 
+            vertical.SetParent(viewport);
             gridScrollView.Init(viewport, content, pageUpButton, pageDownButton, verticalScrollIndicator);
             (gridScrollView as ScrollView).SetField("_platformHelper", platformHelper);
             annotatedBeatmapLevelCollectionsGridView.gameObject.SetActive(true);
@@ -87,11 +91,13 @@ namespace PlaylistManager.UI
 
         private void AnnotatedBeatmapLevelCollectionsGridView_didOpenAnnotatedBeatmapLevelCollectionEvent()
         {
+            scrollBar.gameObject.SetActive(true);
             gridScrollView.OnHover();
         }
 
         private void AnnotatedBeatmapLevelCollectionsGridView_didCloseAnnotatedBeatmapLevelCollectionEvent()
         {
+            scrollBar.gameObject.SetActive(false);
             gridScrollView.OnLeave();
         }
     }
