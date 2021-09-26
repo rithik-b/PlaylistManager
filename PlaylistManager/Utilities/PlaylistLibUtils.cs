@@ -71,7 +71,7 @@ namespace PlaylistManager.Utilities
         {
             Color = System.Drawing.Color.White,
             DrawStyle = DrawStyle.Normal,
-            Font = new Font("teko", 80, FontStyle.Regular),
+            Font = BeatSaberPlaylistsLib.Utilities.FindFont("Microsoft Sans Serif", 80, FontStyle.Regular),
             StringFormat = new StringFormat()
             {
                 Alignment = StringAlignment.Center,
