@@ -8,13 +8,9 @@ namespace PlaylistManager.Utilities
 {
     internal class Accessors
     {
-        #region AnnotatedBeatmapLevelCollectionCell
+        #region TableView
 
-        public static readonly FieldAccessor<AnnotatedBeatmapLevelCollectionCell, ImageView>.Accessor CoverImageAccessor = 
-            FieldAccessor<AnnotatedBeatmapLevelCollectionCell, ImageView>.GetAccessor("_coverImage");
-
-        public static readonly FieldAccessor<AnnotatedBeatmapLevelCollectionCell, IAnnotatedBeatmapLevelCollection>.Accessor BeatmapCollectionAccessor = 
-            FieldAccessor<AnnotatedBeatmapLevelCollectionCell, IAnnotatedBeatmapLevelCollection>.GetAccessor("_annotatedBeatmapLevelCollection");
+        public static readonly FieldAccessor<TableView, ScrollView>.Accessor ScrollViewAccessor = FieldAccessor<TableView, ScrollView>.GetAccessor("_scrollView");
 
         #endregion
 
@@ -24,11 +20,27 @@ namespace PlaylistManager.Utilities
 
         public static readonly FieldAccessor<ScrollView, Button>.Accessor PageDownAccessor = FieldAccessor<ScrollView, Button>.GetAccessor("_pageDownButton");
 
-        public static readonly FieldAccessor<ScrollView, VerticalScrollIndicator>.Accessor ScrollIndicatorAccessor = 
+        public static readonly FieldAccessor<ScrollView, VerticalScrollIndicator>.Accessor ScrollIndicatorAccessor =
             FieldAccessor<ScrollView, VerticalScrollIndicator>.GetAccessor("_verticalScrollIndicator");
 
         public static readonly FieldAccessor<ScrollView, IVRPlatformHelper>.Accessor PlatformHelperAccessor =
             FieldAccessor<ScrollView, IVRPlatformHelper>.GetAccessor("_platformHelper");
+
+        public static readonly FieldAccessor<ScrollView, RectTransform>.Accessor ScrollViewportAccessor =
+            FieldAccessor<ScrollView, RectTransform>.GetAccessor("_viewport");
+
+        public static readonly FieldAccessor<ScrollView, RectTransform>.Accessor ScrollContentAccessor =
+            FieldAccessor<ScrollView, RectTransform>.GetAccessor("_contentRectTransform");
+
+        #endregion
+
+        #region AnnotatedBeatmapLevelCollectionCell
+
+        public static readonly FieldAccessor<AnnotatedBeatmapLevelCollectionCell, ImageView>.Accessor CoverImageAccessor = 
+            FieldAccessor<AnnotatedBeatmapLevelCollectionCell, ImageView>.GetAccessor("_coverImage");
+
+        public static readonly FieldAccessor<AnnotatedBeatmapLevelCollectionCell, IAnnotatedBeatmapLevelCollection>.Accessor BeatmapCollectionAccessor = 
+            FieldAccessor<AnnotatedBeatmapLevelCollectionCell, IAnnotatedBeatmapLevelCollection>.GetAccessor("_annotatedBeatmapLevelCollection");
 
         #endregion
 
@@ -54,10 +66,10 @@ namespace PlaylistManager.Utilities
 
         #region AnnotatedBeatmapLevelCollectionsGridViewAnimator
 
-        public static readonly FieldAccessor<AnnotatedBeatmapLevelCollectionsGridViewAnimator, RectTransform>.Accessor ViewportAccessor = 
+        public static readonly FieldAccessor<AnnotatedBeatmapLevelCollectionsGridViewAnimator, RectTransform>.Accessor GridViewportAccessor = 
             FieldAccessor<AnnotatedBeatmapLevelCollectionsGridViewAnimator, RectTransform>.GetAccessor("_viewportTransform");
 
-        public static readonly FieldAccessor<AnnotatedBeatmapLevelCollectionsGridViewAnimator, RectTransform>.Accessor ContentAccessor =
+        public static readonly FieldAccessor<AnnotatedBeatmapLevelCollectionsGridViewAnimator, RectTransform>.Accessor GridContentAccessor =
             FieldAccessor<AnnotatedBeatmapLevelCollectionsGridViewAnimator, RectTransform>.GetAccessor("_contentTransform");
 
         #endregion

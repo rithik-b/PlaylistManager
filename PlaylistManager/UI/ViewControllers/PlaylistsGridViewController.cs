@@ -68,8 +68,8 @@ namespace PlaylistManager.UI
             Accessors.PageControlAccessor(ref annotatedBeatmapLevelCollectionsGridView).gameObject.SetActive(false);
 
             // Getting Viewport and Content
-            RectTransform viewport = Accessors.ViewportAccessor(ref annotatedBeatmapLevelCollectionsGridViewAnimator);
-            RectTransform content = Accessors.ContentAccessor(ref annotatedBeatmapLevelCollectionsGridViewAnimator);
+            RectTransform viewport = Accessors.GridViewportAccessor(ref annotatedBeatmapLevelCollectionsGridViewAnimator);
+            RectTransform content = Accessors.GridContentAccessor(ref annotatedBeatmapLevelCollectionsGridViewAnimator);
             content.localPosition = Vector3.zero;
 
             // Breaking up ScrollBar from ScrollView
@@ -86,7 +86,7 @@ namespace PlaylistManager.UI
             annotatedBeatmapLevelCollectionsGridView.gameObject.SetActive(false);
             annotatedBeatmapLevelCollectionsGridView.gameObject.AddComponent<EventSystemListener>();
             gridScrollView = annotatedBeatmapLevelCollectionsGridView.gameObject.AddComponent<GridScrollView>();
-            ScrollView scrollView = gridScrollView as ScrollView;
+            ScrollView scrollView = gridScrollView;
 
             // Initializing GridScrollView
             gridScrollView.Init(viewport, content, pageUpButton, pageDownButton, verticalScrollIndicator);

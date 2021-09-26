@@ -38,9 +38,7 @@ namespace PlaylistManager.Types
 
 			zeroPos = -(contentSize - 15) / 2;
 			endPos = -zeroPos - (_fixedCellSize * 4);
-
 			_destinationPos = annotatedBeatmapLevelCollectionsGridViewAnimator.GetContentYOffset();
-			_verticalScrollIndicator.transform.localPosition = new Vector3(-4, -8, 0);
 		}
 
 		public void OnLeave()

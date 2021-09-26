@@ -1,3 +1,3 @@
-﻿<vertical id='vertical' horizontal-fit='PreferredSize' vertical-fit='PreferredSize' anchor-pos-x='32' anchor-pos-y='-25' pref-height='75' pref-width='10'>
+﻿<vertical id='vertical' horizontal-fit='PreferredSize' vertical-fit='PreferredSize' anchor-pos-x='32' anchor-pos-y='-25' pref-height='75' pref-width='8'>
 	<scroll-view id='scroll-view' />
 </vertical>
