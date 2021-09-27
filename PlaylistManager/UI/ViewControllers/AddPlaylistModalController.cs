@@ -14,7 +14,6 @@ using BeatSaberMarkupLanguage.Parser;
 using System.IO;
 using System.ComponentModel;
 using System.Collections.Generic;
-using System.Threading;
 
 namespace PlaylistManager.UI
 {
@@ -22,6 +21,7 @@ namespace PlaylistManager.UI
     {
         private readonly StandardLevelDetailViewController standardLevelDetailViewController;
         private readonly PopupModalsController popupModalsController;
+        private readonly IVRPlatformHelper platformHelper;
 
         private BeatSaberPlaylistsLib.PlaylistManager parentManager;
         private BeatSaberPlaylistsLib.PlaylistManager[] childManagers;
@@ -34,6 +34,9 @@ namespace PlaylistManager.UI
         [UIComponent("list")]
         public CustomListTableData customListTableData;
 
+        [UIComponent("scroll-view")]
+        private ScrollView bsmlScrollView;
+
         [UIComponent("highlight-checkbox")]
         private readonly RectTransform highlightCheckboxTransform;
 
@@ -45,10 +48,11 @@ namespace PlaylistManager.UI
         [UIParams]
         private readonly BSMLParserParams parserParams;
 
-        public AddPlaylistModalController(StandardLevelDetailViewController standardLevelDetailViewController, PopupModalsController popupModalsController)
+        public AddPlaylistModalController(StandardLevelDetailViewController standardLevelDetailViewController, PopupModalsController popupModalsController, IVRPlatformHelper platformHelper)
         {
             this.standardLevelDetailViewController = standardLevelDetailViewController;
             this.popupModalsController = popupModalsController;
+            this.platformHelper = platformHelper;
             folderIcon = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.FolderIcon.png");
             parsed = false;
         }
@@ -59,10 +63,19 @@ namespace PlaylistManager.UI
             {
                 BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.AddPlaylistModal.bsml"), standardLevelDetailViewController.transform.Find("LevelDetail").gameObject, this);
                 modalPosition = modalTransform.position; // Position can change if SongBrowser is clicked while modal is opened so storing here
-                highlightCheckboxTransform.transform.localScale *= 0.5f;
-                parsed = true;
             }
             modalTransform.position = modalPosition; // Reset position
+        }
+
+        [UIAction("#post-parse")]
+        private void PostParse()
+        {
+            parsed = true;
+            highlightCheckboxTransform.transform.localScale *= 0.5f;
+
+            ScrollView scrollView = customListTableData.tableView.GetComponent<ScrollView>();
+            Accessors.PlatformHelperAccessor(ref scrollView) = platformHelper;
+            Utils.TransferScrollBar(bsmlScrollView, scrollView);
         }
 
         #region Show Playlists
@@ -104,8 +117,6 @@ namespace PlaylistManager.UI
             customListTableData.tableView.ReloadData();
             customListTableData.tableView.ScrollToCellWithIdx(0, TableView.ScrollPositionType.Beginning, false);
 
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UpButtonEnabled)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DownButtonEnabled)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(BackActive)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FolderText)));
         }
@@ -119,8 +130,6 @@ namespace PlaylistManager.UI
                     ShowPlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)deferredSpriteLoadPlaylist);
                 }
                 customListTableData.tableView.ReloadDataKeepingPosition();
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UpButtonEnabled)));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DownButtonEnabled)));
                 (deferredSpriteLoadPlaylist).SpriteLoaded -= DeferredSpriteLoadPlaylist_SpriteLoaded;
             }
         }
@@ -205,18 +214,6 @@ namespace PlaylistManager.UI
         private bool BackActive
         {
             get => parentManager != null && parentManager.Parent != null;
-        }
-
-        [UIValue("up-button-enabled")]
-        private bool UpButtonEnabled
-        {
-            get => customListTableData != null && customListTableData.data.Count > 6;
-        }
-
-        [UIValue("down-button-enabled")]
-        private bool DownButtonEnabled
-        {
-            get => customListTableData != null && customListTableData.data.Count > 6;
         }
 
         #endregion

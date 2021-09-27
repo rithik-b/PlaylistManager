@@ -2,7 +2,7 @@
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Parser;
 using HMUI;
-using IPA.Utilities;
+using PlaylistManager.Utilities;
 using System.ComponentModel;
 using System.Reflection;
 using UnityEngine;
@@ -102,7 +102,7 @@ namespace PlaylistManager.UI
             CheckboxValue = false;
             CheckboxActive = !string.IsNullOrEmpty(checkboxText);
 
-            yesNoModalView.SetField("_animateParentCanvas", animateParentCanvas);
+            Accessors.AnimateCanvasAccessor(ref yesNoModalView) = animateParentCanvas;
 
             parserParams.EmitEvent("close-yes-no");
             parserParams.EmitEvent("open-yes-no");
@@ -214,7 +214,7 @@ namespace PlaylistManager.UI
             OkButtonText = okButtonText;
             okButtonPressed = buttonPressedCallback;
 
-            okModalView.SetField("_animateParentCanvas", animateParentCanvas);
+            Accessors.AnimateCanvasAccessor(ref okModalView) = animateParentCanvas;
 
             parserParams.EmitEvent("close-ok");
             parserParams.EmitEvent("open-ok");
@@ -268,7 +268,7 @@ namespace PlaylistManager.UI
 
             keyboardPressed = keyboardPressedCallback;
 
-            keyboardModalView.SetField("_animateParentCanvas", animateParentCanvas);
+            Accessors.AnimateCanvasAccessor(ref keyboardModalView) = animateParentCanvas;
 
             parserParams.EmitEvent("close-keyboard");
             parserParams.EmitEvent("open-keyboard");

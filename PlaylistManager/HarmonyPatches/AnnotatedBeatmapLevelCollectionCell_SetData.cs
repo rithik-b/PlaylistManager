@@ -4,6 +4,10 @@ using UnityEngine.UI;
 using BeatSaberPlaylistsLib.Types;
 using System.Runtime.CompilerServices;
 using PlaylistManager.Utilities;
+using HMUI;
+using UnityEngine;
+using System.Linq;
+using PlaylistManager.Configuration;
 
 /*
  * Original Author: Auros
@@ -12,23 +16,24 @@ using PlaylistManager.Utilities;
 
 namespace PlaylistManager.HarmonyPatches
 {
-    [HarmonyPatch(typeof(AnnotatedBeatmapLevelCollectionTableCell), nameof(AnnotatedBeatmapLevelCollectionTableCell.SetData))]
-    public class AnnotatedBeatmapLevelCollectionTableCell_SetData
+    [HarmonyPatch(typeof(AnnotatedBeatmapLevelCollectionCell), nameof(AnnotatedBeatmapLevelCollectionCell.SetData))]
+    internal class AnnotatedBeatmapLevelCollectionCell_SetData
     {
-        public static readonly ConditionalWeakTable<IDeferredSpriteLoad, AnnotatedBeatmapLevelCollectionTableCell> EventTable = new ConditionalWeakTable<IDeferredSpriteLoad, AnnotatedBeatmapLevelCollectionTableCell>();
+        private static readonly ConditionalWeakTable<IDeferredSpriteLoad, AnnotatedBeatmapLevelCollectionCell> EventTable = new ConditionalWeakTable<IDeferredSpriteLoad, AnnotatedBeatmapLevelCollectionCell>();
+        private static HoverHintController hoverHintController;
 
-        static void Postfix(AnnotatedBeatmapLevelCollectionTableCell __instance, ref IAnnotatedBeatmapLevelCollection annotatedBeatmapLevelCollection, ref Image ____coverImage)
+        private static void Postfix(AnnotatedBeatmapLevelCollectionCell __instance, ref IAnnotatedBeatmapLevelCollection annotatedBeatmapLevelCollection, ref Image ____coverImage)
         {
-            AnnotatedBeatmapLevelCollectionTableCell cell = __instance;
+            AnnotatedBeatmapLevelCollectionCell cell = __instance;
             if (annotatedBeatmapLevelCollection is IDeferredSpriteLoad deferredSpriteLoad)
             {
                 if (deferredSpriteLoad.SpriteWasLoaded)
                 {
 #if DEBUG
-                    Plugin.Log.Debug($"Sprite was already loaded for {(deferredSpriteLoad as IAnnotatedBeatmapLevelCollection).collectionName}");
+                    //Plugin.Log.Debug($"Sprite was already loaded for {(deferredSpriteLoad as IAnnotatedBeatmapLevelCollection).collectionName}");
 #endif
                 }
-                if (EventTable.TryGetValue(deferredSpriteLoad, out AnnotatedBeatmapLevelCollectionTableCell existing))
+                if (EventTable.TryGetValue(deferredSpriteLoad, out AnnotatedBeatmapLevelCollectionCell existing))
                 {
                     EventTable.Remove(deferredSpriteLoad);
                 }
@@ -36,19 +41,37 @@ namespace PlaylistManager.HarmonyPatches
                 deferredSpriteLoad.SpriteLoaded -= OnSpriteLoaded;
                 deferredSpriteLoad.SpriteLoaded += OnSpriteLoaded;
             }
+
+            if (PluginConfig.Instance.PlaylistHoverHints)
+            {
+                HoverHint hoverHint = __instance.GetComponent<HoverHint>();
+
+                if (hoverHint == null)
+                {
+                    hoverHint = __instance.gameObject.AddComponent<HoverHint>();
+                    if (hoverHintController == null)
+                    {
+                        // Forgive me lord but this must be done...
+                        hoverHintController = Resources.FindObjectsOfTypeAll<HoverHintController>().FirstOrDefault();
+                    }
+                    Accessors.HoverHintControllerAccessor(ref hoverHint) = hoverHintController;
+                }
+
+                hoverHint.text = annotatedBeatmapLevelCollection.collectionName;
+            }
         }
 
-        public static void OnSpriteLoaded(object sender, EventArgs e)
+        private static void OnSpriteLoaded(object sender, EventArgs e)
         {
             if (sender is IDeferredSpriteLoad deferredSpriteLoad)
             {
-                if (EventTable.TryGetValue(deferredSpriteLoad, out AnnotatedBeatmapLevelCollectionTableCell tableCell))
+                if (EventTable.TryGetValue(deferredSpriteLoad, out AnnotatedBeatmapLevelCollectionCell tableCell))
                 {
                     IAnnotatedBeatmapLevelCollection collection = Accessors.BeatmapCollectionAccessor(ref tableCell);
                     if (collection == deferredSpriteLoad)
                     {
 #if DEBUG
-                        Plugin.Log.Debug($"Updating image for {collection.collectionName}");
+                        //Plugin.Log.Debug($"Updating image for {collection.collectionName}");
 #endif
                         Accessors.CoverImageAccessor(ref tableCell).sprite = deferredSpriteLoad.Sprite;
                     }

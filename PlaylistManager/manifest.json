@@ -3,15 +3,15 @@
     "id": "PlaylistManager",
     "name": "PlaylistManager",
     "author": "PixelBoom",
-    "version": "1.4.0",
+    "version": "1.5.0",
     "description": "Load, Create, Edit, Organize Playlists and Download their Songs in Beat Saber.",
-    "gameVersion": "1.17.0",
+    "gameVersion": "1.18.0",
     "dependsOn": {
         "BSIPA": "^4.2.0",
-        "SongCore": "^3.7.0",
-        "BeatSaberMarkupLanguage": "^1.5.5",
+        "SongCore": "^3.8.0",
+        "BeatSaberMarkupLanguage": "^1.5.9",
         "SiraUtil": "^2.5.8",
-        "BeatSaberPlaylistsLib": "^1.4.1",
-        "BeatSaverSharp": "^3.0.0"
+        "BeatSaberPlaylistsLib": "^1.5.0",
+        "BeatSaverSharp": "^3.0.2"
     }
 }

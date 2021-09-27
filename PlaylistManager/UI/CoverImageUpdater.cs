@@ -1,6 +1,7 @@
 ﻿using BeatSaberPlaylistsLib.Types;
 using IPA.Utilities;
 using PlaylistManager.Interfaces;
+using PlaylistManager.Utilities;
 using System;
 
 namespace PlaylistManager.UI
@@ -22,7 +23,7 @@ namespace PlaylistManager.UI
         {
             levelPackDetailViewController.SetData((IBeatmapLevelPack)selectedPlaylist);
             levelPackDetailViewController.ShowContent(LevelPackDetailViewController.ContentType.Owned);
-            levelCollectionNavigationController.SetField("_levelPack", (IBeatmapLevelPack)selectedPlaylist);
+            Accessors.LevelPackAccessor(ref levelCollectionNavigationController) = selectedPlaylist as IBeatmapLevelPack;
         }
 
         public void LevelCollectionUpdated(IAnnotatedBeatmapLevelCollection annotatedBeatmapLevelCollection, BeatSaberPlaylistsLib.PlaylistManager parentManager)

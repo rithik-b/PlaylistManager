@@ -3,7 +3,7 @@
 		<vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' spacing='3' preferred-width='60' preferred-height='30'>
 			<text text='~yes-no-text' word-wrapping='true' align='Center' />
 			<horizontal horizontal-fit='PreferredSize' spacing='1' active='~checkbox-active'>
-				<button text='~checkbox' on-click='toggle-checkbox' italics='false' pref-width='6' pref-height='7' />
+				<clickable-text text='~checkbox' on-click='toggle-checkbox' italics='false' />
 				<text text='~checkbox-text' italics='true' word-wrapping='true' align='Left' />
 			</horizontal>
 			<horizontal>

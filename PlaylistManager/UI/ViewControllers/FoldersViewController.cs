@@ -3,7 +3,6 @@ using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.FloatingScreen;
 using HMUI;
-using IPA.Utilities;
 using PlaylistManager.HarmonyPatches;
 using PlaylistManager.Interfaces;
 using PlaylistManager.Utilities;
@@ -26,6 +25,7 @@ namespace PlaylistManager.UI
         private readonly LevelSelectionNavigationController levelSelectionNavigationController;
         private readonly PopupModalsController popupModalsController;
         private readonly HoverHintController hoverHintController;
+        private readonly IVRPlatformHelper platformHelper;
         private BeatmapLevelsModel beatmapLevelsModel;
 
         private FloatingScreen floatingScreen;
@@ -57,13 +57,15 @@ namespace PlaylistManager.UI
         public CustomListTableData customListTableData;
 
         public FoldersViewController(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, MainFlowCoordinator mainFlowCoordinator, 
-            LevelSelectionNavigationController levelSelectionNavigationController, PopupModalsController popupModalsController, HoverHintController hoverHintController, BeatmapLevelsModel beatmapLevelsModel)
+            LevelSelectionNavigationController levelSelectionNavigationController, PopupModalsController popupModalsController, HoverHintController hoverHintController,
+            IVRPlatformHelper platformHelper, BeatmapLevelsModel beatmapLevelsModel)
         {
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
             this.mainFlowCoordinator = mainFlowCoordinator;
             this.levelSelectionNavigationController = levelSelectionNavigationController;
             this.popupModalsController = popupModalsController;
             this.hoverHintController = hoverHintController;
+            this.platformHelper = platformHelper;
             this.beatmapLevelsModel = beatmapLevelsModel;
 
             levelPacksIcon = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.LevelPacks.png");
@@ -81,15 +83,22 @@ namespace PlaylistManager.UI
             floatingScreen.transform.localScale = new Vector3(0.03f, 0.03f, 0.03f);
 
             BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.FoldersView.bsml"), floatingScreen.gameObject, this);
-            rootTransform.gameObject.SetActive(false);
-            rootTransform.gameObject.name = "PlaylistManagerFoldersView";
-
             LevelFilteringNavigationController_ShowPacksInChildController.AllPacksViewSelectedEvent += LevelFilteringNavigationController_ShowPacksInChildController_AllPacksViewSelectedEvent;
         }
 
         public void Dispose()
         {
             LevelFilteringNavigationController_ShowPacksInChildController.AllPacksViewSelectedEvent -= LevelFilteringNavigationController_ShowPacksInChildController_AllPacksViewSelectedEvent;
+        }
+
+        [UIAction("#post-parse")]
+        private void PostParse()
+        {
+            rootTransform.gameObject.SetActive(false);
+            rootTransform.gameObject.name = "PlaylistManagerFoldersView";
+
+            ScrollView scrollView = customListTableData.tableView.GetComponent<ScrollView>();
+            Accessors.PlatformHelperAccessor(ref scrollView) = platformHelper;
         }
 
         public void SetupDimensions()
@@ -178,7 +187,7 @@ namespace PlaylistManager.UI
                     if (hoverHint == null)
                     {
                         hoverHint = visibleCells[i].gameObject.AddComponent<HoverHint>();
-                        hoverHint.SetField("_hoverHintController", hoverHintController);
+                        Accessors.HoverHintControllerAccessor(ref hoverHint) = hoverHintController;
                     }
                     else
                     {
