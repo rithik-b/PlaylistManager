@@ -51,7 +51,7 @@ namespace PlaylistManager.Types
 		public override void UpdateContentSize()
 		{
 			SetContentSize(contentSize);
-			bool active = contentSize - (_fixedCellSize * 5) > 0f;
+			bool active = contentSize - (_fixedCellSize * 3) > 0f;
 
 			_pageUpButton.gameObject.SetActive(active); 
 			_pageDownButton.gameObject.SetActive(active);
@@ -86,6 +86,12 @@ namespace PlaylistManager.Types
         {
 			if (_verticalScrollIndicator != null)
 			{
+				// To show a blank progress bar, we do NaN
+				if (contentSize / _fixedCellSize <= 5)
+                {
+					_verticalScrollIndicator.progress = float.NaN;
+					return;
+                }
 				_verticalScrollIndicator.progress = (currentPos - zeroPos) / (endPos - zeroPos);
 			}
 		}
