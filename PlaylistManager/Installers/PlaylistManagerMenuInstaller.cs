@@ -5,7 +5,7 @@ using PlaylistManager.Configuration;
 
 namespace PlaylistManager.Installers
 {
-    class PlaylistManagerMenuInstaller : Installer
+    internal class PlaylistManagerMenuInstaller : Installer
     {
         public override void InstallBindings()
         {

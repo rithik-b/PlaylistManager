@@ -20,8 +20,9 @@ using Zenject;
 
 namespace PlaylistManager.UI
 {
-    public class PlaylistViewButtonsController : IInitializable, IDisposable, INotifyPropertyChanged, ILevelCollectionUpdater, ILevelCategoryUpdater, ILevelCollectionsTableUpdater
+    internal class PlaylistViewButtonsController : IInitializable, IDisposable, INotifyPropertyChanged, ILevelCollectionUpdater, ILevelCategoryUpdater, ILevelCollectionsTableUpdater
     {
+        private readonly PlaylistDownloader playlistDownloader;
         private readonly LevelPackDetailViewController levelPackDetailViewController;
         private readonly PopupModalsController popupModalsController;
         private readonly PlaylistDetailsViewController playlistDetailsViewController;
@@ -47,9 +48,10 @@ namespace PlaylistManager.UI
         [UIComponent("sync-button")]
         private readonly Transform syncButtonTransform;
 
-        public PlaylistViewButtonsController(LevelPackDetailViewController levelPackDetailViewController, PopupModalsController popupModalsController, 
+        public PlaylistViewButtonsController(PlaylistDownloader playlistDownloader, LevelPackDetailViewController levelPackDetailViewController, PopupModalsController popupModalsController, 
             PlaylistDetailsViewController playlistDetailsViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController)
         {
+            this.playlistDownloader = playlistDownloader;
             this.levelPackDetailViewController = levelPackDetailViewController;
             this.popupModalsController = popupModalsController;
             this.playlistDetailsViewController = playlistDetailsViewController;
@@ -176,15 +178,15 @@ namespace PlaylistManager.UI
                             continue;
                         }
                     }
-                    await DownloaderUtils.instance.BeatmapDownloadByCustomURL(customArchiveURL, identifier, tokenSource.Token);
+                    await playlistDownloader.BeatmapDownloadByCustomURL(customArchiveURL, identifier, tokenSource.Token);
                 }
                 else if (!string.IsNullOrEmpty(MissingSongs[i].Hash))
                 {
-                    await DownloaderUtils.instance.BeatmapDownloadByHash(MissingSongs[i].Hash, tokenSource.Token);
+                    await playlistDownloader.BeatmapDownloadByHash(MissingSongs[i].Hash, tokenSource.Token);
                 }
                 else if (!string.IsNullOrEmpty(MissingSongs[i].Key))
                 {
-                    string hash = await DownloaderUtils.instance.BeatmapDownloadByKey(MissingSongs[i].Key.ToLower(), tokenSource.Token);
+                    string hash = await playlistDownloader.BeatmapDownloadByKey(MissingSongs[i].Key.ToLower(), tokenSource.Token);
                     if (!string.IsNullOrEmpty(hash))
                     {
                         MissingSongs[i].Hash = hash;
@@ -294,7 +296,7 @@ namespace PlaylistManager.UI
 
             try
             {
-                playlistStream = new MemoryStream(await DownloaderUtils.instance.DownloadFileToBytesAsync(syncURL, tokenSource.Token));
+                playlistStream = new MemoryStream(await playlistDownloader.DownloadFileToBytesAsync(syncURL, tokenSource.Token));
                 ((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist).Clear(); // Clear all songs
                 PlaylistLibUtils.playlistManager.DefaultHandler.Populate(playlistStream, (BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
             }

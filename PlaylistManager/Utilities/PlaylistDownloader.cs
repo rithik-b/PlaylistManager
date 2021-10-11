@@ -1,29 +1,27 @@
 ﻿using BeatSaverSharp;
 using BeatSaverSharp.Models;
+using IPA.Loader;
+using SiraUtil;
 using System;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-
-/*
- * Original Author: KyleMC1413
- * Adapted from BeatSaverDownloader
- */
+using Zenject;
 
 namespace PlaylistManager.Utilities
 {
-    internal class DownloaderUtils
+    internal class PlaylistDownloader
     {
-        private BeatSaver beatSaverInstance;
-        public static DownloaderUtils instance;
-        public static void Init()
+        private readonly SiraClient siraClient;
+        private readonly BeatSaver beatSaverInstance;
+
+        public PlaylistDownloader([Inject(Id = nameof(PlaylistManager))] PluginMetadata metadata, SiraClient siraClient)
         {
-            instance = new DownloaderUtils();
-            BeatSaverOptions options = new BeatSaverOptions(applicationName: typeof(DownloaderUtils).Assembly.GetName().Name, version: typeof(DownloaderUtils).Assembly.GetName().Version);
-            instance.beatSaverInstance = new BeatSaver(options);
+            this.siraClient = siraClient;
+            BeatSaverOptions options = new BeatSaverOptions(applicationName: metadata.Name, version: metadata.HVersion.ToString());
+            beatSaverInstance = new BeatSaver(options);
         }
 
         private async Task BeatSaverBeatmapDownload(Beatmap song, BeatmapVersion songversion, CancellationToken token, IProgress<double> progress = null)
@@ -34,15 +32,15 @@ namespace PlaylistManager.Utilities
                 Directory.CreateDirectory(customSongsPath);
             }
             var zip = await songversion.DownloadZIP(token, progress).ConfigureAwait(false);
-            
+
             await ExtractZipAsync(zip, customSongsPath, songInfo: song).ConfigureAwait(false);
         }
 
         public async Task<string> BeatmapDownloadByKey(string key, CancellationToken token, IProgress<double> progress = null)
         {
             bool songDownloaded = false;
-            while(!songDownloaded)
-            { 
+            while (!songDownloaded)
+            {
                 try
                 {
                     var song = await beatSaverInstance.Beatmap(key, token);
@@ -58,7 +56,7 @@ namespace PlaylistManager.Utilities
                 {
                     if (!(e is TaskCanceledException))
                     {
-                        Plugin.Log.Critical(string.Format("Failed to download Song {0}. Exception: {1}", key, e.ToString()));
+                        Plugin.Log.Info(string.Format("Failed to download Song {0}. Exception: {1}", key, e.ToString()));
                     }
                     songDownloaded = true;
                 }
@@ -76,7 +74,7 @@ namespace PlaylistManager.Utilities
                     var song = await beatSaverInstance.BeatmapByHash(hash, token);
                     if (song == null)
                     {
-                        Plugin.Log.Critical(string.Format("Failed to download Song {0}. Unable to find a beatmap for that hash.", hash));
+                        Plugin.Log.Info(string.Format("Failed to download Song {0}. Unable to find a beatmap for that hash.", hash));
                         return;
                     }
 
@@ -88,7 +86,7 @@ namespace PlaylistManager.Utilities
                             matchingVersion = version;
                         }
                     }
-                    
+
                     // Just download exact hash matches for now. Updating to a newer version of a song based on a hash should require some user interaction or option setting.
                     if (matchingVersion != null)
                     {
@@ -96,7 +94,7 @@ namespace PlaylistManager.Utilities
                     }
                     else
                     {
-                        Plugin.Log.Critical(string.Format("Failed to download Song {0}. Unable to find a matching version for that hash.", hash));
+                        Plugin.Log.Info(string.Format("Failed to download Song {0}. Unable to find a matching version for that hash.", hash));
                     }
                     songDownloaded = true;
                 }
@@ -104,7 +102,7 @@ namespace PlaylistManager.Utilities
                 {
                     if (!(e is TaskCanceledException))
                     {
-                        Plugin.Log.Critical(string.Format("Failed to download Song {0}. Exception: {1}", hash, e.ToString()));
+                        Plugin.Log.Info(string.Format("Failed to download Song {0}. Exception: {1}", hash, e.ToString()));
                     }
                     songDownloaded = true;
                 }
@@ -126,7 +124,7 @@ namespace PlaylistManager.Utilities
             catch (Exception e)
             {
                 if (!(e is TaskCanceledException))
-                    Plugin.Log.Critical(string.Format("Failed to download Song {0}", url));
+                    Plugin.Log.Info(string.Format("Failed to download Song {0}", url));
             }
         }
 
@@ -147,7 +145,7 @@ namespace PlaylistManager.Utilities
                 }
                 basePath = string.Join("", basePath.Split(Path.GetInvalidFileNameChars().Concat(Path.GetInvalidPathChars()).ToArray()));
                 string path = Path.Combine(customSongsPath, basePath);
-                
+
                 if (!overwrite && Directory.Exists(path))
                 {
                     int pathNum = 1;
@@ -172,7 +170,7 @@ namespace PlaylistManager.Utilities
             }
             catch (Exception e)
             {
-                Plugin.Log.Critical($"Unable to extract ZIP! Exception: {e}");
+                Plugin.Log.Error($"Unable to extract ZIP! Exception: {e}");
                 return;
             }
             zipStream.Close();
@@ -181,12 +179,8 @@ namespace PlaylistManager.Utilities
         public async Task<byte[]> DownloadFileToBytesAsync(string url, CancellationToken token)
         {
             Uri uri = new Uri(url);
-            using (var webClient = new WebClient())
-            using (var registration = token.Register(() => webClient.CancelAsync()))
-            {
-                var data = await webClient.DownloadDataTaskAsync(uri);
-                return data;
-            }
+            WebResponse webResponse = await siraClient.GetAsync(url, token);
+            return webResponse.ContentToBytes();
         }
     }
 }

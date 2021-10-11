@@ -2,6 +2,7 @@
 using IPA;
 using IPA.Config;
 using IPA.Config.Stores;
+using IPA.Loader;
 using PlaylistManager.Installers;
 using PlaylistManager.Utilities;
 using SiraUtil.Zenject;
@@ -25,12 +26,13 @@ namespace PlaylistManager
         /// [Init] methods that use a Constructor or called before regular methods like InitWithConfig.
         /// Only use [Init] with one Constructor.
         /// </summary>
-        public Plugin(IPALogger logger, Zenjector zenjector)
+        public Plugin(IPALogger logger, Zenjector zenjector, PluginMetadata metadata)
         {
             Instance = this;
             Log = logger;
             Log.Info("PlaylistManager initialized.");
             harmony = new Harmony(HarmonyId);
+            zenjector.OnApp<PlaylistManagerAppInstaller>().WithParameters(metadata);
             zenjector.OnMenu<PlaylistManagerMenuInstaller>();
         }
 
@@ -46,10 +48,6 @@ namespace PlaylistManager
         [OnEnable]
         public void OnEnable()
         {
-            if (DownloaderUtils.instance == null)
-            {
-                DownloaderUtils.Init();
-            }
             harmony.PatchAll(Assembly.GetExecutingAssembly());
         }
 
