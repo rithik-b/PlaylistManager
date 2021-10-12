@@ -20,7 +20,7 @@ using Zenject;
 
 namespace PlaylistManager.UI
 {
-    internal class PlaylistViewButtonsController : IInitializable, IDisposable, INotifyPropertyChanged, ILevelCollectionUpdater, ILevelCategoryUpdater, ILevelCollectionsTableUpdater
+    public class PlaylistViewButtonsController : IInitializable, IDisposable, INotifyPropertyChanged, ILevelCollectionUpdater, ILevelCategoryUpdater, ILevelCollectionsTableUpdater
     {
         private readonly PlaylistDownloader playlistDownloader;
         private readonly LevelPackDetailViewController levelPackDetailViewController;

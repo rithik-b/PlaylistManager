@@ -1,4 +1,5 @@
-﻿using Zenject;
+﻿using SiraUtil;
+using Zenject;
 using PlaylistManager.UI;
 using PlaylistManager.Managers;
 using PlaylistManager.Configuration;
@@ -14,6 +15,7 @@ namespace PlaylistManager.Installers
                 Container.BindInterfacesTo<LevelDetailButtonsViewController>().AsSingle();
                 Container.BindInterfacesAndSelfTo<AddPlaylistModalController>().AsSingle();
                 Container.BindInterfacesTo<PlaylistViewButtonsController>().AsSingle();
+                Container.BindInterfacesTo<PlaylistDownloaderViewController>().FromNewComponentAsViewController().AsSingle();
                 Container.BindInterfacesAndSelfTo<PlaylistDetailsViewController>().AsSingle();
                 Container.Bind<ImageSelectionModalController>().AsSingle();
                 Container.BindInterfacesAndSelfTo<PopupModalsController>().AsSingle();

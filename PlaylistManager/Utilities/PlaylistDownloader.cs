@@ -1,6 +1,7 @@
 ﻿using BeatSaverSharp;
 using BeatSaverSharp.Models;
 using IPA.Loader;
+using PlaylistManager.Types;
 using SiraUtil;
 using System;
 using System.IO;
@@ -12,16 +13,19 @@ using Zenject;
 
 namespace PlaylistManager.Utilities
 {
-    internal class PlaylistDownloader
+    public class PlaylistDownloader
     {
         private readonly SiraClient siraClient;
         private readonly BeatSaver beatSaverInstance;
+
+        public PopupContents PendingPopup { get; private set; }
 
         public PlaylistDownloader([Inject(Id = nameof(PlaylistManager))] PluginMetadata metadata, SiraClient siraClient)
         {
             this.siraClient = siraClient;
             BeatSaverOptions options = new BeatSaverOptions(applicationName: metadata.Name, version: metadata.HVersion.ToString());
             beatSaverInstance = new BeatSaver(options);
+            PendingPopup = null;
         }
 
         private async Task BeatSaverBeatmapDownload(Beatmap song, BeatmapVersion songversion, CancellationToken token, IProgress<double> progress = null)

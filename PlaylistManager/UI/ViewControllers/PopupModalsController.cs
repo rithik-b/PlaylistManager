@@ -2,7 +2,9 @@
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Parser;
 using HMUI;
+using PlaylistManager.Types;
 using PlaylistManager.Utilities;
+using System;
 using System.ComponentModel;
 using System.Reflection;
 using UnityEngine;
@@ -15,13 +17,11 @@ namespace PlaylistManager.UI
         private bool parsed;
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public delegate void ButtonPressed();
-        private ButtonPressed yesButtonPressed;
-        private ButtonPressed noButtonPressed;
-        private ButtonPressed okButtonPressed;
+        private Action yesButtonPressed;
+        private Action noButtonPressed;
+        private Action okButtonPressed;
 
-        public delegate void KeyboardPressed(string keyboardText);
-        private KeyboardPressed keyboardPressed;
+        private Action<string> keyboardPressed;
 
         private string _yesNoText = "";
         private string _checkboxText = "";
@@ -84,7 +84,13 @@ namespace PlaylistManager.UI
 
         // Methods
 
-        internal void ShowYesNoModal(Transform parent, string text, ButtonPressed yesButtonPressedCallback, string yesButtonText = "Yes", string noButtonText = "No", ButtonPressed noButtonPressedCallback = null, bool animateParentCanvas = true, string checkboxText = "")
+        internal void ShowYesNoModal(PopupContents popupContents)
+        {
+            ShowYesNoModal(popupContents.parent, popupContents.message, popupContents.yesButtonPressedCallback, popupContents.yesButtonText,
+                popupContents.noButtonText, popupContents.noButtonPressedCallback, popupContents.animateParentCanvas, popupContents.checkboxText);
+        }
+
+        internal void ShowYesNoModal(Transform parent, string text, Action yesButtonPressedCallback, string yesButtonText = "Yes", string noButtonText = "No", Action noButtonPressedCallback = null, bool animateParentCanvas = true, string checkboxText = "")
         {
             Parse();
             yesNoModalTransform.position = yesNoModalPosition;
@@ -203,7 +209,7 @@ namespace PlaylistManager.UI
 
         // Methods
 
-        internal void ShowOkModal(Transform parent, string text, ButtonPressed buttonPressedCallback, string okButtonText = "Ok", bool animateParentCanvas = true)
+        internal void ShowOkModal(Transform parent, string text, Action buttonPressedCallback, string okButtonText = "Ok", bool animateParentCanvas = true)
         {
             Parse();
             okModalTransform.position = okModalPosition;
@@ -258,7 +264,7 @@ namespace PlaylistManager.UI
 
         // Methods
 
-        internal void ShowKeyboard(Transform parent, KeyboardPressed keyboardPressedCallback, string keyboardText = "", bool animateParentCanvas = true)
+        internal void ShowKeyboard(Transform parent, Action<string> keyboardPressedCallback, string keyboardText = "", bool animateParentCanvas = true)
         {
             Parse(); 
             keyboardTransform.transform.SetParent(rootTransform);
