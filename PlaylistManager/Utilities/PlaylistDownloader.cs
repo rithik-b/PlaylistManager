@@ -1,9 +1,11 @@
-﻿using BeatSaverSharp;
+﻿using BeatSaberPlaylistsLib.Types;
+using BeatSaverSharp;
 using BeatSaverSharp.Models;
 using IPA.Loader;
 using PlaylistManager.Types;
 using SiraUtil;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -17,7 +19,11 @@ namespace PlaylistManager.Utilities
     {
         private readonly SiraClient siraClient;
         private readonly BeatSaver beatSaverInstance;
+        private readonly SemaphoreSlim downloadSemaphore;
+        private readonly HashSet<string> ownedHashes;
 
+        public event Action QueueUpdatedEvent;
+        public readonly List<object> downloadQueue;
         public PopupContents PendingPopup { get; private set; }
 
         public PlaylistDownloader([Inject(Id = nameof(PlaylistManager))] PluginMetadata metadata, SiraClient siraClient)
@@ -25,7 +31,62 @@ namespace PlaylistManager.Utilities
             this.siraClient = siraClient;
             BeatSaverOptions options = new BeatSaverOptions(applicationName: metadata.Name, version: metadata.HVersion.ToString());
             beatSaverInstance = new BeatSaver(options);
+            downloadSemaphore = new SemaphoreSlim(1, 1);
+            ownedHashes = new HashSet<string>();
+            downloadQueue = new List<object>();
             PendingPopup = null;
+        }
+
+        public void QueuePlaylist(DownloadQueueEntry downloadQueueEntry)
+        {
+            downloadQueue.Add(downloadQueueEntry);
+            QueueUpdatedEvent.Invoke();
+            IterateQueue();
+        }
+
+        public async void IterateQueue()
+        {
+            await downloadSemaphore.WaitAsync();
+            await DownloadPlaylist(downloadQueue.OfType<DownloadQueueEntry>().FirstOrDefault());
+            downloadQueue.RemoveAt(0);
+            QueueUpdatedEvent?.Invoke();
+            if (downloadQueue.Count == 0)
+            {
+                SongCore.Loader.Instance.RefreshSongs(false);
+                ownedHashes.Clear();
+            }
+            downloadSemaphore.Release();
+        }
+
+        private async Task DownloadPlaylist(DownloadQueueEntry downloadQueueEntry)
+        {
+            List<IPlaylistSong> missingSongs = PlaylistLibUtils.GetMissingSongs(downloadQueueEntry.playlist, ownedHashes);
+            downloadQueueEntry.Report(0);
+
+            for (int i = 0; i < missingSongs.Count; i++)
+            {
+                if (!string.IsNullOrEmpty(missingSongs[i].Hash))
+                {
+                    await BeatmapDownloadByHash(missingSongs[i].Hash, downloadQueueEntry.cancellationTokenSource.Token);
+                }
+                else if (!string.IsNullOrEmpty(missingSongs[i].Key))
+                {
+                    string hash = await BeatmapDownloadByKey(missingSongs[i].Key.ToLower(), downloadQueueEntry.cancellationTokenSource.Token);
+                    if (!string.IsNullOrEmpty(hash))
+                    {
+                        missingSongs[i].Hash = hash;
+                    }
+                }
+
+                downloadQueueEntry.Report((i + 1) / ((double)missingSongs.Count));
+
+                if (downloadQueueEntry.cancellationTokenSource.IsCancellationRequested)
+                {
+                    break;
+                }
+            }
+
+            downloadQueueEntry.parentManager.StorePlaylist(downloadQueueEntry.playlist);
         }
 
         private async Task BeatSaverBeatmapDownload(Beatmap song, BeatmapVersion songversion, CancellationToken token, IProgress<double> progress = null)
@@ -35,9 +96,13 @@ namespace PlaylistManager.Utilities
             {
                 Directory.CreateDirectory(customSongsPath);
             }
-            var zip = await songversion.DownloadZIP(token, progress).ConfigureAwait(false);
 
-            await ExtractZipAsync(zip, customSongsPath, songInfo: song).ConfigureAwait(false);
+            if (!ownedHashes.Contains(songversion.Hash.ToUpper()))
+            {
+                var zip = await songversion.DownloadZIP(token, progress).ConfigureAwait(false);
+                await ExtractZipAsync(zip, customSongsPath, songInfo: song).ConfigureAwait(false);
+                ownedHashes.Add(songversion.Hash.ToUpper());
+            }
         }
 
         public async Task<string> BeatmapDownloadByKey(string key, CancellationToken token, IProgress<double> progress = null)
@@ -182,7 +247,6 @@ namespace PlaylistManager.Utilities
 
         public async Task<byte[]> DownloadFileToBytesAsync(string url, CancellationToken token)
         {
-            Uri uri = new Uri(url);
             WebResponse webResponse = await siraClient.GetAsync(url, token);
             return webResponse.ContentToBytes();
         }

@@ -1,8 +1,12 @@
-﻿using System.Drawing;
+﻿using System.Collections.Generic;
+using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using BeatSaberPlaylistsLib;
+using BeatSaberPlaylistsLib.Blist;
+using BeatSaberPlaylistsLib.Legacy;
 using BeatSaberPlaylistsLib.Types;
 using PlaylistManager.Configuration;
 using UnityEngine;
@@ -63,6 +67,22 @@ namespace PlaylistManager.Utilities
                 return playlistSong.LevelId;
             }
             return "";
+        }
+
+        public static List<IPlaylistSong> GetMissingSongs(BeatSaberPlaylistsLib.Types.IPlaylist playlist, HashSet<string> ownedHashes = null)
+        {
+            if (playlist is LegacyPlaylist legacyPlaylist)
+            {
+                return legacyPlaylist.Where(s => s.PreviewBeatmapLevel == null && !(ownedHashes?.Contains(s.Hash) ?? false)).Distinct(IPlaylistSongComparer<IPlaylistSong>.Default).ToList();
+            }
+            else if (playlist is BlistPlaylist blistPlaylist)
+            {
+                return blistPlaylist.Where(s => s.PreviewBeatmapLevel == null && !(ownedHashes?.Contains(s.Hash) ?? false)).Distinct(IPlaylistSongComparer<IPlaylistSong>.Default).ToList();
+            }
+            else
+            {
+                return null;
+            }
         }
 
         #region Image

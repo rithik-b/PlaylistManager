@@ -1,3 +1,12 @@
 ﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
-
+	<custom-list anchor-pos-x='0' id='download-list' clickable-cells='false' list-width='90' visible-cells='7' cell-size='9'>
+		<image anchor-pos-x='5' pref-width='4' pref-height='4' anchor-min-x='0' anchor-min-y='0' anchor-max-x='0' anchor-max-y='1' id='playlist-cover' />
+		<horizontal child-expand-width='true' child-control-width='false' anchor-pos-x='11' pref-width='80'>
+			<button id='abort-button' on-click='abort-clicked' ignore-layout='true' text='Abort' anchor-pos-x='70' anchor-pos-y='-5' />
+			<vertical  anchor-pos-x='20' anchor-min-x='0' anchor-max-x='0' child-align='MiddleLeft' vertical-fit='PreferredSize'>
+				<text text='~playlist-name' font-size='4' />
+				<text text='~playlist-author' font-size='3' />
+			</vertical>
+		</horizontal>
+	</custom-list>
 </bg>

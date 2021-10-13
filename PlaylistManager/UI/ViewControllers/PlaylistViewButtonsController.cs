@@ -1,11 +1,10 @@
 ﻿using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
-using BeatSaberPlaylistsLib.Blist;
-using BeatSaberPlaylistsLib.Legacy;
 using BeatSaberPlaylistsLib.Types;
 using PlaylistManager.Configuration;
 using PlaylistManager.HarmonyPatches;
 using PlaylistManager.Interfaces;
+using PlaylistManager.Types;
 using PlaylistManager.Utilities;
 using System;
 using System.Collections.Generic;
@@ -28,7 +27,7 @@ namespace PlaylistManager.UI
         private readonly PlaylistDetailsViewController playlistDetailsViewController;
         private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
 
-        private Playlist selectedPlaylist;
+        private BeatSaberPlaylistsLib.Types.IPlaylist selectedPlaylist;
         private BeatSaberPlaylistsLib.PlaylistManager parentManager;
         private List<IPlaylistSong> _missingSongs;
 
@@ -136,6 +135,9 @@ namespace PlaylistManager.UI
         #region Download
 
         [UIAction("download-click")]
+        private void DownloadClick() => playlistDownloader.QueuePlaylist(new DownloadQueueEntry(selectedPlaylist, parentManager));
+
+
         private async Task DownloadPlaylistAsync()
         {
             popupModalsController.ShowOkModal(rootTransform, "", CancelButtonPressed, "Cancel");
@@ -198,7 +200,7 @@ namespace PlaylistManager.UI
             popupModalsController.OkText = "Download Complete!";
             popupModalsController.OkButtonText = "Ok";
 
-            parentManager.StorePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
+            parentManager.StorePlaylist(selectedPlaylist);
 
             downloadingBeatmapLevelCollections = Accessors.AnnotatedBeatmapLevelCollectionsAccessor(ref annotatedBeatmapLevelCollectionsViewController).ToArray();
             downloadingBeatmapCollectionIdx = annotatedBeatmapLevelCollectionsViewController.selectedItemIndex;
@@ -230,21 +232,7 @@ namespace PlaylistManager.UI
             LevelFilteringNavigationController_UpdateSecondChildControllerContent.SecondChildControllerUpdatedEvent -= LevelFilteringNavigationController_UpdateSecondChildControllerContent_SecondChildControllerUpdatedEvent;
         }
 
-        private void UpdateMissingSongs()
-        {
-            if (selectedPlaylist is LegacyPlaylist legacyPlaylist)
-            {
-                MissingSongs = legacyPlaylist.Where(s => s.PreviewBeatmapLevel == null).Distinct(IPlaylistSongComparer<IPlaylistSong>.Default).ToList();
-            }
-            else if (selectedPlaylist is BlistPlaylist blistPlaylist)
-            {
-                MissingSongs = blistPlaylist.Where(s => s.PreviewBeatmapLevel == null).Distinct(IPlaylistSongComparer<IPlaylistSong>.Default).ToList();
-            }
-            else
-            {
-                MissingSongs = null;
-            }
-        }
+        private void UpdateMissingSongs() => MissingSongs = PlaylistLibUtils.GetMissingSongs(selectedPlaylist);
 
         private List<IPlaylistSong> MissingSongs
         {
@@ -297,8 +285,8 @@ namespace PlaylistManager.UI
             try
             {
                 playlistStream = new MemoryStream(await playlistDownloader.DownloadFileToBytesAsync(syncURL, tokenSource.Token));
-                ((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist).Clear(); // Clear all songs
-                PlaylistLibUtils.playlistManager.DefaultHandler.Populate(playlistStream, (BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
+                selectedPlaylist.Clear(); // Clear all songs
+                PlaylistLibUtils.playlistManager.DefaultHandler.Populate(playlistStream, selectedPlaylist);
             }
             catch (Exception e)
             {
@@ -343,7 +331,7 @@ namespace PlaylistManager.UI
 
         public void LevelCollectionUpdated(IAnnotatedBeatmapLevelCollection selectedBeatmapLevelCollection, BeatSaberPlaylistsLib.PlaylistManager parentManager)
         {
-            if (selectedBeatmapLevelCollection is Playlist selectedPlaylist)
+            if (selectedBeatmapLevelCollection is BeatSaberPlaylistsLib.Types.IPlaylist selectedPlaylist)
             {
                 this.selectedPlaylist = selectedPlaylist;
                 this.parentManager = parentManager;
