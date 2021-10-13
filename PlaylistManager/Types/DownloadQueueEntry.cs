@@ -13,6 +13,7 @@ namespace PlaylistManager.Types
         public readonly BeatSaberPlaylistsLib.Types.IPlaylist playlist;
         public readonly BeatSaberPlaylistsLib.PlaylistManager parentManager;
         public readonly CancellationTokenSource cancellationTokenSource;
+        public event Action<DownloadQueueEntry> DownloadAbortedEvent;
 
         private ImageView bgImage;
 
@@ -63,7 +64,11 @@ namespace PlaylistManager.Types
         }
 
         [UIAction("abort-clicked")]
-        public void AbortDownload() => cancellationTokenSource.Cancel();
+        public void AbortDownload()
+        {
+            cancellationTokenSource.Cancel();
+            DownloadAbortedEvent?.Invoke(this);
+        }
 
         public void Report(double progressDouble)
         {

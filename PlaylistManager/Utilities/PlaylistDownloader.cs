@@ -40,26 +40,38 @@ namespace PlaylistManager.Utilities
         public void QueuePlaylist(DownloadQueueEntry downloadQueueEntry)
         {
             downloadQueue.Add(downloadQueueEntry);
-            QueueUpdatedEvent.Invoke();
+            downloadQueueEntry.DownloadAbortedEvent += OnDownloadAborted;
+            QueueUpdatedEvent?.Invoke();
             IterateQueue();
+        }
+
+        private void OnDownloadAborted(DownloadQueueEntry downloadQueueEntry)
+        {
+            downloadQueue.Remove(downloadQueueEntry); 
+            QueueUpdatedEvent?.Invoke();
         }
 
         public async void IterateQueue()
         {
             await downloadSemaphore.WaitAsync();
-            await DownloadPlaylist(downloadQueue.OfType<DownloadQueueEntry>().FirstOrDefault());
-            downloadQueue.RemoveAt(0);
-            QueueUpdatedEvent?.Invoke();
-            if (downloadQueue.Count == 0)
+            if (downloadQueue.Count > 0)
             {
-                SongCore.Loader.Instance.RefreshSongs(false);
-                ownedHashes.Clear();
+                await DownloadPlaylist(downloadQueue.OfType<DownloadQueueEntry>().FirstOrDefault());
+                downloadQueue.RemoveAt(0);
+                QueueUpdatedEvent?.Invoke();
+                if (downloadQueue.Count == 0)
+                {
+                    SongCore.Loader.Instance.RefreshSongs(false);
+                    ownedHashes.Clear();
+                }
             }
             downloadSemaphore.Release();
         }
 
         private async Task DownloadPlaylist(DownloadQueueEntry downloadQueueEntry)
         {
+            downloadQueueEntry.DownloadAbortedEvent -= OnDownloadAborted;
+
             List<IPlaylistSong> missingSongs = PlaylistLibUtils.GetMissingSongs(downloadQueueEntry.playlist, ownedHashes);
             downloadQueueEntry.Report(0);
 

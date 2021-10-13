@@ -61,10 +61,5 @@ namespace PlaylistManager.UI
                 customListTableData.tableView.ReloadDataKeepingPosition();
             }
         }
-
-        internal void DownloadAborted(DownloadQueueEntry download)
-        {
-            
-        }
     }
 }

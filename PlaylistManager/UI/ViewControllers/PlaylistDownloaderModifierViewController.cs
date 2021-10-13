@@ -42,27 +42,31 @@ namespace PlaylistManager.UI
         public void Initialize()
         {
             GameplaySetup.instance.AddTab("Playlist Downloader", "PlaylistManager.UI.Views.Blank.bsml", this, MenuType.None);
+            GameplaySetup.instance.TabsCreatedEvent += GameplaySetup_TabsCreatedEvent;
             playlistDownloader.QueueUpdatedEvent += PlaylistDownloader_QueueUpdatedEvent;
-            gameplaySetupViewController.didActivateEvent += GameplaySetupViewController_didActivateEvent;
         }
 
         public void Dispose()
         {
-            GameplaySetup.instance?.RemoveTab("Playlist Downloader");
+            if (GameplaySetup.instance != null)
+            {
+                GameplaySetup.instance.RemoveTab("Playlist Downloader");
+                GameplaySetup.instance.TabsCreatedEvent -= GameplaySetup_TabsCreatedEvent;
+            }
             playlistDownloader.QueueUpdatedEvent -= PlaylistDownloader_QueueUpdatedEvent;
-            gameplaySetupViewController.didActivateEvent -= GameplaySetupViewController_didActivateEvent;
         }
 
-        private void PlaylistDownloader_QueueUpdatedEvent() => IsVisible = playlistDownloader.downloadQueue.Count > 0;
-
-        private void GameplaySetupViewController_didActivateEvent(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
+        private void GameplaySetup_TabsCreatedEvent()
         {
+            _isVisible = false;
             IsVisible = true;
             playlistDownloaderViewController.__Init(gameplaySetupViewController.screen, gameplaySetupViewController, null);
             playlistDownloaderViewController.__Activate(false, false);
             playlistDownloaderViewController.transform.SetParent(rootTransform);
             playlistDownloaderViewController.transform.localPosition = Vector3.zero;
-            IsVisible = false;
+            PlaylistDownloader_QueueUpdatedEvent();
         }
+
+        private void PlaylistDownloader_QueueUpdatedEvent() => IsVisible = playlistDownloader.downloadQueue.Count > 0;
     }
 }
