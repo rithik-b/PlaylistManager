@@ -30,6 +30,7 @@ namespace PlaylistManager.UI
         private BeatSaberPlaylistsLib.Types.IPlaylist selectedPlaylist;
         private BeatSaberPlaylistsLib.PlaylistManager parentManager;
         private List<IPlaylistSong> _missingSongs;
+        private DownloadQueueEntry _downloadQueueEntry;
 
         private CancellationTokenSource tokenSource;
         private SemaphoreSlim downloadPauseSemaphore;
@@ -67,10 +68,13 @@ namespace PlaylistManager.UI
             syncButtonTransform.transform.localScale *= 0.08f;
             syncButtonTransform.gameObject.SetActive(false);
             rootTransform.gameObject.SetActive(false);
+
+            playlistDownloader.QueueUpdatedEvent += OnQueueUpdated;
         }
 
         public void Dispose()
         {
+            playlistDownloader.QueueUpdatedEvent -= OnQueueUpdated;
             LevelFilteringNavigationController_UpdateSecondChildControllerContent.SecondChildControllerUpdatedEvent -= LevelFilteringNavigationController_UpdateSecondChildControllerContent_SecondChildControllerUpdatedEvent;
         }
 
@@ -135,8 +139,12 @@ namespace PlaylistManager.UI
         #region Download
 
         [UIAction("download-click")]
-        private void DownloadClick() => playlistDownloader.QueuePlaylist(new DownloadQueueEntry(selectedPlaylist, parentManager));
-
+        private void DownloadClick()
+        {
+            DownloadQueueEntry = new DownloadQueueEntry(selectedPlaylist, parentManager);
+            playlistDownloader.QueuePlaylist(DownloadQueueEntry);
+            popupModalsController.ShowOkModal(rootTransform, $"{selectedPlaylist.collectionName} has been added to the download queue!", null);
+        }
 
         private async Task DownloadPlaylistAsync()
         {
@@ -225,6 +233,15 @@ namespace PlaylistManager.UI
             downloadPauseSemaphore.Release();
         }
 
+        private void OnQueueUpdated()
+        {
+            if (playlistDownloader.downloadQueue.Count == 0)
+            {
+                DownloadQueueEntry = null;
+                UpdateMissingSongs();
+            }
+        }
+
         private void LevelFilteringNavigationController_UpdateSecondChildControllerContent_SecondChildControllerUpdatedEvent()
         {
             LevelCollectionTableViewUpdatedEvent?.Invoke(downloadingBeatmapLevelCollections, downloadingBeatmapCollectionIdx);
@@ -245,21 +262,38 @@ namespace PlaylistManager.UI
             }
         }
 
+        private DownloadQueueEntry DownloadQueueEntry
+        {
+            get => _downloadQueueEntry;
+            set
+            {
+                _downloadQueueEntry = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DownloadInteractable)));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DownloadHint)));
+            }
+        }
+
         [UIValue("download-hint")]
         private string DownloadHint
         {
             get
             {
-                if (DownloadInteractable)
+                if (DownloadQueueEntry != null)
+                {
+                    return "Playlist is downloading";
+                }
+
+                if (MissingSongs != null && MissingSongs.Count > 0)
                 {
                     return $"Download {MissingSongs.Count} missing songs.";
                 }
+
                 return "All songs already downloaded";
             }
         }
 
         [UIValue("download-interactable")]
-        private bool DownloadInteractable => MissingSongs != null && MissingSongs.Count > 0;
+        private bool DownloadInteractable => DownloadQueueEntry == null && MissingSongs != null && MissingSongs.Count > 0;
 
         #endregion
 
@@ -335,6 +369,7 @@ namespace PlaylistManager.UI
             {
                 this.selectedPlaylist = selectedPlaylist;
                 this.parentManager = parentManager;
+                DownloadQueueEntry = playlistDownloader.downloadQueue.OfType<DownloadQueueEntry>().Where(x => x.playlist == selectedPlaylist).FirstOrDefault();
                 UpdateMissingSongs();
 
                 rootTransform.gameObject.SetActive(true);
