@@ -36,9 +36,6 @@ namespace PlaylistManager.UI
         private SemaphoreSlim downloadPauseSemaphore;
         private bool preferCustomArchiveURL;
 
-        private int downloadingBeatmapCollectionIdx;
-        private IAnnotatedBeatmapLevelCollection[] downloadingBeatmapLevelCollections;
-
         public event Action<IAnnotatedBeatmapLevelCollection[], int> LevelCollectionTableViewUpdatedEvent;
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -75,7 +72,6 @@ namespace PlaylistManager.UI
         public void Dispose()
         {
             playlistDownloader.QueueUpdatedEvent -= OnQueueUpdated;
-            LevelFilteringNavigationController_UpdateSecondChildControllerContent.SecondChildControllerUpdatedEvent -= LevelFilteringNavigationController_UpdateSecondChildControllerContent_SecondChildControllerUpdatedEvent;
         }
 
         #region Details
@@ -210,10 +206,8 @@ namespace PlaylistManager.UI
 
             parentManager.StorePlaylist(selectedPlaylist);
 
-            downloadingBeatmapLevelCollections = Accessors.AnnotatedBeatmapLevelCollectionsAccessor(ref annotatedBeatmapLevelCollectionsViewController).ToArray();
-            downloadingBeatmapCollectionIdx = annotatedBeatmapLevelCollectionsViewController.selectedItemIndex;
+            
             SongCore.Loader.Instance.RefreshSongs(false);
-            LevelFilteringNavigationController_UpdateSecondChildControllerContent.SecondChildControllerUpdatedEvent += LevelFilteringNavigationController_UpdateSecondChildControllerContent_SecondChildControllerUpdatedEvent;
         }
 
         private void CancelButtonPressed()
@@ -240,13 +234,6 @@ namespace PlaylistManager.UI
                 DownloadQueueEntry = null;
                 UpdateMissingSongs();
             }
-        }
-
-        private void LevelFilteringNavigationController_UpdateSecondChildControllerContent_SecondChildControllerUpdatedEvent()
-        {
-            LevelCollectionTableViewUpdatedEvent?.Invoke(downloadingBeatmapLevelCollections, downloadingBeatmapCollectionIdx);
-            UpdateMissingSongs();
-            LevelFilteringNavigationController_UpdateSecondChildControllerContent.SecondChildControllerUpdatedEvent -= LevelFilteringNavigationController_UpdateSecondChildControllerContent_SecondChildControllerUpdatedEvent;
         }
 
         private void UpdateMissingSongs() => MissingSongs = PlaylistLibUtils.GetMissingSongs(selectedPlaylist);

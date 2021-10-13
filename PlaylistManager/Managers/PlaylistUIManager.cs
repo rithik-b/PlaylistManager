@@ -5,25 +5,36 @@ using PlaylistManager.Interfaces;
 using System.Threading.Tasks;
 using PlaylistManager.Configuration;
 using PlaylistManager.Utilities;
+using PlaylistManager.HarmonyPatches;
+using System.Linq;
 
 namespace PlaylistManager.Managers
 {
-    internal class PlaylistUIManager : IInitializable, IDisposable
+    internal class PlaylistUIManager : IInitializable, IDisposable, ILevelCollectionsTableUpdater
     {
-        private readonly AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
+        private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
         private readonly SelectLevelCategoryViewController selectLevelCategoryViewController;
         private readonly StandardLevelDetailViewController standardLevelDetailViewController;
+
+        private readonly PlaylistDownloader playlistDownloader;
+        private int downloadingBeatmapCollectionIdx;
+        private IAnnotatedBeatmapLevelCollection[] downloadingBeatmapLevelCollections;
 
         private readonly List<ILevelCategoryUpdater> levelCategoryUpdaters;
         private readonly IPMRefreshable refreshable;
         private readonly IPlatformUserModel platformUserModel;
 
+        public event Action<IAnnotatedBeatmapLevelCollection[], int> LevelCollectionTableViewUpdatedEvent;
+
         internal PlaylistUIManager(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, SelectLevelCategoryViewController selectLevelCategoryViewController, 
-            StandardLevelDetailViewController standardLevelDetailViewController, List<ILevelCategoryUpdater> levelCategoryUpdaters, IPMRefreshable refreshable, IPlatformUserModel platformUserModel)
+            StandardLevelDetailViewController standardLevelDetailViewController, PlaylistDownloader playlistDownloader, List<ILevelCategoryUpdater> levelCategoryUpdaters, IPMRefreshable refreshable, 
+            IPlatformUserModel platformUserModel)
         {
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
             this.selectLevelCategoryViewController = selectLevelCategoryViewController;
             this.standardLevelDetailViewController = standardLevelDetailViewController;
+
+            this.playlistDownloader = playlistDownloader;
 
             this.levelCategoryUpdaters = levelCategoryUpdaters;
             this.refreshable = refreshable;
@@ -37,6 +48,9 @@ namespace PlaylistManager.Managers
             selectLevelCategoryViewController.didActivateEvent += SelectLevelCategoryViewController_didActivateEvent;
             selectLevelCategoryViewController.didDeactivateEvent += SelectLevelCategoryViewController_didDeactivateEvent;
 
+            // When all playlists finish downloading
+            playlistDownloader.QueueUpdatedEvent += PlaylistDownloader_QueueUpdatedEvent;
+
             // Whenever a refresh is requested
             PlaylistLibUtils.playlistManager.PlaylistsRefreshRequested += PlaylistManager_PlaylistsRefreshRequested;
 
@@ -49,6 +63,9 @@ namespace PlaylistManager.Managers
             selectLevelCategoryViewController.didSelectLevelCategoryEvent -= SelectLevelCategoryViewController_didSelectLevelCategoryEvent;
             selectLevelCategoryViewController.didActivateEvent -= SelectLevelCategoryViewController_didActivateEvent;
             selectLevelCategoryViewController.didDeactivateEvent -= SelectLevelCategoryViewController_didDeactivateEvent;
+
+            playlistDownloader.QueueUpdatedEvent -= PlaylistDownloader_QueueUpdatedEvent;
+            LevelFilteringNavigationController_UpdateSecondChildControllerContent.SecondChildControllerUpdatedEvent -= LevelFilteringNavigationController_SecondChildControllerUpdatedEvent;
 
             PlaylistLibUtils.playlistManager.PlaylistsRefreshRequested -= PlaylistManager_PlaylistsRefreshRequested;
         }
@@ -75,6 +92,22 @@ namespace PlaylistManager.Managers
             {
                 levelCategoryUpdater.LevelCategoryUpdated(SelectLevelCategoryViewController.LevelCategory.None, false);
             }
+        }
+
+        private void PlaylistDownloader_QueueUpdatedEvent()
+        {
+            if (annotatedBeatmapLevelCollectionsViewController.isActiveAndEnabled)
+            {
+                downloadingBeatmapLevelCollections = Accessors.AnnotatedBeatmapLevelCollectionsAccessor(ref annotatedBeatmapLevelCollectionsViewController).ToArray();
+                downloadingBeatmapCollectionIdx = annotatedBeatmapLevelCollectionsViewController.selectedItemIndex;
+                LevelFilteringNavigationController_UpdateSecondChildControllerContent.SecondChildControllerUpdatedEvent += LevelFilteringNavigationController_SecondChildControllerUpdatedEvent;
+            }
+        }
+
+        private void LevelFilteringNavigationController_SecondChildControllerUpdatedEvent()
+        {
+            LevelCollectionTableViewUpdatedEvent?.Invoke(downloadingBeatmapLevelCollections, downloadingBeatmapCollectionIdx);
+            LevelFilteringNavigationController_UpdateSecondChildControllerContent.SecondChildControllerUpdatedEvent -= LevelFilteringNavigationController_SecondChildControllerUpdatedEvent;
         }
 
         private void PlaylistManager_PlaylistsRefreshRequested(object sender, string requester)
