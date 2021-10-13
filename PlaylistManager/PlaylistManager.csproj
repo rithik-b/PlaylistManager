@@ -148,6 +148,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <None Remove="UI\Views\Blank.bsml" />
       <None Remove="UI\Views\PlaylistDownloaderView.bsml" />
     </ItemGroup>
 
