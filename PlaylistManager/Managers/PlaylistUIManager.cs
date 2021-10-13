@@ -96,7 +96,7 @@ namespace PlaylistManager.Managers
 
         private void PlaylistDownloader_QueueUpdatedEvent()
         {
-            if (annotatedBeatmapLevelCollectionsViewController.isActiveAndEnabled)
+            if (annotatedBeatmapLevelCollectionsViewController.isActiveAndEnabled && playlistDownloader.downloadQueue.Count == 0)
             {
                 downloadingBeatmapLevelCollections = Accessors.AnnotatedBeatmapLevelCollectionsAccessor(ref annotatedBeatmapLevelCollectionsViewController).ToArray();
                 downloadingBeatmapCollectionIdx = annotatedBeatmapLevelCollectionsViewController.selectedItemIndex;
@@ -112,7 +112,7 @@ namespace PlaylistManager.Managers
 
         private void PlaylistManager_PlaylistsRefreshRequested(object sender, string requester)
         {
-            Plugin.Log.Info("Refresh requested by: " + requester);
+            Plugin.Log.Info("Playlist Refresh requested by: " + requester);
             refreshable.Refresh();
         }
 

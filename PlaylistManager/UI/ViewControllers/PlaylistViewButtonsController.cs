@@ -2,7 +2,6 @@
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberPlaylistsLib.Types;
 using PlaylistManager.Configuration;
-using PlaylistManager.HarmonyPatches;
 using PlaylistManager.Interfaces;
 using PlaylistManager.Types;
 using PlaylistManager.Utilities;

@@ -59,13 +59,17 @@ namespace PlaylistManager.Utilities
                 await DownloadPlaylist(downloadQueue.OfType<DownloadQueueEntry>().FirstOrDefault());
                 downloadQueue.RemoveAt(0);
                 QueueUpdatedEvent?.Invoke();
-                if (downloadQueue.Count == 0)
-                {
-                    SongCore.Loader.Instance.RefreshSongs(false);
-                    ownedHashes.Clear();
-                }
             }
             downloadSemaphore.Release();
+        }
+
+        internal void OnQueueClear()
+        {
+            if (downloadQueue.Count == 0)
+            {
+                SongCore.Loader.Instance.RefreshSongs(false);
+                ownedHashes.Clear();
+            }
         }
 
         private async Task DownloadPlaylist(DownloadQueueEntry downloadQueueEntry)

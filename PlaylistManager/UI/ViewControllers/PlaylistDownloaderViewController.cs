@@ -2,12 +2,9 @@
 using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.FloatingScreen;
 using BeatSaberMarkupLanguage.ViewControllers;
-using PlaylistManager.Types;
+using PlaylistManager.HarmonyPatches;
 using PlaylistManager.Utilities;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
 using Zenject;
 
 namespace PlaylistManager.UI
@@ -18,6 +15,7 @@ namespace PlaylistManager.UI
     {
         private PlaylistDownloader playlistDownloader;
         private FloatingScreen floatingScreen;
+        private bool refreshRequested;
 
         [UIComponent("download-list")]
         private readonly CustomCellListTableData customListTableData;
@@ -35,6 +33,7 @@ namespace PlaylistManager.UI
             //floatingScreen.SetRootViewController(this, AnimationType.In);
 
             playlistDownloader.QueueUpdatedEvent += UpdateQueue;
+            SongCore_MenuLoaded.MenuLoadedEvent += OnMenuLoaded;
         }
 
         public void Dispose()
@@ -45,6 +44,7 @@ namespace PlaylistManager.UI
             }
 
             playlistDownloader.QueueUpdatedEvent -= UpdateQueue;
+            SongCore_MenuLoaded.MenuLoadedEvent -= OnMenuLoaded;
         }
 
         [UIAction("#post-parse")]
@@ -59,6 +59,27 @@ namespace PlaylistManager.UI
             if (customListTableData != null)
             {
                 customListTableData.tableView.ReloadDataKeepingPosition();
+            }
+
+            if (playlistDownloader.downloadQueue.Count == 0)
+            {
+                if (!isActiveAndEnabled)
+                {
+                    refreshRequested = true;
+                }
+                else
+                {
+                    playlistDownloader.OnQueueClear();
+                }
+            }
+        }
+
+        private void OnMenuLoaded()
+        {
+            if (refreshRequested)
+            {
+                refreshRequested = false;
+                playlistDownloader.OnQueueClear();
             }
         }
     }

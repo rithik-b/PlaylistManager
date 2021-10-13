@@ -44,6 +44,7 @@ namespace PlaylistManager.UI
             GameplaySetup.instance.AddTab("Playlist Downloader", "PlaylistManager.UI.Views.Blank.bsml", this, MenuType.None);
             GameplaySetup.instance.TabsCreatedEvent += GameplaySetup_TabsCreatedEvent;
             playlistDownloader.QueueUpdatedEvent += PlaylistDownloader_QueueUpdatedEvent;
+            gameplaySetupViewController.didDeactivateEvent += GameplaySetupViewController_didDeactivateEvent;
         }
 
         public void Dispose()
@@ -54,6 +55,7 @@ namespace PlaylistManager.UI
                 GameplaySetup.instance.TabsCreatedEvent -= GameplaySetup_TabsCreatedEvent;
             }
             playlistDownloader.QueueUpdatedEvent -= PlaylistDownloader_QueueUpdatedEvent;
+            gameplaySetupViewController.didDeactivateEvent -= GameplaySetupViewController_didDeactivateEvent;
         }
 
         private void GameplaySetup_TabsCreatedEvent()
@@ -68,5 +70,10 @@ namespace PlaylistManager.UI
         }
 
         private void PlaylistDownloader_QueueUpdatedEvent() => IsVisible = playlistDownloader.downloadQueue.Count > 0;
+
+        private void GameplaySetupViewController_didDeactivateEvent(bool removedFromHierarchy, bool screenSystemDisabling)
+        {
+            playlistDownloaderViewController.__Deactivate(false, true, false);
+        }
     }
 }
