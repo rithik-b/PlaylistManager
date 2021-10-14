@@ -14,6 +14,7 @@ namespace PlaylistManager.UI
     internal class PlaylistDownloaderViewController : BSMLAutomaticViewController, IInitializable, IDisposable
     {
         private PlaylistDownloader playlistDownloader;
+        private PopupModalsController popupModalsController;
         private FloatingScreen floatingScreen;
         private bool refreshRequested;
 
@@ -21,9 +22,26 @@ namespace PlaylistManager.UI
         private readonly CustomCellListTableData customListTableData;
 
         [Inject]
-        public void Construct(PlaylistDownloader playlistDownloader)
+        public void Construct(PlaylistDownloader playlistDownloader, PopupModalsController popupModalsController)
         {
             this.playlistDownloader = playlistDownloader;
+            this.popupModalsController = popupModalsController;
+        }
+
+        public void OnEnable()
+        {
+            if (playlistDownloader.PendingPopup != null)
+            {
+                popupModalsController.ShowYesNoModal(playlistDownloader.PendingPopup);
+            }
+        }
+
+        public void OnDisable()
+        {
+            if (playlistDownloader.PendingPopup != null)
+            {
+                popupModalsController.HideYesNoModal();
+            }
         }
 
         public void Initialize()
@@ -32,6 +50,7 @@ namespace PlaylistManager.UI
             //floatingScreen.HighlightHandle = true;
             //floatingScreen.SetRootViewController(this, AnimationType.In);
 
+            playlistDownloader.PopupEvent += OnPopupRequested;
             playlistDownloader.QueueUpdatedEvent += UpdateQueue;
             SongCore_MenuLoaded.MenuLoadedEvent += OnMenuLoaded;
         }
@@ -43,6 +62,7 @@ namespace PlaylistManager.UI
                 Destroy(floatingScreen.gameObject);
             }
 
+            playlistDownloader.PopupEvent -= OnPopupRequested;
             playlistDownloader.QueueUpdatedEvent -= UpdateQueue;
             SongCore_MenuLoaded.MenuLoadedEvent -= OnMenuLoaded;
         }
@@ -52,6 +72,18 @@ namespace PlaylistManager.UI
         {
             customListTableData.data = playlistDownloader.downloadQueue;
             UpdateQueue();
+        }
+
+        private void OnPopupRequested()
+        {
+            if (playlistDownloader.PendingPopup != null)
+            {
+                playlistDownloader.PendingPopup.parent = transform;
+                if (isActiveAndEnabled)
+                {
+                    popupModalsController.ShowYesNoModal(playlistDownloader.PendingPopup);
+                }
+            }
         }
 
         private void UpdateQueue()

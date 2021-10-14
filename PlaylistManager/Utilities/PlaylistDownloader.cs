@@ -22,7 +22,12 @@ namespace PlaylistManager.Utilities
         private readonly SemaphoreSlim downloadSemaphore;
         private readonly HashSet<string> ownedHashes;
 
+        private readonly SemaphoreSlim downloadPauseSemaphore;
+        private bool preferCustomArchiveURL;
+
+        public event Action PopupEvent;
         public event Action QueueUpdatedEvent;
+
         public readonly List<object> downloadQueue;
         public PopupContents PendingPopup { get; private set; }
 
@@ -32,6 +37,7 @@ namespace PlaylistManager.Utilities
             BeatSaverOptions options = new BeatSaverOptions(applicationName: metadata.Name, version: metadata.HVersion.ToString());
             beatSaverInstance = new BeatSaver(options);
             downloadSemaphore = new SemaphoreSlim(1, 1);
+            downloadPauseSemaphore = new SemaphoreSlim(0, 1);
             ownedHashes = new HashSet<string>();
             downloadQueue = new List<object>();
             PendingPopup = null;
@@ -79,9 +85,39 @@ namespace PlaylistManager.Utilities
             List<IPlaylistSong> missingSongs = PlaylistLibUtils.GetMissingSongs(downloadQueueEntry.playlist, ownedHashes);
             downloadQueueEntry.Report(0);
 
+            preferCustomArchiveURL = true;
+            bool shownCustomArchiveWarning = false;
+
             for (int i = 0; i < missingSongs.Count; i++)
             {
-                if (!string.IsNullOrEmpty(missingSongs[i].Hash))
+                if (preferCustomArchiveURL && missingSongs[i].TryGetCustomData("customArchiveURL", out object outCustomArchiveURL))
+                {
+                    string customArchiveURL = (string)outCustomArchiveURL;
+                    string identifier = PlaylistLibUtils.GetIdentifierForPlaylistSong(missingSongs[i]);
+                    if (identifier == "")
+                    {
+                        continue;
+                    }
+
+                    if (!shownCustomArchiveWarning)
+                    {
+                        shownCustomArchiveWarning = true;
+                        PendingPopup = new PopupContents("This playlist uses mirror download links. Would you like to use them?", yesButtonPressedCallback: () => SetCustomArchivePreference(true),
+                             noButtonPressedCallback: () => SetCustomArchivePreference(false), animateParentCanvas: false);
+                        PopupEvent?.Invoke();
+
+                        await downloadPauseSemaphore.WaitAsync();
+                        PendingPopup = null;
+
+                        if (!preferCustomArchiveURL)
+                        {
+                            i--;
+                            continue;
+                        }
+                    }
+                    await BeatmapDownloadByCustomURL(customArchiveURL, identifier, downloadQueueEntry.cancellationTokenSource.Token);
+                }
+                else if (!string.IsNullOrEmpty(missingSongs[i].Hash))
                 {
                     await BeatmapDownloadByHash(missingSongs[i].Hash, downloadQueueEntry.cancellationTokenSource.Token);
                 }
@@ -103,6 +139,12 @@ namespace PlaylistManager.Utilities
             }
 
             downloadQueueEntry.parentManager.StorePlaylist(downloadQueueEntry.playlist);
+        }
+
+        private void SetCustomArchivePreference(bool preferCustomArchiveURL)
+        {
+            this.preferCustomArchiveURL = preferCustomArchiveURL;
+            downloadPauseSemaphore.Release();
         }
 
         private async Task BeatSaverBeatmapDownload(Beatmap song, BeatmapVersion songversion, CancellationToken token, IProgress<double> progress = null)

@@ -114,6 +114,8 @@ namespace PlaylistManager.UI
             parserParams.EmitEvent("open-yes-no");
         }
 
+        internal void HideYesNoModal() => parserParams.EmitEvent("close-yes-no");
+
         [UIAction("yes-button-pressed")]
         private void YesButtonPressed()
         {
