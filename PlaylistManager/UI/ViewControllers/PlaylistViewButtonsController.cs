@@ -31,10 +31,6 @@ namespace PlaylistManager.UI
         private List<IPlaylistSong> _missingSongs;
         private DownloadQueueEntry _downloadQueueEntry;
 
-        private CancellationTokenSource tokenSource;
-        private SemaphoreSlim downloadPauseSemaphore;
-        private bool preferCustomArchiveURL;
-
         public event Action<IAnnotatedBeatmapLevelCollection[], int> LevelCollectionTableViewUpdatedEvent;
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -52,10 +48,6 @@ namespace PlaylistManager.UI
             this.popupModalsController = popupModalsController;
             this.playlistDetailsViewController = playlistDetailsViewController;
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
-
-            tokenSource = new CancellationTokenSource();
-            downloadPauseSemaphore = new SemaphoreSlim(0, 1);
-            preferCustomArchiveURL = true;
         }
 
         public void Initialize()
@@ -141,91 +133,6 @@ namespace PlaylistManager.UI
             popupModalsController.ShowOkModal(rootTransform, $"{selectedPlaylist.collectionName} has been added to the download queue!", null);
         }
 
-        private async Task DownloadPlaylistAsync()
-        {
-            popupModalsController.ShowOkModal(rootTransform, "", CancelButtonPressed, "Cancel");
-
-            UpdateMissingSongs();
-            if (MissingSongs == null)
-            {
-                popupModalsController.OkText = "Error: The selected playlist cannot be downloaded.";
-                popupModalsController.OkButtonText = "Ok";
-                return;
-            }
-
-            popupModalsController.OkText = string.Format("{0}/{1} songs downloaded", 0, MissingSongs.Count);
-            tokenSource.Dispose();
-            tokenSource = new CancellationTokenSource();
-
-            preferCustomArchiveURL = true;
-            bool shownCustomArchiveWarning = false;
-
-            for (int i = 0; i < MissingSongs.Count; i++)
-            {
-                if (preferCustomArchiveURL && MissingSongs[i].TryGetCustomData("customArchiveURL", out object outCustomArchiveURL))
-                {
-                    string customArchiveURL = (string)outCustomArchiveURL;
-                    string identifier = PlaylistLibUtils.GetIdentifierForPlaylistSong(MissingSongs[i]);
-                    if (identifier == "")
-                    {
-                        continue;
-                    }
-
-                    if (!shownCustomArchiveWarning)
-                    {
-                        shownCustomArchiveWarning = true;
-                        popupModalsController.ShowYesNoModal(rootTransform, "This playlist uses mirror download links. Would you like to use them?", 
-                            CustomArchivePreferred, noButtonPressedCallback: CustomArchiveNotPreferred, animateParentCanvas: false);
-                        await downloadPauseSemaphore.WaitAsync();
-                        if (!preferCustomArchiveURL)
-                        {
-                            i--;
-                            continue;
-                        }
-                    }
-                    await playlistDownloader.BeatmapDownloadByCustomURL(customArchiveURL, identifier, tokenSource.Token);
-                }
-                else if (!string.IsNullOrEmpty(MissingSongs[i].Hash))
-                {
-                    await playlistDownloader.BeatmapDownloadByHash(MissingSongs[i].Hash, tokenSource.Token);
-                }
-                else if (!string.IsNullOrEmpty(MissingSongs[i].Key))
-                {
-                    string hash = await playlistDownloader.BeatmapDownloadByKey(MissingSongs[i].Key.ToLower(), tokenSource.Token);
-                    if (!string.IsNullOrEmpty(hash))
-                    {
-                        MissingSongs[i].Hash = hash;
-                    }
-                }
-                popupModalsController.OkText = string.Format("{0}/{1} songs downloaded", i + 1, MissingSongs.Count);
-            }
-
-            popupModalsController.OkText = "Download Complete!";
-            popupModalsController.OkButtonText = "Ok";
-
-            parentManager.StorePlaylist(selectedPlaylist);
-
-            
-            SongCore.Loader.Instance.RefreshSongs(false);
-        }
-
-        private void CancelButtonPressed()
-        {
-            tokenSource.Cancel();
-        }
-
-        private void CustomArchivePreferred()
-        {
-            preferCustomArchiveURL = true;
-            downloadPauseSemaphore.Release();
-        }
-
-        private void CustomArchiveNotPreferred()
-        {
-            preferCustomArchiveURL = false;
-            downloadPauseSemaphore.Release();
-        }
-
         private void OnQueueUpdated()
         {
             if (playlistDownloader.downloadQueue.Count == 0)
@@ -295,11 +202,9 @@ namespace PlaylistManager.UI
             }
 
             string syncURL = (string)outSyncURL;
+            CancellationTokenSource tokenSource = new CancellationTokenSource();
 
-            tokenSource.Dispose();
-            tokenSource = new CancellationTokenSource();
-
-            popupModalsController.ShowOkModal(rootTransform, "Syncing Playlist", CancelButtonPressed, "Cancel");
+            popupModalsController.ShowOkModal(rootTransform, "Syncing Playlist", () => tokenSource.Cancel(), "Cancel");
             Stream playlistStream = null;
 
             try
@@ -339,13 +244,13 @@ namespace PlaylistManager.UI
             }
         }
 
-        private async void DownloadAccepted()
+        private void DownloadAccepted()
         {
-            await DownloadPlaylistAsync();
-            popupModalsController.ShowOkModal(rootTransform, "Playlist Synced", null);
+            playlistDownloader.QueuePlaylist(new DownloadQueueEntry(selectedPlaylist, parentManager));
+            popupModalsController.ShowOkModal(rootTransform, "Playlist Synced and added to Download Queue!", null);
         }
 
-        private void DownloadRejected() => popupModalsController.ShowOkModal(rootTransform, "Playlist Synced", null);
+        private void DownloadRejected() => popupModalsController.ShowOkModal(rootTransform, "Playlist Synced!", null);
 
         #endregion
 
