@@ -79,12 +79,24 @@ namespace PlaylistManager.UI
                 parsed = true;
             }
         }
+        
+        internal void ShowModal(PopupContents popupContents)
+        {
+            if (popupContents is OkPopupContents okPopupContents)
+            {
+                ShowOkModal(okPopupContents);
+            }
+            else if (popupContents is YesNoPopupContents yesNoPopupContents)
+            {
+                ShowYesNoModal(yesNoPopupContents);
+            }
+        }
 
         #region Yes/No Modal
 
         // Methods
 
-        internal void ShowYesNoModal(PopupContents popupContents)
+        private void ShowYesNoModal(YesNoPopupContents popupContents)
         {
             ShowYesNoModal(popupContents.parent, popupContents.message, popupContents.yesButtonPressedCallback, popupContents.yesButtonText,
                 popupContents.noButtonText, popupContents.noButtonPressedCallback, popupContents.animateParentCanvas, popupContents.checkboxText);
@@ -210,6 +222,11 @@ namespace PlaylistManager.UI
         #region Ok Modal
 
         // Methods
+
+        private void ShowOkModal(OkPopupContents popupContents)
+        {
+            ShowOkModal(popupContents.parent, popupContents.message, popupContents.buttonPressedCallback, popupContents.okButtonText, popupContents.animateParentCanvas);
+        }
 
         internal void ShowOkModal(Transform parent, string text, Action buttonPressedCallback, string okButtonText = "Ok", bool animateParentCanvas = true)
         {

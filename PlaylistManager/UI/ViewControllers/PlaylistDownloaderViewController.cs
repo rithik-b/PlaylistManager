@@ -32,7 +32,7 @@ namespace PlaylistManager.UI
         {
             if (playlistDownloader.PendingPopup != null)
             {
-                popupModalsController.ShowYesNoModal(playlistDownloader.PendingPopup);
+                popupModalsController.ShowModal(playlistDownloader.PendingPopup);
             }
         }
 
@@ -81,7 +81,7 @@ namespace PlaylistManager.UI
                 playlistDownloader.PendingPopup.parent = transform;
                 if (isActiveAndEnabled)
                 {
-                    popupModalsController.ShowYesNoModal(playlistDownloader.PendingPopup);
+                    popupModalsController.ShowModal(playlistDownloader.PendingPopup);
                 }
             }
         }

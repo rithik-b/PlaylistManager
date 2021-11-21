@@ -53,11 +53,12 @@ namespace PlaylistManager.Utilities
 
         private void OnDownloadAborted(DownloadQueueEntry downloadQueueEntry)
         {
+            downloadQueueEntry.DownloadAbortedEvent -= OnDownloadAborted;
             downloadQueue.Remove(downloadQueueEntry); 
             QueueUpdatedEvent?.Invoke();
         }
 
-        public async void IterateQueue()
+        private async void IterateQueue()
         {
             await downloadSemaphore.WaitAsync();
             if (downloadQueue.Count > 0)
@@ -102,7 +103,7 @@ namespace PlaylistManager.Utilities
                     if (!shownCustomArchiveWarning)
                     {
                         shownCustomArchiveWarning = true;
-                        PendingPopup = new PopupContents("This playlist uses mirror download links. Would you like to use them?", yesButtonPressedCallback: () => SetCustomArchivePreference(true),
+                        PendingPopup = new YesNoPopupContents("This playlist uses mirror download links. Would you like to use them?", yesButtonPressedCallback: () => SetCustomArchivePreference(true),
                              noButtonPressedCallback: () => SetCustomArchivePreference(false), animateParentCanvas: false);
                         PopupEvent?.Invoke();
 
