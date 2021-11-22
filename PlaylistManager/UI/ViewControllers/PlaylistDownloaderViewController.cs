@@ -1,6 +1,5 @@
 ﻿using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
-using BeatSaberMarkupLanguage.FloatingScreen;
 using BeatSaberMarkupLanguage.ViewControllers;
 using PlaylistManager.HarmonyPatches;
 using PlaylistManager.Utilities;
@@ -15,7 +14,6 @@ namespace PlaylistManager.UI
     {
         private PlaylistDownloader playlistDownloader;
         private PopupModalsController popupModalsController;
-        private FloatingScreen floatingScreen;
         private bool refreshRequested;
 
         [UIComponent("download-list")]
@@ -46,10 +44,6 @@ namespace PlaylistManager.UI
 
         public void Initialize()
         {
-            //floatingScreen = FloatingScreen.CreateFloatingScreen(new Vector2(100f, 80f), true, Vector3.zero, Quaternion.identity);
-            //floatingScreen.HighlightHandle = true;
-            //floatingScreen.SetRootViewController(this, AnimationType.In);
-
             playlistDownloader.PopupEvent += OnPopupRequested;
             playlistDownloader.QueueUpdatedEvent += UpdateQueue;
             SongCore_MenuLoaded.MenuLoadedEvent += OnMenuLoaded;
@@ -57,11 +51,6 @@ namespace PlaylistManager.UI
 
         public void Dispose()
         {
-            if (floatingScreen != null && floatingScreen.gameObject != null)
-            {
-                Destroy(floatingScreen.gameObject);
-            }
-
             playlistDownloader.PopupEvent -= OnPopupRequested;
             playlistDownloader.QueueUpdatedEvent -= UpdateQueue;
             SongCore_MenuLoaded.MenuLoadedEvent -= OnMenuLoaded;

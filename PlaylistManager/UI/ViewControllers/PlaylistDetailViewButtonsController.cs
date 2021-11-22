@@ -18,7 +18,7 @@ using Zenject;
 
 namespace PlaylistManager.UI
 {
-    public class PlaylistViewButtonsController : IInitializable, IDisposable, INotifyPropertyChanged, ILevelCollectionUpdater, ILevelCategoryUpdater, ILevelCollectionsTableUpdater
+    public class PlaylistDetailViewButtonsController : IInitializable, IDisposable, INotifyPropertyChanged, ILevelCollectionUpdater, ILevelCategoryUpdater, ILevelCollectionsTableUpdater
     {
         private readonly PlaylistDownloader playlistDownloader;
         private readonly LevelPackDetailViewController levelPackDetailViewController;
@@ -40,7 +40,7 @@ namespace PlaylistManager.UI
         [UIComponent("sync-button")]
         private readonly Transform syncButtonTransform;
 
-        public PlaylistViewButtonsController(PlaylistDownloader playlistDownloader, LevelPackDetailViewController levelPackDetailViewController, PopupModalsController popupModalsController, 
+        public PlaylistDetailViewButtonsController(PlaylistDownloader playlistDownloader, LevelPackDetailViewController levelPackDetailViewController, PopupModalsController popupModalsController, 
             PlaylistDetailsViewController playlistDetailsViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController)
         {
             this.playlistDownloader = playlistDownloader;
@@ -52,7 +52,7 @@ namespace PlaylistManager.UI
 
         public void Initialize()
         {
-            BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.PlaylistViewButtons.bsml"), levelPackDetailViewController.transform.Find("Detail").gameObject, this);
+            BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.PlaylistDetailViewButtons.bsml"), levelPackDetailViewController.transform.Find("Detail").gameObject, this);
             syncButtonTransform.transform.localScale *= 0.08f;
             syncButtonTransform.gameObject.SetActive(false);
             rootTransform.gameObject.SetActive(false);

@@ -14,13 +14,12 @@ namespace PlaylistManager.Installers
             {
                 Container.BindInterfacesTo<LevelDetailButtonsViewController>().AsSingle();
                 Container.BindInterfacesAndSelfTo<AddPlaylistModalController>().AsSingle();
-                Container.BindInterfacesTo<PlaylistViewButtonsController>().AsSingle();
+                Container.BindInterfacesTo<PlaylistDetailViewButtonsController>().AsSingle();
                 Container.BindInterfacesAndSelfTo<PlaylistDetailsViewController>().AsSingle();
                 Container.Bind<ImageSelectionModalController>().AsSingle();
                 Container.BindInterfacesAndSelfTo<PopupModalsController>().AsSingle();
 
                 Container.BindInterfacesAndSelfTo<PlaylistDownloaderViewController>().FromNewComponentAsViewController().AsSingle();
-                Container.BindInterfacesTo<PlaylistDownloaderModifierViewController>().AsSingle();
             }
 
             if (PluginConfig.Instance.FoldersDisabled || PluginConfig.Instance.ManagementDisabled)
