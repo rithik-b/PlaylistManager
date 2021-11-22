@@ -1,18 +1,22 @@
 ﻿using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
+using PlaylistManager.Interfaces;
 using System.Reflection;
 using UnityEngine;
 using Zenject;
 
 namespace PlaylistManager.UI
 {
-    internal class PlaylistViewButtonsController : IInitializable
+    internal class PlaylistViewButtonsController : IInitializable, ILevelCategoryUpdater
     {
         private readonly PlaylistDownloaderViewController playlistDownloaderViewController;
         private readonly AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
 
+        [UIComponent("root")]
+        private readonly RectTransform rootTransform;
+
         [UIComponent("queue-modal")]
-        private RectTransform queueModalTransform;
+        private readonly RectTransform queueModalTransform;
 
         private Vector3 queueModalPosition;
 
@@ -25,6 +29,21 @@ namespace PlaylistManager.UI
         public void Initialize()
         {
             BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.PlaylistViewButtons.bsml"), annotatedBeatmapLevelCollectionsViewController.gameObject, this);
+        }
+
+        public void LevelCategoryUpdated(SelectLevelCategoryViewController.LevelCategory levelCategory, bool viewControllerActivated)
+        {
+            if (rootTransform != null)
+            {
+                if (levelCategory == SelectLevelCategoryViewController.LevelCategory.CustomSongs)
+                {
+                    rootTransform.gameObject.SetActive(true);
+                }
+                else
+                {
+                    rootTransform.gameObject.SetActive(false);
+                }
+            }
         }
 
         [UIAction("#post-parse")]

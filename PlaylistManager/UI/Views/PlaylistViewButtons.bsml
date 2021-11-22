@@ -1,4 +1,4 @@
-﻿<bg anchor-pos-x='38' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
+﻿<bg id='root' active='false' anchor-pos-x='38' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
 	<action-button text='+' italics='false' anchor-pos-y='-0.1' hover-hint='Create a new playlist!' pref-height='14' pref-width='4' />
 	<button text='⏬' italics='false' hover-hint='Playlist Download Queue' click-event='open-queue' on-click='queue-click' anchor-pos-x='54.1' anchor-pos-y='-4' pref-width='4' />
 	<button text='⚙' italics='false' hover-hint='PlaylistManager Settings' anchor-pos-x='53' anchor-pos-y='-10.5' pref-width='4' />
