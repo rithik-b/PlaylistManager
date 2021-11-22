@@ -75,7 +75,11 @@ namespace PlaylistManager.UI
         {
             parsed = true;
             customListTableData.data = playlistDownloader.downloadQueue;
-            UpdateQueue();
+
+            if (customListTableData != null)
+            {
+                customListTableData.tableView.ReloadDataKeepingPosition();
+            }
         }
 
         private void OnPopupRequested()
