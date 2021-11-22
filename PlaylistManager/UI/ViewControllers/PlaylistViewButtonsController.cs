@@ -14,6 +14,8 @@ namespace PlaylistManager.UI
         [UIComponent("queue-modal")]
         private RectTransform queueModalTransform;
 
+        private Vector3 queueModalPosition;
+
         public PlaylistViewButtonsController(PlaylistDownloaderViewController playlistDownloaderViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController)
         {
             this.playlistDownloaderViewController = playlistDownloaderViewController;
@@ -25,9 +27,16 @@ namespace PlaylistManager.UI
             BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.PlaylistViewButtons.bsml"), annotatedBeatmapLevelCollectionsViewController.gameObject, this);
         }
 
+        [UIAction("#post-parse")]
+        private void PostParse()
+        {
+            queueModalPosition = queueModalTransform.localPosition;
+        }
+
         [UIAction("queue-click")]
         private void ShowQueue()
         {
+            queueModalTransform.localPosition = queueModalPosition;
             playlistDownloaderViewController.SetParent(queueModalTransform, new Vector3(0.75f, 0.75f, 1f));
         }
     }

@@ -6,6 +6,7 @@ using PlaylistManager.Utilities;
 using System;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Zenject;
 
 namespace PlaylistManager.UI
@@ -96,10 +97,9 @@ namespace PlaylistManager.UI
                 customListTableData.tableView.ReloadDataKeepingPosition();
             }
 
-            /*
             if (playlistDownloader.downloadQueue.Count == 0)
             {
-                if (!isActiveAndEnabled)
+                if (SceneManager.GetActiveScene().name == "GameCore")
                 {
                     refreshRequested = true;
                 }
@@ -108,7 +108,6 @@ namespace PlaylistManager.UI
                     playlistDownloader.OnQueueClear();
                 }
             }
-            */
         }
 
         private void OnMenuLoaded()
