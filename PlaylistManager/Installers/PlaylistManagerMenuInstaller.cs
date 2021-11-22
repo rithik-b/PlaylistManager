@@ -19,7 +19,8 @@ namespace PlaylistManager.Installers
                 Container.Bind<ImageSelectionModalController>().AsSingle();
                 Container.BindInterfacesAndSelfTo<PopupModalsController>().AsSingle();
 
-                Container.BindInterfacesAndSelfTo<PlaylistDownloaderViewController>().FromNewComponentAsViewController().AsSingle();
+                Container.BindInterfacesAndSelfTo<PlaylistDownloaderViewController>().AsSingle();
+                Container.BindInterfacesTo<PlaylistViewButtonsController>().AsSingle();
             }
 
             if (PluginConfig.Instance.FoldersDisabled || PluginConfig.Instance.ManagementDisabled)

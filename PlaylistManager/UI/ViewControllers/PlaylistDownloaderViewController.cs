@@ -1,29 +1,42 @@
-﻿using BeatSaberMarkupLanguage.Attributes;
+﻿using BeatSaberMarkupLanguage;
+using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
-using BeatSaberMarkupLanguage.ViewControllers;
 using PlaylistManager.HarmonyPatches;
 using PlaylistManager.Utilities;
 using System;
+using System.Reflection;
+using UnityEngine;
 using Zenject;
 
 namespace PlaylistManager.UI
 {
-    [HotReload(RelativePathToLayout = @"..\Views\PlaylistDownloaderView.bsml")]
-    [ViewDefinition("PlaylistManager.UI.Views.PlaylistDownloaderView.bsml")]
-    internal class PlaylistDownloaderViewController : BSMLAutomaticViewController, IInitializable, IDisposable
+    public class PlaylistDownloaderViewController : IInitializable, IDisposable
     {
-        private PlaylistDownloader playlistDownloader;
-        private PopupModalsController popupModalsController;
+        private readonly PlaylistDownloader playlistDownloader;
+        private readonly PopupModalsController popupModalsController;
+        private bool parsed;
         private bool refreshRequested;
 
         [UIComponent("download-list")]
         private readonly CustomCellListTableData customListTableData;
 
-        [Inject]
-        public void Construct(PlaylistDownloader playlistDownloader, PopupModalsController popupModalsController)
+        [UIComponent("root")]
+        private readonly RectTransform rootTransform;
+
+        public PlaylistDownloaderViewController(PlaylistDownloader playlistDownloader, PopupModalsController popupModalsController)
         {
             this.playlistDownloader = playlistDownloader;
             this.popupModalsController = popupModalsController;
+        }
+
+        public void SetParent(Transform parent, Vector3? scale = null)
+        {
+            if (!parsed)
+            {
+                BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.PlaylistDownloaderView.bsml"), parent.gameObject, this);
+            }
+            rootTransform.SetParent(parent);
+            rootTransform.localScale = scale ?? Vector3.one;
         }
 
         public void OnEnable()
@@ -59,6 +72,7 @@ namespace PlaylistManager.UI
         [UIAction("#post-parse")]
         private void PostParse()
         {
+            parsed = true;
             customListTableData.data = playlistDownloader.downloadQueue;
             UpdateQueue();
         }
@@ -67,8 +81,8 @@ namespace PlaylistManager.UI
         {
             if (playlistDownloader.PendingPopup != null)
             {
-                playlistDownloader.PendingPopup.parent = transform;
-                if (isActiveAndEnabled)
+                playlistDownloader.PendingPopup.parent = rootTransform;
+                if (rootTransform.gameObject.activeInHierarchy)
                 {
                     popupModalsController.ShowModal(playlistDownloader.PendingPopup);
                 }
@@ -82,6 +96,7 @@ namespace PlaylistManager.UI
                 customListTableData.tableView.ReloadDataKeepingPosition();
             }
 
+            /*
             if (playlistDownloader.downloadQueue.Count == 0)
             {
                 if (!isActiveAndEnabled)
@@ -93,6 +108,7 @@ namespace PlaylistManager.UI
                     playlistDownloader.OnQueueClear();
                 }
             }
+            */
         }
 
         private void OnMenuLoaded()
