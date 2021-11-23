@@ -163,6 +163,7 @@ namespace PlaylistManager.UI
                 _downloadQueueEntry = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DownloadInteractable)));
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DownloadHint)));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SyncInteractable)));
             }
         }
 
@@ -247,11 +248,15 @@ namespace PlaylistManager.UI
 
         private void DownloadAccepted()
         {
-            playlistDownloader.QueuePlaylist(new DownloadQueueEntry(selectedPlaylist, parentManager));
+            DownloadQueueEntry = new DownloadQueueEntry(selectedPlaylist, parentManager);
+            playlistDownloader.QueuePlaylist(DownloadQueueEntry);
             popupModalsController.ShowOkModal(rootTransform, "Playlist Synced and added to Download Queue!", null);
         }
 
         private void DownloadRejected() => popupModalsController.ShowOkModal(rootTransform, "Playlist Synced!", null);
+
+        [UIValue("sync-interactable")]
+        private bool SyncInteractable => DownloadQueueEntry == null;
 
         #endregion
 
