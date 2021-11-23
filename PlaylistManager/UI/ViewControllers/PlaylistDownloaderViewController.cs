@@ -4,6 +4,7 @@ using BeatSaberMarkupLanguage.Components;
 using PlaylistManager.HarmonyPatches;
 using PlaylistManager.Utilities;
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -75,11 +76,7 @@ namespace PlaylistManager.UI
         {
             parsed = true;
             customListTableData.data = playlistDownloader.downloadQueue;
-
-            if (customListTableData != null)
-            {
-                customListTableData.tableView.ReloadDataKeepingPosition();
-            }
+            customListTableData.tableView.ReloadDataKeepingPosition();
         }
 
         private void OnPopupRequested()

@@ -2,7 +2,7 @@
 	<horizontal anchor-min-y='1.1'  bg='panel-top' pad-left='10' pad-right='10' horizontal-fit='PreferredSize'>
 		<text text='Download Queue' align='Center' font-size='8' />
 	</horizontal>
-	<custom-list anchor-pos-x='0' anchor-pos-y='-2' id='download-list' clickable-cells='false' list-width='90' visible-cells='6' cell-size='9'>
+	<custom-list anchor-pos-x='-2' anchor-pos-y='-2' id='download-list' clickable-cells='false' list-width='90' visible-cells='6' cell-size='9' show-scrollbar='true' stick-scrolling='true'>
 		<image anchor-pos-x='5' pref-width='4' pref-height='4' anchor-min-x='0' anchor-min-y='0' anchor-max-x='0' anchor-max-y='1' id='playlist-cover' />
 		<horizontal child-expand-width='true' child-control-width='false' anchor-pos-x='11' pref-width='80'>
 			<button id='abort-button' on-click='abort-clicked' ignore-layout='true' text='Abort' face-color='red' hover-hint='Abort this download' anchor-pos-x='70' anchor-pos-y='-5' />
