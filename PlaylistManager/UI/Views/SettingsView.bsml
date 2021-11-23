@@ -1,30 +1,30 @@
 ﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
 	<horizontal anchor-min-y='1'  bg='panel-top' pad-left='10' pad-right='10' horizontal-fit='PreferredSize'>
-		<text text='PlaylistManager Settings' align='Center' font-size='8' />
+		<text text='PlaylistManager Settings' align='Center' italics='true' font-size='8' />
 	</horizontal>
 	<settings-container size-delta-x='-50' vertical-fit='PreferredSize' child-control-height='true'>
-		<text text='Default Playlist Settings' align='Left' font-size='5' />
+		<text text='Default Playlist Settings' align='Left' italics='true' font-size='5' />
 		<vertical background='round-rect-panel' background-color='white' pad='2'>
 			<checkbox value='no-image' text='Disable Default Icon' hover-hint='Do not add the default playlist image for new playlists.' apply-on-change='true' bind-value='true' />
 			<checkbox value='allow-duplicates' text='Default Allow Duplicates' hover-hint='Default value for Allow Duplicates when creating a new playlist.' apply-on-change='true' bind-value='true' />
 			<string-setting value='author-name' text='Default Author Name' hover-hint='Change the name of the playlist author for new playlists.' interactable='~name-interactable' apply-on-change='true' bind-value='true' />
 			<checkbox value='auto-name' text='Set Name Automatically' hover-hint='Set the name of the playlist author automatically based on your username' apply-on-change='true' bind-value='true' spacing='5' />
 		</vertical>
-		<text text='User Interface Settings' align='Left' font-size='5' />
+		<text text='User Interface Settings' align='Left' italics='true' font-size='5' />
 		<vertical background='round-rect-panel' background-color='white' pad='2'>
 			<checkbox value='hover-hint' text='Playlist Name on Hover' hover-hint='Show playlist name when hovering over one in the table.' apply-on-change='true' bind-value='true' />
 			<slider-setting value='scroll-speed' text='Playlist Scroll Speed' hover-hint='Set how fast you scroll through the playlists list.' min='1' max='7' increment='0.5' apply-on-change='true' bind-value='true' />
 			<checkbox value='blurred-art' text='Blurred Artwork' hover-hint='Use blurred artwork for playlist cover in preview.' apply-on-change='true' bind-value='true' />
 			<checkbox value='no-folders' text='Disable Folders &amp; Categories' hover-hint='Do not use folders and categories (this also disables loading playlists from subfolders).' apply-on-change='true' bind-value='true' />
 		</vertical>
-		<text text='Other Settings' align='Left' font-size='5' />
+		<text text='Other Settings' align='Left' italics='true' font-size='5' />
 		<vertical background='round-rect-panel' background-color='white' pad='2'>
 			<increment-setting text='Download Songs After Sync' hover-hint='Choose if songs should always download after a sync or have it always ask.' value='sync-option' formatter='sync-formatter' min='0' max='2' increment='1' integer-only='true' apply-on-change='true' bind-value='true' />
 			<checkbox value='gameplay-download' text='Download Playlists During Gameplay' hover-hint='Download playlists while the game during game scene instead of pausing, can cause performance issues on low end systems.' apply-on-change='true' bind-value='true' />
 			<checkbox value='easter-eggs' text='Easter Eggs' hover-hint='Enable easter eggs in this mod.' apply-on-change='true' bind-value='true' />
 		</vertical>
 	</settings-container>
-	<text anchor-pos-x='55' anchor-pos-y='-47' text='The game will perform a soft restart after applying these settings. Are you sure?' color='red' active='~soft-restart' />
+	<text anchor-pos-x='55' anchor-pos-y='-47' text='The game will perform a soft restart after applying these settings. Are you sure?' italics='true' color='red' active='~soft-restart' />
 	<horizontal horizontal-fit='PreferredSize' child-control-height='false' child-expand-height='false' child-align='MiddleCenter' anchor-min-x='0.5' anchor-max-x='0.5' anchor-min-y='0' anchor-max-y='0' size-delta-x='120' size-delta-y='10' pivot-y='0' spacing='2'>
 		<button text='Cancel' pref-width='34' pref-height='10' on-click='cancel-click' />
 		<action-button text='Ok' pref-width='34' pref-height='10' on-click='ok-click' />
