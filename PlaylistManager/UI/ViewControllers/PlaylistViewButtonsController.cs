@@ -26,6 +26,9 @@ namespace PlaylistManager.UI
         private readonly RectTransform rootTransform;
 
         [UIComponent("queue-modal")]
+        private readonly ModalView queueModal;
+
+        [UIComponent("queue-modal")]
         private readonly RectTransform queueModalTransform;
 
         private Vector3 queueModalPosition;
@@ -81,7 +84,10 @@ namespace PlaylistManager.UI
         private void ShowQueue()
         {
             queueModalTransform.localPosition = queueModalPosition;
-            playlistDownloaderViewController.SetParent(queueModalTransform, new Vector3(0.75f, 0.75f, 1f));
+            queueModal.Show(true, moveToCenter: false, finishedCallback: () =>
+            {
+                playlistDownloaderViewController.SetParent(queueModalTransform, new Vector3(0.75f, 0.75f, 1f));
+            });
         }
 
         [UIAction("settings-click")]

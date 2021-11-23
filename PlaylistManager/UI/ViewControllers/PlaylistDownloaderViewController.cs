@@ -39,6 +39,7 @@ namespace PlaylistManager.UI
             }
             rootTransform.SetParent(parent);
             rootTransform.localScale = scale ?? Vector3.one;
+            OnPopupRequested();
         }
 
         public void OnEnable()
@@ -81,7 +82,7 @@ namespace PlaylistManager.UI
 
         private void OnPopupRequested()
         {
-            if (playlistDownloader.PendingPopup != null)
+            if (playlistDownloader.PendingPopup != null && parsed)
             {
                 playlistDownloader.PendingPopup.parent = rootTransform;
                 if (rootTransform.gameObject.activeInHierarchy)
