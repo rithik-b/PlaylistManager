@@ -13,7 +13,6 @@ namespace PlaylistManager.Configuration
         public virtual bool AutomaticAuthorName { get; set; } = true;
         public virtual bool DefaultImageDisabled { get; set; } = false;
         public virtual bool FoldersDisabled { get; set; } = false;
-        public virtual bool ManagementDisabled { get; set; } = false;
         public virtual bool DefaultAllowDuplicates { get; set; } = true;
         public virtual bool PlaylistHoverHints { get; set; } = true;
         public virtual bool BlurredArt { get; set; } = true;

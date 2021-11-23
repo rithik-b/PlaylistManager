@@ -1,5 +1,7 @@
 ﻿using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
+using HMUI;
+using IPA.Utilities;
 using PlaylistManager.Interfaces;
 using System.Reflection;
 using UnityEngine;
@@ -10,6 +12,8 @@ namespace PlaylistManager.UI
     internal class PlaylistViewButtonsController : IInitializable, ILevelCategoryUpdater
     {
         private readonly PlaylistDownloaderViewController playlistDownloaderViewController;
+        private readonly SettingsViewController settingsViewController;
+        private readonly MainFlowCoordinator mainFlowCoordinator;
         private readonly AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
 
         [UIComponent("root")]
@@ -20,9 +24,12 @@ namespace PlaylistManager.UI
 
         private Vector3 queueModalPosition;
 
-        public PlaylistViewButtonsController(PlaylistDownloaderViewController playlistDownloaderViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController)
+        public PlaylistViewButtonsController(PlaylistDownloaderViewController playlistDownloaderViewController, MainFlowCoordinator mainFlowCoordinator,
+            SettingsViewController settingsViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController)
         {
             this.playlistDownloaderViewController = playlistDownloaderViewController;
+            this.mainFlowCoordinator = mainFlowCoordinator;
+            this.settingsViewController = settingsViewController;
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
         }
 
@@ -57,6 +64,12 @@ namespace PlaylistManager.UI
         {
             queueModalTransform.localPosition = queueModalPosition;
             playlistDownloaderViewController.SetParent(queueModalTransform, new Vector3(0.75f, 0.75f, 1f));
+        }
+
+        [UIAction("settings-click")]
+        private void ShowSettings()
+        {
+            mainFlowCoordinator.YoungestChildFlowCoordinatorOrSelf().InvokeMethod<object, FlowCoordinator>("PresentViewController", new object[] { settingsViewController, null, ViewController.AnimationDirection.Vertical, false });
         }
     }
 }
