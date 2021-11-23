@@ -25,7 +25,6 @@ namespace PlaylistManager.UI
         private readonly LevelSelectionNavigationController levelSelectionNavigationController;
         private readonly PopupModalsController popupModalsController;
         private readonly HoverHintController hoverHintController;
-        private readonly IVRPlatformHelper platformHelper;
         private BeatmapLevelsModel beatmapLevelsModel;
 
         private FloatingScreen floatingScreen;
@@ -58,14 +57,13 @@ namespace PlaylistManager.UI
 
         public FoldersViewController(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, MainFlowCoordinator mainFlowCoordinator, 
             LevelSelectionNavigationController levelSelectionNavigationController, PopupModalsController popupModalsController, HoverHintController hoverHintController,
-            IVRPlatformHelper platformHelper, BeatmapLevelsModel beatmapLevelsModel)
+            BeatmapLevelsModel beatmapLevelsModel)
         {
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
             this.mainFlowCoordinator = mainFlowCoordinator;
             this.levelSelectionNavigationController = levelSelectionNavigationController;
             this.popupModalsController = popupModalsController;
             this.hoverHintController = hoverHintController;
-            this.platformHelper = platformHelper;
             this.beatmapLevelsModel = beatmapLevelsModel;
 
             levelPacksIcon = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.LevelPacks.png");
@@ -98,7 +96,6 @@ namespace PlaylistManager.UI
             rootTransform.gameObject.name = "PlaylistManagerFoldersView";
 
             ScrollView scrollView = customListTableData.tableView.GetComponent<ScrollView>();
-            Accessors.PlatformHelperAccessor(ref scrollView) = platformHelper;
         }
 
         public void SetupDimensions()

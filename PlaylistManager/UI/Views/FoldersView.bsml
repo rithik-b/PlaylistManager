@@ -11,7 +11,7 @@
 		</horizontal>
 		<horizontal horizontal-fit='PreferredSize' preferred-width='72' preferred-height='15' align-to-center='true'>
 			<page-button event-click='folder-list#PageUp' direction='Left' active='~left-button-enabled' />
-			<list id='folder-list' cell-size='15' list-direction='Horizontal' list-style='Box' select-cell='folder-select' />
+			<list id='folder-list' cell-size='15' list-direction='Horizontal' list-style='Box' select-cell='folder-select' stick-scrolling='true' />
 			<page-button event-click='folder-list#PageDown' direction='Right' active='~right-button-enabled' />
 		</horizontal>
 	</vertical>

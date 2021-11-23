@@ -20,7 +20,6 @@ namespace PlaylistManager.UI
     {
         private readonly LevelPackDetailViewController levelPackDetailViewController;
         private readonly PopupModalsController popupModalsController;
-        private readonly IVRPlatformHelper platformHelper;
 
         private readonly string IMAGES_PATH = Path.Combine(PlaylistLibUtils.playlistManager.PlaylistPath, "CoverImages");
         private readonly Sprite playlistManagerIcon;
@@ -33,9 +32,6 @@ namespace PlaylistManager.UI
         [UIComponent("list")]
         public CustomListTableData customListTableData;
 
-        [UIComponent("scroll-view")]
-        private ScrollView bsmlScrollView;
-
         [UIComponent("modal")]
         private readonly RectTransform modalTransform;
 
@@ -47,11 +43,10 @@ namespace PlaylistManager.UI
         [UIParams]
         private readonly BSMLParserParams parserParams;
 
-        public ImageSelectionModalController(LevelPackDetailViewController levelPackDetailViewController, PopupModalsController popupModalsController, IVRPlatformHelper platformHelper)
+        public ImageSelectionModalController(LevelPackDetailViewController levelPackDetailViewController, PopupModalsController popupModalsController)
         {
             this.levelPackDetailViewController = levelPackDetailViewController;
             this.popupModalsController = popupModalsController;
-            this.platformHelper = platformHelper;
 
             // Have to do this in case directory perms are not given
             try
@@ -84,10 +79,6 @@ namespace PlaylistManager.UI
         {
             parsed = true;
             Accessors.AnimateCanvasAccessor(ref modalView) = false;
-
-            ScrollView scrollView = customListTableData.tableView.GetComponent<ScrollView>();
-            Accessors.PlatformHelperAccessor(ref scrollView) = platformHelper;
-            Utils.TransferScrollBar(bsmlScrollView, scrollView);
         }
 
         internal void ShowModal(BeatSaberPlaylistsLib.Types.IPlaylist playlist)

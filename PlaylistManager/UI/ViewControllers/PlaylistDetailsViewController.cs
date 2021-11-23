@@ -22,7 +22,6 @@ namespace PlaylistManager.UI
         private readonly LevelPackDetailViewController levelPackDetailViewController;
         private readonly ImageSelectionModalController imageSelectionModalController;
         private readonly PopupModalsController popupModalsController;
-        private readonly IVRPlatformHelper platformHelper;
 
         private bool parsed;
         private Playlist selectedPlaylist;
@@ -50,12 +49,11 @@ namespace PlaylistManager.UI
         private readonly BSMLParserParams parserParams;
 
         public PlaylistDetailsViewController(LevelPackDetailViewController levelPackDetailViewController, ImageSelectionModalController imageSelectionModalController,
-            PopupModalsController popupModalsController, IVRPlatformHelper platformHelper)
+            PopupModalsController popupModalsController)
         {
             this.levelPackDetailViewController = levelPackDetailViewController;
             this.imageSelectionModalController = imageSelectionModalController;
             this.popupModalsController = popupModalsController;
-            this.platformHelper = platformHelper;
             parsed = false;
         }
 
@@ -94,9 +92,6 @@ namespace PlaylistManager.UI
 
             ModalView authorKeyboardModal = authorSettingTransform.Find("BSMLModalKeyboard").GetComponent<ModalView>();
             Accessors.AnimateCanvasAccessor(ref authorKeyboardModal) = false;
-
-            ScrollView scrollView = descriptionTextPage;
-            Accessors.PlatformHelperAccessor(ref scrollView) = platformHelper;
         }
 
         internal void ShowDetails()

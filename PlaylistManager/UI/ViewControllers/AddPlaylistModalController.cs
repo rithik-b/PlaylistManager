@@ -21,7 +21,6 @@ namespace PlaylistManager.UI
     {
         private readonly StandardLevelDetailViewController standardLevelDetailViewController;
         private readonly PopupModalsController popupModalsController;
-        private readonly IVRPlatformHelper platformHelper;
 
         private BeatSaberPlaylistsLib.PlaylistManager parentManager;
         private BeatSaberPlaylistsLib.PlaylistManager[] childManagers;
@@ -34,9 +33,6 @@ namespace PlaylistManager.UI
         [UIComponent("list")]
         public CustomListTableData customListTableData;
 
-        [UIComponent("scroll-view")]
-        private ScrollView bsmlScrollView;
-
         [UIComponent("highlight-checkbox")]
         private readonly RectTransform highlightCheckboxTransform;
 
@@ -48,11 +44,10 @@ namespace PlaylistManager.UI
         [UIParams]
         private readonly BSMLParserParams parserParams;
 
-        public AddPlaylistModalController(StandardLevelDetailViewController standardLevelDetailViewController, PopupModalsController popupModalsController, IVRPlatformHelper platformHelper)
+        public AddPlaylistModalController(StandardLevelDetailViewController standardLevelDetailViewController, PopupModalsController popupModalsController)
         {
             this.standardLevelDetailViewController = standardLevelDetailViewController;
             this.popupModalsController = popupModalsController;
-            this.platformHelper = platformHelper;
             folderIcon = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.FolderIcon.png");
             parsed = false;
         }
@@ -72,10 +67,6 @@ namespace PlaylistManager.UI
         {
             parsed = true;
             highlightCheckboxTransform.transform.localScale *= 0.5f;
-
-            ScrollView scrollView = customListTableData.tableView.GetComponent<ScrollView>();
-            Accessors.PlatformHelperAccessor(ref scrollView) = platformHelper;
-            Utils.TransferScrollBar(bsmlScrollView, scrollView);
         }
 
         #region Show Playlists
