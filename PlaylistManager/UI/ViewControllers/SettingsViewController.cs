@@ -14,16 +14,17 @@ namespace PlaylistManager.UI
         private MainFlowCoordinator mainFlowCoordinator;
         private MenuTransitionsHelper menuTransitionsHelper;
 
+        private bool _defaultImageDisabled;
+        private bool _defaultAllowDuplicates;
         private string _authorName;
         private bool _automaticAuthorName;
-        private bool _defaultAllowDuplicates;
-        private float _playlistScrollSpeed;
-        private int _syncOption;
         private bool _playlistHoverHints;
+        private float _playlistScrollSpeed;
         private bool _blurredArt;
-        private bool _easterEggs;
-        private bool _defaultImageDisabled;
         private bool _foldersDisabled;
+        private int _syncOption;
+        private bool _downloadDuringGameplay;
+        private bool _easterEggs;
 
         [Inject]
         public void Construct(MainFlowCoordinator mainFlowCoordinator, MenuTransitionsHelper menuTransitionsHelper)
@@ -46,6 +47,7 @@ namespace PlaylistManager.UI
             BlurredArt = PluginConfig.Instance.BlurredArt;
             FoldersDisabled = PluginConfig.Instance.FoldersDisabled;
             SyncOption = (int)PluginConfig.Instance.SyncOption;
+            DownloadDuringGameplay = PluginConfig.Instance.DownloadDuringGameplay;
             EasterEggs = PluginConfig.Instance.EasterEggs;
         }
 
@@ -70,6 +72,7 @@ namespace PlaylistManager.UI
             PluginConfig.Instance.BlurredArt = BlurredArt;
             PluginConfig.Instance.FoldersDisabled = FoldersDisabled;
             PluginConfig.Instance.SyncOption = (PluginConfig.SyncOptions)SyncOption;
+            PluginConfig.Instance.DownloadDuringGameplay = DownloadDuringGameplay;
             PluginConfig.Instance.EasterEggs = EasterEggs;
 
             if (softRestart)
@@ -199,6 +202,17 @@ namespace PlaylistManager.UI
             {
                 _syncOption = value;
                 NotifyPropertyChanged(nameof(SyncOption));
+            }
+        }
+
+        [UIValue("gameplay-download")]
+        private bool DownloadDuringGameplay
+        {
+            get => _downloadDuringGameplay;
+            set
+            {
+                _downloadDuringGameplay = value;
+                NotifyPropertyChanged(nameof(DownloadDuringGameplay));
             }
         }
 

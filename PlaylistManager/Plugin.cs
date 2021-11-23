@@ -30,10 +30,10 @@ namespace PlaylistManager
         {
             Instance = this;
             Log = logger;
-            Log.Info("PlaylistManager initialized.");
             harmony = new Harmony(HarmonyId);
             zenjector.OnApp<PlaylistManagerAppInstaller>().WithParameters(metadata);
             zenjector.OnMenu<PlaylistManagerMenuInstaller>();
+            zenjector.OnGame<PlaylistManagerGameInstaller>();
         }
 
         #region BSIPA Config

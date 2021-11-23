@@ -19,6 +19,7 @@ namespace PlaylistManager.Configuration
         public virtual float PlaylistScrollSpeed { get; set; } = 1;
         public virtual bool HighlightDifficulty { get; set; } = true;
         public virtual bool EasterEggs { get; set; } = false;
+        public virtual bool DownloadDuringGameplay { get; set; } = false;
 
         [UseConverter(typeof(EnumConverter<SyncOptions>))]
         [NonNullable]

@@ -21,8 +21,10 @@ namespace PlaylistManager.Utilities
         private readonly BeatSaver beatSaverInstance;
         private readonly SemaphoreSlim downloadSemaphore;
         private readonly HashSet<string> ownedHashes;
+        private DownloadQueueEntry currentDownload;
 
-        private readonly SemaphoreSlim downloadPauseSemaphore;
+        private readonly SemaphoreSlim pauseSemaphore;
+        private readonly SemaphoreSlim customArchiveSemaphore;
         private bool preferCustomArchiveURL;
 
         public event Action PopupEvent;
@@ -37,7 +39,8 @@ namespace PlaylistManager.Utilities
             BeatSaverOptions options = new BeatSaverOptions(applicationName: metadata.Name, version: metadata.HVersion.ToString());
             beatSaverInstance = new BeatSaver(options);
             downloadSemaphore = new SemaphoreSlim(1, 1);
-            downloadPauseSemaphore = new SemaphoreSlim(0, 1);
+            pauseSemaphore = new SemaphoreSlim(0, 1);
+            customArchiveSemaphore = new SemaphoreSlim(0, 1);
             ownedHashes = new HashSet<string>();
             downloadQueue = new List<object>();
             PendingPopup = null;
@@ -79,10 +82,27 @@ namespace PlaylistManager.Utilities
             }
         }
 
+        internal void PauseDownload()
+        {
+            if (currentDownload != null && !currentDownload.cancellationTokenSource.IsCancellationRequested)
+            {
+                currentDownload.cancellationTokenSource.Cancel();
+            }
+        }
+
+        internal void ResumeDownload()
+        {
+            if (currentDownload != null && pauseSemaphore.CurrentCount == 0)
+            {
+                pauseSemaphore.Release();
+            }
+        }
+
         private async Task DownloadPlaylist(DownloadQueueEntry downloadQueueEntry)
         {
             downloadQueueEntry.DownloadAbortedEvent -= OnDownloadAborted;
 
+            currentDownload = downloadQueueEntry;
             List<IPlaylistSong> missingSongs = PlaylistLibUtils.GetMissingSongs(downloadQueueEntry.playlist, ownedHashes);
             downloadQueueEntry.Report(0);
 
@@ -107,7 +127,7 @@ namespace PlaylistManager.Utilities
                              noButtonPressedCallback: () => SetCustomArchivePreference(false), animateParentCanvas: false);
                         PopupEvent?.Invoke();
 
-                        await downloadPauseSemaphore.WaitAsync();
+                        await customArchiveSemaphore.WaitAsync();
                         PendingPopup = null;
 
                         if (!preferCustomArchiveURL)
@@ -133,19 +153,27 @@ namespace PlaylistManager.Utilities
 
                 downloadQueueEntry.Report((i + 1) / ((double)missingSongs.Count));
 
-                if (downloadQueueEntry.cancellationTokenSource.IsCancellationRequested)
+                if (downloadQueueEntry.Aborted)
                 {
                     break;
+                }
+                else if (downloadQueueEntry.cancellationTokenSource.IsCancellationRequested)
+                {
+                    // If we directly cancel, it is a pause. So we wait at this semaphore till it is released.
+                    await pauseSemaphore.WaitAsync();
+                    i--;
+                    downloadQueueEntry.cancellationTokenSource = new CancellationTokenSource();
                 }
             }
 
             downloadQueueEntry.parentManager.StorePlaylist(downloadQueueEntry.playlist);
+            currentDownload = null;
         }
 
         private void SetCustomArchivePreference(bool preferCustomArchiveURL)
         {
             this.preferCustomArchiveURL = preferCustomArchiveURL;
-            downloadPauseSemaphore.Release();
+            customArchiveSemaphore.Release();
         }
 
         private async Task BeatSaverBeatmapDownload(Beatmap song, BeatmapVersion songversion, CancellationToken token, IProgress<double> progress = null)
@@ -164,7 +192,7 @@ namespace PlaylistManager.Utilities
             }
         }
 
-        public async Task<string> BeatmapDownloadByKey(string key, CancellationToken token, IProgress<double> progress = null)
+        private async Task<string> BeatmapDownloadByKey(string key, CancellationToken token, IProgress<double> progress = null)
         {
             bool songDownloaded = false;
             while (!songDownloaded)
@@ -192,7 +220,7 @@ namespace PlaylistManager.Utilities
             return "";
         }
 
-        public async Task BeatmapDownloadByHash(string hash, CancellationToken token, IProgress<double> progress = null)
+        private async Task BeatmapDownloadByHash(string hash, CancellationToken token, IProgress<double> progress = null)
         {
             bool songDownloaded = false;
             while (!songDownloaded)
@@ -237,7 +265,7 @@ namespace PlaylistManager.Utilities
             }
         }
 
-        public async Task BeatmapDownloadByCustomURL(string url, string songName, CancellationToken token)
+        private async Task BeatmapDownloadByCustomURL(string url, string songName, CancellationToken token)
         {
             try
             {
