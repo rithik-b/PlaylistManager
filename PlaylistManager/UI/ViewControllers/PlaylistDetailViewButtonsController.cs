@@ -212,6 +212,7 @@ namespace PlaylistManager.UI
                 playlistStream = new MemoryStream(await playlistDownloader.DownloadFileToBytesAsync(syncURL, tokenSource.Token));
                 selectedPlaylist.Clear(); // Clear all songs
                 PlaylistLibUtils.playlistManager.DefaultHandler.Populate(playlistStream, selectedPlaylist);
+                parentManager.StorePlaylist(selectedPlaylist);
             }
             catch (Exception e)
             {
