@@ -1,4 +1,5 @@
 ﻿using BeatSaberMarkupLanguage.Attributes;
+using BeatSaberPlaylistsLib.Types;
 using HMUI;
 using System;
 using System.ComponentModel;
@@ -49,6 +50,15 @@ namespace PlaylistManager.Types
             var filter = playlistCoverView.gameObject.AddComponent<AspectRatioFitter>();
             filter.aspectRatio = 1f;
             filter.aspectMode = AspectRatioFitter.AspectMode.HeightControlsWidth;
+
+            if (playlist is IDeferredSpriteLoad deferredSpriteLoad)
+            {
+                if (!deferredSpriteLoad.SpriteWasLoaded)
+                {
+                    deferredSpriteLoad.SpriteLoaded += OnSpriteLoad;
+                }
+            }
+
             playlistCoverView.sprite = playlist.coverImage;
             playlistCoverView.rectTransform.sizeDelta = new Vector2(8, 0);
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistName)));
@@ -63,6 +73,15 @@ namespace PlaylistManager.Types
             bgImage.material = BeatSaberMarkupLanguage.Utilities.ImageResources.NoGlowMat;
 
             Report(Progress);
+        }
+
+        private void OnSpriteLoad(object sender, EventArgs e)
+        {
+            if (sender is IDeferredSpriteLoad deferredSpriteLoad)
+            {
+                deferredSpriteLoad.SpriteLoaded -= OnSpriteLoad;
+                playlistCoverView.sprite = deferredSpriteLoad.Sprite;
+            }
         }
 
         [UIAction("abort-clicked")]
