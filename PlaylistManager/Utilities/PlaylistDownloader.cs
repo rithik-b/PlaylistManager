@@ -274,8 +274,16 @@ namespace PlaylistManager.Utilities
                 {
                     Directory.CreateDirectory(customSongsPath);
                 }
-                var zip = await DownloadFileToBytesAsync(url, token);
-                await ExtractZipAsync(zip, customSongsPath, songName: songName).ConfigureAwait(false);
+                WebResponse webResponse = await siraClient.GetAsync(url, token);
+                if (webResponse.IsSuccessStatusCode)
+                {
+                    byte[] zip = webResponse.ContentToBytes();
+                    await ExtractZipAsync(zip, customSongsPath, songName: songName).ConfigureAwait(false);
+                }
+                else
+                {
+                    Plugin.Log.Info(string.Format("Failed to download Song {0}", url));
+                }
             }
             catch (Exception e)
             {
@@ -330,12 +338,6 @@ namespace PlaylistManager.Utilities
                 return;
             }
             zipStream.Close();
-        }
-
-        public async Task<byte[]> DownloadFileToBytesAsync(string url, CancellationToken token)
-        {
-            WebResponse webResponse = await siraClient.GetAsync(url, token);
-            return webResponse.ContentToBytes();
         }
     }
 }

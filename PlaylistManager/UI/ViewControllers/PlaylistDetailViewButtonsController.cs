@@ -5,6 +5,7 @@ using PlaylistManager.Configuration;
 using PlaylistManager.Interfaces;
 using PlaylistManager.Types;
 using PlaylistManager.Utilities;
+using SiraUtil;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -20,6 +21,7 @@ namespace PlaylistManager.UI
 {
     public class PlaylistDetailViewButtonsController : IInitializable, IDisposable, INotifyPropertyChanged, ILevelCollectionUpdater, ILevelCategoryUpdater, ILevelCollectionsTableUpdater
     {
+        private readonly SiraClient siraClient;
         private readonly PlaylistDownloader playlistDownloader;
         private readonly LevelPackDetailViewController levelPackDetailViewController;
         private readonly PopupModalsController popupModalsController;
@@ -40,9 +42,10 @@ namespace PlaylistManager.UI
         [UIComponent("sync-button")]
         private readonly Transform syncButtonTransform;
 
-        public PlaylistDetailViewButtonsController(PlaylistDownloader playlistDownloader, LevelPackDetailViewController levelPackDetailViewController, PopupModalsController popupModalsController, 
-            PlaylistDetailsViewController playlistDetailsViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController)
+        public PlaylistDetailViewButtonsController(SiraClient siraClient, PlaylistDownloader playlistDownloader, LevelPackDetailViewController levelPackDetailViewController, 
+            PopupModalsController popupModalsController, PlaylistDetailsViewController playlistDetailsViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController)
         {
+            this.siraClient = siraClient;
             this.playlistDownloader = playlistDownloader;
             this.levelPackDetailViewController = levelPackDetailViewController;
             this.popupModalsController = popupModalsController;
@@ -210,10 +213,20 @@ namespace PlaylistManager.UI
 
             try
             {
-                playlistStream = new MemoryStream(await playlistDownloader.DownloadFileToBytesAsync(syncURL, tokenSource.Token));
-                selectedPlaylist.Clear(); // Clear all songs
-                PlaylistLibUtils.playlistManager.DefaultHandler.Populate(playlistStream, selectedPlaylist);
-                parentManager.StorePlaylist(selectedPlaylist);
+                WebResponse webResponse = await siraClient.GetAsync(syncURL, tokenSource.Token);
+                if (webResponse.IsSuccessStatusCode)
+                {
+                    playlistStream = new MemoryStream(webResponse.ContentToBytes());
+                    selectedPlaylist.Clear(); // Clear all songs
+                    PlaylistLibUtils.playlistManager.DefaultHandler.Populate(playlistStream, selectedPlaylist);
+                    parentManager.StorePlaylist(selectedPlaylist);
+                }
+                else
+                {
+                    popupModalsController.OkText = "Error: The selected playlist cannot be synced";
+                    popupModalsController.OkButtonText = "Ok";
+                    return;
+                }
             }
             catch (Exception e)
             {
