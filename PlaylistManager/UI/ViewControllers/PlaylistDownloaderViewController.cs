@@ -37,7 +37,7 @@ namespace PlaylistManager.UI
             {
                 BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.PlaylistDownloaderView.bsml"), parent.gameObject, this);
             }
-            rootTransform.SetParent(parent);
+            rootTransform.SetParent(parent, false);
             rootTransform.localScale = scale ?? Vector3.one;
             OnPopupRequested();
         }
