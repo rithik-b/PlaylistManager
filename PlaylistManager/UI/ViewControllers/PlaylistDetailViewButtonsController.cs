@@ -167,7 +167,8 @@ namespace PlaylistManager.UI
                 _downloadQueueEntry = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DownloadInteractable)));
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DownloadHint)));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SyncInteractable)));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DeleteHint)));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistNotDownloading)));
             }
         }
 
@@ -190,8 +191,26 @@ namespace PlaylistManager.UI
             }
         }
 
+        [UIValue("delete-hint")]
+        private string DeleteHint
+        {
+            get
+            {
+                if (DownloadQueueEntry != null)
+                {
+                    return "Can't delete playlist when it is downloading";
+                }
+
+                return "Delete Playlist";
+            }
+        }
+
         [UIValue("download-interactable")]
         private bool DownloadInteractable => DownloadQueueEntry == null && MissingSongs != null && MissingSongs.Count > 0;
+
+
+        [UIValue("playlist-not-downloading")]
+        private bool PlaylistNotDownloading => DownloadQueueEntry == null;
 
         #endregion
 
@@ -268,9 +287,6 @@ namespace PlaylistManager.UI
         }
 
         private void DownloadRejected() => popupModalsController.ShowOkModal(rootTransform, "Playlist Synced!", null);
-
-        [UIValue("sync-interactable")]
-        private bool SyncInteractable => DownloadQueueEntry == null;
 
         #endregion
 
