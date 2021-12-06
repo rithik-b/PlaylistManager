@@ -76,7 +76,7 @@ namespace PlaylistManager.UI
         private void PostParse()
         {
             parsed = true;
-            customListTableData.data = playlistDownloader.downloadQueue;
+            customListTableData.data = PlaylistDownloader.downloadQueue;
             customListTableData.tableView.ReloadDataKeepingPosition();
         }
 
@@ -99,7 +99,7 @@ namespace PlaylistManager.UI
                 customListTableData.tableView.ReloadDataKeepingPosition();
             }
 
-            if (playlistDownloader.downloadQueue.Count == 0)
+            if (PlaylistDownloader.downloadQueue.Count == 0)
             {
                 if (SceneManager.GetActiveScene().name == "GameCore")
                 {

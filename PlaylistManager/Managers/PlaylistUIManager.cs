@@ -100,7 +100,7 @@ namespace PlaylistManager.Managers
 
         private void PlaylistDownloader_QueueUpdatedEvent()
         {
-            if (playlistDownloader.downloadQueue.Count == 0)
+            if (PlaylistDownloader.downloadQueue.Count == 0)
             {
                 SongCore_RefreshLevelPacks.PacksToBeRefreshedEvent += OnPacksToBeRefreshed;
             }

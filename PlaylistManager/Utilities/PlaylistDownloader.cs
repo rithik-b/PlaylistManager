@@ -15,22 +15,23 @@ using Zenject;
 
 namespace PlaylistManager.Utilities
 {
-    public class PlaylistDownloader
+    public class PlaylistDownloader : IInitializable, IDisposable
     {
         private readonly SiraClient siraClient;
         private readonly BeatSaver beatSaverInstance;
         private readonly SemaphoreSlim downloadSemaphore;
-        private readonly HashSet<string> ownedHashes;
+        private static readonly HashSet<string> ownedHashes = new HashSet<string>();
         private DownloadQueueEntry currentDownload;
 
         private readonly SemaphoreSlim pauseSemaphore;
         private readonly SemaphoreSlim customArchiveSemaphore;
         private bool preferCustomArchiveURL;
+        private bool disposed;
 
         public event Action PopupEvent;
         public event Action QueueUpdatedEvent;
 
-        public readonly List<object> downloadQueue;
+        public static readonly List<object> downloadQueue = new List<object>();
         public PopupContents PendingPopup { get; private set; }
 
         public PlaylistDownloader([Inject(Id = nameof(PlaylistManager))] PluginMetadata metadata, SiraClient siraClient)
@@ -41,9 +42,24 @@ namespace PlaylistManager.Utilities
             downloadSemaphore = new SemaphoreSlim(1, 1);
             pauseSemaphore = new SemaphoreSlim(0, 1);
             customArchiveSemaphore = new SemaphoreSlim(0, 1);
-            ownedHashes = new HashSet<string>();
-            downloadQueue = new List<object>();
             PendingPopup = null;
+        }
+
+        public void Initialize()
+        {
+            foreach (DownloadQueueEntry _ in downloadQueue)
+            {
+                IterateQueue();
+            }
+        }
+
+        public void Dispose()
+        {
+            disposed = true;
+            if (currentDownload != null && !currentDownload.cancellationTokenSource.IsCancellationRequested)
+            {
+                currentDownload.cancellationTokenSource.Cancel();
+            }
         }
 
         public void QueuePlaylist(DownloadQueueEntry downloadQueueEntry)
@@ -64,10 +80,13 @@ namespace PlaylistManager.Utilities
         private async void IterateQueue()
         {
             await downloadSemaphore.WaitAsync();
-            if (downloadQueue.Count > 0)
+            if (downloadQueue.Count > 0 && !disposed)
             {
                 await DownloadPlaylist(downloadQueue.OfType<DownloadQueueEntry>().FirstOrDefault());
-                downloadQueue.RemoveAt(0);
+                if (!disposed)
+                {
+                    downloadQueue.RemoveAt(0);
+                }
                 QueueUpdatedEvent?.Invoke();
             }
             downloadSemaphore.Release();
@@ -156,6 +175,12 @@ namespace PlaylistManager.Utilities
                 if (downloadQueueEntry.Aborted)
                 {
                     break;
+                }
+                else if (disposed)
+                {
+                    // If downloader is disposed, a soft restart is happening. Reinstantiate the cancellation token and leave.
+                    downloadQueueEntry.cancellationTokenSource = new CancellationTokenSource();
+                    return;
                 }
                 else if (downloadQueueEntry.cancellationTokenSource.IsCancellationRequested)
                 {

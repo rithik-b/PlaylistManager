@@ -16,7 +16,7 @@ namespace PlaylistManager.Installers
         public override void InstallBindings()
         {
             Container.BindInstance(metadata).WithId(nameof(PlaylistManager)).AsCached();
-            Container.Bind<PlaylistDownloader>().AsSingle();
+            Container.BindInterfacesAndSelfTo<PlaylistDownloader>().AsSingle();
         }
     }
 }

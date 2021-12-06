@@ -139,7 +139,7 @@ namespace PlaylistManager.UI
 
         private void OnQueueUpdated()
         {
-            if (playlistDownloader.downloadQueue.Count == 0)
+            if (PlaylistDownloader.downloadQueue.Count == 0)
             {
                 DownloadQueueEntry = null;
                 UpdateMissingSongs();
@@ -296,7 +296,7 @@ namespace PlaylistManager.UI
             {
                 this.selectedPlaylist = selectedPlaylist;
                 this.parentManager = parentManager;
-                DownloadQueueEntry = playlistDownloader.downloadQueue.OfType<DownloadQueueEntry>().Where(x => x.playlist == selectedPlaylist).FirstOrDefault();
+                DownloadQueueEntry = PlaylistDownloader.downloadQueue.OfType<DownloadQueueEntry>().Where(x => x.playlist == selectedPlaylist).FirstOrDefault();
                 UpdateMissingSongs();
 
                 rootTransform.gameObject.SetActive(true);

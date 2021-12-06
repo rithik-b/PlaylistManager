@@ -97,6 +97,6 @@ namespace PlaylistManager.UI
         }
 
         [UIValue("queue-interactable")]
-        private bool QueueInteractable => playlistDownloader.downloadQueue.Count != 0;
+        private bool QueueInteractable => PlaylistDownloader.downloadQueue.Count != 0;
     }
 }
