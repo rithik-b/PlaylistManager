@@ -319,7 +319,12 @@ namespace PlaylistManager.Utilities
             }
         }
 
-        private string FolderNameForBeatsaverMap(Beatmap song) => song.ID + " (" + song.Metadata.SongName + " - " + song.Metadata.LevelAuthorName + ")";
+        private string FolderNameForBeatsaverMap(Beatmap song)
+        {
+            // A workaround for the max path issue and long folder names
+            string longFolderName = song.ID + " (" + song.Metadata.LevelAuthorName + " - " + song.Metadata.SongName;
+            return longFolderName.Truncate(49, true) + ")";
+        }
 
         private async Task ExtractZipAsync(byte[] zip, string customSongsPath, string songName, bool overwrite = false)
         {
