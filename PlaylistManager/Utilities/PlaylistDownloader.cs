@@ -201,6 +201,8 @@ namespace PlaylistManager.Utilities
             customArchiveSemaphore.Release();
         }
 
+        #region Map Download
+
         private async Task BeatSaverBeatmapDownload(Beatmap song, BeatmapVersion songversion, CancellationToken token, IProgress<double> progress = null)
         {
             string customSongsPath = CustomLevelPathHelper.customLevelsDirectoryPath;
@@ -212,7 +214,7 @@ namespace PlaylistManager.Utilities
             if (!ownedHashes.Contains(songversion.Hash.ToUpper()))
             {
                 var zip = await songversion.DownloadZIP(token, progress).ConfigureAwait(false);
-                await ExtractZipAsync(zip, customSongsPath, songInfo: song).ConfigureAwait(false);
+                await ExtractZipAsync(zip, customSongsPath, FolderNameForBeatsaverMap(song)).ConfigureAwait(false);
                 ownedHashes.Add(songversion.Hash.ToUpper());
             }
         }
@@ -268,14 +270,14 @@ namespace PlaylistManager.Utilities
                         }
                     }
 
-                    // Just download exact hash matches for now. Updating to a newer version of a song based on a hash should require some user interaction or option setting.
                     if (matchingVersion != null)
                     {
                         await BeatSaverBeatmapDownload(song, matchingVersion, token, progress);
                     }
                     else
                     {
-                        Plugin.Log.Info(string.Format("Failed to download Song {0}. Unable to find a matching version for that hash.", hash));
+                        BeatmapVersion latest = song.LatestVersion;
+                        await BeatmapDownloadByCustomURL(latest.DownloadURL.Replace(latest.Hash, hash.ToLowerInvariant()), FolderNameForBeatsaverMap(song), token);
                     }
                     songDownloaded = true;
                 }
@@ -317,22 +319,16 @@ namespace PlaylistManager.Utilities
             }
         }
 
-        private async Task ExtractZipAsync(byte[] zip, string customSongsPath, bool overwrite = false, string songName = null, Beatmap songInfo = null)
+        private string FolderNameForBeatsaverMap(Beatmap song) => song.ID + " (" + song.Metadata.SongName + " - " + song.Metadata.LevelAuthorName + ")";
+
+        private async Task ExtractZipAsync(byte[] zip, string customSongsPath, string songName, bool overwrite = false)
         {
             Stream zipStream = new MemoryStream(zip);
             try
             {
                 ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Read);
                 string basePath = "";
-                if (songInfo != null)
-                {
-                    basePath = songInfo.ID + " (" + songInfo.Metadata.SongName + " - " + songInfo.Metadata.LevelAuthorName + ")";
-                }
-                else
-                {
-                    basePath = songName;
-                }
-                basePath = string.Join("", basePath.Split(Path.GetInvalidFileNameChars().Concat(Path.GetInvalidPathChars()).ToArray()));
+                basePath = string.Join("", songName.Split(Path.GetInvalidFileNameChars().Concat(Path.GetInvalidPathChars()).ToArray()));
                 string path = Path.Combine(customSongsPath, basePath);
 
                 if (!overwrite && Directory.Exists(path))
@@ -364,5 +360,7 @@ namespace PlaylistManager.Utilities
             }
             zipStream.Close();
         }
+
+        #endregion
     }
 }
