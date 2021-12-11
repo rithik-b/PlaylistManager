@@ -25,7 +25,15 @@ namespace PlaylistManager.Utilities
             }
         }
 
-        public static BeatSaberPlaylistsLib.Types.IPlaylist CreatePlaylist(string playlistName, string playlistAuthorName, BeatSaberPlaylistsLib.PlaylistManager playlistManager, bool defaultCover = true)
+        public static BeatSaberPlaylistsLib.Types.IPlaylist CreatePlaylistWithConfig(string playlistName, BeatSaberPlaylistsLib.PlaylistManager playlistManager)
+        {
+            string playlistAuthorName = PluginConfig.Instance.AuthorName;
+            bool easterEgg = playlistAuthorName.ToUpper().Contains("BINTER") && playlistName.ToUpper().Contains("TECH") && PluginConfig.Instance.EasterEggs;
+            return CreatePlaylist(playlistName, playlistAuthorName, playlistManager, !PluginConfig.Instance.DefaultImageDisabled, PluginConfig.Instance.DefaultAllowDuplicates, easterEgg);
+        }
+
+        public static BeatSaberPlaylistsLib.Types.IPlaylist CreatePlaylist(string playlistName, string playlistAuthorName, BeatSaberPlaylistsLib.PlaylistManager playlistManager, bool defaultCover = true,
+            bool allowDups = true, bool easterEgg = false)
         {
             BeatSaberPlaylistsLib.Types.IPlaylist playlist = playlistManager.CreatePlaylist("", playlistName, playlistAuthorName, "");
 
@@ -37,18 +45,19 @@ namespace PlaylistManager.Utilities
                 }
             }
 
-            if (!PluginConfig.Instance.DefaultAllowDuplicates)
+
+            if (!allowDups)
             {
                 playlist.AllowDuplicates = false;
             }
 
-            // Easter Egg
-            if (PluginConfig.Instance.AuthorName.ToUpper().Contains("BINTER") && playlistName.ToUpper().Contains("TECH") && PluginConfig.Instance.EasterEggs)
+            if (easterEgg)
             {
                 playlist.SetCustomData("syncURL", EASTER_EGG_URL);
             }
 
             playlistManager.StorePlaylist(playlist);
+            PlaylistLibUtils.playlistManager.RequestRefresh("PlaylistManager (plugin)");
             return playlist;
         }
 
