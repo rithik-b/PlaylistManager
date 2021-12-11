@@ -12,14 +12,16 @@ using Zenject;
 
 namespace PlaylistManager.UI
 {
-    internal class PlaylistViewButtonsController : IInitializable, IDisposable, INotifyPropertyChanged, ILevelCategoryUpdater
+    internal class PlaylistViewButtonsController : IInitializable, IDisposable, INotifyPropertyChanged, ILevelCategoryUpdater, IParentManagerUpdater
     {
+        private readonly PopupModalsController popupModalsController;
         private readonly PlaylistDownloader playlistDownloader;
         private readonly PlaylistDownloaderViewController playlistDownloaderViewController;
         private readonly SettingsViewController settingsViewController;
         private readonly MainFlowCoordinator mainFlowCoordinator;
         private readonly AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
 
+        private BeatSaberPlaylistsLib.PlaylistManager parentManager;
         public event PropertyChangedEventHandler PropertyChanged;
 
         [UIComponent("root")]
@@ -33,9 +35,10 @@ namespace PlaylistManager.UI
 
         private Vector3 queueModalPosition;
 
-        public PlaylistViewButtonsController(PlaylistDownloader playlistDownloader, PlaylistDownloaderViewController playlistDownloaderViewController, MainFlowCoordinator mainFlowCoordinator,
-            SettingsViewController settingsViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController)
+        public PlaylistViewButtonsController(PopupModalsController popupModalsController, PlaylistDownloader playlistDownloader, PlaylistDownloaderViewController playlistDownloaderViewController,
+            MainFlowCoordinator mainFlowCoordinator, SettingsViewController settingsViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController)
         {
+            this.popupModalsController = popupModalsController;
             this.playlistDownloader = playlistDownloader;
             this.playlistDownloaderViewController = playlistDownloaderViewController;
             this.mainFlowCoordinator = mainFlowCoordinator;
@@ -74,10 +77,29 @@ namespace PlaylistManager.UI
             }
         }
 
+        public void ParentManagerUpdated(BeatSaberPlaylistsLib.PlaylistManager parentManager) => this.parentManager = parentManager;
+
         [UIAction("#post-parse")]
         private void PostParse()
         {
             queueModalPosition = queueModalTransform.localPosition;
+        }
+
+        [UIAction("create-click")]
+        private void CreateClicked()
+        {
+            popupModalsController.ShowKeyboard(rootTransform, CreatePlaylist);
+        }
+
+        private void CreatePlaylist(string playlistName)
+        {
+            if (string.IsNullOrWhiteSpace(playlistName))
+            {
+                return;
+            }
+
+            BeatSaberPlaylistsLib.Types.IPlaylist playlist = PlaylistLibUtils.CreatePlaylistWithConfig(playlistName, parentManager ?? BeatSaberPlaylistsLib.PlaylistManager.DefaultManager);
+            popupModalsController.ShowOkModal(rootTransform, $"Successfully created {playlist.collectionName}", null);
         }
 
         [UIAction("queue-click")]

@@ -35,10 +35,21 @@ namespace PlaylistManager.UI
 
         public event PropertyChangedEventHandler PropertyChanged;
         public event Action<IAnnotatedBeatmapLevelCollection[], int> LevelCollectionTableViewUpdatedEvent;
+        public event Action<BeatSaberPlaylistsLib.PlaylistManager> ParentManagerUpdatedEvent;
 
-        private BeatSaberPlaylistsLib.PlaylistManager currentParentManager;
+        private BeatSaberPlaylistsLib.PlaylistManager _currentParentManager;
         private List<BeatSaberPlaylistsLib.PlaylistManager> currentManagers;
         private FolderMode folderMode;
+
+        public BeatSaberPlaylistsLib.PlaylistManager CurrentParentManager
+        {
+            get => _currentParentManager;
+            private set
+            {
+                _currentParentManager = value;
+                ParentManagerUpdatedEvent?.Invoke(value);
+            }
+        }
 
         [UIComponent("root")]
         private RectTransform rootTransform;
@@ -120,7 +131,7 @@ namespace PlaylistManager.UI
         {
             customListTableData.tableView.ClearSelection();
             customListTableData.data.Clear();
-            this.currentParentManager = currentParentManager;
+            this.CurrentParentManager = currentParentManager;
 
             if (currentParentManager == null)
             {
@@ -219,7 +230,7 @@ namespace PlaylistManager.UI
         [UIAction("folder-select")]
         private void Select(TableView _, int selectedCellIndex)
         {
-            if (currentParentManager == null) // If we are at root
+            if (CurrentParentManager == null) // If we are at root
             {
                 if (selectedCellIndex == 0)
                 {
@@ -255,11 +266,11 @@ namespace PlaylistManager.UI
         [UIAction("back-button-click")]
         private void BackButtonClicked()
         {
-            if (currentParentManager == null)
+            if (CurrentParentManager == null)
             {
                 return;
             }
-            SetupList(currentParentManager: currentParentManager.Parent);
+            SetupList(currentParentManager: CurrentParentManager.Parent);
         }
 
         #region Create Folder
@@ -275,7 +286,7 @@ namespace PlaylistManager.UI
             folderName = folderName.Replace("/", "").Replace("\\", "").Replace(".", "");
             if (!string.IsNullOrEmpty(folderName))
             {
-                BeatSaberPlaylistsLib.PlaylistManager childManager = currentParentManager.CreateChildManager(folderName);
+                BeatSaberPlaylistsLib.PlaylistManager childManager = CurrentParentManager.CreateChildManager(folderName);
 
                 if (currentManagers.Contains(childManager))
                 {
@@ -299,7 +310,7 @@ namespace PlaylistManager.UI
         [UIAction("rename-folder")]
         private void RenameButtonClicked()
         {
-            popupModalsController.ShowKeyboard(levelSelectionNavigationController.transform, RenameKeyboardEnter, keyboardText: Path.GetFileName(currentParentManager.PlaylistPath));
+            popupModalsController.ShowKeyboard(levelSelectionNavigationController.transform, RenameKeyboardEnter, keyboardText: Path.GetFileName(CurrentParentManager.PlaylistPath));
         }
 
         private void RenameKeyboardEnter(string folderName)
@@ -307,9 +318,9 @@ namespace PlaylistManager.UI
             folderName = folderName.Replace("/", "").Replace("\\", "").Replace(".", "");
             if (!string.IsNullOrEmpty(folderName))
             {
-                if (folderName != Path.GetFileName(currentParentManager.PlaylistPath))
+                if (folderName != Path.GetFileName(CurrentParentManager.PlaylistPath))
                 {
-                    currentParentManager.RenameManager(folderName);
+                    CurrentParentManager.RenameManager(folderName);
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FolderText)));
                 }
             }
@@ -322,12 +333,12 @@ namespace PlaylistManager.UI
         [UIAction("delete-folder")]
         private void DeleteButtonClicked()
         {
-            popupModalsController.ShowYesNoModal(levelSelectionNavigationController.transform, string.Format("Are you sure you want to delete {0} along with all playlists and subfolders?", Path.GetFileName(currentParentManager.PlaylistPath)), DeleteConfirm);
+            popupModalsController.ShowYesNoModal(levelSelectionNavigationController.transform, string.Format("Are you sure you want to delete {0} along with all playlists and subfolders?", Path.GetFileName(CurrentParentManager.PlaylistPath)), DeleteConfirm);
         }
 
         private void DeleteConfirm()
         {
-            currentParentManager.Parent.DeleteChildManager(currentParentManager);
+            CurrentParentManager.Parent.DeleteChildManager(CurrentParentManager);
             BackButtonClicked();
         }
 
@@ -341,7 +352,7 @@ namespace PlaylistManager.UI
                 SetupDimensions();
                 if (viewControllerActivated)
                 {
-                    SetupList(currentParentManager, false);
+                    SetupList(CurrentParentManager, false);
                 }
             }
             else
@@ -379,13 +390,13 @@ namespace PlaylistManager.UI
             }
             else if (folderMode == FolderMode.Folders)
             {
-                BeatSaberPlaylistsLib.Types.IPlaylist[] annotatedBeatmapLevelCollections = currentParentManager.GetAllPlaylists(false);
+                BeatSaberPlaylistsLib.Types.IPlaylist[] annotatedBeatmapLevelCollections = CurrentParentManager.GetAllPlaylists(false);
                 int indexToSelect = annotatedBeatmapLevelCollections.IndexOf(annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection);
                 if (indexToSelect != -1)
                 {
                     annotatedBeatmapLevelCollectionsViewController.SetData(annotatedBeatmapLevelCollections, indexToSelect, false);
                 }
-                SetupList(currentParentManager, false);
+                SetupList(CurrentParentManager, false);
             }
         }
 
@@ -394,13 +405,13 @@ namespace PlaylistManager.UI
         {
             get
             {
-                if (currentParentManager == null || !Directory.Exists(currentParentManager.PlaylistPath))
+                if (CurrentParentManager == null || !Directory.Exists(CurrentParentManager.PlaylistPath))
                 {
                     return "";
                 }
                 else
                 {
-                    string folderName = Path.GetFileName(currentParentManager.PlaylistPath);
+                    string folderName = Path.GetFileName(CurrentParentManager.PlaylistPath);
                     if (folderName.Length > 15)
                     {
                         return folderName.Substring(0, 15) + "...";

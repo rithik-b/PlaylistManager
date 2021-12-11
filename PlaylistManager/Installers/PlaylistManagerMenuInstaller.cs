@@ -36,7 +36,7 @@ namespace PlaylistManager.Installers
             }
             else
             {
-                Container.BindInterfacesTo<FoldersViewController>().AsSingle();
+                Container.BindInterfacesAndSelfTo<FoldersViewController>().AsSingle();
             }
         }
     }
