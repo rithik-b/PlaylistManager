@@ -23,7 +23,7 @@ namespace PlaylistManager.UI
         private readonly PopupModalsController popupModalsController;
 
         private BeatSaberPlaylistsLib.PlaylistManager parentManager;
-        private BeatSaberPlaylistsLib.PlaylistManager[] childManagers;
+        private List<BeatSaberPlaylistsLib.PlaylistManager> childManagers;
         private List<BeatSaberPlaylistsLib.Types.IPlaylist> childPlaylists;
 
         private readonly Sprite folderIcon;
@@ -31,7 +31,10 @@ namespace PlaylistManager.UI
         public event PropertyChangedEventHandler PropertyChanged;
 
         [UIComponent("list")]
-        public CustomListTableData customListTableData;
+        public CustomListTableData playlistTableData;
+
+        [UIComponent("dropdown-options")]
+        public CustomListTableData dropdownTableData;
 
         [UIComponent("highlight-checkbox")]
         private readonly RectTransform highlightCheckboxTransform;
@@ -40,6 +43,14 @@ namespace PlaylistManager.UI
         private readonly RectTransform modalTransform;
 
         private Vector3 modalPosition;
+
+        [UIComponent("create-dropdown")]
+        private ModalView createModal;
+
+        [UIComponent("create-dropdown")]
+        private readonly RectTransform createModalTransform;
+
+        private Vector3 createModalPosition;
 
         [UIParams]
         private readonly BSMLParserParams parserParams;
@@ -57,9 +68,11 @@ namespace PlaylistManager.UI
             if (!parsed)
             {
                 BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.AddPlaylistModal.bsml"), standardLevelDetailViewController.transform.Find("LevelDetail").gameObject, this);
-                modalPosition = modalTransform.position; // Position can change if SongBrowser is clicked while modal is opened so storing here
+                modalPosition = modalTransform.localPosition;
+                createModalPosition = createModalTransform.localPosition;
             }
-            modalTransform.position = modalPosition; // Reset position
+            modalTransform.localPosition = modalPosition; // Reset position
+            createModalTransform.localPosition = createModalPosition;
         }
 
         [UIAction("#post-parse")]
@@ -67,6 +80,11 @@ namespace PlaylistManager.UI
         {
             parsed = true;
             highlightCheckboxTransform.transform.localScale *= 0.5f;
+
+            Accessors.AnimateCanvasAccessor(ref createModal) = false;
+            dropdownTableData.data.Add(new CustomCellInfo("Playlist"));
+            dropdownTableData.data.Add(new CustomCellInfo("Folder"));
+            dropdownTableData.tableView.ReloadData();
         }
 
         #region Show Playlists
@@ -81,16 +99,16 @@ namespace PlaylistManager.UI
 
         internal void ShowPlaylistsForManager(BeatSaberPlaylistsLib.PlaylistManager parentManager)
         {
-            customListTableData.data.Clear();
+            playlistTableData.data.Clear();
 
             this.parentManager = parentManager;
-            childManagers = parentManager.GetChildManagers().ToArray();
+            childManagers = parentManager.GetChildManagers().ToList();
             var childPlaylists = parentManager.GetAllPlaylists(false).Where(playlist => !playlist.ReadOnly);
             this.childPlaylists = childPlaylists.ToList();
 
             foreach (BeatSaberPlaylistsLib.PlaylistManager playlistManager in childManagers)
             {
-                customListTableData.data.Add(new CustomCellInfo(Path.GetFileName(playlistManager.PlaylistPath), "Folder", folderIcon));
+                playlistTableData.data.Add(new CustomCellInfo(Path.GetFileName(playlistManager.PlaylistPath), "Folder", folderIcon));
             }
             foreach (BeatSaberPlaylistsLib.Types.IPlaylist playlist in childPlaylists)
             {
@@ -105,8 +123,7 @@ namespace PlaylistManager.UI
                     ShowPlaylist(playlist);
                 }
             }
-            customListTableData.tableView.ReloadData();
-            customListTableData.tableView.ScrollToCellWithIdx(0, TableView.ScrollPositionType.Beginning, false);
+            playlistTableData.tableView.ReloadData();
 
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(BackActive)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FolderText)));
@@ -120,7 +137,7 @@ namespace PlaylistManager.UI
                 {
                     ShowPlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)deferredSpriteLoadPlaylist);
                 }
-                customListTableData.tableView.ReloadDataKeepingPosition();
+                playlistTableData.tableView.ReloadDataKeepingPosition();
                 (deferredSpriteLoadPlaylist).SpriteLoaded -= DeferredSpriteLoadPlaylist_SpriteLoaded;
             }
         }
@@ -137,21 +154,21 @@ namespace PlaylistManager.UI
                 }
                 subName += " (contains song)";
             }
-            customListTableData.data.Add(new CustomCellInfo(playlist.collectionName, subName, playlist.coverImage));
+            playlistTableData.data.Add(new CustomCellInfo(playlist.collectionName, subName, playlist.coverImage));
         }
 
         [UIAction("select-cell")]
         private void OnCellSelect(TableView tableView, int index)
         {
-            customListTableData.tableView.ClearSelection();
+            playlistTableData.tableView.ClearSelection();
             // Folder Selected
-            if (index < childManagers.Length)
+            if (index < childManagers.Count)
             {
                 ShowPlaylistsForManager(childManagers[index]);
             }
             else
             {
-                index -= childManagers.Length;
+                index -= childManagers.Count;
                 var selectedPlaylist = childPlaylists[index];
                 if (HighlightDifficulty)
                 {
@@ -211,10 +228,12 @@ namespace PlaylistManager.UI
 
         #region Create Playlist
 
-        [UIAction("open-keyboard")]
-        private void OpenKeyboard()
+        [UIAction("select-option")]
+        private void OnOptionSelect(TableView tableView, int index)
         {
-            popupModalsController.ShowKeyboard(modalTransform, CreatePlaylist, animateParentCanvas: false);
+            popupModalsController.ShowKeyboard(modalTransform, index == 0 ? CreatePlaylist : CreateFolder, animateParentCanvas: false);
+            tableView.ClearSelection();
+            parserParams.EmitEvent("close-dropdown");
         }
 
         private void CreatePlaylist(string playlistName)
@@ -228,15 +247,35 @@ namespace PlaylistManager.UI
 
             if (playlist is IDeferredSpriteLoad deferredSpriteLoadPlaylist && !deferredSpriteLoadPlaylist.SpriteWasLoaded)
             {
-                _ = playlist.coverImage;
                 deferredSpriteLoadPlaylist.SpriteLoaded -= DeferredSpriteLoadPlaylist_SpriteLoaded;
                 deferredSpriteLoadPlaylist.SpriteLoaded += DeferredSpriteLoadPlaylist_SpriteLoaded;
+                _ = playlist.coverImage;
             }
+
             childPlaylists.Add(playlist);
-            customListTableData.tableView.ReloadData();
+            playlistTableData.tableView.ReloadDataKeepingPosition();
+        }
+
+        private void CreateFolder(string folderName)
+        {
+            folderName = folderName.Replace("/", "").Replace("\\", "").Replace(".", "");
+            if (!string.IsNullOrEmpty(folderName))
+            {
+                BeatSaberPlaylistsLib.PlaylistManager childManager = parentManager.CreateChildManager(folderName);
+
+                if (childManagers.Contains(childManager))
+                {
+                    popupModalsController.ShowOkModal(modalTransform, "\"" + folderName + "\" already exists! Please use a different name.", null, animateParentCanvas: false);
+                }
+                else
+                {
+                    playlistTableData.data.Insert(childManagers.Count, new CustomCellInfo(Path.GetFileName(childManager.PlaylistPath), "Folder", folderIcon));
+                    playlistTableData.tableView.ReloadDataKeepingPosition();
+                    childManagers.Add(childManager);
+                }
+            }
         }
 
         #endregion
-
     }
 }

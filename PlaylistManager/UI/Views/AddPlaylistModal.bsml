@@ -1,13 +1,18 @@
 ﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
-	<modal id='modal' show-event='open-modal' hide-event='close-modal' clickerino-offerino-closerino="true" anchor-pos-y='15' size-delta-x='65' size-delta-y='75' move-to-center='false'>
+	<modal id='modal' show-event='open-modal' hide-event='close-modal' clickerino-offerino-closerino='true' anchor-pos-y='15' size-delta-x='65' size-delta-y='75' move-to-center='false'>
 		<bg active='~back-active'>
 			<button text='&lt;' on-click='back-button-pressed' anchor-pos-x ='5' anchor-pos-y='-5' />
 			<text text='~folder-text' anchor-pos-x ='45' anchor-pos-y='-15' />
 		</bg>
-		<horizontal horizontal-fit='PreferredSize' vertical-fit='PreferredSize' anchor-pos-x='-2' anchor-pos-y='-3' size-delta-y='0'>
+		<horizontal horizontal-fit='PreferredSize' vertical-fit='PreferredSize' anchor-pos-x='-2' anchor-pos-y='-3'>
 			<list id='list' pref-height='50' pref-width='56' select-cell='select-cell' list-style='List' show-scrollbar='true' stick-scrolling='true' />
 		</horizontal>
-		<button id ='create-playlist-button' text='+' hover-hint='Create a new playlist' on-click='open-keyboard' anchor-pos-x ='5' anchor-pos-y='-70' />
+		<modal id='create-dropdown' show-event='open-dropdown' hide-event='close-dropdown' clickerino-offerino-closerino='true' anchor-pos-x='-23.5' anchor-pos-y='-20.5' size-delta-x='15' size-delta-y='18' move-to-center='false'>
+			<horizontal horizontal-fit='PreferredSize' vertical-fit='PreferredSize' anchor-pos-y='-1'>
+				<list id='dropdown-options' pref-width='15' pref-height='18' select-cell='select-option' list-style='Simple' />
+			</horizontal>
+		</modal>
+		<button id ='create-playlist-button' text='+' hover-hint='Create a new playlist/folder' click-event='open-dropdown' anchor-pos-x ='5' anchor-pos-y='-70' />
 		<button text='x' click-event='close-modal' anchor-pos-x ='60' anchor-pos-y='-5' />
 		<checkbox-setting id='highlight-checkbox' text='Highlight Selected Difficulty' value='highlight-difficulty' bind-value='true' apply-on-change='true' anchor-pos-x='0' anchor-pos-y='-67.5' />
 	</modal>
