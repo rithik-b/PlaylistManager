@@ -19,7 +19,7 @@ namespace PlaylistManager.UI
         private readonly TweeningManager uwuTweenyManager;
         private readonly PlaylistDownloader playlistDownloader;
         private readonly PlaylistDownloaderViewController playlistDownloaderViewController;
-        private readonly SettingsViewController settingsViewController;
+        private readonly PlaylistManagerFlowCoordinator playlistManagerFlowCoordinator;
         private readonly MainFlowCoordinator mainFlowCoordinator;
         private readonly AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
 
@@ -45,14 +45,14 @@ namespace PlaylistManager.UI
         private Vector3 queueModalPosition;
 
         public PlaylistViewButtonsController(PopupModalsController popupModalsController, TimeTweeningManager uwuTweenyManager, PlaylistDownloader playlistDownloader, PlaylistDownloaderViewController playlistDownloaderViewController,
-            MainFlowCoordinator mainFlowCoordinator, SettingsViewController settingsViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController)
+            MainFlowCoordinator mainFlowCoordinator, PlaylistManagerFlowCoordinator playlistManagerFlowCoordinator, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController)
         {
             this.popupModalsController = popupModalsController;
             this.uwuTweenyManager = uwuTweenyManager;
             this.playlistDownloader = playlistDownloader;
             this.playlistDownloaderViewController = playlistDownloaderViewController;
             this.mainFlowCoordinator = mainFlowCoordinator;
-            this.settingsViewController = settingsViewController;
+            this.playlistManagerFlowCoordinator = playlistManagerFlowCoordinator;
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
         }
 
@@ -147,7 +147,7 @@ namespace PlaylistManager.UI
         [UIAction("settings-click")]
         private void ShowSettings()
         {
-            mainFlowCoordinator.YoungestChildFlowCoordinatorOrSelf().InvokeMethod<object, FlowCoordinator>("PresentViewController", new object[] { settingsViewController, null, ViewController.AnimationDirection.Vertical, false });
+            playlistManagerFlowCoordinator.PresentFlowCoordinator(mainFlowCoordinator.YoungestChildFlowCoordinatorOrSelf());
         }
 
         [UIValue("queue-interactable")]

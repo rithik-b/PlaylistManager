@@ -20,11 +20,13 @@ namespace PlaylistManager.Installers
             Container.BindInterfacesAndSelfTo<PlaylistDownloaderViewController>().FromNewComponentOnNewGameObject().AsSingle();
             Container.BindInterfacesTo<PlaylistViewButtonsController>().AsSingle();
 
+            Container.BindInterfacesAndSelfTo<PlaylistManagerFlowCoordinator>().FromNewComponentOnNewGameObject().AsSingle();
+            Container.Bind<SettingsViewController>().FromNewComponentAsViewController().AsSingle();
+
             Container.BindInterfacesTo<PlaylistsGridViewController>().AsSingle();
             Container.BindInterfacesTo<CoverImageUpdater>().AsSingle();
             Container.BindInterfacesAndSelfTo<DifficultyHighlighter>().AsSingle();
 
-            Container.Bind<SettingsViewController>().FromNewComponentAsViewController().AsSingle();
             Container.BindInterfacesTo<RefreshButtonUI>().AsSingle();
 
             Container.BindInterfacesTo<PlaylistUIManager>().AsSingle();

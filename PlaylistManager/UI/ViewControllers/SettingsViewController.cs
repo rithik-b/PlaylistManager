@@ -1,7 +1,5 @@
 ﻿using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
-using HMUI;
-using IPA.Utilities;
 using PlaylistManager.Configuration;
 using System;
 using Zenject;
@@ -12,7 +10,6 @@ namespace PlaylistManager.UI
     [ViewDefinition("PlaylistManager.UI.Views.SettingsView.bsml")]
     internal class SettingsViewController : BSMLAutomaticViewController
     {
-        private MainFlowCoordinator mainFlowCoordinator;
         private MenuTransitionsHelper menuTransitionsHelper;
 
         private bool _defaultImageDisabled;
@@ -28,12 +25,12 @@ namespace PlaylistManager.UI
         private bool _driveFullProtection;
         private bool _easterEggs;
 
+        public event Action DismissFlowEvent;
         public event Action NameFetchRequestedEvent;
 
         [Inject]
-        public void Construct(MainFlowCoordinator mainFlowCoordinator, MenuTransitionsHelper menuTransitionsHelper)
+        public void Construct(MenuTransitionsHelper menuTransitionsHelper)
         {
-            this.mainFlowCoordinator = mainFlowCoordinator;
             this.menuTransitionsHelper = menuTransitionsHelper;
         }
 
@@ -57,10 +54,7 @@ namespace PlaylistManager.UI
         }
 
         [UIAction("cancel-click")]
-        private void CancelClicked()
-        {
-            mainFlowCoordinator.YoungestChildFlowCoordinatorOrSelf().InvokeMethod<object, FlowCoordinator>("DismissViewController", new object[] { this, ViewController.AnimationDirection.Vertical, null, false });
-        }
+        private void CancelClicked() => DismissFlowEvent?.Invoke();
 
         [UIAction("ok-click")]
         private void OkClicked()
@@ -88,7 +82,7 @@ namespace PlaylistManager.UI
             }
             else
             {
-                mainFlowCoordinator.YoungestChildFlowCoordinatorOrSelf().InvokeMethod<object, FlowCoordinator>("DismissViewController", new object[] { this, ViewController.AnimationDirection.Vertical, null, false });
+                DismissFlowEvent?.Invoke();
                 if (fetchName)
                 {
                     NameFetchRequestedEvent?.Invoke();
