@@ -2,6 +2,7 @@
 using BeatSaverSharp;
 using BeatSaverSharp.Models;
 using IPA.Loader;
+using PlaylistManager.Configuration;
 using PlaylistManager.Types;
 using SiraUtil;
 using System;
@@ -24,8 +25,9 @@ namespace PlaylistManager.Utilities
         private DownloadQueueEntry currentDownload;
 
         private readonly SemaphoreSlim pauseSemaphore;
-        private readonly SemaphoreSlim customArchiveSemaphore;
+        private readonly SemaphoreSlim popupSemaphore;
         private bool preferCustomArchiveURL;
+        private bool ignoredDiskWarning;
         private bool disposed;
 
         public event Action PopupEvent;
@@ -41,7 +43,7 @@ namespace PlaylistManager.Utilities
             beatSaverInstance = new BeatSaver(options);
             downloadSemaphore = new SemaphoreSlim(1, 1);
             pauseSemaphore = new SemaphoreSlim(0, 1);
-            customArchiveSemaphore = new SemaphoreSlim(0, 1);
+            popupSemaphore = new SemaphoreSlim(0, 1);
             PendingPopup = null;
         }
 
@@ -146,7 +148,7 @@ namespace PlaylistManager.Utilities
                              noButtonPressedCallback: () => SetCustomArchivePreference(false), animateParentCanvas: false);
                         PopupEvent?.Invoke();
 
-                        await customArchiveSemaphore.WaitAsync();
+                        await popupSemaphore.WaitAsync();
                         PendingPopup = null;
 
                         if (!preferCustomArchiveURL)
@@ -198,7 +200,7 @@ namespace PlaylistManager.Utilities
         private void SetCustomArchivePreference(bool preferCustomArchiveURL)
         {
             this.preferCustomArchiveURL = preferCustomArchiveURL;
-            customArchiveSemaphore.Release();
+            popupSemaphore.Release();
         }
 
         #region Map Download
@@ -342,6 +344,26 @@ namespace PlaylistManager.Utilities
                     while (Directory.Exists(path + $" ({pathNum})")) ++pathNum;
                     path += $" ({pathNum})";
                 }
+
+                if (PluginConfig.Instance.DriveFullProtection)
+                {
+                    DriveInfo driveInfo = new DriveInfo(Path.GetPathRoot(path));
+                    if (driveInfo.AvailableFreeSpace < 104857600 && !ignoredDiskWarning) // If less than 100MB
+                    {
+                        CreateDrivePopup();
+
+                        await popupSemaphore.WaitAsync();
+
+                        if (!ignoredDiskWarning)
+                        {
+                            currentDownload.AbortDownload();
+                            downloadQueue.Clear();
+                            downloadQueue.Add(currentDownload); // Add it back because we remove the first element of queue after a download
+                            return;
+                        }
+                    }
+                }
+
                 if (!Directory.Exists(path))
                     Directory.CreateDirectory(path);
                 await Task.Run(() =>
@@ -364,6 +386,29 @@ namespace PlaylistManager.Utilities
                 return;
             }
             zipStream.Close();
+        }
+
+        private void CreateDrivePopup()
+        {
+            string popupText = "You are running out of disk space (less than 100MB), continuing the download can cause issues such as corrupt game configs" +
+                            " (as there may not be enough space to save them).";
+
+            if (PluginConfig.Instance.EasterEggs && PluginConfig.Instance.AuthorName.ToUpper().Contains("SKALX"))
+            {
+                popupText = "Remember the October 26th, 2021 \"JoeSaber\" incident? Wanna do it again?";
+            }
+
+            PendingPopup = new YesNoPopupContents(popupText, yesButtonText: "Continue", noButtonText: "Abort", yesButtonPressedCallback: () =>
+                            {
+                                ignoredDiskWarning = true;
+                                popupSemaphore.Release();
+                            },
+                            noButtonPressedCallback: () =>
+                            {
+                                ignoredDiskWarning = false;
+                                popupSemaphore.Release();
+                            }, animateParentCanvas: false);
+            PopupEvent?.Invoke();
         }
 
         #endregion

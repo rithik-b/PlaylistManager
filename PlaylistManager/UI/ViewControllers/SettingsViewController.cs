@@ -24,6 +24,7 @@ namespace PlaylistManager.UI
         private bool _foldersDisabled;
         private int _syncOption;
         private bool _downloadDuringGameplay;
+        private bool _driveFullProtection;
         private bool _easterEggs;
 
         [Inject]
@@ -48,6 +49,7 @@ namespace PlaylistManager.UI
             FoldersDisabled = PluginConfig.Instance.FoldersDisabled;
             SyncOption = (int)PluginConfig.Instance.SyncOption;
             DownloadDuringGameplay = PluginConfig.Instance.DownloadDuringGameplay;
+            DriveFullProtection = PluginConfig.Instance.DriveFullProtection;
             EasterEggs = PluginConfig.Instance.EasterEggs;
         }
 
@@ -73,6 +75,7 @@ namespace PlaylistManager.UI
             PluginConfig.Instance.FoldersDisabled = FoldersDisabled;
             PluginConfig.Instance.SyncOption = (PluginConfig.SyncOptions)SyncOption;
             PluginConfig.Instance.DownloadDuringGameplay = DownloadDuringGameplay;
+            PluginConfig.Instance.DriveFullProtection = DriveFullProtection;
             PluginConfig.Instance.EasterEggs = EasterEggs;
 
             if (softRestart)
@@ -213,6 +216,17 @@ namespace PlaylistManager.UI
             {
                 _downloadDuringGameplay = value;
                 NotifyPropertyChanged(nameof(DownloadDuringGameplay));
+            }
+        }
+
+        [UIValue("drive-protection")]
+        private bool DriveFullProtection
+        {
+            get => _driveFullProtection;
+            set
+            {
+                _driveFullProtection = value;
+                NotifyPropertyChanged(nameof(DriveFullProtection));
             }
         }
 
