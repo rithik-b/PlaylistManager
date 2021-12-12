@@ -348,7 +348,14 @@ namespace PlaylistManager.Utilities
                 if (PluginConfig.Instance.DriveFullProtection)
                 {
                     DriveInfo driveInfo = new DriveInfo(Path.GetPathRoot(path));
-                    if (driveInfo.AvailableFreeSpace < 104857600 && !ignoredDiskWarning) // If less than 100MB
+
+                    long totalSize = 0;
+                    foreach (var entry in archive.Entries)
+                    {
+                        totalSize += entry.Length;
+                    }
+
+                    if (driveInfo.AvailableFreeSpace - totalSize < 104857600 && !ignoredDiskWarning) // If less than 100MB
                     {
                         CreateDrivePopup();
 
