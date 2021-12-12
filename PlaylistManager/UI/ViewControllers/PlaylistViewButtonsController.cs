@@ -1,7 +1,7 @@
 ﻿using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
+using BeatSaberMarkupLanguage.Components;
 using HMUI;
-using IPA.Utilities;
 using PlaylistManager.Interfaces;
 using PlaylistManager.Utilities;
 using System;
@@ -35,6 +35,9 @@ namespace PlaylistManager.UI
         private CurvedTextMeshPro downloadButtonText;
 
         private Color downloadButtonTextColor;
+
+        [UIComponent("flow-button")]
+        private readonly ButtonIconImage flowButton;
 
         [UIComponent("queue-modal")]
         private readonly ModalView queueModal;
@@ -113,8 +116,13 @@ namespace PlaylistManager.UI
         private void PostParse()
         {
             queueModalPosition = queueModalTransform.localPosition;
+
             downloadButtonText = downloadButtonTransform.GetComponentInChildren<CurvedTextMeshPro>();
             downloadButtonTextColor = downloadButtonText.color;
+
+            flowButton.transform.localScale = new Vector3(0.3f, 0.3f, 1f);
+            ImageView icon = flowButton.image as ImageView;
+            Accessors.SkewAccessor(ref icon) = 0.18f;
         }
 
         [UIAction("create-click")]
@@ -144,7 +152,7 @@ namespace PlaylistManager.UI
             });
         }
 
-        [UIAction("settings-click")]
+        [UIAction("flow-click")]
         private void ShowSettings()
         {
             playlistManagerFlowCoordinator.PresentFlowCoordinator(mainFlowCoordinator.YoungestChildFlowCoordinatorOrSelf());
