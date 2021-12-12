@@ -34,7 +34,17 @@ namespace PlaylistManager.Utilities
         public event Action QueueUpdatedEvent;
 
         public static readonly List<object> downloadQueue = new List<object>();
-        public PopupContents PendingPopup { get; private set; }
+
+        private PopupContents _pendingPopup;
+        public PopupContents PendingPopup
+        {
+            get => _pendingPopup;
+            private set
+            {
+                _pendingPopup = value;
+                PopupEvent?.Invoke();
+            }
+        }
 
         public PlaylistDownloader([Inject(Id = nameof(PlaylistManager))] PluginMetadata metadata, SiraClient siraClient)
         {
@@ -146,7 +156,6 @@ namespace PlaylistManager.Utilities
                         shownCustomArchiveWarning = true;
                         PendingPopup = new YesNoPopupContents("This playlist uses mirror download links. Would you like to use them?", yesButtonPressedCallback: () => SetCustomArchivePreference(true),
                              noButtonPressedCallback: () => SetCustomArchivePreference(false), animateParentCanvas: false);
-                        PopupEvent?.Invoke();
 
                         await popupSemaphore.WaitAsync();
                         PendingPopup = null;
@@ -416,7 +425,6 @@ namespace PlaylistManager.Utilities
                                 ignoredDiskWarning = false;
                                 popupSemaphore.Release();
                             }, animateParentCanvas: false);
-            PopupEvent?.Invoke();
         }
 
         #endregion

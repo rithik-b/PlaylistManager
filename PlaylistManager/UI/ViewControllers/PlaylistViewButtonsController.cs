@@ -7,6 +7,7 @@ using PlaylistManager.Utilities;
 using System;
 using System.ComponentModel;
 using System.Reflection;
+using Tweening;
 using UnityEngine;
 using Zenject;
 
@@ -15,6 +16,7 @@ namespace PlaylistManager.UI
     internal class PlaylistViewButtonsController : IInitializable, IDisposable, INotifyPropertyChanged, ILevelCategoryUpdater, IParentManagerUpdater
     {
         private readonly PopupModalsController popupModalsController;
+        private readonly TweeningManager uwuTweenyManager;
         private readonly PlaylistDownloader playlistDownloader;
         private readonly PlaylistDownloaderViewController playlistDownloaderViewController;
         private readonly SettingsViewController settingsViewController;
@@ -27,6 +29,13 @@ namespace PlaylistManager.UI
         [UIComponent("root")]
         private readonly RectTransform rootTransform;
 
+        [UIComponent("download-button")]
+        private readonly RectTransform downloadButtonTransform;
+
+        private CurvedTextMeshPro downloadButtonText;
+
+        private Color downloadButtonTextColor;
+
         [UIComponent("queue-modal")]
         private readonly ModalView queueModal;
 
@@ -35,10 +44,11 @@ namespace PlaylistManager.UI
 
         private Vector3 queueModalPosition;
 
-        public PlaylistViewButtonsController(PopupModalsController popupModalsController, PlaylistDownloader playlistDownloader, PlaylistDownloaderViewController playlistDownloaderViewController,
+        public PlaylistViewButtonsController(PopupModalsController popupModalsController, TimeTweeningManager uwuTweenyManager, PlaylistDownloader playlistDownloader, PlaylistDownloaderViewController playlistDownloaderViewController,
             MainFlowCoordinator mainFlowCoordinator, SettingsViewController settingsViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController)
         {
             this.popupModalsController = popupModalsController;
+            this.uwuTweenyManager = uwuTweenyManager;
             this.playlistDownloader = playlistDownloader;
             this.playlistDownloaderViewController = playlistDownloaderViewController;
             this.mainFlowCoordinator = mainFlowCoordinator;
@@ -49,17 +59,37 @@ namespace PlaylistManager.UI
         public void Initialize()
         {
             BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.PlaylistViewButtons.bsml"), annotatedBeatmapLevelCollectionsViewController.gameObject, this);
-            playlistDownloader.QueueUpdatedEvent += PlaylistDownloader_QueueUpdatedEvent;
+            playlistDownloader.QueueUpdatedEvent += DownloadQueueUpdated;
+            playlistDownloader.PopupEvent += TweenButton;
         }
 
         public void Dispose()
         {
-            playlistDownloader.QueueUpdatedEvent -= PlaylistDownloader_QueueUpdatedEvent;
+            playlistDownloader.QueueUpdatedEvent -= DownloadQueueUpdated;
+            playlistDownloader.PopupEvent -= TweenButton;
         }
 
-        private void PlaylistDownloader_QueueUpdatedEvent()
+        private void DownloadQueueUpdated()
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(QueueInteractable)));
+        }
+
+        private void TweenButton()
+        {
+            uwuTweenyManager.KillAllTweens(downloadButtonText);
+            if (playlistDownloader.PendingPopup != null)
+            {
+                FloatTween tween = new FloatTween(0.35f, 0.6f, val =>
+                {
+                    downloadButtonText.color = new Color(val, val, val);
+                }, 0.75f, EaseType.InOutBack);
+                uwuTweenyManager.AddTween(tween, downloadButtonText);
+                tween.onCompleted = delegate () { TweenButton(); };
+            }
+            else
+            {
+                downloadButtonText.color = downloadButtonTextColor;
+            }
         }
 
         public void LevelCategoryUpdated(SelectLevelCategoryViewController.LevelCategory levelCategory, bool viewControllerActivated)
@@ -83,6 +113,8 @@ namespace PlaylistManager.UI
         private void PostParse()
         {
             queueModalPosition = queueModalTransform.localPosition;
+            downloadButtonText = downloadButtonTransform.GetComponentInChildren<CurvedTextMeshPro>();
+            downloadButtonTextColor = downloadButtonText.color;
         }
 
         [UIAction("create-click")]
