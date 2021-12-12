@@ -18,6 +18,7 @@ namespace PlaylistManager.UI
         private bool _automaticAuthorName;
         private bool _playlistHoverHints;
         private float _playlistScrollSpeed;
+        private bool _showDownloadIcon;
         private bool _blurredArt;
         private bool _foldersDisabled;
         private int _syncOption;
@@ -45,6 +46,7 @@ namespace PlaylistManager.UI
             AuthorName = PluginConfig.Instance.AuthorName;
             PlaylistHoverHints = PluginConfig.Instance.PlaylistHoverHints;
             PlaylistScrollSpeed = PluginConfig.Instance.PlaylistScrollSpeed;
+            ShowDownloadIcon = PluginConfig.Instance.ShowDownloadIcon;
             BlurredArt = PluginConfig.Instance.BlurredArt;
             FoldersDisabled = PluginConfig.Instance.FoldersDisabled;
             SyncOption = (int)PluginConfig.Instance.SyncOption;
@@ -69,6 +71,7 @@ namespace PlaylistManager.UI
             PluginConfig.Instance.AuthorName = AuthorName;
             PluginConfig.Instance.PlaylistHoverHints = PlaylistHoverHints;
             PluginConfig.Instance.PlaylistScrollSpeed = PlaylistScrollSpeed;
+            PluginConfig.Instance.ShowDownloadIcon = ShowDownloadIcon;
             PluginConfig.Instance.BlurredArt = BlurredArt;
             PluginConfig.Instance.FoldersDisabled = FoldersDisabled;
             PluginConfig.Instance.SyncOption = (PluginConfig.SyncOptions)SyncOption;
@@ -169,6 +172,17 @@ namespace PlaylistManager.UI
             {
                 _playlistScrollSpeed = value;
                 NotifyPropertyChanged(nameof(PlaylistScrollSpeed));
+            }
+        }
+
+        [UIValue("download-icon")]
+        private bool ShowDownloadIcon
+        {
+            get => _showDownloadIcon;
+            set
+            {
+                _showDownloadIcon = value;
+                NotifyPropertyChanged(nameof(ShowDownloadIcon));
             }
         }
 

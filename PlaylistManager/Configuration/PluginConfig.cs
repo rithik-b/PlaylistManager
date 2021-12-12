@@ -21,6 +21,7 @@ namespace PlaylistManager.Configuration
         public virtual bool EasterEggs { get; set; } = false;
         public virtual bool DownloadDuringGameplay { get; set; } = false;
         public virtual bool DriveFullProtection { get; set; } = true;
+        public virtual bool ShowDownloadIcon { get; set; } = true;
 
         [UseConverter(typeof(EnumConverter<SyncOptions>))]
         [NonNullable]
