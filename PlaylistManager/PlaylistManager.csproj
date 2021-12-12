@@ -3,7 +3,7 @@
     <PropertyGroup>
         <TargetFramework>net48</TargetFramework>
         <OutputType>Library</OutputType>
-        <LangVersion>8</LangVersion>
+        <LangVersion>9</LangVersion>
         <Nullable>disable</Nullable>
         <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
         <LocalRefsDir Condition="Exists('..\Refs')">..\Refs</LocalRefsDir>
