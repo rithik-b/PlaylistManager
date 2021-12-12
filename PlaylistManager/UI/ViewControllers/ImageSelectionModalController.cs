@@ -203,7 +203,7 @@ namespace PlaylistManager.UI
 
         private async Task ViewControllerMonkeyCleanup()
         {
-            await SiraUtil.Utilities.PauseChamp;
+            await SiraUtil.Extras.Utilities.PauseChamp;
             ImageView[] imageViews = customListTableData.tableView.GetComponentsInChildren<ImageView>(true);
             for (int i = 0; i < imageViews.Length; i++)
             {
