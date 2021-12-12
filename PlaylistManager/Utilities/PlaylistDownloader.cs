@@ -353,6 +353,7 @@ namespace PlaylistManager.Utilities
                         CreateDrivePopup();
 
                         await popupSemaphore.WaitAsync();
+                        PendingPopup = null;
 
                         if (!ignoredDiskWarning)
                         {

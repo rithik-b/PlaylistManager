@@ -4,7 +4,6 @@ using BeatSaberMarkupLanguage.Components;
 using PlaylistManager.HarmonyPatches;
 using PlaylistManager.Utilities;
 using System;
-using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -12,10 +11,10 @@ using Zenject;
 
 namespace PlaylistManager.UI
 {
-    public class PlaylistDownloaderViewController : IInitializable, IDisposable
+    public class PlaylistDownloaderViewController : MonoBehaviour, IInitializable, IDisposable
     {
-        private readonly PlaylistDownloader playlistDownloader;
-        private readonly PopupModalsController popupModalsController;
+        private PlaylistDownloader playlistDownloader;
+        private PopupModalsController popupModalsController;
         private bool parsed;
         private bool refreshRequested;
 
@@ -25,7 +24,8 @@ namespace PlaylistManager.UI
         [UIComponent("root")]
         private readonly RectTransform rootTransform;
 
-        public PlaylistDownloaderViewController(PlaylistDownloader playlistDownloader, PopupModalsController popupModalsController)
+        [Inject]
+        public void Construct(PlaylistDownloader playlistDownloader, PopupModalsController popupModalsController)
         {
             this.playlistDownloader = playlistDownloader;
             this.popupModalsController = popupModalsController;
@@ -40,14 +40,6 @@ namespace PlaylistManager.UI
             rootTransform.SetParent(parent, false);
             rootTransform.localScale = scale ?? Vector3.one;
             OnPopupRequested();
-        }
-
-        public void OnEnable()
-        {
-            if (playlistDownloader.PendingPopup != null)
-            {
-                popupModalsController.ShowModal(playlistDownloader.PendingPopup);
-            }
         }
 
         public void OnDisable()
@@ -76,6 +68,7 @@ namespace PlaylistManager.UI
         private void PostParse()
         {
             parsed = true;
+            transform.SetParent(rootTransform);
             customListTableData.data = PlaylistDownloader.downloadQueue;
             customListTableData.tableView.ReloadDataKeepingPosition();
         }
@@ -84,11 +77,16 @@ namespace PlaylistManager.UI
         {
             if (playlistDownloader.PendingPopup != null && parsed)
             {
-                playlistDownloader.PendingPopup.parent = rootTransform;
-                if (rootTransform.gameObject.activeInHierarchy)
-                {
-                    popupModalsController.ShowModal(playlistDownloader.PendingPopup);
-                }
+                IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(DontMessWithGameObjectsOffMainThread);
+            }
+        }
+
+        private void DontMessWithGameObjectsOffMainThread()
+        {
+            playlistDownloader.PendingPopup.parent = rootTransform;
+            if (rootTransform.gameObject.activeInHierarchy)
+            {
+                popupModalsController.ShowModal(playlistDownloader.PendingPopup);
             }
         }
 
