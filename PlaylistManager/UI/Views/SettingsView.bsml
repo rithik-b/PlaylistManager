@@ -7,8 +7,8 @@
 		<vertical background='round-rect-panel' background-color='white' pad='2'>
 			<checkbox value='no-image' text='Disable Default Icon' hover-hint='Do not add the default playlist image for new playlists.' apply-on-change='true' bind-value='true' />
 			<checkbox value='allow-duplicates' text='Default Allow Duplicates' hover-hint='Default value for Allow Duplicates when creating a new playlist.' apply-on-change='true' bind-value='true' />
-			<string-setting value='author-name' text='Default Author Name' hover-hint='Change the name of the playlist author for new playlists.' interactable='~name-interactable' apply-on-change='true' bind-value='true' />
 			<checkbox value='auto-name' text='Set Name Automatically' hover-hint='Set the name of the playlist author automatically based on your username' apply-on-change='true' bind-value='true' spacing='5' />
+			<string-setting value='author-name' text='Default Author Name' hover-hint='Change the name of the playlist author for new playlists.' active='~name-active' apply-on-change='true' bind-value='true' />
 		</vertical>
 		<text text='User Interface Settings' align='Left' italics='true' font-size='5' />
 		<vertical background='round-rect-panel' background-color='white' pad='2'>

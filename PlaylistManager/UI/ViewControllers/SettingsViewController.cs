@@ -3,6 +3,7 @@ using BeatSaberMarkupLanguage.ViewControllers;
 using HMUI;
 using IPA.Utilities;
 using PlaylistManager.Configuration;
+using System;
 using Zenject;
 
 namespace PlaylistManager.UI
@@ -27,6 +28,8 @@ namespace PlaylistManager.UI
         private bool _driveFullProtection;
         private bool _easterEggs;
 
+        public event Action NameFetchRequestedEvent;
+
         [Inject]
         public void Construct(MainFlowCoordinator mainFlowCoordinator, MenuTransitionsHelper menuTransitionsHelper)
         {
@@ -41,8 +44,8 @@ namespace PlaylistManager.UI
             // Get all values from config
             DefaultImageDisabled = PluginConfig.Instance.DefaultImageDisabled;
             DefaultAllowDuplicates = PluginConfig.Instance.DefaultAllowDuplicates;
-            AuthorName = PluginConfig.Instance.AuthorName;
             AutomaticAuthorName = PluginConfig.Instance.AutomaticAuthorName;
+            AuthorName = PluginConfig.Instance.AuthorName;
             PlaylistHoverHints = PluginConfig.Instance.PlaylistHoverHints;
             PlaylistScrollSpeed = PluginConfig.Instance.PlaylistScrollSpeed;
             BlurredArt = PluginConfig.Instance.BlurredArt;
@@ -62,13 +65,14 @@ namespace PlaylistManager.UI
         [UIAction("ok-click")]
         private void OkClicked()
         {
+            bool fetchName = !PluginConfig.Instance.AutomaticAuthorName && AutomaticAuthorName;
             bool softRestart = SoftRestart;
 
             // Save all values to config
             PluginConfig.Instance.DefaultImageDisabled = DefaultImageDisabled;
             PluginConfig.Instance.DefaultAllowDuplicates = DefaultAllowDuplicates;
-            PluginConfig.Instance.AuthorName = AuthorName;
             PluginConfig.Instance.AutomaticAuthorName = AutomaticAuthorName;
+            PluginConfig.Instance.AuthorName = AuthorName;
             PluginConfig.Instance.PlaylistHoverHints = PlaylistHoverHints;
             PluginConfig.Instance.PlaylistScrollSpeed = PlaylistScrollSpeed;
             PluginConfig.Instance.BlurredArt = BlurredArt;
@@ -85,6 +89,10 @@ namespace PlaylistManager.UI
             else
             {
                 mainFlowCoordinator.YoungestChildFlowCoordinatorOrSelf().InvokeMethod<object, FlowCoordinator>("DismissViewController", new object[] { this, ViewController.AnimationDirection.Vertical, null, false });
+                if (fetchName)
+                {
+                    NameFetchRequestedEvent?.Invoke();
+                }
             }
         }
 
@@ -118,6 +126,18 @@ namespace PlaylistManager.UI
             }
         }
 
+        [UIValue("auto-name")]
+        private bool AutomaticAuthorName
+        {
+            get => _automaticAuthorName;
+            set
+            {
+                _automaticAuthorName = value;
+                NotifyPropertyChanged(nameof(AutomaticAuthorName));
+                NotifyPropertyChanged(nameof(NameActive));
+            }
+        }
+
         [UIValue("author-name")]
         private string AuthorName
         {
@@ -129,20 +149,8 @@ namespace PlaylistManager.UI
             }
         }
 
-        [UIValue("name-interactable")]
-        private bool NameInteractable => !AutomaticAuthorName;
-
-        [UIValue("auto-name")]
-        private bool AutomaticAuthorName
-        {
-            get => _automaticAuthorName;
-            set
-            {
-                _automaticAuthorName = value;
-                NotifyPropertyChanged(nameof(AutomaticAuthorName));
-                NotifyPropertyChanged(nameof(NameInteractable));
-            }
-        }
+        [UIValue("name-active")]
+        private bool NameActive => !AutomaticAuthorName;
 
         #endregion
 
