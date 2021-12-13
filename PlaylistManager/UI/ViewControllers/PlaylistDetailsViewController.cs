@@ -131,7 +131,7 @@ namespace PlaylistManager.UI
         [UIValue("playlist-name")]
         private string PlaylistName
         {
-            get => selectedPlaylist == null || selectedPlaylist.Title == null ? " " : selectedPlaylist.Title;
+            get => selectedPlaylist == null ? " " : (selectedPlaylist as BeatSaberPlaylistsLib.Types.IPlaylist).packName;
             set
             {
                 selectedPlaylist.Title = value;

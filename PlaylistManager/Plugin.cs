@@ -2,9 +2,7 @@
 using IPA;
 using IPA.Config;
 using IPA.Config.Stores;
-using IPA.Loader;
 using PlaylistManager.Installers;
-using PlaylistManager.Utilities;
 using SiraUtil.Zenject;
 using System.Reflection;
 using IPALogger = IPA.Logging.Logger;
@@ -26,14 +24,17 @@ namespace PlaylistManager
         /// [Init] methods that use a Constructor or called before regular methods like InitWithConfig.
         /// Only use [Init] with one Constructor.
         /// </summary>
-        public Plugin(IPALogger logger, Zenjector zenjector, PluginMetadata metadata)
+        public Plugin(IPALogger logger, Zenjector zenjector)
         {
             Instance = this;
             Log = logger;
             harmony = new Harmony(HarmonyId);
-            zenjector.OnApp<PlaylistManagerAppInstaller>().WithParameters(metadata);
-            zenjector.OnMenu<PlaylistManagerMenuInstaller>();
-            zenjector.OnGame<PlaylistManagerGameInstaller>();
+            zenjector.UseMetadataBinder<Plugin>();
+            zenjector.UseHttpService();
+            zenjector.UseSiraSync(SiraUtil.Web.SiraSync.SiraSyncServiceType.GitHub, "rithik-b");
+            zenjector.Install<PlaylistManagerAppInstaller>(Location.App);
+            zenjector.Install<PlaylistManagerMenuInstaller>(Location.Menu);
+            zenjector.Install<PlaylistManagerGameInstaller>(Location.GameCore);
         }
 
         #region BSIPA Config

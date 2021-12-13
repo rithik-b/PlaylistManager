@@ -9,11 +9,13 @@ namespace PlaylistManager.UI
     {
         private FlowCoordinator parentFlowCoordinator;
         private SettingsViewController settingsViewController;
+        private ChangelogViewController changelogViewController;
 
         [Inject]
-        public void Construct(SettingsViewController settingsViewController)
+        public void Construct(SettingsViewController settingsViewController, ChangelogViewController changelogViewController)
         {
             this.settingsViewController = settingsViewController;
+            this.changelogViewController = changelogViewController;
         }
 
         public void Initialize()
@@ -28,18 +30,18 @@ namespace PlaylistManager.UI
 
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
-            ProvideInitialViewControllers(settingsViewController);
+            ProvideInitialViewControllers(settingsViewController, changelogViewController);
         }
 
         public void PresentFlowCoordinator(FlowCoordinator parentFlowCoordinator)
         {
             this.parentFlowCoordinator = parentFlowCoordinator;
-            parentFlowCoordinator.PresentFlowCoordinator(this);
+            parentFlowCoordinator.PresentFlowCoordinator(this, animationDirection: ViewController.AnimationDirection.Vertical);
         }
 
         private void DismissFlowCoordinator()
         {
-            parentFlowCoordinator.DismissFlowCoordinator(this);
+            parentFlowCoordinator.DismissFlowCoordinator(this, animationDirection: ViewController.AnimationDirection.Vertical);
         }
     }
 }

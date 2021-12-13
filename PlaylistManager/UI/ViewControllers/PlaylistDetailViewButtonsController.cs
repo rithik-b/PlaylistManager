@@ -6,6 +6,7 @@ using PlaylistManager.Interfaces;
 using PlaylistManager.Types;
 using PlaylistManager.Utilities;
 using SiraUtil;
+using SiraUtil.Web;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -22,7 +23,7 @@ namespace PlaylistManager.UI
 {
     public class PlaylistDetailViewButtonsController : IInitializable, IDisposable, INotifyPropertyChanged, ILevelCollectionUpdater, ILevelCategoryUpdater, ILevelCollectionsTableUpdater
     {
-        private readonly SiraClient siraClient;
+        private readonly IHttpService siraHttpService;
         private readonly PlaylistDownloader playlistDownloader;
         private readonly LevelPackDetailViewController levelPackDetailViewController;
         private readonly PopupModalsController popupModalsController;
@@ -43,10 +44,10 @@ namespace PlaylistManager.UI
         [UIComponent("sync-button")]
         private readonly Transform syncButtonTransform;
 
-        public PlaylistDetailViewButtonsController(SiraClient siraClient, PlaylistDownloader playlistDownloader, LevelPackDetailViewController levelPackDetailViewController, 
+        public PlaylistDetailViewButtonsController(IHttpService siraHttpService, PlaylistDownloader playlistDownloader, LevelPackDetailViewController levelPackDetailViewController, 
             PopupModalsController popupModalsController, PlaylistDetailsViewController playlistDetailsViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController)
         {
-            this.siraClient = siraClient;
+            this.siraHttpService = siraHttpService;
             this.playlistDownloader = playlistDownloader;
             this.levelPackDetailViewController = levelPackDetailViewController;
             this.popupModalsController = popupModalsController;
@@ -86,7 +87,7 @@ namespace PlaylistManager.UI
         {
             int numberOfSongs = ((IAnnotatedBeatmapLevelCollection)selectedPlaylist).beatmapLevelCollection.beatmapLevels.Length;
             string checkboxText = numberOfSongs > 0 ? $"Also delete all {numberOfSongs} songs from the game." : "";
-            popupModalsController.ShowYesNoModal(rootTransform, $"Are you sure you would like to delete the playlist \"{selectedPlaylist.Title}\"?", DeleteButtonPressed, checkboxText: checkboxText);
+            popupModalsController.ShowYesNoModal(rootTransform, $"Are you sure you would like to delete the playlist \"{selectedPlaylist.packName}\"?", DeleteButtonPressed, checkboxText: checkboxText);
         }
 
         private void DeleteButtonPressed()
@@ -233,12 +234,11 @@ namespace PlaylistManager.UI
 
             try
             {
-                WebResponse webResponse = await siraClient.GetAsync(syncURL, tokenSource.Token);
-                if (webResponse.IsSuccessStatusCode)
+                IHttpResponse httpResponse = await siraHttpService.GetAsync(syncURL, cancellationToken: tokenSource.Token);
+                if (httpResponse.Successful)
                 {
-                    playlistStream = new MemoryStream(webResponse.ContentToBytes());
                     selectedPlaylist.Clear(); // Clear all songs
-                    PlaylistLibUtils.playlistManager.DefaultHandler.Populate(playlistStream, selectedPlaylist);
+                    PlaylistLibUtils.playlistManager.DefaultHandler.Populate(await httpResponse.ReadAsStreamAsync(), selectedPlaylist);
                     parentManager.StorePlaylist(selectedPlaylist);
                 }
                 else

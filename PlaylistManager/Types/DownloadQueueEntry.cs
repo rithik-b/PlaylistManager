@@ -23,7 +23,7 @@ namespace PlaylistManager.Types
         private readonly ImageView playlistCoverView;
 
         [UIValue("playlist-name")]
-        public string PlaylistName => playlist?.Title ?? " ";
+        public string PlaylistName => playlist?.packName ?? " ";
 
         [UIValue("playlist-author")]
         public string PlaylistAuthor => playlist?.Author ?? " ";

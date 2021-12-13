@@ -22,6 +22,7 @@ namespace PlaylistManager.Installers
 
             Container.BindInterfacesAndSelfTo<PlaylistManagerFlowCoordinator>().FromNewComponentOnNewGameObject().AsSingle();
             Container.Bind<SettingsViewController>().FromNewComponentAsViewController().AsSingle();
+            Container.Bind<ChangelogViewController>().FromNewComponentAsViewController().AsSingle();
 
             Container.BindInterfacesTo<PlaylistsGridViewController>().AsSingle();
             Container.BindInterfacesTo<CoverImageUpdater>().AsSingle();

@@ -103,11 +103,11 @@ namespace PlaylistManager.UI
             if ((PluginConfig.Instance.AuthorName.ToUpper().Contains("GOOBIE") || PluginConfig.Instance.AuthorName.ToUpper().Contains("ERIS") || 
                  PluginConfig.Instance.AuthorName.ToUpper().Contains("PINK") || PluginConfig.Instance.AuthorName.ToUpper().Contains("CANDL3"))  && PluginConfig.Instance.EasterEggs)
             {
-                levelCollectionNavigationController.SetDataForPack(selectedPlaylist, true, true, true, $"{PluginConfig.Instance.AuthorName} Cute");
+                levelCollectionNavigationController.SetDataForPack(selectedPlaylist, true, true, $"{PluginConfig.Instance.AuthorName} Cute");
             }
             else
             {
-                levelCollectionNavigationController.SetDataForPack(selectedPlaylist, true, true, true, "Play");
+                levelCollectionNavigationController.SetDataForPack(selectedPlaylist, true, true, "Play");
             }
 
             levelCollectionNavigationController.HideDetailViewController();

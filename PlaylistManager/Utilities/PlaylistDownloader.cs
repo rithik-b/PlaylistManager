@@ -4,7 +4,8 @@ using BeatSaverSharp.Models;
 using IPA.Loader;
 using PlaylistManager.Configuration;
 using PlaylistManager.Types;
-using SiraUtil;
+using SiraUtil.Web;
+using SiraUtil.Zenject;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -18,7 +19,7 @@ namespace PlaylistManager.Utilities
 {
     public class PlaylistDownloader : IInitializable, IDisposable
     {
-        private readonly SiraClient siraClient;
+        private readonly IHttpService siraHttpService;
         private readonly BeatSaver beatSaverInstance;
         private readonly SemaphoreSlim downloadSemaphore;
         private static readonly HashSet<string> ownedHashes = new HashSet<string>();
@@ -46,10 +47,10 @@ namespace PlaylistManager.Utilities
             }
         }
 
-        public PlaylistDownloader([Inject(Id = nameof(PlaylistManager))] PluginMetadata metadata, SiraClient siraClient)
+        public PlaylistDownloader(UBinder<Plugin, PluginMetadata> metadata, IHttpService siraHttpService)
         {
-            this.siraClient = siraClient;
-            BeatSaverOptions options = new BeatSaverOptions(applicationName: metadata.Name, version: metadata.HVersion.ToString());
+            this.siraHttpService = siraHttpService;
+            BeatSaverOptions options = new BeatSaverOptions(applicationName: metadata.Value.Name, version: metadata.Value.HVersion.ToString());
             beatSaverInstance = new BeatSaver(options);
             downloadSemaphore = new SemaphoreSlim(1, 1);
             pauseSemaphore = new SemaphoreSlim(0, 1);
@@ -312,10 +313,10 @@ namespace PlaylistManager.Utilities
                 {
                     Directory.CreateDirectory(customSongsPath);
                 }
-                WebResponse webResponse = await siraClient.GetAsync(url, token);
-                if (webResponse.IsSuccessStatusCode)
+                IHttpResponse httpResponse = await siraHttpService.GetAsync(url, cancellationToken: token);
+                if (httpResponse.Successful)
                 {
-                    byte[] zip = webResponse.ContentToBytes();
+                    byte[] zip = await httpResponse.ReadAsByteArrayAsync();
                     await ExtractZipAsync(zip, customSongsPath, songName: songName).ConfigureAwait(false);
                 }
                 else
