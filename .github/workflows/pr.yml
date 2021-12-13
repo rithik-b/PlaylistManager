@@ -16,12 +16,11 @@ jobs:
               uses: actions/setup-dotnet@v1
               with:
                   dotnet-version: 5.0.x
-            - name: GetStrippedRefs
-              env:
-                  FILES_URL: ${{ secrets.BSFILES_URL }}
-              run: wget --no-check-certificate "$FILES_URL" -q -O bsfiles.zip
-            - name: ExtractRefs
-              run: unzip -q -n bsfiles.zip -d ${{github.workspace}}/Refs
+            - name: Download SIRA References
+                  uses: ProjectSIRA/download-sira-stripped@1.0.0
+                  with:
+                    manifest: ${{github.workspace}}/PlaylistManager/manifest.json
+                    sira-server-code: ${{ secrets.SIRA_SERVER_CODE }}
             - name: Download Mod Dependencies
               uses: Goobwabber/download-beatmods-deps@1.2
               with:
