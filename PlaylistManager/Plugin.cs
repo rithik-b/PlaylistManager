@@ -2,9 +2,7 @@
 using IPA;
 using IPA.Config;
 using IPA.Config.Stores;
-using IPA.Loader;
 using PlaylistManager.Installers;
-using PlaylistManager.Utilities;
 using SiraUtil.Zenject;
 using System.Reflection;
 using IPALogger = IPA.Logging.Logger;
@@ -33,6 +31,7 @@ namespace PlaylistManager
             harmony = new Harmony(HarmonyId);
             zenjector.UseMetadataBinder<Plugin>();
             zenjector.UseHttpService();
+            zenjector.UseSiraSync(SiraUtil.Web.SiraSync.SiraSyncServiceType.GitHub, "rithik-b");
             zenjector.Install<PlaylistManagerAppInstaller>(Location.App);
             zenjector.Install<PlaylistManagerMenuInstaller>(Location.Menu);
             zenjector.Install<PlaylistManagerGameInstaller>(Location.GameCore);
