@@ -106,7 +106,6 @@ namespace PlaylistManager.UI
         {
             Parse();
             yesNoModalTransform.localPosition = yesNoModalPosition;
-            keyboardTransform.transform.SetParent(rootTransform);
             yesNoModalTransform.transform.SetParent(parent);
 
             YesNoText = text;
@@ -230,7 +229,6 @@ namespace PlaylistManager.UI
         {
             Parse();
             okModalTransform.localPosition = okModalPosition;
-            keyboardTransform.transform.SetParent(rootTransform);
             okModalTransform.transform.SetParent(parent);
 
             OkText = text;
