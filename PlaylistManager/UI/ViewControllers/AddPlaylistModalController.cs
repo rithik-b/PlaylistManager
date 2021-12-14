@@ -272,6 +272,7 @@ namespace PlaylistManager.UI
                     playlistTableData.data.Insert(childManagers.Count, new CustomCellInfo(Path.GetFileName(childManager.PlaylistPath), "Folder", folderIcon));
                     playlistTableData.tableView.ReloadDataKeepingPosition();
                     childManagers.Add(childManager);
+                    PlaylistLibUtils.playlistManager.RequestRefresh("PlaylistManager (plugin)");
                 }
             }
         }

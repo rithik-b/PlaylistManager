@@ -358,7 +358,6 @@ namespace PlaylistManager.UI
             else
             {
                 rootTransform.gameObject.SetActive(false);
-                folderMode = FolderMode.None;
             }
         }
 
@@ -370,6 +369,11 @@ namespace PlaylistManager.UI
 
         public void Refresh()
         {
+            if (!rootTransform.gameObject.activeInHierarchy)
+            {
+                return;
+            }
+
             if (folderMode == FolderMode.AllPacks)
             {
                 IBeatmapLevelPack[] annotatedBeatmapLevelCollections = Accessors.CustomLevelPackCollectionAccessor(ref beatmapLevelsModel).beatmapLevelPacks.Concat(PlaylistLibUtils.playlistManager.GetAllPlaylists(true)).ToArray();
