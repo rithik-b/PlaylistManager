@@ -161,6 +161,7 @@ namespace PlaylistManager.UI
             {
                 _playlistHoverHints = value;
                 NotifyPropertyChanged(nameof(PlaylistHoverHints));
+                NotifyPropertyChanged(nameof(SoftRestart));
             }
         }
 
@@ -172,6 +173,7 @@ namespace PlaylistManager.UI
             {
                 _playlistScrollSpeed = value;
                 NotifyPropertyChanged(nameof(PlaylistScrollSpeed));
+                NotifyPropertyChanged(nameof(SoftRestart));
             }
         }
 
@@ -260,6 +262,7 @@ namespace PlaylistManager.UI
         #endregion
 
         [UIValue("soft-restart")]
-        private bool SoftRestart => FoldersDisabled != PluginConfig.Instance.FoldersDisabled;
+        private bool SoftRestart => PlaylistHoverHints != PluginConfig.Instance.PlaylistHoverHints || PlaylistScrollSpeed != PluginConfig.Instance.PlaylistScrollSpeed ||
+            FoldersDisabled != PluginConfig.Instance.FoldersDisabled;
     }
 }
