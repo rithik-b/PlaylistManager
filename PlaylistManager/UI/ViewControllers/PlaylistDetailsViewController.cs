@@ -142,6 +142,7 @@ namespace PlaylistManager.UI
                 }
                 parentManager.StorePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistName)));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NameHint)));
             }
         }
 
