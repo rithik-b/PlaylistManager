@@ -18,5 +18,11 @@
 			<button text='~ok-button-text' on-click='ok-button-pressed' click-event='close-ok' min-width='16' pref-height='8' />
 		</vertical>
 	</modal>
+	<modal id='loading-modal' show-event='open-loading' hide-event='close-loading' clickerino-offerino-closerino='false' size-delta-x='50' size-delta-y='30'>
+		<vertical anchor-pos-y='2' horizontal-fit='PreferredSize' vertical-fit='PreferredSize' spacing='3' preferred-width='45' preferred-height='25'>
+			<text text='~loading-text' word-wrapping='true' align='Center' font-size='5' />
+			<loading-indicator preserve-aspect='true' pref-width='3' pref-height='3' />
+		</vertical>
+	</modal>
 	<modal-keyboard id='keyboard' value='keyboard-text' show-event='open-keyboard' hide-event='close-keyboard' clickerino-offerino-closerino='true' on-enter='keyboard-enter' />
 </bg>

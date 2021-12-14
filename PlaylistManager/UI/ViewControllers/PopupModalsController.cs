@@ -34,6 +34,8 @@ namespace PlaylistManager.UI
         private string _okText = "";
         private string _okButtonText = "Ok";
 
+        private string _loadingText = "";
+
         private string _keyboardText = "";
 
         [UIComponent("root")]
@@ -54,6 +56,14 @@ namespace PlaylistManager.UI
         private ModalView okModalView;
 
         private Vector3 okModalPosition;
+
+        [UIComponent("loading-modal")]
+        private readonly RectTransform loadingModalTransform;
+
+        [UIComponent("loading-modal")]
+        private ModalView loadingModalView;
+
+        private Vector3 loadingModalPosition;
 
         [UIComponent("keyboard")]
         private readonly RectTransform keyboardTransform;
@@ -76,6 +86,7 @@ namespace PlaylistManager.UI
                 BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.PopupModals.bsml"), mainMenuViewController.gameObject, this);
                 yesNoModalPosition = yesNoModalTransform.localPosition;
                 okModalPosition = okModalTransform.localPosition;
+                loadingModalPosition = loadingModalTransform.localPosition;
                 parsed = true;
             }
         }
@@ -269,6 +280,37 @@ namespace PlaylistManager.UI
             {
                 _okButtonText = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(OkButtonText)));
+            }
+        }
+
+        #endregion
+
+        #region Loading Modal
+
+        internal void ShowLoadingModal(Transform parent, string text, bool animateParentCanvas = true)
+        {
+            Parse();
+            loadingModalTransform.localPosition = loadingModalPosition;
+            loadingModalTransform.SetParent(parent);
+
+            LoadingText = text;
+
+            Accessors.AnimateCanvasAccessor(ref okModalView) = animateParentCanvas;
+
+            parserParams.EmitEvent("close-loading");
+            parserParams.EmitEvent("open-loading");
+        }
+
+        internal void DismissLoadingModal() => parserParams.EmitEvent("close-loading");
+
+        [UIValue("loading-text")]
+        private string LoadingText
+        {
+            get => _loadingText;
+            set
+            {
+                _loadingText = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LoadingText)));
             }
         }
 

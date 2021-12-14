@@ -108,18 +108,24 @@ namespace PlaylistManager.UI
             }
         }
 
-        private void DeleteSongs()
+        private async void DeleteSongs()
         {
-            IPreviewBeatmapLevel[] beatmapLevels = ((IAnnotatedBeatmapLevelCollection)selectedPlaylist).beatmapLevelCollection.beatmapLevels;
+            popupModalsController.ShowLoadingModal(rootTransform, "Deleting Playlist & Songs");
+
+            IPreviewBeatmapLevel[] beatmapLevels = selectedPlaylist.beatmapLevelCollection.beatmapLevels;
+            List<string> levelPaths = new List<string>();
             foreach (CustomPreviewBeatmapLevel beatmapLevel in beatmapLevels.OfType<CustomPreviewBeatmapLevel>())
             {
-                SongCore.Loader.Instance.DeleteSong(beatmapLevel.customLevelPath);
+                levelPaths.Add(beatmapLevel.customLevelPath);
             }
+            await SongCore.Loader.Instance.DeleteSongsAsync(levelPaths);
+
+            popupModalsController.DismissLoadingModal();
         }
 
         private void DeletePlaylist()
         {
-            parentManager.DeletePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
+            parentManager.DeletePlaylist(selectedPlaylist);
             int selectedIndex = annotatedBeatmapLevelCollectionsViewController.selectedItemIndex;
             List<IAnnotatedBeatmapLevelCollection> annotatedBeatmapLevelCollections = Accessors.AnnotatedBeatmapLevelCollectionsAccessor(ref annotatedBeatmapLevelCollectionsViewController).ToList();
             annotatedBeatmapLevelCollections.RemoveAt(selectedIndex);
