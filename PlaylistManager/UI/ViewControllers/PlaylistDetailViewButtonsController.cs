@@ -62,11 +62,13 @@ namespace PlaylistManager.UI
             syncButtonTransform.gameObject.SetActive(false);
             rootTransform.gameObject.SetActive(false);
 
+            levelPackDetailViewController.didActivateEvent += PackViewActivated;
             playlistDownloader.QueueUpdatedEvent += OnQueueUpdated;
         }
 
         public void Dispose()
         {
+            levelPackDetailViewController.didActivateEvent -= PackViewActivated;
             playlistDownloader.QueueUpdatedEvent -= OnQueueUpdated;
         }
 
@@ -289,6 +291,14 @@ namespace PlaylistManager.UI
         private void DownloadRejected() => popupModalsController.ShowOkModal(rootTransform, "Playlist Synced!", null);
 
         #endregion
+
+        private void PackViewActivated(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
+        {
+            if (selectedPlaylist != null && parentManager != null)
+            {
+                rootTransform.gameObject.SetActive(true);
+            }
+        }
 
         public void LevelCollectionUpdated(IAnnotatedBeatmapLevelCollection selectedBeatmapLevelCollection, BeatSaberPlaylistsLib.PlaylistManager parentManager)
         {
