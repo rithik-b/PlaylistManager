@@ -20,8 +20,13 @@ namespace PlaylistManager.UI
         private readonly PlaylistDownloader playlistDownloader;
         private readonly PlaylistDownloaderViewController playlistDownloaderViewController;
         private readonly PlaylistManagerFlowCoordinator playlistManagerFlowCoordinator;
+
         private readonly MainFlowCoordinator mainFlowCoordinator;
         private readonly AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
+        private readonly LevelFilteringNavigationController levelFilteringNavigationController;
+        private readonly SelectLevelCategoryViewController selectLevelCategoryViewController;
+        private readonly IconSegmentedControl levelCategorySegmentedControl;
+
 
         private BeatSaberPlaylistsLib.PlaylistManager parentManager;
         public event PropertyChangedEventHandler PropertyChanged;
@@ -48,15 +53,20 @@ namespace PlaylistManager.UI
         private Vector3 queueModalPosition;
 
         public PlaylistViewButtonsController(PopupModalsController popupModalsController, TimeTweeningManager uwuTweenyManager, PlaylistDownloader playlistDownloader, PlaylistDownloaderViewController playlistDownloaderViewController,
-            MainFlowCoordinator mainFlowCoordinator, PlaylistManagerFlowCoordinator playlistManagerFlowCoordinator, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController)
+            MainFlowCoordinator mainFlowCoordinator, PlaylistManagerFlowCoordinator playlistManagerFlowCoordinator, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController,
+            LevelFilteringNavigationController levelFilteringNavigationController, SelectLevelCategoryViewController selectLevelCategoryViewController)
         {
             this.popupModalsController = popupModalsController;
             this.uwuTweenyManager = uwuTweenyManager;
             this.playlistDownloader = playlistDownloader;
             this.playlistDownloaderViewController = playlistDownloaderViewController;
+
             this.mainFlowCoordinator = mainFlowCoordinator;
             this.playlistManagerFlowCoordinator = playlistManagerFlowCoordinator;
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
+            this.levelFilteringNavigationController = levelFilteringNavigationController;
+            this.selectLevelCategoryViewController = selectLevelCategoryViewController;
+            levelCategorySegmentedControl = Accessors.LevelCategorySegmentedControlAccessor(ref selectLevelCategoryViewController);
         }
 
         public void Initialize()
@@ -125,6 +135,8 @@ namespace PlaylistManager.UI
             Accessors.SkewAccessor(ref icon) = 0.18f;
         }
 
+        #region Create Playlist
+
         [UIAction("create-click")]
         private void CreateClicked()
         {
@@ -139,8 +151,18 @@ namespace PlaylistManager.UI
             }
 
             BeatSaberPlaylistsLib.Types.IPlaylist playlist = PlaylistLibUtils.CreatePlaylistWithConfig(playlistName, parentManager ?? BeatSaberPlaylistsLib.PlaylistManager.DefaultManager);
-            popupModalsController.ShowOkModal(rootTransform, $"Successfully created {playlist.collectionName}", null);
+            popupModalsController.ShowYesNoModal(rootTransform, $"Successfully created {playlist.collectionName}", () =>
+            {
+                // In case the category isn't already playlists which it shouldn't be
+                levelCategorySegmentedControl.SelectCellWithNumber(1);
+                selectLevelCategoryViewController.LevelFilterCategoryIconSegmentedControlDidSelectCell(levelCategorySegmentedControl, 1);
+                levelFilteringNavigationController.SelectAnnotatedBeatmapLevelCollection(playlist);
+            }, "Go to playlist", "Dismiss");
         }
+
+        #endregion
+
+        #region Download Queue
 
         [UIAction("queue-click")]
         private void ShowQueue()
@@ -152,13 +174,19 @@ namespace PlaylistManager.UI
             });
         }
 
+        [UIValue("queue-interactable")]
+        private bool QueueInteractable => PlaylistDownloader.downloadQueue.Count != 0;
+
+        #endregion
+
+        #region Settings
+
         [UIAction("flow-click")]
         private void ShowSettings()
         {
             playlistManagerFlowCoordinator.PresentFlowCoordinator(mainFlowCoordinator.YoungestChildFlowCoordinatorOrSelf());
         }
 
-        [UIValue("queue-interactable")]
-        private bool QueueInteractable => PlaylistDownloader.downloadQueue.Count != 0;
+        #endregion
     }
 }
