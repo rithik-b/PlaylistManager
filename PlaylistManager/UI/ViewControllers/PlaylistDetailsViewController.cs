@@ -149,7 +149,7 @@ namespace PlaylistManager.UI
         [UIValue("name-hint")]
         private string NameHint
         {
-            get => PlaylistName;
+            get => string.IsNullOrWhiteSpace(PlaylistName) ? " " : PlaylistName;
         }
 
         [UIValue("playlist-author")]
@@ -161,13 +161,14 @@ namespace PlaylistManager.UI
                 selectedPlaylist.Author = value;
                 parentManager.StorePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistAuthor)));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AuthorHint)));
             }
         }
 
         [UIValue("author-hint")]
         private string AuthorHint
         {
-            get => PlaylistAuthor;
+            get => string.IsNullOrWhiteSpace(PlaylistAuthor) ? " " : PlaylistAuthor;
         }
 
         [UIValue("playlist-description")]
