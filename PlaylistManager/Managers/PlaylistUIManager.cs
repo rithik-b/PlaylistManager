@@ -129,12 +129,15 @@ namespace PlaylistManager.Managers
 
         private void LevelFilteringNavigationController_SecondChildControllerUpdatedEvent()
         {
+            LevelFilteringNavigationController_UpdateSecondChildControllerContent.SecondChildControllerUpdatedEvent -= LevelFilteringNavigationController_SecondChildControllerUpdatedEvent;
             if (annotatedBeatmapLevelCollectionsViewController.isActiveAndEnabled)
             {
                 LevelCollectionTableViewUpdatedEvent?.Invoke(downloadingBeatmapLevelCollections, downloadingBeatmapCollectionIdx);
             }
-            levelCollectionNavigationController.SelectLevel(downloadingBeatmap);
-            LevelFilteringNavigationController_UpdateSecondChildControllerContent.SecondChildControllerUpdatedEvent -= LevelFilteringNavigationController_SecondChildControllerUpdatedEvent;
+            if (levelCollectionNavigationController.isActiveAndEnabled && downloadingBeatmap != null)
+            {
+                levelCollectionNavigationController.SelectLevel(downloadingBeatmap);
+            }
         }
 
         private void PlaylistManager_PlaylistsRefreshRequested(object sender, string requester)
