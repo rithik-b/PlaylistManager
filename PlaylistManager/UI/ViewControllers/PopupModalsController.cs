@@ -301,7 +301,6 @@ namespace PlaylistManager.UI
         {
             keyboardPressed?.Invoke(keyboardText);
             keyboardPressed = null;
-            keyboardTransform.transform.SetParent(rootTransform);
         }
 
         // Values
