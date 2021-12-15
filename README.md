@@ -1,4 +1,4 @@
-<img src="https://github.com/rithik-b/PlaylistManager/blob/master/img/logo.png?raw=true" alt="Logo created by Interz" width="256" height="256">
+<img src="https://github.com/rithik-b/PlaylistManager/blob/master/PlaylistManager/Icons/Logo.png?raw=true" alt="Logo created by Interz" width="256" height="256">
 
 # PlaylistManager
 Load, Create, Edit, Organize Playlists and Download their Songs in Beat Saber.

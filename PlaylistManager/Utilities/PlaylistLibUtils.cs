@@ -15,7 +15,8 @@ namespace PlaylistManager.Utilities
 {
     public class PlaylistLibUtils
     {
-        private static readonly string EASTER_EGG_URL = "https://raw.githubusercontent.com/rithik-b/PlaylistManager/master/img/easteregg.bplist";
+        private const string ICON_PATH = "PlaylistManager.Icons.DefaultIcon.png";
+        private const string EASTER_EGG_URL = "https://raw.githubusercontent.com/rithik-b/PlaylistManager/master/img/easteregg.bplist";
 
         public static BeatSaberPlaylistsLib.PlaylistManager playlistManager
         {
@@ -39,7 +40,7 @@ namespace PlaylistManager.Utilities
 
             if (defaultCover)
             {
-                using (Stream imageStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("PlaylistManager.Icons.Logo.png"))
+                using (Stream imageStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(ICON_PATH))
                 {
                     playlist.SetCover(imageStream);
                 }
