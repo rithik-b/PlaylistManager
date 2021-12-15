@@ -142,6 +142,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <EmbeddedResource Include="Description.md" />
         <EmbeddedResource Include="manifest.json" />
         <EmbeddedResource Include="Icons\*.png" />
         <EmbeddedResource Include="UI\Views\*.bsml" />
