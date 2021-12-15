@@ -12,10 +12,10 @@
 		</horizontal>
 		<horizontal anchor-pos-x='0' child-expand-width='false' child-control-width='false' spacing='3' pref-height='10' child-align='MiddleRight'>
 			<image src='PlaylistManager.Icons.WhitePixel.png' size-delta-x='0.5' size-delta-y='10' />
-			<clickable-image src='PlaylistManager.Icons.Youtube.png' active='~youtube-active' on-click='youtube-click' size-delta-x='7' preserve-aspect='true' />
-			<clickable-image src='PlaylistManager.Icons.Twitch.png' active='~twitch-active' on-click='twitch-click' size-delta-x='7' preserve-aspect='true' />
-			<clickable-image src='PlaylistManager.Icons.Github.png' active='~github-active' on-click='github-click' size-delta-x='7' preserve-aspect='true' />
-			<clickable-image src='PlaylistManager.Icons.Kofi.png' active='~kofi-active' on-click='kofi-click' size-delta-x='7' preserve-aspect='true' />
+			<clickable-image src='PlaylistManager.Icons.Youtube.png' active='~youtube-active' hover-hint='Youtube' on-click='youtube-click' size-delta-x='7' preserve-aspect='true' />
+			<clickable-image src='PlaylistManager.Icons.Twitch.png' active='~twitch-active' hover-hint='Twitch' on-click='twitch-click' size-delta-x='7' preserve-aspect='true' />
+			<clickable-image src='PlaylistManager.Icons.Github.png' active='~github-active' hover-hint='Github' on-click='github-click' size-delta-x='7' preserve-aspect='true' />
+			<clickable-image src='PlaylistManager.Icons.Kofi.png' active='~kofi-active' hover-hint='Donate!' on-click='kofi-click' size-delta-x='7' preserve-aspect='true' />
 		</horizontal>
 	</custom-list>
 </bg>
