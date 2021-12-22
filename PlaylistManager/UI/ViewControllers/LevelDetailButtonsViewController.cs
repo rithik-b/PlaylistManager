@@ -114,6 +114,10 @@ namespace PlaylistManager.UI
             {
                 levelCollectionNavigationController.SetDataForPack(selectedPlaylist, true, true, $"{PluginConfig.Instance.AuthorName} Cute");
             }
+            else if (PluginConfig.Instance.AuthorName.ToUpper().Contains("JOSHABI"))
+            {
+                levelCollectionNavigationController.SetDataForPack(selectedPlaylist, true, true, $"*Sneeze*");
+            }
             else
             {
                 levelCollectionNavigationController.SetDataForPack(selectedPlaylist, true, true, "Play");
