@@ -37,7 +37,7 @@ namespace PlaylistManager.UI
                 _changelog = value;
 
                 // We do a little filtering using regex
-                _changelog = Regex.Replace(_changelog, @"!\[.*\]\(.*\)", ""); // No images
+                _changelog = Regex.Replace(_changelog, @"!\[.*\]\(.*\)\n", ""); // No images
                 _changelog = Regex.Replace(_changelog, @"(\[)(.*)(\]\(.*\))", "$2"); // No hyperlinks
 
                 // Newlines need to be doubled
