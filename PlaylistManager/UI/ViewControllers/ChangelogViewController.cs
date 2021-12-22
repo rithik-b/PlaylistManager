@@ -40,6 +40,9 @@ namespace PlaylistManager.UI
                 _changelog = Regex.Replace(_changelog, @"!\[.*\]\(.*\)", ""); // No images
                 _changelog = Regex.Replace(_changelog, @"(\[)(.*)(\]\(.*\))", "$2"); // No hyperlinks
 
+                // Newlines need to be doubled
+                _changelog = _changelog.Replace("\n", "\n\n");
+
                 // I will not need more than 3 headings
                 _changelog = Regex.Replace(_changelog, @"(### )(.*)", "<size=5.75>$2</size>\n"); // Heading 3
                 _changelog = Regex.Replace(_changelog, @"(## )(.*)", "<size=6>$2</size>\n<color=#ffffff80>________________________________________________________</color>"); // Heading 2

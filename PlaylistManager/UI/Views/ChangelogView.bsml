@@ -4,6 +4,6 @@
 	</horizontal>
 	<loading-indicator active='~is-loading' preserve-aspect='true' pref-width='20' pref-height='20' />
 	<horizontal horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width='110' pref-height='60' spacing='2'>
-		<text-page id='text-page' text='~changelog' rich-text='true' italics='false' /> <!--Text is coming from a reliable source (me)-->
+		<text-page id='text-page' text='~changelog' rich-text='true' italics='true' /> <!--Text is coming from a reliable source (me)-->
 	</horizontal>
 </vertical>
