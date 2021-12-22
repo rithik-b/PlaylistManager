@@ -251,7 +251,7 @@ namespace PlaylistManager.Utilities
                 {
                     if (!(e is TaskCanceledException))
                     {
-                        Plugin.Log.Info(string.Format("Failed to download Song {0}. Exception: {1}", key, e.ToString()));
+                        Plugin.Log.Error(string.Format("Failed to download Song {0}. Exception: {1}", key, e.ToString()));
                     }
                     songDownloaded = true;
                 }
@@ -297,7 +297,7 @@ namespace PlaylistManager.Utilities
                 {
                     if (!(e is TaskCanceledException))
                     {
-                        Plugin.Log.Info(string.Format("Failed to download Song {0}. Exception: {1}", hash, e.ToString()));
+                        Plugin.Log.Error(string.Format("Failed to download Song {0}. Exception: {1}", hash, e.ToString()));
                     }
                     songDownloaded = true;
                 }
@@ -321,13 +321,13 @@ namespace PlaylistManager.Utilities
                 }
                 else
                 {
-                    Plugin.Log.Info(string.Format("Failed to download Song {0}", url));
+                    Plugin.Log.Error(string.Format("Failed to download Song {0}", url));
                 }
             }
             catch (Exception e)
             {
                 if (!(e is TaskCanceledException))
-                    Plugin.Log.Info(string.Format("Failed to download Song {0}", url));
+                    Plugin.Log.Error(string.Format("Failed to download Song {0}", url));
             }
         }
 
