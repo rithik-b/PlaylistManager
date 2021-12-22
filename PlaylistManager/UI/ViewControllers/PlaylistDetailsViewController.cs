@@ -141,6 +141,7 @@ namespace PlaylistManager.UI
                     selectedPlaylist.RaiseCoverImageChangedForDefaultCover();
                 }
                 parentManager.StorePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
+                Events.RaisePlaylistRenamed((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist, parentManager);
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistName)));
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NameHint)));
             }

@@ -95,7 +95,16 @@ namespace PlaylistManager.UI
         private void RemoveSong()
         {
             selectedPlaylist.Remove((IPlaylistSong)selectedBeatmapLevel);
-            parentManager.StorePlaylist(selectedPlaylist);
+            try
+            {
+                parentManager.StorePlaylist(selectedPlaylist);
+                Events.RaisePlaylistSongRemoved((IPlaylistSong)selectedBeatmapLevel, selectedPlaylist);
+            }
+            catch (Exception e)
+            {
+                popupModalsController.ShowOkModal(standardLevelDetailViewController.transform, "An error occured while removing a song from the playlist.", null);
+                Plugin.Log.Critical(string.Format("An exception was thrown while adding a song to a playlist.\nException Message: {0}", e.Message));
+            }
 
             levelCollectionTableView.ClearSelection();
 

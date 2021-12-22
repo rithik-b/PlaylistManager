@@ -170,18 +170,20 @@ namespace PlaylistManager.UI
             {
                 index -= childManagers.Count;
                 var selectedPlaylist = childPlaylists[index];
+                IPlaylistSong playlistSong;
                 if (HighlightDifficulty)
                 {
-                    selectedPlaylist.Add(standardLevelDetailViewController.selectedDifficultyBeatmap);
+                    playlistSong = selectedPlaylist.Add(standardLevelDetailViewController.selectedDifficultyBeatmap);
                 }
                 else
                 {
-                    selectedPlaylist.Add(standardLevelDetailViewController.selectedDifficultyBeatmap.level);
+                    playlistSong = selectedPlaylist.Add(standardLevelDetailViewController.selectedDifficultyBeatmap.level);
                 }
                 try
                 {
                     parentManager.StorePlaylist(selectedPlaylist);
                     popupModalsController.ShowOkModal(modalTransform, string.Format("Song successfully added to {0}", selectedPlaylist.collectionName), null, animateParentCanvas: false);
+                    Events.RaisePlaylistSongAdded(playlistSong, selectedPlaylist);
                 }
                 catch (Exception e)
                 {
