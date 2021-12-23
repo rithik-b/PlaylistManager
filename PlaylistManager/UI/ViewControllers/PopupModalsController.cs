@@ -131,6 +131,7 @@ namespace PlaylistManager.UI
             CheckboxActive = !string.IsNullOrEmpty(checkboxText);
 
             Accessors.AnimateCanvasAccessor(ref yesNoModalView) = animateParentCanvas;
+            Accessors.ViewValidAccessor(ref yesNoModalView) = false; // Need to do this to show the animation after parent changes
 
             parserParams.EmitEvent("close-yes-no");
             parserParams.EmitEvent("open-yes-no");
@@ -247,6 +248,7 @@ namespace PlaylistManager.UI
             okButtonPressed = buttonPressedCallback;
 
             Accessors.AnimateCanvasAccessor(ref okModalView) = animateParentCanvas;
+            Accessors.ViewValidAccessor(ref yesNoModalView) = false;
 
             parserParams.EmitEvent("close-ok");
             parserParams.EmitEvent("open-ok");
@@ -296,6 +298,7 @@ namespace PlaylistManager.UI
             LoadingText = text;
 
             Accessors.AnimateCanvasAccessor(ref okModalView) = animateParentCanvas;
+            Accessors.ViewValidAccessor(ref yesNoModalView) = false;
 
             parserParams.EmitEvent("close-loading");
             parserParams.EmitEvent("open-loading");
@@ -331,6 +334,7 @@ namespace PlaylistManager.UI
             keyboardPressed = keyboardPressedCallback;
 
             Accessors.AnimateCanvasAccessor(ref keyboardModalView) = animateParentCanvas;
+            Accessors.ViewValidAccessor(ref yesNoModalView) = false;
 
             parserParams.EmitEvent("close-keyboard");
             parserParams.EmitEvent("open-keyboard");
