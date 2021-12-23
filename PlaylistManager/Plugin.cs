@@ -55,7 +55,7 @@ namespace PlaylistManager
         [OnDisable]
         public void OnDisable()
         {
-            harmony.UnpatchAll(HarmonyId);
+            harmony.UnpatchSelf();
         }
     }
 }
