@@ -30,7 +30,8 @@ namespace PlaylistManager.UI
         private string MarkdownParse(string original)
         {
             // We do a little filtering using regex
-            original = Regex.Replace(original, @"!\[.*\]\(.*\)\n", ""); // No images
+            original = Regex.Replace(original, @"!\[.*\]\(.*\)\r\n", ""); // No images with line breaks
+            original = Regex.Replace(original, @"!\[.*\]\(.*\)", ""); // No images
             original = Regex.Replace(original, @"(\[)(.*)(\]\(.*\))", "$2"); // No hyperlinks
 
             // Newlines need to be doubled
