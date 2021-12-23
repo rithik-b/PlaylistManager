@@ -96,7 +96,7 @@ namespace PlaylistManager.Utilities
             if (downloadQueue.Count > 0 && !disposed)
             {
                 await DownloadPlaylist(downloadQueue.OfType<DownloadQueueEntry>().FirstOrDefault());
-                if (!disposed)
+                if (downloadQueue.Count > 0 && !disposed)
                 {
                     downloadQueue.RemoveAt(0);
                 }
