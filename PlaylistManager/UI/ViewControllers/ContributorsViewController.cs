@@ -32,6 +32,7 @@ namespace PlaylistManager.UI
             contributors.Add(new Contributor("PixelBoom", "PlaylistManager", "PlaylistManager.Icons.Pixel.png", "https://www.youtube.com/channel/UCrk1WH6hCAdfrAtzv-q9hvQ",
                 "https://www.twitch.tv/pixelboom58", "https://github.com/rithik-b", "https://ko-fi.com/pixelboom"));
             contributors.Add(new Contributor("Zingabopp", "BeatSaberPlaylistsLib", "PlaylistManager.Icons.Zinga.png", github: "https://github.com/Zingabopp", kofi: "https://ko-fi.com/zingabopp"));
+            contributors.Add(new Contributor("Auros", "Major Contributor", "PlaylistManager.Icons.Auros.png", twitch: "https://www.twitch.tv/aurosvr", github: "https://github.com/Auros", kofi: "https://ko-fi.com/auros"));
 
             foreach (Contributor contributor in contributors.OfType<Contributor>())
             {
