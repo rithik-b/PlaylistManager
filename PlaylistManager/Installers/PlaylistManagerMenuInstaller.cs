@@ -2,6 +2,7 @@
 using PlaylistManager.UI;
 using PlaylistManager.Managers;
 using PlaylistManager.Configuration;
+using PlaylistManager.HarmonyPatches;
 
 namespace PlaylistManager.Installers
 {
@@ -32,6 +33,8 @@ namespace PlaylistManager.Installers
 
             Container.BindInterfacesTo<PlaylistUIManager>().AsSingle();
             Container.BindInterfacesAndSelfTo<PlaylistDataManager>().AsSingle();
+
+            Container.BindInterfacesTo<LevelCollectionCellSetDataPatch>().AsSingle();
 
             if (PluginConfig.Instance.FoldersDisabled)
             {

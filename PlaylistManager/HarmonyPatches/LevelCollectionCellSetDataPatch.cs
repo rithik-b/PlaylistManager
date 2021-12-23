@@ -1,13 +1,11 @@
 ﻿using System;
-using HarmonyLib;
 using UnityEngine.UI;
 using BeatSaberPlaylistsLib.Types;
 using System.Runtime.CompilerServices;
 using PlaylistManager.Utilities;
 using HMUI;
-using UnityEngine;
-using System.Linq;
 using PlaylistManager.Configuration;
+using SiraUtil.Affinity;
 
 /*
  * Original Author: Auros
@@ -16,13 +14,18 @@ using PlaylistManager.Configuration;
 
 namespace PlaylistManager.HarmonyPatches
 {
-    [HarmonyPatch(typeof(AnnotatedBeatmapLevelCollectionCell), nameof(AnnotatedBeatmapLevelCollectionCell.SetData))]
-    internal class AnnotatedBeatmapLevelCollectionCell_SetData
+    internal class LevelCollectionCellSetDataPatch : IAffinity
     {
-        private static readonly ConditionalWeakTable<IDeferredSpriteLoad, AnnotatedBeatmapLevelCollectionCell> EventTable = new ConditionalWeakTable<IDeferredSpriteLoad, AnnotatedBeatmapLevelCollectionCell>();
-        private static HoverHintController hoverHintController;
+        private readonly ConditionalWeakTable<IDeferredSpriteLoad, AnnotatedBeatmapLevelCollectionCell> eventTable = new ConditionalWeakTable<IDeferredSpriteLoad, AnnotatedBeatmapLevelCollectionCell>();
+        private readonly HoverHintController hoverHintController;
 
-        private static void Postfix(AnnotatedBeatmapLevelCollectionCell __instance, ref IAnnotatedBeatmapLevelCollection annotatedBeatmapLevelCollection, ref Image ____coverImage)
+        public LevelCollectionCellSetDataPatch(HoverHintController hoverHintController)
+        {
+            this.hoverHintController = hoverHintController;
+        }
+
+        [AffinityPatch(typeof(AnnotatedBeatmapLevelCollectionCell), nameof(AnnotatedBeatmapLevelCollectionCell.SetData))]
+        private void Patch(AnnotatedBeatmapLevelCollectionCell __instance, ref IAnnotatedBeatmapLevelCollection annotatedBeatmapLevelCollection, ref Image ____coverImage)
         {
             AnnotatedBeatmapLevelCollectionCell cell = __instance;
             if (annotatedBeatmapLevelCollection is IDeferredSpriteLoad deferredSpriteLoad)
@@ -33,11 +36,11 @@ namespace PlaylistManager.HarmonyPatches
                     //Plugin.Log.Debug($"Sprite was already loaded for {(deferredSpriteLoad as IAnnotatedBeatmapLevelCollection).collectionName}");
 #endif
                 }
-                if (EventTable.TryGetValue(deferredSpriteLoad, out AnnotatedBeatmapLevelCollectionCell existing))
+                if (eventTable.TryGetValue(deferredSpriteLoad, out AnnotatedBeatmapLevelCollectionCell existing))
                 {
-                    EventTable.Remove(deferredSpriteLoad);
+                    eventTable.Remove(deferredSpriteLoad);
                 }
-                EventTable.Add(deferredSpriteLoad, cell);
+                eventTable.Add(deferredSpriteLoad, cell);
                 deferredSpriteLoad.SpriteLoaded -= OnSpriteLoaded;
                 deferredSpriteLoad.SpriteLoaded += OnSpriteLoaded;
             }
@@ -49,11 +52,6 @@ namespace PlaylistManager.HarmonyPatches
                 if (hoverHint == null)
                 {
                     hoverHint = __instance.gameObject.AddComponent<HoverHint>();
-                    if (hoverHintController == null)
-                    {
-                        // Forgive me lord but this must be done...
-                        hoverHintController = Resources.FindObjectsOfTypeAll<HoverHintController>().FirstOrDefault();
-                    }
                     Accessors.HoverHintControllerAccessor(ref hoverHint) = hoverHintController;
                 }
 
@@ -61,12 +59,18 @@ namespace PlaylistManager.HarmonyPatches
             }
         }
 
-        private static void OnSpriteLoaded(object sender, EventArgs e)
+        private void OnSpriteLoaded(object sender, EventArgs e)
         {
             if (sender is IDeferredSpriteLoad deferredSpriteLoad)
             {
-                if (EventTable.TryGetValue(deferredSpriteLoad, out AnnotatedBeatmapLevelCollectionCell tableCell))
+                if (eventTable.TryGetValue(deferredSpriteLoad, out AnnotatedBeatmapLevelCollectionCell tableCell))
                 {
+                    if (tableCell == null)
+                    {
+                        deferredSpriteLoad.SpriteLoaded -= OnSpriteLoaded;
+                        return;
+                    }
+
                     IAnnotatedBeatmapLevelCollection collection = Accessors.BeatmapCollectionAccessor(ref tableCell);
                     if (collection == deferredSpriteLoad)
                     {
@@ -77,20 +81,20 @@ namespace PlaylistManager.HarmonyPatches
                     }
                     else
                     {
-                        Plugin.Log.Warn($"Collection '{collection.collectionName}' is not {(deferredSpriteLoad as IAnnotatedBeatmapLevelCollection).collectionName}");
-                        EventTable.Remove(deferredSpriteLoad);
+                        //Plugin.Log.Warn($"Collection '{collection.collectionName}' is not {(deferredSpriteLoad as IAnnotatedBeatmapLevelCollection).collectionName}");
+                        eventTable.Remove(deferredSpriteLoad);
                         deferredSpriteLoad.SpriteLoaded -= OnSpriteLoaded;
                     }
                 }
                 else
                 {
-                    Plugin.Log.Warn($"{(deferredSpriteLoad as IAnnotatedBeatmapLevelCollection).collectionName} is not in the EventTable.");
+                    //Plugin.Log.Warn($"{(deferredSpriteLoad as IAnnotatedBeatmapLevelCollection).collectionName} is not in the EventTable.");
                     deferredSpriteLoad.SpriteLoaded -= OnSpriteLoaded;
                 }
             }
             else
             {
-                Plugin.Log.Warn($"Wrong sender type for deferred sprite load: {sender?.GetType().Name ?? "<NULL>"}");
+                //Plugin.Log.Warn($"Wrong sender type for deferred sprite load: {sender?.GetType().Name ?? "<NULL>"}");
             }
         }
     }
