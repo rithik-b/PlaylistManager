@@ -21,7 +21,7 @@ jobs:
             - name: Download SIRA References
               uses: ProjectSIRA/download-sira-stripped@1.0.0
               with:
-                  manifest: ${{github.workspace}}/RedLightGreenLight/manifest.json
+                  manifest: ${{github.workspace}}/PlaylistManager/manifest.json
                   sira-server-code: ${{ secrets.SIRA_SERVER_CODE }}
             - name: Download Mod Dependencies
               uses: Goobwabber/download-beatmods-deps@1.2
