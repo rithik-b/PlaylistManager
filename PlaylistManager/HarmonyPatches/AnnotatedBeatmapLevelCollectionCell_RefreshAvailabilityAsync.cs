@@ -1,4 +1,6 @@
 ﻿using HarmonyLib;
+using PlaylistManager.Configuration;
+using PlaylistManager.Utilities;
 
 /*
  * This patch removes the download icon for empty beatmaplevelcollections
@@ -12,9 +14,9 @@ namespace PlaylistManager.HarmonyPatches
     {
         private static void Postfix(AnnotatedBeatmapLevelCollectionCell __instance, IAnnotatedBeatmapLevelCollection ____annotatedBeatmapLevelCollection)
         {
-            if (____annotatedBeatmapLevelCollection is BeatSaberPlaylistsLib.Types.IPlaylist)
+            if (____annotatedBeatmapLevelCollection is BeatSaberPlaylistsLib.Types.IPlaylist playlist)
             {
-                __instance.SetDownloadIconVisible(false);
+                __instance.SetDownloadIconVisible(PluginConfig.Instance.ShowDownloadIcon && PlaylistLibUtils.GetMissingSongs(playlist).Count > 0);
             }
         }
     }

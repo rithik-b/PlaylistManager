@@ -34,6 +34,14 @@ namespace PlaylistManager.Utilities
 
         #endregion
 
+        #region ModalView
+
+        public static readonly FieldAccessor<ModalView, bool>.Accessor AnimateCanvasAccessor = FieldAccessor<ModalView, bool>.GetAccessor("_animateParentCanvas");
+
+        public static readonly FieldAccessor<ModalView, bool>.Accessor ViewValidAccessor = FieldAccessor<ModalView, bool>.GetAccessor("_viewIsValid");
+
+        #endregion
+
         #region AnnotatedBeatmapLevelCollectionCell
 
         public static readonly FieldAccessor<AnnotatedBeatmapLevelCollectionCell, ImageView>.Accessor CoverImageAccessor = 
@@ -111,6 +119,9 @@ namespace PlaylistManager.Utilities
         public static readonly FieldAccessor<StandardLevelDetailViewController, StandardLevelDetailView>.Accessor StandardLevelDetailViewAccessor =
             FieldAccessor<StandardLevelDetailViewController, StandardLevelDetailView>.GetAccessor("_standardLevelDetailView");
 
+        public static readonly FieldAccessor<SelectLevelCategoryViewController, IconSegmentedControl>.Accessor LevelCategorySegmentedControlAccessor =
+            FieldAccessor<SelectLevelCategoryViewController, IconSegmentedControl>.GetAccessor("_levelFilterCategoryIconSegmentedControl");
+
         public static readonly FieldAccessor<BeatmapCharacteristicSegmentedControlController, IconSegmentedControl>.Accessor BeatmapCharacteristicsSegmentedControlAccessor =
             FieldAccessor<BeatmapCharacteristicSegmentedControlController, IconSegmentedControl>.GetAccessor("_segmentedControl");
 
@@ -118,8 +129,6 @@ namespace PlaylistManager.Utilities
             FieldAccessor<SegmentedControl, List<SegmentedControlCell>>.GetAccessor("_cells");
 
         public static readonly FieldAccessor<HoverHint, HoverHintController>.Accessor HoverHintControllerAccessor = FieldAccessor<HoverHint, HoverHintController>.GetAccessor("_hoverHintController");
-
-        public static readonly FieldAccessor<ModalView, bool>.Accessor AnimateCanvasAccessor = FieldAccessor<ModalView, bool>.GetAccessor("_animateParentCanvas");
 
         public static readonly FieldAccessor<ImageView, float>.Accessor SkewAccessor = FieldAccessor<ImageView, float>.GetAccessor("_skew");
 

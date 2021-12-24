@@ -3,7 +3,6 @@ using IPA;
 using IPA.Config;
 using IPA.Config.Stores;
 using PlaylistManager.Installers;
-using PlaylistManager.Utilities;
 using SiraUtil.Zenject;
 using System.Reflection;
 using IPALogger = IPA.Logging.Logger;
@@ -29,9 +28,13 @@ namespace PlaylistManager
         {
             Instance = this;
             Log = logger;
-            Log.Info("PlaylistManager initialized.");
             harmony = new Harmony(HarmonyId);
-            zenjector.OnMenu<PlaylistManagerMenuInstaller>();
+            zenjector.UseMetadataBinder<Plugin>();
+            zenjector.UseHttpService();
+            zenjector.UseSiraSync(SiraUtil.Web.SiraSync.SiraSyncServiceType.GitHub, "rithik-b");
+            zenjector.Install<PlaylistManagerAppInstaller>(Location.App);
+            zenjector.Install<PlaylistManagerMenuInstaller>(Location.Menu);
+            zenjector.Install<PlaylistManagerGameInstaller>(Location.GameCore);
         }
 
         #region BSIPA Config
@@ -46,17 +49,13 @@ namespace PlaylistManager
         [OnEnable]
         public void OnEnable()
         {
-            if (DownloaderUtils.instance == null)
-            {
-                DownloaderUtils.Init();
-            }
             harmony.PatchAll(Assembly.GetExecutingAssembly());
         }
 
         [OnDisable]
         public void OnDisable()
         {
-            harmony.UnpatchAll(HarmonyId);
+            harmony.UnpatchSelf();
         }
     }
 }

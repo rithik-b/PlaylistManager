@@ -95,7 +95,16 @@ namespace PlaylistManager.UI
         private void RemoveSong()
         {
             selectedPlaylist.Remove((IPlaylistSong)selectedBeatmapLevel);
-            parentManager.StorePlaylist(selectedPlaylist);
+            try
+            {
+                parentManager.StorePlaylist(selectedPlaylist);
+                Events.RaisePlaylistSongRemoved((IPlaylistSong)selectedBeatmapLevel, selectedPlaylist);
+            }
+            catch (Exception e)
+            {
+                popupModalsController.ShowOkModal(standardLevelDetailViewController.transform, "An error occured while removing a song from the playlist.", null);
+                Plugin.Log.Critical(string.Format("An exception was thrown while adding a song to a playlist.\nException Message: {0}", e.Message));
+            }
 
             levelCollectionTableView.ClearSelection();
 
@@ -103,11 +112,15 @@ namespace PlaylistManager.UI
             if ((PluginConfig.Instance.AuthorName.ToUpper().Contains("GOOBIE") || PluginConfig.Instance.AuthorName.ToUpper().Contains("ERIS") || 
                  PluginConfig.Instance.AuthorName.ToUpper().Contains("PINK") || PluginConfig.Instance.AuthorName.ToUpper().Contains("CANDL3"))  && PluginConfig.Instance.EasterEggs)
             {
-                levelCollectionNavigationController.SetDataForPack(selectedPlaylist, true, true, true, $"{PluginConfig.Instance.AuthorName} Cute");
+                levelCollectionNavigationController.SetDataForPack(selectedPlaylist, true, true, $"{PluginConfig.Instance.AuthorName} Cute");
+            }
+            else if (PluginConfig.Instance.AuthorName.ToUpper().Contains("JOSHABI"))
+            {
+                levelCollectionNavigationController.SetDataForPack(selectedPlaylist, true, true, $"*Sneeze*");
             }
             else
             {
-                levelCollectionNavigationController.SetDataForPack(selectedPlaylist, true, true, true, "Play");
+                levelCollectionNavigationController.SetDataForPack(selectedPlaylist, true, true, "Play");
             }
 
             levelCollectionNavigationController.HideDetailViewController();

@@ -1,9 +1,10 @@
 ﻿using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.MenuButtons;
-using PlaylistManager.Configuration;
 using PlaylistManager.Utilities;
 using SongCore;
+using SongCore.UI;
 using System;
+using System.Threading.Tasks;
 using Zenject;
 
 namespace PlaylistManager.UI
@@ -18,21 +19,19 @@ namespace PlaylistManager.UI
         {
             _refreshButton = new MenuButton("Refresh Playlists", "Refresh Songs & Playlists", RefreshButtonPressed, true);
             MenuButtons.instance.RegisterButton(_refreshButton);
+            Loader.SongsLoadedEvent += SongsLoaded;
         }
 
-        private void SongsLoaded(Loader _, System.Collections.Concurrent.ConcurrentDictionary<string, CustomPreviewBeatmapLevel> songs)
+        private async void SongsLoaded(Loader _, System.Collections.Concurrent.ConcurrentDictionary<string, CustomPreviewBeatmapLevel> songs)
         {
-            PlaylistLibUtils.playlistManager.RefreshPlaylists(true);
-
             if (_progressBar == null)
             {
                 _progressBar = ProgressBar.Create();
             }
-            int numPlaylists = PlaylistLibUtils.playlistManager.GetAllPlaylists(true).Length;
+            int numPlaylists = await Task.Run(() => PlaylistLibUtils.playlistManager.GetAllPlaylists(true).Length);
 
             _progressBar.enabled = true;
-            _progressBar.ShowMessage(string.Format("\n{0} playlists loaded.", numPlaylists), MESSAGE_TIME);
-            Loader.SongsLoadedEvent -= SongsLoaded;
+            _progressBar.ShowMessage($"\n{numPlaylists} playlists loaded.", MESSAGE_TIME);
         }
 
         public void Dispose()
@@ -47,7 +46,6 @@ namespace PlaylistManager.UI
         {
             if (!Loader.AreSongsLoading)
                 Loader.Instance.RefreshSongs(fullRefresh: false);
-            Loader.SongsLoadedEvent += SongsLoaded;
         }
     }
 }

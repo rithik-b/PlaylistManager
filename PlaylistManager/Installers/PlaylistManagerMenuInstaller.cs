@@ -2,42 +2,48 @@
 using PlaylistManager.UI;
 using PlaylistManager.Managers;
 using PlaylistManager.Configuration;
+using PlaylistManager.HarmonyPatches;
 
 namespace PlaylistManager.Installers
 {
-    class PlaylistManagerMenuInstaller : Installer
+    internal class PlaylistManagerMenuInstaller : Installer
     {
         public override void InstallBindings()
         {
-            if (!PluginConfig.Instance.ManagementDisabled)
-            {
-                Container.BindInterfacesTo<LevelDetailButtonsViewController>().AsSingle();
-                Container.BindInterfacesAndSelfTo<AddPlaylistModalController>().AsSingle();
-                Container.BindInterfacesTo<PlaylistViewButtonsController>().AsSingle();
-                Container.BindInterfacesAndSelfTo<PlaylistDetailsViewController>().AsSingle();
-                Container.Bind<ImageSelectionModalController>().AsSingle();
-                Container.BindInterfacesAndSelfTo<PopupModalsController>().AsSingle();
-            }
+            Container.BindInterfacesTo<LevelDetailButtonsViewController>().AsSingle();
+            Container.BindInterfacesAndSelfTo<AddPlaylistModalController>().AsSingle();
+            Container.BindInterfacesTo<PlaylistDetailViewButtonsController>().AsSingle();
+            Container.BindInterfacesAndSelfTo<PlaylistDetailsViewController>().AsSingle();
+            Container.Bind<ImageSelectionModalController>().AsSingle();
+            Container.BindInterfacesAndSelfTo<PopupModalsController>().AsSingle();
 
-            if (PluginConfig.Instance.FoldersDisabled || PluginConfig.Instance.ManagementDisabled)
-            {
-                Container.BindInterfacesTo<AllPacksRefresher>().AsSingle();
-            }
-            else
-            {
-                Container.BindInterfacesTo<FoldersViewController>().AsSingle();
-            }
+            Container.BindInterfacesAndSelfTo<PlaylistDownloaderViewController>().FromNewComponentOnNewGameObject().AsSingle();
+            Container.BindInterfacesTo<PlaylistViewButtonsController>().AsSingle();
 
+            Container.BindInterfacesAndSelfTo<PlaylistManagerFlowCoordinator>().FromNewComponentOnNewGameObject().AsSingle();
+            Container.Bind<SettingsViewController>().FromNewComponentAsViewController().AsSingle();
+            Container.Bind<ChangelogViewController>().FromNewComponentAsViewController().AsSingle();
+            Container.BindInterfacesAndSelfTo<ContributorsViewController>().FromNewComponentAsViewController().AsSingle();
 
             Container.BindInterfacesTo<PlaylistsGridViewController>().AsSingle();
             Container.BindInterfacesTo<CoverImageUpdater>().AsSingle();
             Container.BindInterfacesAndSelfTo<DifficultyHighlighter>().AsSingle();
 
-            Container.BindInterfacesTo<SettingsViewController>().AsSingle();
             Container.BindInterfacesTo<RefreshButtonUI>().AsSingle();
 
             Container.BindInterfacesTo<PlaylistUIManager>().AsSingle();
             Container.BindInterfacesAndSelfTo<PlaylistDataManager>().AsSingle();
+
+            Container.BindInterfacesTo<LevelCollectionCellSetDataPatch>().AsSingle();
+
+            if (PluginConfig.Instance.FoldersDisabled)
+            {
+                Container.BindInterfacesTo<AllPacksRefresher>().AsSingle();
+            }
+            else
+            {
+                Container.BindInterfacesAndSelfTo<FoldersViewController>().AsSingle();
+            }
         }
     }
 }

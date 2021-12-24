@@ -13,13 +13,15 @@ namespace PlaylistManager.Configuration
         public virtual bool AutomaticAuthorName { get; set; } = true;
         public virtual bool DefaultImageDisabled { get; set; } = false;
         public virtual bool FoldersDisabled { get; set; } = false;
-        public virtual bool ManagementDisabled { get; set; } = false;
         public virtual bool DefaultAllowDuplicates { get; set; } = true;
         public virtual bool PlaylistHoverHints { get; set; } = true;
         public virtual bool BlurredArt { get; set; } = true;
         public virtual float PlaylistScrollSpeed { get; set; } = 1;
         public virtual bool HighlightDifficulty { get; set; } = true;
         public virtual bool EasterEggs { get; set; } = false;
+        public virtual bool DownloadDuringGameplay { get; set; } = false;
+        public virtual bool DriveFullProtection { get; set; } = true;
+        public virtual bool ShowDownloadIcon { get; set; } = true;
 
         [UseConverter(typeof(EnumConverter<SyncOptions>))]
         [NonNullable]

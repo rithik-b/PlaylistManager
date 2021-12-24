@@ -3,7 +3,7 @@
     <PropertyGroup>
         <TargetFramework>net48</TargetFramework>
         <OutputType>Library</OutputType>
-        <LangVersion>8</LangVersion>
+        <LangVersion>9</LangVersion>
         <Nullable>disable</Nullable>
         <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
         <LocalRefsDir Condition="Exists('..\Refs')">..\Refs</LocalRefsDir>
@@ -35,6 +35,10 @@
         </Reference>
         <Reference Include="BGNet">
           <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BGNet.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Hive.Versioning">
+          <HintPath>$(BeatSaberDir)\Libs\Hive.Versioning.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine">
@@ -138,6 +142,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <EmbeddedResource Include="Description.md" />
         <EmbeddedResource Include="manifest.json" />
         <EmbeddedResource Include="Icons\*.png" />
         <EmbeddedResource Include="UI\Views\*.bsml" />

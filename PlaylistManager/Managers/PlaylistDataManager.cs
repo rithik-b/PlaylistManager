@@ -1,6 +1,7 @@
 ﻿using IPA.Utilities;
 using PlaylistManager.HarmonyPatches;
 using PlaylistManager.Interfaces;
+using PlaylistManager.UI;
 using PlaylistManager.Utilities;
 using System;
 using System.Collections.Generic;
@@ -13,10 +14,12 @@ namespace PlaylistManager
         private readonly AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
         private readonly LevelPackDetailViewController levelPackDetailViewController;
         private readonly LevelFilteringNavigationController levelFilteringNavigationController;
+        private readonly FoldersViewController foldersViewController;
 
         private readonly List<ILevelCollectionUpdater> levelCollectionUpdaters;
         private readonly List<ILevelCollectionsTableUpdater> levelCollectionsTableUpdaters;
         private readonly List<IPreviewBeatmapLevelUpdater> previewBeatmapLevelUpdaters;
+        private readonly List<IParentManagerUpdater> parentManagerUpdaters;
 
         public BeatSaberPlaylistsLib.Types.IPlaylist selectedPlaylist;
         public BeatSaberPlaylistsLib.Types.IPlaylistSong selectedPlaylistSong;
@@ -25,11 +28,14 @@ namespace PlaylistManager
         private readonly BeatmapLevelPack emptyBeatmapLevelPack;
 
         internal PlaylistDataManager(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, LevelPackDetailViewController levelPackDetailViewController, LevelFilteringNavigationController levelFilteringNavigationController,
-            List<ILevelCollectionUpdater> levelCollectionUpdaters, List<ILevelCollectionsTableUpdater> levelCollectionsTableUpdaters, List<IPreviewBeatmapLevelUpdater> previewBeatmapLevelUpdaters)
+            [InjectOptional] FoldersViewController foldersViewController, List<ILevelCollectionUpdater> levelCollectionUpdaters, List<ILevelCollectionsTableUpdater> levelCollectionsTableUpdaters, List<IPreviewBeatmapLevelUpdater> previewBeatmapLevelUpdaters,
+            List<IParentManagerUpdater> parentManagerUpdaters)
         {
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
             this.levelPackDetailViewController = levelPackDetailViewController;
             this.levelFilteringNavigationController = levelFilteringNavigationController;
+            this.foldersViewController = foldersViewController;
+            this.parentManagerUpdaters = parentManagerUpdaters;
 
             this.levelCollectionUpdaters = levelCollectionUpdaters;
             this.levelCollectionsTableUpdaters = levelCollectionsTableUpdaters;
@@ -45,6 +51,11 @@ namespace PlaylistManager
             annotatedBeatmapLevelCollectionsViewController.didSelectAnnotatedBeatmapLevelCollectionEvent += AnnotatedBeatmapLevelCollectionsViewController_didSelectAnnotatedBeatmapLevelCollectionEvent;
             LevelCollectionTableView_HandleDidSelectRowEvent.DidSelectLevelEvent += LevelCollectionTableView_DidSelectLevelEvent;
 
+            if (foldersViewController != null)
+            {
+                foldersViewController.ParentManagerUpdatedEvent += FoldersViewController_ParentManagerUpdatedEvent;
+            }
+
             foreach (ILevelCollectionsTableUpdater levelCollectionsTableUpdater in levelCollectionsTableUpdaters)
             {
                 levelCollectionsTableUpdater.LevelCollectionTableViewUpdatedEvent += LevelCollectionsTableUpdater_LevelCollectionTableViewUpdated;
@@ -57,6 +68,11 @@ namespace PlaylistManager
             levelFilteringNavigationController.didSelectAnnotatedBeatmapLevelCollectionEvent -= LevelFilteringNavigationController_didSelectAnnotatedBeatmapLevelCollectionEvent;
             annotatedBeatmapLevelCollectionsViewController.didSelectAnnotatedBeatmapLevelCollectionEvent -= AnnotatedBeatmapLevelCollectionsViewController_didSelectAnnotatedBeatmapLevelCollectionEvent;
             LevelCollectionTableView_HandleDidSelectRowEvent.DidSelectLevelEvent -= LevelCollectionTableView_DidSelectLevelEvent;
+
+            if (foldersViewController != null)
+            {
+                foldersViewController.ParentManagerUpdatedEvent -= FoldersViewController_ParentManagerUpdatedEvent;
+            }
 
             foreach (ILevelCollectionsTableUpdater levelCollectionsTableUpdater in levelCollectionsTableUpdaters)
             {
@@ -110,6 +126,14 @@ namespace PlaylistManager
             foreach (IPreviewBeatmapLevelUpdater previewBeatmapLevelUpdater in previewBeatmapLevelUpdaters)
             {
                 previewBeatmapLevelUpdater.PreviewBeatmapLevelUpdated(previewBeatmapLevel);
+            }
+        }
+
+        private void FoldersViewController_ParentManagerUpdatedEvent(BeatSaberPlaylistsLib.PlaylistManager parentManager)
+        {
+            foreach (IParentManagerUpdater parentManagerUpdater in parentManagerUpdaters)
+            {
+                parentManagerUpdater.ParentManagerUpdated(parentManager);
             }
         }
 

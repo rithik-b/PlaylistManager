@@ -2,7 +2,9 @@
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Parser;
 using HMUI;
+using PlaylistManager.Types;
 using PlaylistManager.Utilities;
+using System;
 using System.ComponentModel;
 using System.Reflection;
 using UnityEngine;
@@ -11,17 +13,15 @@ namespace PlaylistManager.UI
 {
     public class PopupModalsController : INotifyPropertyChanged
     {
-        private readonly LevelSelectionNavigationController levelSelectionNavigationController;
+        private readonly MainMenuViewController mainMenuViewController;
         private bool parsed;
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public delegate void ButtonPressed();
-        private ButtonPressed yesButtonPressed;
-        private ButtonPressed noButtonPressed;
-        private ButtonPressed okButtonPressed;
+        private Action yesButtonPressed;
+        private Action noButtonPressed;
+        private Action okButtonPressed;
 
-        public delegate void KeyboardPressed(string keyboardText);
-        private KeyboardPressed keyboardPressed;
+        private Action<string> keyboardPressed;
 
         private string _yesNoText = "";
         private string _checkboxText = "";
@@ -33,6 +33,8 @@ namespace PlaylistManager.UI
 
         private string _okText = "";
         private string _okButtonText = "Ok";
+
+        private string _loadingText = "";
 
         private string _keyboardText = "";
 
@@ -55,6 +57,14 @@ namespace PlaylistManager.UI
 
         private Vector3 okModalPosition;
 
+        [UIComponent("loading-modal")]
+        private readonly RectTransform loadingModalTransform;
+
+        [UIComponent("loading-modal")]
+        private ModalView loadingModalView;
+
+        private Vector3 loadingModalPosition;
+
         [UIComponent("keyboard")]
         private readonly RectTransform keyboardTransform;
 
@@ -64,19 +74,32 @@ namespace PlaylistManager.UI
         [UIParams]
         private readonly BSMLParserParams parserParams;
 
-        public PopupModalsController(LevelSelectionNavigationController levelSelectionNavigationController)
+        public PopupModalsController(MainMenuViewController mainMenuViewController)
         {
-            this.levelSelectionNavigationController = levelSelectionNavigationController;
+            this.mainMenuViewController = mainMenuViewController;
         }
 
         private void Parse()
         {
             if (!parsed)
             {
-                BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.PopupModals.bsml"), levelSelectionNavigationController.gameObject, this);
-                yesNoModalPosition = yesNoModalTransform.position;
-                okModalPosition = okModalTransform.position;
+                BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.PopupModals.bsml"), mainMenuViewController.gameObject, this);
+                yesNoModalPosition = yesNoModalTransform.localPosition;
+                okModalPosition = okModalTransform.localPosition;
+                loadingModalPosition = loadingModalTransform.localPosition;
                 parsed = true;
+            }
+        }
+        
+        internal void ShowModal(PopupContents popupContents)
+        {
+            if (popupContents is OkPopupContents okPopupContents)
+            {
+                ShowOkModal(okPopupContents);
+            }
+            else if (popupContents is YesNoPopupContents yesNoPopupContents)
+            {
+                ShowYesNoModal(yesNoPopupContents);
             }
         }
 
@@ -84,11 +107,16 @@ namespace PlaylistManager.UI
 
         // Methods
 
-        internal void ShowYesNoModal(Transform parent, string text, ButtonPressed yesButtonPressedCallback, string yesButtonText = "Yes", string noButtonText = "No", ButtonPressed noButtonPressedCallback = null, bool animateParentCanvas = true, string checkboxText = "")
+        private void ShowYesNoModal(YesNoPopupContents popupContents)
+        {
+            ShowYesNoModal(popupContents.parent, popupContents.message, popupContents.yesButtonPressedCallback, popupContents.yesButtonText,
+                popupContents.noButtonText, popupContents.noButtonPressedCallback, popupContents.animateParentCanvas, popupContents.checkboxText);
+        }
+
+        internal void ShowYesNoModal(Transform parent, string text, Action yesButtonPressedCallback, string yesButtonText = "Yes", string noButtonText = "No", Action noButtonPressedCallback = null, bool animateParentCanvas = true, string checkboxText = "")
         {
             Parse();
-            yesNoModalTransform.position = yesNoModalPosition;
-            keyboardTransform.transform.SetParent(rootTransform);
+            yesNoModalTransform.localPosition = yesNoModalPosition;
             yesNoModalTransform.transform.SetParent(parent);
 
             YesNoText = text;
@@ -103,17 +131,19 @@ namespace PlaylistManager.UI
             CheckboxActive = !string.IsNullOrEmpty(checkboxText);
 
             Accessors.AnimateCanvasAccessor(ref yesNoModalView) = animateParentCanvas;
+            Accessors.ViewValidAccessor(ref yesNoModalView) = false; // Need to do this to show the animation after parent changes
 
             parserParams.EmitEvent("close-yes-no");
             parserParams.EmitEvent("open-yes-no");
         }
+
+        internal void HideYesNoModal() => parserParams.EmitEvent("close-yes-no");
 
         [UIAction("yes-button-pressed")]
         private void YesButtonPressed()
         {
             yesButtonPressed?.Invoke();
             yesButtonPressed = null;
-            yesNoModalTransform.transform.SetParent(rootTransform);
         }
 
         [UIAction("no-button-pressed")]
@@ -121,7 +151,6 @@ namespace PlaylistManager.UI
         {
             noButtonPressed?.Invoke();
             noButtonPressed = null;
-            yesNoModalTransform.transform.SetParent(rootTransform);
         }
 
         [UIAction("toggle-checkbox")]
@@ -203,11 +232,15 @@ namespace PlaylistManager.UI
 
         // Methods
 
-        internal void ShowOkModal(Transform parent, string text, ButtonPressed buttonPressedCallback, string okButtonText = "Ok", bool animateParentCanvas = true)
+        private void ShowOkModal(OkPopupContents popupContents)
+        {
+            ShowOkModal(popupContents.parent, popupContents.message, popupContents.buttonPressedCallback, popupContents.okButtonText, popupContents.animateParentCanvas);
+        }
+
+        internal void ShowOkModal(Transform parent, string text, Action buttonPressedCallback, string okButtonText = "Ok", bool animateParentCanvas = true)
         {
             Parse();
-            okModalTransform.position = okModalPosition;
-            keyboardTransform.transform.SetParent(rootTransform);
+            okModalTransform.localPosition = okModalPosition;
             okModalTransform.transform.SetParent(parent);
 
             OkText = text;
@@ -215,6 +248,7 @@ namespace PlaylistManager.UI
             okButtonPressed = buttonPressedCallback;
 
             Accessors.AnimateCanvasAccessor(ref okModalView) = animateParentCanvas;
+            Accessors.ViewValidAccessor(ref yesNoModalView) = false;
 
             parserParams.EmitEvent("close-ok");
             parserParams.EmitEvent("open-ok");
@@ -225,7 +259,6 @@ namespace PlaylistManager.UI
         {
             okButtonPressed?.Invoke();
             okButtonPressed = null;
-            okModalTransform.transform.SetParent(rootTransform);
         }
 
         // Values
@@ -254,11 +287,43 @@ namespace PlaylistManager.UI
 
         #endregion
 
+        #region Loading Modal
+
+        internal void ShowLoadingModal(Transform parent, string text, bool animateParentCanvas = true)
+        {
+            Parse();
+            loadingModalTransform.localPosition = loadingModalPosition;
+            loadingModalTransform.SetParent(parent);
+
+            LoadingText = text;
+
+            Accessors.AnimateCanvasAccessor(ref okModalView) = animateParentCanvas;
+            Accessors.ViewValidAccessor(ref yesNoModalView) = false;
+
+            parserParams.EmitEvent("close-loading");
+            parserParams.EmitEvent("open-loading");
+        }
+
+        internal void DismissLoadingModal() => parserParams.EmitEvent("close-loading");
+
+        [UIValue("loading-text")]
+        private string LoadingText
+        {
+            get => _loadingText;
+            set
+            {
+                _loadingText = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LoadingText)));
+            }
+        }
+
+        #endregion
+
         #region Keyboard
 
         // Methods
 
-        internal void ShowKeyboard(Transform parent, KeyboardPressed keyboardPressedCallback, string keyboardText = "", bool animateParentCanvas = true)
+        internal void ShowKeyboard(Transform parent, Action<string> keyboardPressedCallback, string keyboardText = "", bool animateParentCanvas = true)
         {
             Parse(); 
             keyboardTransform.transform.SetParent(rootTransform);
@@ -269,6 +334,7 @@ namespace PlaylistManager.UI
             keyboardPressed = keyboardPressedCallback;
 
             Accessors.AnimateCanvasAccessor(ref keyboardModalView) = animateParentCanvas;
+            Accessors.ViewValidAccessor(ref yesNoModalView) = false;
 
             parserParams.EmitEvent("close-keyboard");
             parserParams.EmitEvent("open-keyboard");
@@ -279,7 +345,6 @@ namespace PlaylistManager.UI
         {
             keyboardPressed?.Invoke(keyboardText);
             keyboardPressed = null;
-            keyboardTransform.transform.SetParent(rootTransform);
         }
 
         // Values

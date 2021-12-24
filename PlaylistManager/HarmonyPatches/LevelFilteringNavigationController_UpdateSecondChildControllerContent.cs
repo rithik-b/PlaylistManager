@@ -3,7 +3,7 @@ using System;
 
 namespace PlaylistManager.HarmonyPatches
 {
-    [HarmonyPatch(typeof(LevelFilteringNavigationController), "UpdateSecondChildControllerContent", 
+    [HarmonyPatch(typeof(LevelFilteringNavigationController), nameof(LevelFilteringNavigationController.UpdateSecondChildControllerContent), 
         new Type[] {
         typeof(SelectLevelCategoryViewController.LevelCategory)})]
     public class LevelFilteringNavigationController_UpdateSecondChildControllerContent

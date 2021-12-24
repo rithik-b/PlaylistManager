@@ -1,0 +1,21 @@
+﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
+	<horizontal anchor-min-y='1'  bg='panel-top' pad-left='10' pad-right='10' horizontal-fit='PreferredSize'>
+		<text text='Contributors' italics='true' align='Center' font-size='8' />
+	</horizontal>
+	<custom-list anchor-pos-x='-2' anchor-pos-y='-25' id='contributors-list' clickable-cells='false' list-width='100' cell-size='15'>
+		<image anchor-pos-x='15' size-delta-x='12' preserve-aspect='true' anchor-min-x='0' anchor-min-y='0' anchor-max-x='0' anchor-max-y='1' id='icon' />
+		<horizontal child-expand-width='true' child-control-width='false' anchor-pos-x='23' pref-width='80'>
+			<vertical child-align='MiddleLeft' vertical-fit='PreferredSize'>
+				<text text='~name' italics='true' font-size='5' />
+				<text text='~role' italics='true' font-size='4' />
+			</vertical>
+		</horizontal>
+		<horizontal anchor-pos-x='0' child-expand-width='false' child-control-width='false' spacing='3' pref-height='10' child-align='MiddleRight'>
+			<image src='PlaylistManager.Icons.WhitePixel.png' size-delta-x='0.5' size-delta-y='10' />
+			<clickable-image src='PlaylistManager.Icons.Youtube.png' active='~youtube-active' hover-hint='Youtube' on-click='youtube-click' size-delta-x='7' preserve-aspect='true' />
+			<clickable-image src='PlaylistManager.Icons.Twitch.png' active='~twitch-active' hover-hint='Twitch' on-click='twitch-click' size-delta-x='7' preserve-aspect='true' />
+			<clickable-image src='PlaylistManager.Icons.Github.png' active='~github-active' hover-hint='Github' on-click='github-click' size-delta-x='7' preserve-aspect='true' />
+			<clickable-image src='PlaylistManager.Icons.Kofi.png' active='~kofi-active' hover-hint='Donate!' on-click='kofi-click' size-delta-x='7' preserve-aspect='true' />
+		</horizontal>
+	</custom-list>
+</bg>

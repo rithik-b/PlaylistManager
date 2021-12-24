@@ -22,7 +22,6 @@ namespace PlaylistManager.UI
         private readonly LevelPackDetailViewController levelPackDetailViewController;
         private readonly ImageSelectionModalController imageSelectionModalController;
         private readonly PopupModalsController popupModalsController;
-        private readonly IVRPlatformHelper platformHelper;
 
         private bool parsed;
         private Playlist selectedPlaylist;
@@ -50,12 +49,11 @@ namespace PlaylistManager.UI
         private readonly BSMLParserParams parserParams;
 
         public PlaylistDetailsViewController(LevelPackDetailViewController levelPackDetailViewController, ImageSelectionModalController imageSelectionModalController,
-            PopupModalsController popupModalsController, IVRPlatformHelper platformHelper)
+            PopupModalsController popupModalsController)
         {
             this.levelPackDetailViewController = levelPackDetailViewController;
             this.imageSelectionModalController = imageSelectionModalController;
             this.popupModalsController = popupModalsController;
-            this.platformHelper = platformHelper;
             parsed = false;
         }
 
@@ -94,9 +92,6 @@ namespace PlaylistManager.UI
 
             ModalView authorKeyboardModal = authorSettingTransform.Find("BSMLModalKeyboard").GetComponent<ModalView>();
             Accessors.AnimateCanvasAccessor(ref authorKeyboardModal) = false;
-
-            ScrollView scrollView = descriptionTextPage;
-            Accessors.PlatformHelperAccessor(ref scrollView) = platformHelper;
         }
 
         internal void ShowDetails()
@@ -136,7 +131,7 @@ namespace PlaylistManager.UI
         [UIValue("playlist-name")]
         private string PlaylistName
         {
-            get => selectedPlaylist == null || selectedPlaylist.Title == null ? " " : selectedPlaylist.Title;
+            get => selectedPlaylist == null ? " " : (selectedPlaylist as BeatSaberPlaylistsLib.Types.IPlaylist).packName;
             set
             {
                 selectedPlaylist.Title = value;
@@ -146,14 +141,16 @@ namespace PlaylistManager.UI
                     selectedPlaylist.RaiseCoverImageChangedForDefaultCover();
                 }
                 parentManager.StorePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
+                Events.RaisePlaylistRenamed((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist, parentManager);
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistName)));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NameHint)));
             }
         }
 
         [UIValue("name-hint")]
         private string NameHint
         {
-            get => PlaylistName;
+            get => string.IsNullOrWhiteSpace(PlaylistName) ? " " : PlaylistName;
         }
 
         [UIValue("playlist-author")]
@@ -165,13 +162,14 @@ namespace PlaylistManager.UI
                 selectedPlaylist.Author = value;
                 parentManager.StorePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistAuthor)));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AuthorHint)));
             }
         }
 
         [UIValue("author-hint")]
         private string AuthorHint
         {
-            get => PlaylistAuthor;
+            get => string.IsNullOrWhiteSpace(PlaylistAuthor) ? " " : PlaylistAuthor;
         }
 
         [UIValue("playlist-description")]
