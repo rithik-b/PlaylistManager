@@ -8,18 +8,18 @@
         "#![PlaylistManager.Description.md]",
         "Load, Create, Edit, Organize Playlists and Download their Songs in Beat Saber."
     ],
-    "gameVersion": "1.18.0",
+    "gameVersion": "1.19.0",
     "icon": "PlaylistManager.Icons.Logo.png",
     "dependsOn": {
-        "BSIPA": "^4.2.0",
+        "BSIPA": "^4.2.1",
         "SongCore": "^3.8.0",
         "BeatSaberMarkupLanguage": "^1.6.0",
         "SiraUtil": "^3.0.0",
-        "BeatSaberPlaylistsLib": "^1.5.0",
+        "BeatSaberPlaylistsLib": "^1.5.2",
         "BeatSaverSharp": "^3.0.2"
     },
     "links": {
-        "project-home": "https://github.com/rithik-b/PlaylistManager",
+        "project-home": "https://github.com/rithik-b/PlaylistManager/blob/master/Guides/GettingStarted.md",
         "project-source": "https://github.com/rithik-b/PlaylistManager",
         "donate": "https://ko-fi.com/pixelboom"
     }
