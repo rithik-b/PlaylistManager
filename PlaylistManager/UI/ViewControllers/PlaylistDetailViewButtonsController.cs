@@ -57,7 +57,7 @@ namespace PlaylistManager.UI
         public void Initialize()
         {
             BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.PlaylistDetailViewButtons.bsml"), levelPackDetailViewController.transform.Find("Detail").gameObject, this);
-            syncButtonTransform.transform.localScale *= 0.08f;
+            syncButtonTransform.transform.localScale *= 0.6f;
             syncButtonTransform.gameObject.SetActive(false);
             rootTransform.gameObject.SetActive(false);
 
