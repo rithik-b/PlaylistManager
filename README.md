@@ -21,7 +21,7 @@ Load, Create, Edit, Organize Playlists and Download their Songs in Beat Saber.
 - Sync some playlists with the internet (example map pools)
 
 ## Download
-Download the latest version of the mod (v1.6.0) [here](https://github.com/rithik-b/PlaylistManager/releases/tag/1.6.0 "here").
+Download the latest version of the mod (v1.6.1) [here](https://github.com/rithik-b/PlaylistManager/releases/tag/1.6.1 "here").
 To install, move the dll to your Plugins folder.
 
 **SongCore**, **BeatSaverSharp**, **BeatSaberMarkupLanguage (BSML)**, **SiraUtil** and **BeatSaberPlaylistsLib** are required for this mod, so please download the latest version from ModAssistant.
