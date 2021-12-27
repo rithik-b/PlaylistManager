@@ -1,6 +1,7 @@
 ﻿using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
+using HMUI;
 using PlaylistManager.HarmonyPatches;
 using PlaylistManager.Utilities;
 using System;
@@ -84,6 +85,7 @@ namespace PlaylistManager.UI
         private void DontMessWithGameObjectsOffMainThread()
         {
             playlistDownloader.PendingPopup.parent = rootTransform;
+            playlistDownloader.PendingPopup.animateParentCanvas = !rootTransform.GetComponentInParent<ModalView>();
             if (rootTransform.gameObject.activeInHierarchy)
             {
                 popupModalsController.ShowModal(playlistDownloader.PendingPopup);
