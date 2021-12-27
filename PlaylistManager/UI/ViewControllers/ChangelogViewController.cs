@@ -48,6 +48,9 @@ namespace PlaylistManager.UI
         [UIValue("is-loading")]
         private bool IsLoading => string.IsNullOrEmpty(Changelog);
 
+        [UIValue("loaded")]
+        private bool Loaded => !string.IsNullOrEmpty(Changelog);
+
         [UIValue("changelog")]
         private string Changelog
         {
@@ -57,6 +60,7 @@ namespace PlaylistManager.UI
                 _changelog = value;
                 NotifyPropertyChanged();
                 NotifyPropertyChanged(nameof(IsLoading));
+                NotifyPropertyChanged(nameof(Loaded));
             }
         }
     }
