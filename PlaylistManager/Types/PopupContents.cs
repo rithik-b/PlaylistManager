@@ -7,7 +7,7 @@ namespace PlaylistManager.Types
     {
         public Transform parent;
         public readonly string message;
-        public readonly bool animateParentCanvas;
+        public bool animateParentCanvas;
 
         public PopupContents(string message, bool animateParentCanvas = true)
         {
