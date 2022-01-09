@@ -108,7 +108,7 @@ namespace PlaylistManager.Utilities
                 LineAlignment = StringAlignment.Near
             },
             MinTextSize = 20,
-            MaxTextSize = 30,
+            MaxTextSize = 20,
             WrapWidth = 10
         };
 
