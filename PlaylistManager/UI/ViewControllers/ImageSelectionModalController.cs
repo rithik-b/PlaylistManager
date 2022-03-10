@@ -60,7 +60,7 @@ namespace PlaylistManager.UI
             }
 
             coverImages = new Dictionary<string, CoverImage>();
-            playlistManagerIcon = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.Logo.png");
+            playlistManagerIcon = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.DefaultIcon.png");
             parsed = false;
         }
 
@@ -172,7 +172,7 @@ namespace PlaylistManager.UI
             }
             else if (selectedIndex == 1)
             {
-                using (Stream imageStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("PlaylistManager.Icons.Logo.png"))
+                using (Stream imageStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("PlaylistManager.Icons.DefaultIcon.png"))
                 {
                     byte[] imageBytes = new byte[imageStream.Length];
                     imageStream.Read(imageBytes, 0, (int)imageStream.Length);
