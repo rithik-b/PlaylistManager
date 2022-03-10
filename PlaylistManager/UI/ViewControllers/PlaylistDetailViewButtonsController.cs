@@ -86,7 +86,7 @@ namespace PlaylistManager.UI
         [UIAction("delete-click")]
         private void OnDelete()
         {
-            int numberOfSongs = ((IAnnotatedBeatmapLevelCollection)selectedPlaylist).beatmapLevelCollection.beatmapLevels.Length;
+            int numberOfSongs = selectedPlaylist.beatmapLevelCollection.beatmapLevels.Count;
             string checkboxText = numberOfSongs > 0 ? $"Also delete all {numberOfSongs} songs from the game." : "";
             popupModalsController.ShowYesNoModal(rootTransform, $"Are you sure you would like to delete the playlist \"{selectedPlaylist.packName}\"?", DeleteButtonPressed, checkboxText: checkboxText);
         }
@@ -112,7 +112,7 @@ namespace PlaylistManager.UI
         {
             popupModalsController.ShowLoadingModal(rootTransform, "Deleting Playlist & Songs");
 
-            IPreviewBeatmapLevel[] beatmapLevels = selectedPlaylist.beatmapLevelCollection.beatmapLevels;
+            var beatmapLevels = selectedPlaylist.beatmapLevelCollection.beatmapLevels;
             List<string> levelPaths = new List<string>();
             foreach (CustomPreviewBeatmapLevel beatmapLevel in beatmapLevels.OfType<CustomPreviewBeatmapLevel>())
             {

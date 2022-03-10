@@ -24,7 +24,7 @@ namespace PlaylistManager.HarmonyPatches
 
             if (row >= 0)
             {
-                DidSelectLevelEvent?.Invoke(LevelCollectionViewController_SetData.beatmapLevels[row]);
+                DidSelectLevelEvent?.Invoke(LevelCollectionViewController_SetData.beatmapLevels.ElementAt(row));
             }
         }
     }

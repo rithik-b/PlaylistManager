@@ -110,7 +110,7 @@ namespace PlaylistManager.UI
             {
                 playlistTableData.data.Add(new CustomCellInfo(Path.GetFileName(playlistManager.PlaylistPath), "Folder", folderIcon));
             }
-            foreach (BeatSaberPlaylistsLib.Types.IPlaylist playlist in childPlaylists)
+            foreach (IPlaylist playlist in childPlaylists)
             {
                 if (playlist is IDeferredSpriteLoad deferredSpriteLoadPlaylist && !deferredSpriteLoadPlaylist.SpriteWasLoaded)
                 {
@@ -133,19 +133,19 @@ namespace PlaylistManager.UI
         {
             if (sender is IDeferredSpriteLoad deferredSpriteLoadPlaylist)
             {
-                if (parentManager.GetAllPlaylists(false).Contains((BeatSaberPlaylistsLib.Types.IPlaylist)deferredSpriteLoadPlaylist))
+                if (parentManager.GetAllPlaylists(false).Contains((IPlaylist)deferredSpriteLoadPlaylist))
                 {
-                    ShowPlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)deferredSpriteLoadPlaylist);
+                    ShowPlaylist((IPlaylist)deferredSpriteLoadPlaylist);
                 }
                 playlistTableData.tableView.ReloadDataKeepingPosition();
                 (deferredSpriteLoadPlaylist).SpriteLoaded -= DeferredSpriteLoadPlaylist_SpriteLoaded;
             }
         }
 
-        private void ShowPlaylist(BeatSaberPlaylistsLib.Types.IPlaylist playlist)
+        private void ShowPlaylist(IPlaylist playlist)
         {
-            string subName = string.Format("{0} songs", playlist.beatmapLevelCollection.beatmapLevels.Length);
-            if (Array.Exists(playlist.beatmapLevelCollection.beatmapLevels, level => level.levelID == standardLevelDetailViewController.selectedDifficultyBeatmap.level.levelID))
+            string subName = string.Format("{0} songs", playlist.beatmapLevelCollection.beatmapLevels.Count);
+            if (playlist.beatmapLevelCollection.beatmapLevels.Any(level => level.levelID == standardLevelDetailViewController.selectedDifficultyBeatmap.level.levelID))
             {
                 if (!playlist.AllowDuplicates)
                 {
