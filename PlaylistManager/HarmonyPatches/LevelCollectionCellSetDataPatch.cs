@@ -16,7 +16,7 @@ namespace PlaylistManager.HarmonyPatches
 {
     internal class LevelCollectionCellSetDataPatch : IAffinity
     {
-        private readonly ConditionalWeakTable<IDeferredSpriteLoad, AnnotatedBeatmapLevelCollectionCell> eventTable = new ConditionalWeakTable<IDeferredSpriteLoad, AnnotatedBeatmapLevelCollectionCell>();
+        private readonly ConditionalWeakTable<IStagedSpriteLoad, AnnotatedBeatmapLevelCollectionCell> eventTable = new ConditionalWeakTable<IStagedSpriteLoad, AnnotatedBeatmapLevelCollectionCell>();
         private readonly HoverHintController hoverHintController;
 
         public LevelCollectionCellSetDataPatch(HoverHintController hoverHintController)
@@ -28,21 +28,21 @@ namespace PlaylistManager.HarmonyPatches
         private void Patch(AnnotatedBeatmapLevelCollectionCell __instance, ref IAnnotatedBeatmapLevelCollection annotatedBeatmapLevelCollection, ref Image ____coverImage)
         {
             AnnotatedBeatmapLevelCollectionCell cell = __instance;
-            if (annotatedBeatmapLevelCollection is IDeferredSpriteLoad deferredSpriteLoad)
+            if (annotatedBeatmapLevelCollection is IStagedSpriteLoad stagedSpriteLoad)
             {
-                if (deferredSpriteLoad.SpriteWasLoaded)
+                if (stagedSpriteLoad.SmallSpriteWasLoaded)
                 {
 #if DEBUG
                     //Plugin.Log.Debug($"Sprite was already loaded for {(deferredSpriteLoad as IAnnotatedBeatmapLevelCollection).collectionName}");
 #endif
                 }
-                if (eventTable.TryGetValue(deferredSpriteLoad, out AnnotatedBeatmapLevelCollectionCell existing))
+                if (eventTable.TryGetValue(stagedSpriteLoad, out AnnotatedBeatmapLevelCollectionCell existing))
                 {
-                    eventTable.Remove(deferredSpriteLoad);
+                    eventTable.Remove(stagedSpriteLoad);
                 }
-                eventTable.Add(deferredSpriteLoad, cell);
-                deferredSpriteLoad.SpriteLoaded -= OnSpriteLoaded;
-                deferredSpriteLoad.SpriteLoaded += OnSpriteLoaded;
+                eventTable.Add(stagedSpriteLoad, cell);
+                stagedSpriteLoad.SpriteLoaded -= OnSpriteLoaded;
+                stagedSpriteLoad.SpriteLoaded += OnSpriteLoaded;
             }
 
             if (PluginConfig.Instance.PlaylistHoverHints)
@@ -61,35 +61,35 @@ namespace PlaylistManager.HarmonyPatches
 
         private void OnSpriteLoaded(object sender, EventArgs e)
         {
-            if (sender is IDeferredSpriteLoad deferredSpriteLoad)
+            if (sender is IStagedSpriteLoad stagedSpriteLoad)
             {
-                if (eventTable.TryGetValue(deferredSpriteLoad, out AnnotatedBeatmapLevelCollectionCell tableCell))
+                if (eventTable.TryGetValue(stagedSpriteLoad, out AnnotatedBeatmapLevelCollectionCell tableCell))
                 {
                     if (tableCell == null)
                     {
-                        deferredSpriteLoad.SpriteLoaded -= OnSpriteLoaded;
+                        stagedSpriteLoad.SpriteLoaded -= OnSpriteLoaded;
                         return;
                     }
 
                     IAnnotatedBeatmapLevelCollection collection = Accessors.BeatmapCollectionAccessor(ref tableCell);
-                    if (collection == deferredSpriteLoad)
+                    if (collection == stagedSpriteLoad)
                     {
 #if DEBUG
                         //Plugin.Log.Debug($"Updating image for {collection.collectionName}");
 #endif
-                        Accessors.CoverImageAccessor(ref tableCell).sprite = deferredSpriteLoad.Sprite;
+                        Accessors.CoverImageAccessor(ref tableCell).sprite = stagedSpriteLoad.SmallSprite;
                     }
                     else
                     {
                         //Plugin.Log.Warn($"Collection '{collection.collectionName}' is not {(deferredSpriteLoad as IAnnotatedBeatmapLevelCollection).collectionName}");
-                        eventTable.Remove(deferredSpriteLoad);
-                        deferredSpriteLoad.SpriteLoaded -= OnSpriteLoaded;
+                        eventTable.Remove(stagedSpriteLoad);
+                        stagedSpriteLoad.SpriteLoaded -= OnSpriteLoaded;
                     }
                 }
                 else
                 {
                     //Plugin.Log.Warn($"{(deferredSpriteLoad as IAnnotatedBeatmapLevelCollection).collectionName} is not in the EventTable.");
-                    deferredSpriteLoad.SpriteLoaded -= OnSpriteLoaded;
+                    stagedSpriteLoad.SpriteLoaded -= OnSpriteLoaded;
                 }
             }
             else

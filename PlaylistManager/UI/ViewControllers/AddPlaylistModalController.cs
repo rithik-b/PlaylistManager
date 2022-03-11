@@ -24,7 +24,7 @@ namespace PlaylistManager.UI
 
         private BeatSaberPlaylistsLib.PlaylistManager parentManager;
         private List<BeatSaberPlaylistsLib.PlaylistManager> childManagers;
-        private List<BeatSaberPlaylistsLib.Types.IPlaylist> childPlaylists;
+        private List<IPlaylist> childPlaylists;
 
         private readonly Sprite folderIcon;
         private bool parsed;
@@ -112,11 +112,11 @@ namespace PlaylistManager.UI
             }
             foreach (IPlaylist playlist in childPlaylists)
             {
-                if (playlist is IDeferredSpriteLoad deferredSpriteLoadPlaylist && !deferredSpriteLoadPlaylist.SpriteWasLoaded)
+                if (playlist is IStagedSpriteLoad stagedSpriteLoadPlaylist && !stagedSpriteLoadPlaylist.SmallSpriteWasLoaded)
                 {
-                    deferredSpriteLoadPlaylist.SpriteLoaded -= DeferredSpriteLoadPlaylist_SpriteLoaded;
-                    deferredSpriteLoadPlaylist.SpriteLoaded += DeferredSpriteLoadPlaylist_SpriteLoaded;
-                    _ = playlist.coverImage;
+                    stagedSpriteLoadPlaylist.SpriteLoaded -= StagedSpriteLoadPlaylist_SpriteLoaded;
+                    stagedSpriteLoadPlaylist.SpriteLoaded += StagedSpriteLoadPlaylist_SpriteLoaded;
+                    _ = playlist.smallCoverImage;
                 }
                 else
                 {
@@ -129,16 +129,16 @@ namespace PlaylistManager.UI
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FolderText)));
         }
 
-        private void DeferredSpriteLoadPlaylist_SpriteLoaded(object sender, EventArgs e)
+        private void StagedSpriteLoadPlaylist_SpriteLoaded(object sender, EventArgs e)
         {
-            if (sender is IDeferredSpriteLoad deferredSpriteLoadPlaylist)
+            if (sender is IStagedSpriteLoad stagedSpriteLoadPlaylist)
             {
-                if (parentManager.GetAllPlaylists(false).Contains((IPlaylist)deferredSpriteLoadPlaylist))
+                if (parentManager.GetAllPlaylists(false).Contains((IPlaylist)stagedSpriteLoadPlaylist))
                 {
-                    ShowPlaylist((IPlaylist)deferredSpriteLoadPlaylist);
+                    ShowPlaylist((IPlaylist)stagedSpriteLoadPlaylist);
                 }
                 playlistTableData.tableView.ReloadDataKeepingPosition();
-                (deferredSpriteLoadPlaylist).SpriteLoaded -= DeferredSpriteLoadPlaylist_SpriteLoaded;
+                (stagedSpriteLoadPlaylist).SpriteLoaded -= StagedSpriteLoadPlaylist_SpriteLoaded;
             }
         }
 
@@ -154,7 +154,7 @@ namespace PlaylistManager.UI
                 }
                 subName += " (contains song)";
             }
-            playlistTableData.data.Add(new CustomCellInfo(playlist.collectionName, subName, playlist.coverImage));
+            playlistTableData.data.Add(new CustomCellInfo(playlist.collectionName, subName, playlist.smallCoverImage));
         }
 
         [UIAction("select-cell")]
@@ -249,8 +249,8 @@ namespace PlaylistManager.UI
 
             if (playlist is IDeferredSpriteLoad deferredSpriteLoadPlaylist && !deferredSpriteLoadPlaylist.SpriteWasLoaded)
             {
-                deferredSpriteLoadPlaylist.SpriteLoaded -= DeferredSpriteLoadPlaylist_SpriteLoaded;
-                deferredSpriteLoadPlaylist.SpriteLoaded += DeferredSpriteLoadPlaylist_SpriteLoaded;
+                deferredSpriteLoadPlaylist.SpriteLoaded -= StagedSpriteLoadPlaylist_SpriteLoaded;
+                deferredSpriteLoadPlaylist.SpriteLoaded += StagedSpriteLoadPlaylist_SpriteLoaded;
                 _ = playlist.coverImage;
             }
 
