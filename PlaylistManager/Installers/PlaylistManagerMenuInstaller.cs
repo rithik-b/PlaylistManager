@@ -1,4 +1,6 @@
-﻿using Zenject;
+﻿using System;
+using PlaylistManager.AffinityPatches;
+using Zenject;
 using PlaylistManager.UI;
 using PlaylistManager.Managers;
 using PlaylistManager.Configuration;
@@ -35,6 +37,11 @@ namespace PlaylistManager.Installers
             Container.BindInterfacesAndSelfTo<PlaylistDataManager>().AsSingle();
 
             Container.BindInterfacesTo<LevelCollectionCellSetDataPatch>().AsSingle();
+
+            if (DateTime.Now.Month == 4 && DateTime.Now.Day == 1)
+            {
+                Container.BindInterfacesTo<Amogus>().AsSingle();
+            }
 
             if (PluginConfig.Instance.FoldersDisabled)
             {

@@ -12,7 +12,7 @@ using SiraUtil.Affinity;
  * Taken from PlaylistCore
  */
 
-namespace PlaylistManager.HarmonyPatches
+namespace PlaylistManager.AffinityPatches
 {
     internal class LevelCollectionCellSetDataPatch : IAffinity
     {
