@@ -7,12 +7,14 @@ using PlaylistManager.Types;
 using SiraUtil.Web;
 using SiraUtil.Zenject;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using SongCore;
 using Zenject;
 
 namespace PlaylistManager.Utilities
@@ -35,6 +37,7 @@ namespace PlaylistManager.Utilities
         public event Action QueueUpdatedEvent;
 
         public static readonly List<object> downloadQueue = new List<object>();
+        public static readonly LinkedList<Playlist> coversToRefresh = new LinkedList<Playlist>();
 
         private PopupContents _pendingPopup;
         public PopupContents PendingPopup
@@ -109,9 +112,20 @@ namespace PlaylistManager.Utilities
         {
             if (downloadQueue.Count == 0)
             {
-                SongCore.Loader.Instance.RefreshSongs(false);
+                Loader.SongsLoadedEvent += OnSongsLoaded;
+                Loader.Instance.RefreshSongs(false);
                 ownedHashes.Clear();
             }
+        }
+
+        private void OnSongsLoaded(Loader arg1, ConcurrentDictionary<string, CustomPreviewBeatmapLevel> arg2)
+        {
+            Loader.SongsLoadedEvent -= OnSongsLoaded;
+            foreach (var playlist in coversToRefresh)
+            {
+                playlist.RaiseCoverImageChangedForDefaultCover();
+            }
+            coversToRefresh.Clear();
         }
 
         internal void PauseDownload()
@@ -204,6 +218,12 @@ namespace PlaylistManager.Utilities
             }
 
             downloadQueueEntry.parentManager.StorePlaylist(downloadQueueEntry.playlist);
+
+            if (downloadQueueEntry.playlist is Playlist playlist)
+            {
+                coversToRefresh.AddLast(playlist);
+            }
+            
             currentDownload = null;
         }
 
