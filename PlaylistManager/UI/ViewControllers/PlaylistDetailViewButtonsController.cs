@@ -125,7 +125,7 @@ namespace PlaylistManager.UI
 
         private void DeletePlaylist()
         {
-            parentManager.DeletePlaylist(selectedPlaylist);
+            parentManager.DeletePlaylist(selectedPlaylist, true);
             int selectedIndex = annotatedBeatmapLevelCollectionsViewController.selectedItemIndex;
             List<IAnnotatedBeatmapLevelCollection> annotatedBeatmapLevelCollections = Accessors.AnnotatedBeatmapLevelCollectionsAccessor(ref annotatedBeatmapLevelCollectionsViewController).ToList();
             annotatedBeatmapLevelCollections.RemoveAt(selectedIndex);

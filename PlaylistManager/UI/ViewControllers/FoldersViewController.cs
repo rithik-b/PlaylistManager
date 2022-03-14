@@ -338,7 +338,7 @@ namespace PlaylistManager.UI
 
         private void DeleteConfirm()
         {
-            CurrentParentManager.Parent.DeleteChildManager(CurrentParentManager);
+            CurrentParentManager.Parent?.DeleteChildManager(CurrentParentManager, true);
             BackButtonClicked();
         }
 
