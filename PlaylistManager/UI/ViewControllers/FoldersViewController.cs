@@ -155,7 +155,7 @@ namespace PlaylistManager.UI
                 foreach (var childManager in currentManagers)
                 {
                     var folderName = Path.GetFileName(childManager.PlaylistPath);
-                    CustomListTableData.CustomCellInfo customCellInfo = new CustomListTableData.CustomCellInfo(folderName, icon: PlaylistLibUtils.DrawFolderIcon(folderName));
+                    CustomListTableData.CustomCellInfo customCellInfo = new CustomListTableData.CustomCellInfo(folderName, icon: BeatSaberMarkupLanguage.Utilities.ImageResources.BlankSprite);
                     customListTableData.data.Add(customCellInfo);
                 }
 
@@ -294,7 +294,7 @@ namespace PlaylistManager.UI
                 }
                 else
                 {
-                    CustomListTableData.CustomCellInfo customCellInfo = new CustomListTableData.CustomCellInfo(folderName, icon: PlaylistLibUtils.DrawFolderIcon(folderName));
+                    CustomListTableData.CustomCellInfo customCellInfo = new CustomListTableData.CustomCellInfo(folderName, icon: BeatSaberMarkupLanguage.Utilities.ImageResources.BlankSprite);
                     customListTableData.data.Add(customCellInfo);
                     customListTableData.tableView.ReloadData();
                     customListTableData.tableView.ClearSelection();

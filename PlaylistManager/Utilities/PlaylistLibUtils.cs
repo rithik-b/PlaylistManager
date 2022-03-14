@@ -4,10 +4,12 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using BeatSaberPlaylistsLib;
 using BeatSaberPlaylistsLib.Blist;
 using BeatSaberPlaylistsLib.Legacy;
 using BeatSaberPlaylistsLib.Types;
+using JetBrains.Annotations;
 using PlaylistManager.Configuration;
 using UnityEngine;
 
@@ -96,38 +98,22 @@ namespace PlaylistManager.Utilities
         }
 
         #region Image
-
-        private static DrawSettings defaultDrawSettings = new DrawSettings
-        {
-            Color = System.Drawing.Color.White,
-            DrawStyle = DrawStyle.Normal,
-            Font = BeatSaberPlaylistsLib.Utilities.FindFont("Microsoft Sans Serif", 20, FontStyle.Regular),
-            StringFormat = new StringFormat()
-            {
-                Alignment = StringAlignment.Center,
-                LineAlignment = StringAlignment.Near
-            },
-            MinTextSize = 20,
-            MaxTextSize = 20,
-            WrapWidth = 10
-        };
+        
 
         private static Stream GetFolderImageStream() =>
             Assembly.GetExecutingAssembly().GetManifestResourceStream("PlaylistManager.Icons.FolderIcon.png");
-
-        internal static Sprite DrawFolderIcon(string str)
+        
+        internal static async Task<Sprite> GeneratePlaylistIcon(IPlaylist playlist)
         {
-            if (str.Length > 15)
+            using var coverStream = await playlist.GetDefaultCoverStream();
+            if (coverStream != null)
             {
-                str = str.Substring(0, 15) + "...";
+                Sprite? sprite = null;
+                await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() => sprite = BeatSaberMarkupLanguage.Utilities.LoadSpriteRaw(coverStream.ToArray()));
+                return sprite ? sprite : BeatSaberPlaylistsLib.Utilities.DefaultSprite;
             }
-            Image img = ImageUtilities.DrawString("\n"+str, Image.FromStream(GetFolderImageStream()), defaultDrawSettings);
-            MemoryStream ms = new MemoryStream();
-            img.Save(ms, ImageFormat.Png);
-            return BeatSaberMarkupLanguage.Utilities.LoadSpriteRaw(ms.ToArray());
+            return BeatSaberPlaylistsLib.Utilities.DefaultSprite;
         }
-
-        internal static Sprite GeneratePlaylistIcon(BeatSaberPlaylistsLib.Types.IPlaylist playlist) => BeatSaberMarkupLanguage.Utilities.LoadSpriteRaw(BeatSaberPlaylistsLib.Utilities.GenerateCoverForPlaylist(playlist).ToArray());
 
         #endregion
     }

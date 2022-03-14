@@ -16,7 +16,7 @@ using static BeatSaberMarkupLanguage.Components.CustomListTableData;
 
 namespace PlaylistManager.UI
 {
-    public class ImageSelectionModalController
+    public class ImageSelectionModalController : NotifiableBase
     {
         private readonly LevelPackDetailViewController levelPackDetailViewController;
         private readonly PopupModalsController popupModalsController;
@@ -108,12 +108,14 @@ namespace PlaylistManager.UI
             }
         }
 
-        private void ShowImages(BeatSaberPlaylistsLib.Types.IPlaylist playlist)
+        private async void ShowImages(BeatSaberPlaylistsLib.Types.IPlaylist playlist)
         {
-            customListTableData.data.Clear();
+            await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() => customListTableData.data.Clear());
 
+            IsLoading = true;
+            
             // Add clear image
-            customListTableData.data.Add(new CustomCellInfo("Clear Icon", "Clear", PlaylistLibUtils.GeneratePlaylistIcon(playlist)));
+            customListTableData.data.Add(new CustomCellInfo("Clear Icon", "Clear", await PlaylistLibUtils.GeneratePlaylistIcon(playlist)));
 
             // Add default image
             customListTableData.data.Add(new CustomCellInfo("PlaylistManager Icon", "Default", playlistManagerIcon));
@@ -131,7 +133,8 @@ namespace PlaylistManager.UI
                     customListTableData.data.Add(new CustomCellInfo(Path.GetFileName(coverImage.Key), coverImage.Key, coverImage.Value.Sprite));
                 }
             }
-            customListTableData.tableView.ReloadData();
+            
+            await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() => customListTableData.tableView.ReloadData());
             customListTableData.tableView.ScrollToCellWithIdx(0, TableView.ScrollPositionType.Beginning, false);
             _ = ViewControllerMonkeyCleanup();
         }
@@ -209,6 +212,24 @@ namespace PlaylistManager.UI
             {
                 Accessors.SkewAccessor(ref imageViews[i]) = 0f;
             }
+            IsLoading = false;
         }
+
+        private bool _isLoading;
+
+        [UIValue("is-loading")]
+        private bool IsLoading
+        {
+            get => _isLoading;
+            set
+            {
+                _isLoading = value;
+                NotifyPropertyChanged();
+                NotifyPropertyChanged(nameof(IsNotLoading));
+            }
+        }
+
+        [UIValue("is-not-loading")]
+        private bool IsNotLoading => !IsLoading;
     }
 }
