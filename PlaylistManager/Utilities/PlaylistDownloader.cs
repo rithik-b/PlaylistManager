@@ -260,7 +260,7 @@ namespace PlaylistManager.Utilities
                     var song = await beatSaverInstance.Beatmap(key, token);
                     if (song == null)
                     {
-                        Plugin.Log.Info($"Failed to download Song {key}. Unable to find a beatmap for that hash.");
+                        Plugin.Log.Error($"Failed to download Song {key}. Unable to find a beatmap for that hash.");
                         return "";
                     }
                     // A key is not enough to identify a specific version. So just get the latest one.
@@ -290,7 +290,7 @@ namespace PlaylistManager.Utilities
                     var song = await beatSaverInstance.BeatmapByHash(hash, token);
                     if (song == null)
                     {
-                        Plugin.Log.Info($"Failed to download Song {hash}. Unable to find a beatmap for that hash.");
+                        Plugin.Log.Error($"Failed to download Song {hash}. Unable to find a beatmap for that hash.");
                         return;
                     }
 
