@@ -81,21 +81,8 @@ namespace PlaylistManager.Utilities
             return "";
         }
 
-        public static List<IPlaylistSong> GetMissingSongs(IPlaylist playlist, HashSet<string> ownedHashes = null)
-        {
-            if (playlist is LegacyPlaylist legacyPlaylist)
-            {
-                return legacyPlaylist.Where(s => s.PreviewBeatmapLevel == null && !(ownedHashes?.Contains(s.Hash) ?? false)).Distinct(IPlaylistSongComparer<IPlaylistSong>.Default).ToList();
-            }
-            else if (playlist is BlistPlaylist blistPlaylist)
-            {
-                return blistPlaylist.Where(s => s.PreviewBeatmapLevel == null && !(ownedHashes?.Contains(s.Hash) ?? false)).Distinct(IPlaylistSongComparer<IPlaylistSong>.Default).ToList();
-            }
-            else
-            {
-                return null;
-            }
-        }
+        public static List<IPlaylistSong> GetMissingSongs(IPlaylist playlist, HashSet<string> ownedHashes = null) => 
+            playlist.Where(s => s.PreviewBeatmapLevel == null && !(ownedHashes?.Contains(s.Hash) ?? false)).Distinct(IPlaylistSongComparer<IPlaylistSong>.Default).ToList();
 
         #region Image
         
