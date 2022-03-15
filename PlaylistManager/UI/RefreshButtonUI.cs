@@ -28,11 +28,8 @@ namespace PlaylistManager.UI
             {
                 progressBar = ProgressBar.Create();
             }
-            var numPlaylists = await Task.Run(() =>
-            {
-                PlaylistLibUtils.playlistManager.RefreshPlaylists(true);
-                return PlaylistLibUtils.playlistManager.GetAllPlaylists(true).Length;
-            });
+            
+            var numPlaylists = await Task.Run(() => PlaylistLibUtils.playlistManager.GetAllPlaylists(true).Length).ConfigureAwait(false);
 
             progressBar.enabled = true;
             progressBar.ShowMessage($"\n{numPlaylists} playlists loaded.", kMessageTime);
