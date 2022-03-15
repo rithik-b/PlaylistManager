@@ -97,7 +97,7 @@ namespace PlaylistManager.UI
             }
 
             string[] ext = { "jpg", "png" };
-            IEnumerable<string> imageFiles = Directory.EnumerateFiles(IMAGES_PATH, "*.*", SearchOption.AllDirectories).Where(s => ext.Contains(Path.GetExtension(s).TrimStart('.').ToLowerInvariant()));
+            var imageFiles = Directory.EnumerateFiles(IMAGES_PATH, "*.*", SearchOption.AllDirectories).Where(s => ext.Contains(Path.GetExtension(s).TrimStart('.').ToLowerInvariant()));
 
             foreach (var file in imageFiles)
             {
@@ -175,9 +175,9 @@ namespace PlaylistManager.UI
             }
             else if (selectedIndex == 1)
             {
-                using (Stream imageStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("PlaylistManager.Icons.DefaultIcon.png"))
+                using (var imageStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("PlaylistManager.Icons.DefaultIcon.png"))
                 {
-                    byte[] imageBytes = new byte[imageStream.Length];
+                    var imageBytes = new byte[imageStream.Length];
                     imageStream.Read(imageBytes, 0, (int)imageStream.Length);
                     ImageSelectedEvent?.Invoke(imageBytes);
                     parserParams.EmitEvent("close-modal");
@@ -185,12 +185,12 @@ namespace PlaylistManager.UI
             }
             else
             {
-                string selectedImagePath = customListTableData.data[selectedIndex].subtext;
+                var selectedImagePath = customListTableData.data[selectedIndex].subtext;
                 try
                 {
-                    using (FileStream imageStream = File.Open(selectedImagePath, FileMode.Open))
+                    using (var imageStream = File.Open(selectedImagePath, FileMode.Open))
                     {
-                        byte[] imageBytes = new byte[imageStream.Length];
+                        var imageBytes = new byte[imageStream.Length];
                         imageStream.Read(imageBytes, 0, (int)imageStream.Length);
                         ImageSelectedEvent?.Invoke(imageBytes);
                         parserParams.EmitEvent("close-modal");
@@ -207,8 +207,8 @@ namespace PlaylistManager.UI
         private async Task ViewControllerMonkeyCleanup()
         {
             await SiraUtil.Extras.Utilities.PauseChamp;
-            ImageView[] imageViews = customListTableData.tableView.GetComponentsInChildren<ImageView>(true);
-            for (int i = 0; i < imageViews.Length; i++)
+            var imageViews = customListTableData.tableView.GetComponentsInChildren<ImageView>(true);
+            for (var i = 0; i < imageViews.Length; i++)
             {
                 Accessors.SkewAccessor(ref imageViews[i]) = 0f;
             }

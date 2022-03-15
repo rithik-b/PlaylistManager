@@ -106,11 +106,11 @@ namespace PlaylistManager.UI
             var childPlaylists = parentManager.GetAllPlaylists(false).Where(playlist => !playlist.ReadOnly);
             this.childPlaylists = childPlaylists.ToList();
 
-            foreach (BeatSaberPlaylistsLib.PlaylistManager playlistManager in childManagers)
+            foreach (var playlistManager in childManagers)
             {
                 playlistTableData.data.Add(new CustomCellInfo(Path.GetFileName(playlistManager.PlaylistPath), "Folder", folderIcon));
             }
-            foreach (IPlaylist playlist in childPlaylists)
+            foreach (var playlist in childPlaylists)
             {
                 if (playlist is IStagedSpriteLoad stagedSpriteLoadPlaylist && !stagedSpriteLoadPlaylist.SmallSpriteWasLoaded)
                 {
@@ -144,7 +144,7 @@ namespace PlaylistManager.UI
 
         private void ShowPlaylist(IPlaylist playlist)
         {
-            string subName = string.Format("{0} songs", playlist.beatmapLevelCollection.beatmapLevels.Count);
+            var subName = string.Format("{0} songs", playlist.beatmapLevelCollection.beatmapLevels.Count);
             if (playlist.beatmapLevelCollection.beatmapLevels.Any(level => level.levelID == standardLevelDetailViewController.selectedDifficultyBeatmap.level.levelID))
             {
                 if (!playlist.AllowDuplicates)
@@ -245,7 +245,7 @@ namespace PlaylistManager.UI
                 return;
             }
 
-            IPlaylist playlist = PlaylistLibUtils.CreatePlaylistWithConfig(playlistName, parentManager);
+            var playlist = PlaylistLibUtils.CreatePlaylistWithConfig(playlistName, parentManager);
 
             if (playlist is IDeferredSpriteLoad deferredSpriteLoadPlaylist && !deferredSpriteLoadPlaylist.SpriteWasLoaded)
             {
@@ -263,7 +263,7 @@ namespace PlaylistManager.UI
             folderName = folderName.Replace("/", "").Replace("\\", "").Replace(".", "");
             if (!string.IsNullOrEmpty(folderName))
             {
-                BeatSaberPlaylistsLib.PlaylistManager childManager = parentManager.CreateChildManager(folderName);
+                var childManager = parentManager.CreateChildManager(folderName);
 
                 if (childManagers.Contains(childManager))
                 {

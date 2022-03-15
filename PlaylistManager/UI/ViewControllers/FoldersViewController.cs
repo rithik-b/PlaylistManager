@@ -126,7 +126,7 @@ namespace PlaylistManager.UI
             }
             else
             {
-                Vector3 foldersPosition = levelSelectionNavigationController.transform.position;
+                var foldersPosition = levelSelectionNavigationController.transform.position;
                 foldersPosition.y += 0.73f;
                 var transform = floatingScreen.transform;
                 transform.eulerAngles = new Vector3(0, 0, 0);
@@ -196,10 +196,10 @@ namespace PlaylistManager.UI
                 customListTableData.tableView.SelectCellWithIdx(0);
 
                 // Add hover hint
-                TableCell[] visibleCells = customListTableData.tableView.visibleCells.ToArray();
-                for (int i = 0; i < visibleCells.Length; i++)
+                var visibleCells = customListTableData.tableView.visibleCells.ToArray();
+                for (var i = 0; i < visibleCells.Length; i++)
                 {
-                    HoverHint hoverHint = visibleCells[i].GetComponent<HoverHint>();
+                    var hoverHint = visibleCells[i].GetComponent<HoverHint>();
                     if (hoverHint == null)
                     {
                         hoverHint = visibleCells[i].gameObject.AddComponent<HoverHint>();
@@ -220,10 +220,10 @@ namespace PlaylistManager.UI
             else
             {
                 // Disable hover hint
-                TableCell[] visibleCells = customListTableData.tableView.visibleCells.ToArray();
-                for (int i = 0; i < visibleCells.Length; i++)
+                var visibleCells = customListTableData.tableView.visibleCells.ToArray();
+                for (var i = 0; i < visibleCells.Length; i++)
                 {
-                    HoverHint hoverHint = visibleCells[i].GetComponent<HoverHint>();
+                    var hoverHint = visibleCells[i].GetComponent<HoverHint>();
                     if (hoverHint != null)
                     {
                         hoverHint.enabled = false;
@@ -294,7 +294,7 @@ namespace PlaylistManager.UI
             folderName = folderName.Replace("/", "").Replace("\\", "").Replace(".", "");
             if (!string.IsNullOrEmpty(folderName))
             {
-                BeatSaberPlaylistsLib.PlaylistManager childManager = CurrentParentManager.CreateChildManager(folderName);
+                var childManager = CurrentParentManager.CreateChildManager(folderName);
 
                 if (currentManagers.Contains(childManager))
                 {
@@ -302,7 +302,7 @@ namespace PlaylistManager.UI
                 }
                 else
                 {
-                    CustomListTableData.CustomCellInfo customCellInfo = new CustomListTableData.CustomCellInfo(folderName, icon: BeatSaberMarkupLanguage.Utilities.ImageResources.BlankSprite);
+                    var customCellInfo = new CustomListTableData.CustomCellInfo(folderName, icon: BeatSaberMarkupLanguage.Utilities.ImageResources.BlankSprite);
                     tableCells.Add(customCellInfo);
                     customListTableData.tableView.ReloadData();
                     customListTableData.tableView.ClearSelection();
@@ -384,8 +384,8 @@ namespace PlaylistManager.UI
 
             if (folderMode == FolderMode.AllPacks)
             {
-                IBeatmapLevelPack[] annotatedBeatmapLevelCollections = Accessors.CustomLevelPackCollectionAccessor(ref beatmapLevelsModel).beatmapLevelPacks.Concat(PlaylistLibUtils.playlistManager.GetAllPlaylists(true)).ToArray();
-                int indexToSelect = annotatedBeatmapLevelCollections.IndexOf(annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection);
+                var annotatedBeatmapLevelCollections = Accessors.CustomLevelPackCollectionAccessor(ref beatmapLevelsModel).beatmapLevelPacks.Concat(PlaylistLibUtils.playlistManager.GetAllPlaylists(true)).ToArray();
+                var indexToSelect = annotatedBeatmapLevelCollections.IndexOf(annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection);
                 if (indexToSelect != -1)
                 {
                     annotatedBeatmapLevelCollectionsViewController.SetData(annotatedBeatmapLevelCollections, indexToSelect, false);
@@ -393,8 +393,8 @@ namespace PlaylistManager.UI
             }
             else if (folderMode == FolderMode.Playlists)
             {
-                BeatSaberPlaylistsLib.Types.IPlaylist[] annotatedBeatmapLevelCollections = PlaylistLibUtils.playlistManager.GetAllPlaylists(true);
-                int indexToSelect = annotatedBeatmapLevelCollections.IndexOf(annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection);
+                var annotatedBeatmapLevelCollections = PlaylistLibUtils.playlistManager.GetAllPlaylists(true);
+                var indexToSelect = annotatedBeatmapLevelCollections.IndexOf(annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection);
                 if (indexToSelect != -1)
                 {
                     annotatedBeatmapLevelCollectionsViewController.SetData(annotatedBeatmapLevelCollections, indexToSelect, false);
@@ -402,8 +402,8 @@ namespace PlaylistManager.UI
             }
             else if (folderMode == FolderMode.Folders)
             {
-                BeatSaberPlaylistsLib.Types.IPlaylist[] annotatedBeatmapLevelCollections = CurrentParentManager.GetAllPlaylists(false);
-                int indexToSelect = annotatedBeatmapLevelCollections.IndexOf(annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection);
+                var annotatedBeatmapLevelCollections = CurrentParentManager.GetAllPlaylists(false);
+                var indexToSelect = annotatedBeatmapLevelCollections.IndexOf(annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection);
                 if (indexToSelect != -1)
                 {
                     annotatedBeatmapLevelCollectionsViewController.SetData(annotatedBeatmapLevelCollections, indexToSelect, false);
@@ -423,7 +423,7 @@ namespace PlaylistManager.UI
                 }
                 else
                 {
-                    string folderName = Path.GetFileName(CurrentParentManager.PlaylistPath);
+                    var folderName = Path.GetFileName(CurrentParentManager.PlaylistPath);
                     if (folderName.Length > 15)
                     {
                         return folderName.Substring(0, 15) + "...";

@@ -23,7 +23,7 @@ namespace PlaylistManager.UI
         [UIAction("#post-parse")]
         private async void PostParse()
         {
-            string rawChangelog = await siraSyncService.LatestChangelog();
+            var rawChangelog = await siraSyncService.LatestChangelog();
             Changelog = await Task.Run(() => MarkdownParse(rawChangelog));
         }
 

@@ -34,7 +34,7 @@ namespace PlaylistManager.UI
             contributors.Add(new Contributor("Zingabopp", "BeatSaberPlaylistsLib", "PlaylistManager.Icons.Zinga.png", github: "https://github.com/Zingabopp", kofi: "https://ko-fi.com/zingabopp"));
             contributors.Add(new Contributor("Auros", "Major Contributor", "PlaylistManager.Icons.Auros.png", twitch: "https://www.twitch.tv/aurosvr", github: "https://github.com/Auros", kofi: "https://ko-fi.com/auros"));
 
-            foreach (Contributor contributor in contributors.OfType<Contributor>())
+            foreach (var contributor in contributors.OfType<Contributor>())
             {
                 contributor.OpenURL += URLRequested;
             }
@@ -42,7 +42,7 @@ namespace PlaylistManager.UI
 
         public void Dispose()
         {
-            foreach (Contributor contributor in contributors.OfType<Contributor>())
+            foreach (var contributor in contributors.OfType<Contributor>())
             {
                 contributor.OpenURL -= URLRequested;
             }

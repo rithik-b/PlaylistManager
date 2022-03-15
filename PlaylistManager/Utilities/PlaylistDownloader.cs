@@ -323,7 +323,7 @@ namespace PlaylistManager.Utilities
             }
         }
 
-        private async Task BeatmapDownloadByCustomURL(string url, string songName, CancellationToken token)
+        private async Task BeatmapDownloadByCustomURL(string url, string songName, CancellationToken token, IProgress<float> progress = null)
         {
             if (!token.IsCancellationRequested)
             {
@@ -334,7 +334,7 @@ namespace PlaylistManager.Utilities
                     {
                         Directory.CreateDirectory(customSongsPath);
                     }
-                    var httpResponse = await siraHttpService.GetAsync(url, cancellationToken: token);
+                    var httpResponse = await siraHttpService.GetAsync(url, progress, token);
                     if (httpResponse.Successful)
                     {
                         var zip = await httpResponse.ReadAsByteArrayAsync();

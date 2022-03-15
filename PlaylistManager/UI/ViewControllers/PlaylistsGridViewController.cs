@@ -42,7 +42,7 @@ namespace PlaylistManager.UI
             annotatedBeatmapLevelCollectionsGridViewAnimator = Accessors.GridViewAnimatorAccessor(ref annotatedBeatmapLevelCollectionsGridView);
 
             // Removing last column of GridView to make space for our scroller
-            RectTransform rectTransform = annotatedBeatmapLevelCollectionsGridView.gameObject.GetComponent<RectTransform>();
+            var rectTransform = annotatedBeatmapLevelCollectionsGridView.gameObject.GetComponent<RectTransform>();
             rectTransform.sizeDelta = new Vector2(-10f, 0);
             rectTransform.localPosition = new Vector3(-5f, -7.5f, 0);
 
@@ -69,17 +69,17 @@ namespace PlaylistManager.UI
             Accessors.PageControlAccessor(ref annotatedBeatmapLevelCollectionsGridView).gameObject.SetActive(false);
 
             // Getting Viewport and Content
-            RectTransform viewport = Accessors.GridViewportAccessor(ref annotatedBeatmapLevelCollectionsGridViewAnimator);
-            RectTransform content = Accessors.GridContentAccessor(ref annotatedBeatmapLevelCollectionsGridViewAnimator);
+            var viewport = Accessors.GridViewportAccessor(ref annotatedBeatmapLevelCollectionsGridViewAnimator);
+            var content = Accessors.GridContentAccessor(ref annotatedBeatmapLevelCollectionsGridViewAnimator);
             content.localPosition = Vector3.zero;
 
             // Breaking up ScrollBar from ScrollView
             scrollBar = bsmlScrollView.transform.Find("ScrollBar");
             scrollBar.SetParent(vertical);
             vertical.SetParent(viewport);
-            Button pageUpButton = Accessors.PageUpAccessor(ref bsmlScrollView);
-            Button pageDownButton = Accessors.PageDownAccessor(ref bsmlScrollView);
-            VerticalScrollIndicator verticalScrollIndicator = Accessors.ScrollIndicatorAccessor(ref bsmlScrollView);
+            var pageUpButton = Accessors.PageUpAccessor(ref bsmlScrollView);
+            var pageDownButton = Accessors.PageDownAccessor(ref bsmlScrollView);
+            var verticalScrollIndicator = Accessors.ScrollIndicatorAccessor(ref bsmlScrollView);
             Object.Destroy(bsmlScrollView.gameObject);
             scrollBar.gameObject.SetActive(false);
 

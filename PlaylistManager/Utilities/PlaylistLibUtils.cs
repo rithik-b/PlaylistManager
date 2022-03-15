@@ -30,19 +30,19 @@ namespace PlaylistManager.Utilities
 
         public static IPlaylist CreatePlaylistWithConfig(string playlistName, BeatSaberPlaylistsLib.PlaylistManager playlistManager)
         {
-            string playlistAuthorName = PluginConfig.Instance.AuthorName;
-            bool easterEgg = playlistAuthorName.ToUpper().Contains("BINTER") && playlistName.ToUpper().Contains("TECH") && PluginConfig.Instance.EasterEggs;
+            var playlistAuthorName = PluginConfig.Instance.AuthorName;
+            var easterEgg = playlistAuthorName.ToUpper().Contains("BINTER") && playlistName.ToUpper().Contains("TECH") && PluginConfig.Instance.EasterEggs;
             return CreatePlaylist(playlistName, playlistAuthorName, playlistManager, !PluginConfig.Instance.DefaultImageDisabled, PluginConfig.Instance.DefaultAllowDuplicates, easterEgg);
         }
 
         public static IPlaylist CreatePlaylist(string playlistName, string playlistAuthorName, BeatSaberPlaylistsLib.PlaylistManager playlistManager, bool defaultCover = true,
             bool allowDups = true, bool easterEgg = false)
         {
-            IPlaylist playlist = playlistManager.CreatePlaylist("", playlistName, playlistAuthorName, "");
+            var playlist = playlistManager.CreatePlaylist("", playlistName, playlistAuthorName, "");
 
             if (defaultCover)
             {
-                using (Stream imageStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(ICON_PATH))
+                using (var imageStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(ICON_PATH))
                 {
                     playlist.SetCover(imageStream);
                 }

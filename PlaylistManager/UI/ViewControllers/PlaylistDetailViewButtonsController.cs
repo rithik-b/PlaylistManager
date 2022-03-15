@@ -86,8 +86,8 @@ namespace PlaylistManager.UI
         [UIAction("delete-click")]
         private void OnDelete()
         {
-            int numberOfSongs = selectedPlaylist.beatmapLevelCollection.beatmapLevels.Count;
-            string checkboxText = numberOfSongs > 0 ? $"Also delete all {numberOfSongs} songs from the game." : "";
+            var numberOfSongs = selectedPlaylist.beatmapLevelCollection.beatmapLevels.Count;
+            var checkboxText = numberOfSongs > 0 ? $"Also delete all {numberOfSongs} songs from the game." : "";
             popupModalsController.ShowYesNoModal(rootTransform, $"Are you sure you would like to delete the playlist \"{selectedPlaylist.packName}\"?", DeleteButtonPressed, checkboxText: checkboxText);
         }
 
@@ -113,8 +113,8 @@ namespace PlaylistManager.UI
             popupModalsController.ShowLoadingModal(rootTransform, "Deleting Playlist & Songs");
 
             var beatmapLevels = selectedPlaylist.beatmapLevelCollection.beatmapLevels;
-            List<string> levelPaths = new List<string>();
-            foreach (CustomPreviewBeatmapLevel beatmapLevel in beatmapLevels.OfType<CustomPreviewBeatmapLevel>())
+            var levelPaths = new List<string>();
+            foreach (var beatmapLevel in beatmapLevels.OfType<CustomPreviewBeatmapLevel>())
             {
                 levelPaths.Add(beatmapLevel.customLevelPath);
             }
@@ -126,8 +126,8 @@ namespace PlaylistManager.UI
         private void DeletePlaylist()
         {
             parentManager.DeletePlaylist(selectedPlaylist, true);
-            int selectedIndex = annotatedBeatmapLevelCollectionsViewController.selectedItemIndex;
-            List<IAnnotatedBeatmapLevelCollection> annotatedBeatmapLevelCollections = Accessors.AnnotatedBeatmapLevelCollectionsAccessor(ref annotatedBeatmapLevelCollectionsViewController).ToList();
+            var selectedIndex = annotatedBeatmapLevelCollectionsViewController.selectedItemIndex;
+            var annotatedBeatmapLevelCollections = Accessors.AnnotatedBeatmapLevelCollectionsAccessor(ref annotatedBeatmapLevelCollectionsViewController).ToList();
             annotatedBeatmapLevelCollections.RemoveAt(selectedIndex);
             selectedIndex--;
             LevelCollectionTableViewUpdatedEvent?.Invoke(annotatedBeatmapLevelCollections.ToArray(), selectedIndex < 0 ? 0 : selectedIndex);
@@ -227,21 +227,21 @@ namespace PlaylistManager.UI
         [UIAction("sync-click")]
         private async Task SyncPlaylistAsync()
         {
-            if (!selectedPlaylist.TryGetCustomData("syncURL", out object outSyncURL))
+            if (!selectedPlaylist.TryGetCustomData("syncURL", out var outSyncURL))
             {
                 popupModalsController.ShowOkModal(rootTransform, "Error: The selected playlist cannot be synced", null);
                 return;
             }
 
-            string syncURL = (string)outSyncURL;
-            CancellationTokenSource tokenSource = new CancellationTokenSource();
+            var syncURL = (string)outSyncURL;
+            var tokenSource = new CancellationTokenSource();
 
             popupModalsController.ShowOkModal(rootTransform, "Syncing Playlist", () => tokenSource.Cancel(), "Cancel");
             Stream playlistStream = null;
 
             try
             {
-                IHttpResponse httpResponse = await siraHttpService.GetAsync(syncURL, cancellationToken: tokenSource.Token);
+                var httpResponse = await siraHttpService.GetAsync(syncURL, cancellationToken: tokenSource.Token);
                 if (httpResponse.Successful)
                 {
                     selectedPlaylist.Clear(); // Clear all songs
@@ -315,7 +315,7 @@ namespace PlaylistManager.UI
                 UpdateMissingSongs();
 
                 rootTransform.gameObject.SetActive(true);
-                if (selectedPlaylist.TryGetCustomData("syncURL", out object syncURLObj) && syncURLObj is string syncURL && !string.IsNullOrWhiteSpace(syncURL))
+                if (selectedPlaylist.TryGetCustomData("syncURL", out var syncURLObj) && syncURLObj is string syncURL && !string.IsNullOrWhiteSpace(syncURL))
                 {
                     syncButtonTransform.gameObject.SetActive(true);
                 }

@@ -56,7 +56,7 @@ namespace PlaylistManager
                 foldersViewController.ParentManagerUpdatedEvent += FoldersViewController_ParentManagerUpdatedEvent;
             }
 
-            foreach (ILevelCollectionsTableUpdater levelCollectionsTableUpdater in levelCollectionsTableUpdaters)
+            foreach (var levelCollectionsTableUpdater in levelCollectionsTableUpdaters)
             {
                 levelCollectionsTableUpdater.LevelCollectionTableViewUpdatedEvent += LevelCollectionsTableUpdater_LevelCollectionTableViewUpdated;
             }
@@ -74,7 +74,7 @@ namespace PlaylistManager
                 foldersViewController.ParentManagerUpdatedEvent -= FoldersViewController_ParentManagerUpdatedEvent;
             }
 
-            foreach (ILevelCollectionsTableUpdater levelCollectionsTableUpdater in levelCollectionsTableUpdaters)
+            foreach (var levelCollectionsTableUpdater in levelCollectionsTableUpdaters)
             {
                 levelCollectionsTableUpdater.LevelCollectionTableViewUpdatedEvent -= LevelCollectionsTableUpdater_LevelCollectionTableViewUpdated;
             }
@@ -106,7 +106,7 @@ namespace PlaylistManager
                 this.selectedPlaylist = null;
                 parentManager = null;
             }
-            foreach (ILevelCollectionUpdater levelCollectionUpdater in levelCollectionUpdaters)
+            foreach (var levelCollectionUpdater in levelCollectionUpdaters)
             {
                 levelCollectionUpdater.LevelCollectionUpdated(annotatedBeatmapLevelCollection, parentManager);
             }
@@ -123,7 +123,7 @@ namespace PlaylistManager
             {
                 this.selectedPlaylistSong = null;
             }
-            foreach (IPreviewBeatmapLevelUpdater previewBeatmapLevelUpdater in previewBeatmapLevelUpdaters)
+            foreach (var previewBeatmapLevelUpdater in previewBeatmapLevelUpdaters)
             {
                 previewBeatmapLevelUpdater.PreviewBeatmapLevelUpdated(previewBeatmapLevel);
             }
@@ -131,7 +131,7 @@ namespace PlaylistManager
 
         private void FoldersViewController_ParentManagerUpdatedEvent(BeatSaberPlaylistsLib.PlaylistManager parentManager)
         {
-            foreach (IParentManagerUpdater parentManagerUpdater in parentManagerUpdaters)
+            foreach (var parentManagerUpdater in parentManagerUpdaters)
             {
                 parentManagerUpdater.ParentManagerUpdated(parentManager);
             }

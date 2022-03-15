@@ -58,9 +58,9 @@ namespace PlaylistManager.Types
             {
                 try
                 {
-                    using (FileStream imageStream = File.Open(coverImage.Path, FileMode.Open))
+                    using (var imageStream = File.Open(coverImage.Path, FileMode.Open))
                     {
-                        byte[] imageBytes = new byte[imageStream.Length];
+                        var imageBytes = new byte[imageStream.Length];
                         imageStream.Read(imageBytes, 0, (int)imageStream.Length);
                         coverImage._sprite = BeatSaberMarkupLanguage.Utilities.LoadSpriteRaw(imageBytes);
                         if (coverImage._sprite != null)

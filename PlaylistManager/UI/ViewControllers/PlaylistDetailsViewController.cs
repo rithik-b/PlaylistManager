@@ -87,10 +87,10 @@ namespace PlaylistManager.UI
         {
             parsed = true;
 
-            ModalView nameKeyboardModal = nameSettingTransform.Find("BSMLModalKeyboard").GetComponent<ModalView>();
+            var nameKeyboardModal = nameSettingTransform.Find("BSMLModalKeyboard").GetComponent<ModalView>();
             Accessors.AnimateCanvasAccessor(ref nameKeyboardModal) = false;
 
-            ModalView authorKeyboardModal = authorSettingTransform.Find("BSMLModalKeyboard").GetComponent<ModalView>();
+            var authorKeyboardModal = authorSettingTransform.Find("BSMLModalKeyboard").GetComponent<ModalView>();
             Accessors.AnimateCanvasAccessor(ref authorKeyboardModal) = false;
         }
 
@@ -199,10 +199,10 @@ namespace PlaylistManager.UI
 
         private void ClonePlaylist()
         {
-            string playlistPath = Path.Combine(parentManager.PlaylistPath, $"{selectedPlaylist.Filename}.{selectedPlaylist.SuggestedExtension}");
+            var playlistPath = Path.Combine(parentManager.PlaylistPath, $"{selectedPlaylist.Filename}.{selectedPlaylist.SuggestedExtension}");
             if (File.Exists(playlistPath))
             {
-                IPlaylist clonedPlaylist = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.DefaultHandler?.Deserialize(File.OpenRead(playlistPath));
+                var clonedPlaylist = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.DefaultHandler?.Deserialize(File.OpenRead(playlistPath));
                 clonedPlaylist.ReadOnly = false;
                 parentManager.StorePlaylist(clonedPlaylist);
                 PlaylistLibUtils.playlistManager.RequestRefresh("PlaylistManager (plugin)");

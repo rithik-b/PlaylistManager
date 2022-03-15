@@ -97,7 +97,7 @@ namespace PlaylistManager.Types
             if (bgImage != null)
             {
                 Progress = (float)progressDouble;
-                Color color = SongCore.Utilities.HSBColor.ToColor(new SongCore.Utilities.HSBColor(Mathf.PingPong(Progress * 0.35f, 1), 1, 1));
+                var color = SongCore.Utilities.HSBColor.ToColor(new SongCore.Utilities.HSBColor(Mathf.PingPong(Progress * 0.35f, 1), 1, 1));
                 color.a = 0.35f;
                 bgImage.color = color;
                 bgImage.fillAmount = Progress;

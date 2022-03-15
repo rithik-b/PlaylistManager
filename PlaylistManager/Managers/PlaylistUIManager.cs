@@ -80,7 +80,7 @@ namespace PlaylistManager.Managers
 
         private void SelectLevelCategoryViewController_didSelectLevelCategoryEvent(SelectLevelCategoryViewController selectLevelCategoryViewController, SelectLevelCategoryViewController.LevelCategory levelCategory)
         {
-            foreach (ILevelCategoryUpdater levelCategoryUpdater in levelCategoryUpdaters)
+            foreach (var levelCategoryUpdater in levelCategoryUpdaters)
             {
                 levelCategoryUpdater.LevelCategoryUpdated(levelCategory, false);
             }
@@ -88,7 +88,7 @@ namespace PlaylistManager.Managers
 
         private void SelectLevelCategoryViewController_didActivateEvent(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
-            foreach (ILevelCategoryUpdater levelCategoryUpdater in levelCategoryUpdaters)
+            foreach (var levelCategoryUpdater in levelCategoryUpdaters)
             {
                 levelCategoryUpdater.LevelCategoryUpdated(selectLevelCategoryViewController.selectedLevelCategory, true);
             }
@@ -96,7 +96,7 @@ namespace PlaylistManager.Managers
 
         private void SelectLevelCategoryViewController_didDeactivateEvent(bool removedFromHierarchy, bool screenSystemDisabling)
         {
-            foreach (ILevelCategoryUpdater levelCategoryUpdater in levelCategoryUpdaters)
+            foreach (var levelCategoryUpdater in levelCategoryUpdaters)
             {
                 levelCategoryUpdater.LevelCategoryUpdated(SelectLevelCategoryViewController.LevelCategory.None, false);
             }
@@ -149,7 +149,7 @@ namespace PlaylistManager.Managers
         {
             if (PluginConfig.Instance.AutomaticAuthorName)
             {
-                UserInfo user = await platformUserModel.GetUserInfo();
+                var user = await platformUserModel.GetUserInfo();
                 if (PluginConfig.Instance.AuthorName == null && user == null)
                 {
                     PluginConfig.Instance.AuthorName = nameof(PlaylistManager);

@@ -27,7 +27,7 @@ namespace PlaylistManager.AffinityPatches
         [AffinityPatch(typeof(AnnotatedBeatmapLevelCollectionCell), nameof(AnnotatedBeatmapLevelCollectionCell.SetData))]
         private void Patch(AnnotatedBeatmapLevelCollectionCell __instance, ref IAnnotatedBeatmapLevelCollection annotatedBeatmapLevelCollection, ref Image ____coverImage)
         {
-            AnnotatedBeatmapLevelCollectionCell cell = __instance;
+            var cell = __instance;
             if (annotatedBeatmapLevelCollection is IStagedSpriteLoad stagedSpriteLoad)
             {
                 if (stagedSpriteLoad.SmallSpriteWasLoaded)
@@ -36,7 +36,7 @@ namespace PlaylistManager.AffinityPatches
                     //Plugin.Log.Debug($"Sprite was already loaded for {(deferredSpriteLoad as IAnnotatedBeatmapLevelCollection).collectionName}");
 #endif
                 }
-                if (eventTable.TryGetValue(stagedSpriteLoad, out AnnotatedBeatmapLevelCollectionCell existing))
+                if (eventTable.TryGetValue(stagedSpriteLoad, out var existing))
                 {
                     eventTable.Remove(stagedSpriteLoad);
                 }
@@ -47,7 +47,7 @@ namespace PlaylistManager.AffinityPatches
 
             if (PluginConfig.Instance.PlaylistHoverHints)
             {
-                HoverHint hoverHint = __instance.GetComponent<HoverHint>();
+                var hoverHint = __instance.GetComponent<HoverHint>();
 
                 if (hoverHint == null)
                 {
@@ -63,7 +63,7 @@ namespace PlaylistManager.AffinityPatches
         {
             if (sender is IStagedSpriteLoad stagedSpriteLoad)
             {
-                if (eventTable.TryGetValue(stagedSpriteLoad, out AnnotatedBeatmapLevelCollectionCell tableCell))
+                if (eventTable.TryGetValue(stagedSpriteLoad, out var tableCell))
                 {
                     if (tableCell == null)
                     {
@@ -71,7 +71,7 @@ namespace PlaylistManager.AffinityPatches
                         return;
                     }
 
-                    IAnnotatedBeatmapLevelCollection collection = Accessors.BeatmapCollectionAccessor(ref tableCell);
+                    var collection = Accessors.BeatmapCollectionAccessor(ref tableCell);
                     if (collection == stagedSpriteLoad)
                     {
 #if DEBUG
