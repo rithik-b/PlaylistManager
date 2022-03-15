@@ -3,7 +3,6 @@ using BeatSaberPlaylistsLib.Types;
 using HMUI;
 using System;
 using System.ComponentModel;
-using System.Globalization;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.UI;
@@ -24,10 +23,10 @@ namespace PlaylistManager.Types
         private readonly ImageView playlistCoverView;
 
         [UIValue("playlist-name")]
-        public string PlaylistName => playlist?.packName ?? " ";
+        public string PlaylistName => playlist?.packName ?? "";
 
-        [UIValue("playlist-author")]
-        public string PlaylistAuthor => playlist?.Author ?? " ";
+        [UIValue("playlist-subtext")]
+        public string PlaylistSubtext => (playlist?.Author ?? "") + $" [{completedLevels}/{missingLevels} downloaded]";
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -81,7 +80,7 @@ namespace PlaylistManager.Types
             playlistCoverView.sprite = playlist.coverImage;
             playlistCoverView.rectTransform.sizeDelta = new Vector2(8, 0);
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistName)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistAuthor)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistSubtext)));
 
             bgImage = playlistCoverView.transform.parent.gameObject.AddComponent<ImageView>();
             bgImage.enabled = true;
@@ -120,7 +119,11 @@ namespace PlaylistManager.Types
             completedLevels = 0;
             Progress = 0;
         }
-        
-        public void SetTotalProgress(int value) => completedLevels = value;
+
+        public void SetTotalProgress(int value)
+        {
+            completedLevels = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistSubtext)));
+        }
     }
 }
