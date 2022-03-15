@@ -3,13 +3,14 @@ using BeatSaberPlaylistsLib.Types;
 using HMUI;
 using System;
 using System.ComponentModel;
+using System.Globalization;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace PlaylistManager.Types
 {
-    public class DownloadQueueEntry : INotifyPropertyChanged, IProgress<double>
+    public class DownloadQueueEntry : INotifyPropertyChanged, IProgress<double>, IProgress<float>
     {
         public readonly IPlaylist playlist;
         public readonly BeatSaberPlaylistsLib.PlaylistManager parentManager;
@@ -29,8 +30,26 @@ namespace PlaylistManager.Types
         public string PlaylistAuthor => playlist?.Author ?? " ";
 
         public event PropertyChangedEventHandler PropertyChanged;
-        public float Progress { get; private set; }
 
+        private double progress;
+        public double Progress
+        {
+            get => progress;
+            private set
+            {
+                progress = value;
+                if (bgImage != null)
+                {
+                    var color = SongCore.Utilities.HSBColor.ToColor(new SongCore.Utilities.HSBColor(Mathf.PingPong((float) (Progress * 0.35f), 1), 1, 1));
+                    color.a = 0.35f;
+                    bgImage.color = color;
+                    bgImage.fillAmount = (float) Progress;
+                }
+            }
+        }
+        private int completedLevels;
+        private int missingLevels = 1; // Just in case a divide by 0 happens
+        
         public DownloadQueueEntry(IPlaylist playlist, BeatSaberPlaylistsLib.PlaylistManager parentManager)
         {
             this.playlist = playlist;
@@ -72,7 +91,7 @@ namespace PlaylistManager.Types
             bgImage.fillAmount = 0;
             bgImage.material = BeatSaberMarkupLanguage.Utilities.ImageResources.NoGlowMat;
 
-            Report(Progress);
+            Progress = progress;
         }
 
         private void OnSpriteLoad(object sender, EventArgs e)
@@ -92,16 +111,16 @@ namespace PlaylistManager.Types
             Aborted = true;
         }
 
-        public void Report(double progressDouble)
+        public void Report(double value) => Progress = ((double)completedLevels / missingLevels) + (value / missingLevels);
+        public void Report(float value) => Report((double)value);
+        
+        public void SetMissingLevels(int value)
         {
-            if (bgImage != null)
-            {
-                Progress = (float)progressDouble;
-                var color = SongCore.Utilities.HSBColor.ToColor(new SongCore.Utilities.HSBColor(Mathf.PingPong(Progress * 0.35f, 1), 1, 1));
-                color.a = 0.35f;
-                bgImage.color = color;
-                bgImage.fillAmount = Progress;
-            }
+            missingLevels = value;
+            completedLevels = 0;
+            Progress = 0;
         }
+        
+        public void SetTotalProgress(int value) => completedLevels = value;
     }
 }

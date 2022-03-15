@@ -150,7 +150,8 @@ namespace PlaylistManager.Utilities
 
             currentDownload = downloadQueueEntry;
             var missingSongs = PlaylistLibUtils.GetMissingSongs(downloadQueueEntry.playlist, ownedHashes);
-            downloadQueueEntry.Report(0);
+            downloadQueueEntry.SetMissingLevels(missingSongs.Count);
+            downloadQueueEntry.SetTotalProgress(0);
 
             preferCustomArchiveURL = true;
             var shownCustomArchiveWarning = false;
@@ -181,34 +182,36 @@ namespace PlaylistManager.Utilities
                             continue;
                         }
                     }
-                    await BeatmapDownloadByCustomURL(customArchiveURL, identifier, downloadQueueEntry.cancellationTokenSource.Token);
+                    await BeatmapDownloadByCustomURL(customArchiveURL, identifier, downloadQueueEntry.cancellationTokenSource.Token, downloadQueueEntry);
                 }
                 else if (!string.IsNullOrEmpty(missingSongs[i].Hash))
                 {
-                    await BeatmapDownloadByHash(missingSongs[i].Hash, downloadQueueEntry.cancellationTokenSource.Token);
+                    await BeatmapDownloadByHash(missingSongs[i].Hash, downloadQueueEntry.cancellationTokenSource.Token, downloadQueueEntry);
                 }
                 else if (!string.IsNullOrEmpty(missingSongs[i].Key))
                 {
-                    var hash = await BeatmapDownloadByKey(missingSongs[i].Key.ToLower(), downloadQueueEntry.cancellationTokenSource.Token);
+                    var hash = await BeatmapDownloadByKey(missingSongs[i].Key.ToLower(), downloadQueueEntry.cancellationTokenSource.Token, downloadQueueEntry);
                     if (!string.IsNullOrEmpty(hash))
                     {
                         missingSongs[i].Hash = hash;
                     }
                 }
 
-                downloadQueueEntry.Report((i + 1) / ((double)missingSongs.Count));
+                downloadQueueEntry.SetTotalProgress(i + 1);
 
                 if (downloadQueueEntry.Aborted)
                 {
                     break;
                 }
-                else if (disposed)
+
+                if (disposed)
                 {
                     // If downloader is disposed, a soft restart is happening. Reinstantiate the cancellation token and leave.
                     downloadQueueEntry.cancellationTokenSource = new CancellationTokenSource();
                     return;
                 }
-                else if (downloadQueueEntry.cancellationTokenSource.IsCancellationRequested)
+
+                if (downloadQueueEntry.cancellationTokenSource.IsCancellationRequested)
                 {
                     // If we directly cancel, it is a pause. So we wait at this semaphore till it is released.
                     await pauseSemaphore.WaitAsync();
@@ -310,7 +313,7 @@ namespace PlaylistManager.Utilities
                     else
                     {
                         var latest = song.LatestVersion;
-                        await BeatmapDownloadByCustomURL(latest.DownloadURL.Replace(latest.Hash, hash.ToLowerInvariant()), FolderNameForBeatsaverMap(song), token);
+                        await BeatmapDownloadByCustomURL(latest.DownloadURL.Replace(latest.Hash, hash.ToLowerInvariant()), FolderNameForBeatsaverMap(song), token, progress as IProgress<float>);
                     }
                 }
                 catch (Exception e)
