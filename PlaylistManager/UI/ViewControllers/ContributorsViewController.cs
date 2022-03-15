@@ -29,10 +29,11 @@ namespace PlaylistManager.UI
         public void Initialize()
         {
             contributors = new List<object>();
-            contributors.Add(new Contributor("PixelBoom", "PlaylistManager", "PlaylistManager.Icons.Pixel.png", "https://www.youtube.com/channel/UCrk1WH6hCAdfrAtzv-q9hvQ",
+            contributors.Add(new Contributor("PixelBoom", "PlaylistManager (PC)", "PlaylistManager.Icons.Pixel.png", "https://www.youtube.com/channel/UCrk1WH6hCAdfrAtzv-q9hvQ",
                 "https://www.twitch.tv/pixelboom58", "https://github.com/rithik-b", "https://ko-fi.com/pixelboom"));
-            contributors.Add(new Contributor("Zingabopp", "BeatSaberPlaylistsLib", "PlaylistManager.Icons.Zinga.png", github: "https://github.com/Zingabopp", kofi: "https://ko-fi.com/zingabopp"));
-            contributors.Add(new Contributor("Auros", "Major Contributor", "PlaylistManager.Icons.Auros.png", twitch: "https://www.twitch.tv/aurosvr", github: "https://github.com/Auros", kofi: "https://ko-fi.com/auros"));
+            contributors.Add(new Contributor("Metalit", "PlaylistManager (Quest)", "PlaylistManager.Icons.Metalit.png", github: "https://github.com/Metalit"));
+            contributors.Add(new Contributor("Zingabopp", "BeatSaberPlaylistsLib (PC)", "PlaylistManager.Icons.Zinga.png", github: "https://github.com/Zingabopp", kofi: "https://ko-fi.com/zingabopp"));
+            contributors.Add(new Contributor("Auros", "Major Contributor (PC)", "PlaylistManager.Icons.Auros.png", twitch: "https://www.twitch.tv/aurosvr", github: "https://github.com/Auros", kofi: "https://ko-fi.com/auros"));
 
             foreach (var contributor in contributors.OfType<Contributor>())
             {
