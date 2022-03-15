@@ -412,7 +412,7 @@ namespace PlaylistManager.Utilities
                 {
                     foreach (var entry in archive.Entries)
                     {
-                        if (!string.IsNullOrWhiteSpace(entry.Name))
+                        if (!string.IsNullOrWhiteSpace(entry.Name) && entry.Name == entry.FullName)
                         {
                             var entryPath = Path.Combine(path, entry.Name); // Name instead of FullName for better security and because song zips don't have nested directories anyway
                             if (overwrite || !File.Exists(entryPath)) // Either we're overwriting or there's no existing file
