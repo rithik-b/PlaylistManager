@@ -36,8 +36,8 @@ namespace PlaylistManager.Utilities
         public event Action PopupEvent;
         public event Action QueueUpdatedEvent;
 
-        public static readonly List<object> downloadQueue = new List<object>();
-        public static readonly LinkedList<Playlist> coversToRefresh = new LinkedList<Playlist>();
+        public static readonly List<object> downloadQueue = new();
+        public static readonly LinkedList<Playlist> coversToRefresh = new();
 
         private PopupContents _pendingPopup;
         public PopupContents PendingPopup
@@ -53,7 +53,7 @@ namespace PlaylistManager.Utilities
         public PlaylistDownloader(UBinder<Plugin, PluginMetadata> metadata, IHttpService siraHttpService)
         {
             this.siraHttpService = siraHttpService;
-            var options = new BeatSaverOptions(applicationName: metadata.Value.Name, version: metadata.Value.HVersion.ToString());
+            var options = new BeatSaverOptions(metadata.Value.Name, metadata.Value.HVersion.ToString());
             beatSaverInstance = new BeatSaver(options);
             downloadSemaphore = new SemaphoreSlim(1, 1);
             pauseSemaphore = new SemaphoreSlim(0, 1);
@@ -169,7 +169,7 @@ namespace PlaylistManager.Utilities
                     if (!shownCustomArchiveWarning)
                     {
                         shownCustomArchiveWarning = true;
-                        PendingPopup = new YesNoPopupContents("This playlist uses mirror download links. Would you like to use them?", yesButtonPressedCallback: () => SetCustomArchivePreference(true),
+                        PendingPopup = new YesNoPopupContents("This playlist uses mirror download links. Would you like to use them?", () => SetCustomArchivePreference(true),
                              noButtonPressedCallback: () => SetCustomArchivePreference(false), animateParentCanvas: false);
 
                         await popupSemaphore.WaitAsync();
@@ -338,7 +338,7 @@ namespace PlaylistManager.Utilities
                     if (httpResponse.Successful)
                     {
                         var zip = await httpResponse.ReadAsByteArrayAsync();
-                        await ExtractZipAsync(zip, customSongsPath, songName: songName).ConfigureAwait(false);
+                        await ExtractZipAsync(zip, customSongsPath, songName).ConfigureAwait(false);
                     }
                     else
                     {
@@ -441,15 +441,15 @@ namespace PlaylistManager.Utilities
             }
 
             PendingPopup = new YesNoPopupContents(popupText, yesButtonText: "Continue", noButtonText: "Abort", yesButtonPressedCallback: () =>
-                            {
-                                ignoredDiskWarning = true;
-                                popupSemaphore.Release();
-                            },
-                            noButtonPressedCallback: () =>
-                            {
-                                ignoredDiskWarning = false;
-                                popupSemaphore.Release();
-                            }, animateParentCanvas: false);
+            {
+                ignoredDiskWarning = true;
+                popupSemaphore.Release();
+            },
+            noButtonPressedCallback: () =>
+            {
+                ignoredDiskWarning = false;
+                popupSemaphore.Release();
+            }, animateParentCanvas: false);
         }
 
         #endregion

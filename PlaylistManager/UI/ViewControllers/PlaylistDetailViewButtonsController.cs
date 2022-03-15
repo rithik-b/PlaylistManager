@@ -29,7 +29,7 @@ namespace PlaylistManager.UI
         private readonly PlaylistDetailsViewController playlistDetailsViewController;
         private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
 
-        private BeatSaberPlaylistsLib.Types.IPlaylist selectedPlaylist;
+        private IPlaylist selectedPlaylist;
         private BeatSaberPlaylistsLib.PlaylistManager parentManager;
         private List<IPlaylistSong> _missingSongs;
         private DownloadQueueEntry _downloadQueueEntry;
@@ -307,7 +307,7 @@ namespace PlaylistManager.UI
 
         public void LevelCollectionUpdated(IAnnotatedBeatmapLevelCollection selectedBeatmapLevelCollection, BeatSaberPlaylistsLib.PlaylistManager parentManager)
         {
-            if (selectedBeatmapLevelCollection is BeatSaberPlaylistsLib.Types.IPlaylist selectedPlaylist)
+            if (selectedBeatmapLevelCollection is IPlaylist selectedPlaylist)
             {
                 this.selectedPlaylist = selectedPlaylist;
                 this.parentManager = parentManager;

@@ -9,6 +9,7 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
+using Object = UnityEngine.Object;
 
 namespace PlaylistManager.UI
 {
@@ -79,7 +80,7 @@ namespace PlaylistManager.UI
             Button pageUpButton = Accessors.PageUpAccessor(ref bsmlScrollView);
             Button pageDownButton = Accessors.PageDownAccessor(ref bsmlScrollView);
             VerticalScrollIndicator verticalScrollIndicator = Accessors.ScrollIndicatorAccessor(ref bsmlScrollView);
-            GameObject.Destroy(bsmlScrollView.gameObject);
+            Object.Destroy(bsmlScrollView.gameObject);
             scrollBar.gameObject.SetActive(false);
 
             // Adding GridScrollView to GridView

@@ -11,7 +11,7 @@ namespace PlaylistManager.Types
 {
     public class DownloadQueueEntry : INotifyPropertyChanged, IProgress<double>
     {
-        public readonly BeatSaberPlaylistsLib.Types.IPlaylist playlist;
+        public readonly IPlaylist playlist;
         public readonly BeatSaberPlaylistsLib.PlaylistManager parentManager;
         public CancellationTokenSource cancellationTokenSource;
         public bool Aborted;
@@ -31,7 +31,7 @@ namespace PlaylistManager.Types
         public event PropertyChangedEventHandler PropertyChanged;
         public float Progress { get; private set; }
 
-        public DownloadQueueEntry(BeatSaberPlaylistsLib.Types.IPlaylist playlist, BeatSaberPlaylistsLib.PlaylistManager parentManager)
+        public DownloadQueueEntry(IPlaylist playlist, BeatSaberPlaylistsLib.PlaylistManager parentManager)
         {
             this.playlist = playlist;
             this.parentManager = parentManager;

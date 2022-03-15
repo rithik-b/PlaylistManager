@@ -28,17 +28,17 @@ namespace PlaylistManager.Utilities
             }
         }
 
-        public static BeatSaberPlaylistsLib.Types.IPlaylist CreatePlaylistWithConfig(string playlistName, BeatSaberPlaylistsLib.PlaylistManager playlistManager)
+        public static IPlaylist CreatePlaylistWithConfig(string playlistName, BeatSaberPlaylistsLib.PlaylistManager playlistManager)
         {
             string playlistAuthorName = PluginConfig.Instance.AuthorName;
             bool easterEgg = playlistAuthorName.ToUpper().Contains("BINTER") && playlistName.ToUpper().Contains("TECH") && PluginConfig.Instance.EasterEggs;
             return CreatePlaylist(playlistName, playlistAuthorName, playlistManager, !PluginConfig.Instance.DefaultImageDisabled, PluginConfig.Instance.DefaultAllowDuplicates, easterEgg);
         }
 
-        public static BeatSaberPlaylistsLib.Types.IPlaylist CreatePlaylist(string playlistName, string playlistAuthorName, BeatSaberPlaylistsLib.PlaylistManager playlistManager, bool defaultCover = true,
+        public static IPlaylist CreatePlaylist(string playlistName, string playlistAuthorName, BeatSaberPlaylistsLib.PlaylistManager playlistManager, bool defaultCover = true,
             bool allowDups = true, bool easterEgg = false)
         {
-            BeatSaberPlaylistsLib.Types.IPlaylist playlist = playlistManager.CreatePlaylist("", playlistName, playlistAuthorName, "");
+            IPlaylist playlist = playlistManager.CreatePlaylist("", playlistName, playlistAuthorName, "");
 
             if (defaultCover)
             {
@@ -81,7 +81,7 @@ namespace PlaylistManager.Utilities
             return "";
         }
 
-        public static List<IPlaylistSong> GetMissingSongs(BeatSaberPlaylistsLib.Types.IPlaylist playlist, HashSet<string> ownedHashes = null)
+        public static List<IPlaylistSong> GetMissingSongs(IPlaylist playlist, HashSet<string> ownedHashes = null)
         {
             if (playlist is LegacyPlaylist legacyPlaylist)
             {

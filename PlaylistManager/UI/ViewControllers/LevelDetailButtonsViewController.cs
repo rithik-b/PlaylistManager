@@ -23,7 +23,7 @@ namespace PlaylistManager.UI
 
         public event PropertyChangedEventHandler PropertyChanged;
         private IPreviewBeatmapLevel selectedBeatmapLevel;
-        private BeatSaberPlaylistsLib.Types.IPlaylist selectedPlaylist;
+        private IPlaylist selectedPlaylist;
         private BeatSaberPlaylistsLib.PlaylistManager parentManager;
         private bool _addActive;
         private bool _isPlaylistSong;
@@ -188,7 +188,7 @@ namespace PlaylistManager.UI
 
         public void LevelCollectionUpdated(IAnnotatedBeatmapLevelCollection annotatedBeatmapLevelCollection, BeatSaberPlaylistsLib.PlaylistManager parentManager)
         {
-            if (annotatedBeatmapLevelCollection is BeatSaberPlaylistsLib.Types.IPlaylist selectedPlaylist)
+            if (annotatedBeatmapLevelCollection is IPlaylist selectedPlaylist)
             {
                 this.selectedPlaylist = selectedPlaylist;
                 this.parentManager = parentManager;
