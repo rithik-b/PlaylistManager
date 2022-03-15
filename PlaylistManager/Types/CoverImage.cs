@@ -21,9 +21,9 @@ namespace PlaylistManager.Types
         public bool Blacklist { get; private set; }
         public event EventHandler SpriteLoaded;
 
-        private static readonly object _loaderLock = new object();
+        private static readonly object _loaderLock = new();
         private static bool CoroutineRunning = false;
-        private static readonly Queue<Action> SpriteQueue = new Queue<Action>();
+        private static readonly Queue<Action> SpriteQueue = new();
 
         public CoverImage(string path)
         {

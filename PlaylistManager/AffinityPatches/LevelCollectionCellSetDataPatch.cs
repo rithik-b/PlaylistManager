@@ -16,7 +16,7 @@ namespace PlaylistManager.AffinityPatches
 {
     internal class LevelCollectionCellSetDataPatch : IAffinity
     {
-        private readonly ConditionalWeakTable<IStagedSpriteLoad, AnnotatedBeatmapLevelCollectionCell> eventTable = new ConditionalWeakTable<IStagedSpriteLoad, AnnotatedBeatmapLevelCollectionCell>();
+        private readonly ConditionalWeakTable<IStagedSpriteLoad, AnnotatedBeatmapLevelCollectionCell> eventTable = new();
         private readonly HoverHintController hoverHintController;
 
         public LevelCollectionCellSetDataPatch(HoverHintController hoverHintController)

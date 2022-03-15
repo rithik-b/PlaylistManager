@@ -24,7 +24,7 @@ namespace PlaylistManager.Utilities
         private readonly IHttpService siraHttpService;
         private readonly BeatSaver beatSaverInstance;
         private readonly SemaphoreSlim downloadSemaphore;
-        private static readonly HashSet<string> ownedHashes = new HashSet<string>();
+        private static readonly HashSet<string> ownedHashes = new();
         private DownloadQueueEntry currentDownload;
 
         private readonly SemaphoreSlim pauseSemaphore;
