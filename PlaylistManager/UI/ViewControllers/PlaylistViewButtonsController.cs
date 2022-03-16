@@ -3,7 +3,7 @@ using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using HMUI;
 using PlaylistManager.Interfaces;
-using PlaylistManager.Utilities;
+using PlaylistManager.Downloaders;
 using System;
 using System.ComponentModel;
 using System.Reflection;
@@ -17,7 +17,7 @@ namespace PlaylistManager.UI
     {
         private readonly PopupModalsController popupModalsController;
         private readonly TweeningManager uwuTweenyManager;
-        private readonly PlaylistDownloader playlistDownloader;
+        private readonly PlaylistSequentialDownloader playlistDownloader;
         private readonly PlaylistDownloaderViewController playlistDownloaderViewController;
         private readonly PlaylistManagerFlowCoordinator playlistManagerFlowCoordinator;
 
@@ -52,7 +52,7 @@ namespace PlaylistManager.UI
 
         private Vector3 queueModalPosition;
 
-        public PlaylistViewButtonsController(PopupModalsController popupModalsController, TimeTweeningManager uwuTweenyManager, PlaylistDownloader playlistDownloader, PlaylistDownloaderViewController playlistDownloaderViewController,
+        public PlaylistViewButtonsController(PopupModalsController popupModalsController, TimeTweeningManager uwuTweenyManager, PlaylistSequentialDownloader playlistDownloader, PlaylistDownloaderViewController playlistDownloaderViewController,
             MainFlowCoordinator mainFlowCoordinator, PlaylistManagerFlowCoordinator playlistManagerFlowCoordinator, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController,
             LevelFilteringNavigationController levelFilteringNavigationController, SelectLevelCategoryViewController selectLevelCategoryViewController)
         {
@@ -175,7 +175,7 @@ namespace PlaylistManager.UI
         }
 
         [UIValue("queue-interactable")]
-        private bool QueueInteractable => PlaylistDownloader.downloadQueue.Count != 0;
+        private bool QueueInteractable => PlaylistSequentialDownloader.downloadQueue.Count != 0;
 
         #endregion
 

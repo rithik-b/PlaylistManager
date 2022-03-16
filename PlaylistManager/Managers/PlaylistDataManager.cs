@@ -2,7 +2,7 @@
 using PlaylistManager.HarmonyPatches;
 using PlaylistManager.Interfaces;
 using PlaylistManager.UI;
-using PlaylistManager.Utilities;
+using PlaylistManager.Downloaders;
 using System;
 using System.Collections.Generic;
 using Zenject;

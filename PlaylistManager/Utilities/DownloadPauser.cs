@@ -1,13 +1,13 @@
 ﻿using System;
 using Zenject;
 
-namespace PlaylistManager.Utilities
+namespace PlaylistManager.Downloaders
 {
     internal class DownloadPauser : IInitializable, IDisposable
     {
-        private readonly PlaylistDownloader playlistDownloader;
+        private readonly PlaylistSequentialDownloader playlistDownloader;
 
-        public DownloadPauser(PlaylistDownloader playlistDownloader)
+        public DownloadPauser(PlaylistSequentialDownloader playlistDownloader)
         {
             this.playlistDownloader = playlistDownloader;
         }

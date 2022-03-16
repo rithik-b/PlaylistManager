@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace PlaylistManager.Utilities
+namespace PlaylistManager.Downloaders
 {
     internal class Accessors
     {

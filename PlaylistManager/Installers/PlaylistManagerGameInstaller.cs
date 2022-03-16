@@ -1,5 +1,5 @@
 ﻿using PlaylistManager.Configuration;
-using PlaylistManager.Utilities;
+using PlaylistManager.Downloaders;
 using Zenject;
 
 namespace PlaylistManager.Installers

@@ -1,6 +1,6 @@
 ﻿using System;
 using PlaylistManager.AffinityPatches;
-using PlaylistManager.Utilities;
+using PlaylistManager.Downloaders;
 using Polyglot;
 using Zenject;
 
@@ -10,7 +10,7 @@ namespace PlaylistManager.Installers
     {
         public override void InstallBindings()
         {
-            Container.BindInterfacesAndSelfTo<PlaylistDownloader>().AsSingle();
+            Container.BindInterfacesAndSelfTo<PlaylistSequentialDownloader>().AsSingle();
             
             if (DateTime.Now.Month == 4 && DateTime.Now.Day == 1 && LocalizationProvider.Instance.localization.SelectedLanguage == Language.English)
             {

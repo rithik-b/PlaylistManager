@@ -1,5 +1,5 @@
 ﻿using PlaylistManager.Interfaces;
-using PlaylistManager.Utilities;
+using PlaylistManager.Downloaders;
 using System.Linq;
 
 namespace PlaylistManager.UI

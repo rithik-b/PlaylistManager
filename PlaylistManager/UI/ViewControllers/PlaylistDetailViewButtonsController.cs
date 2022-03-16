@@ -4,7 +4,7 @@ using BeatSaberPlaylistsLib.Types;
 using PlaylistManager.Configuration;
 using PlaylistManager.Interfaces;
 using PlaylistManager.Types;
-using PlaylistManager.Utilities;
+using PlaylistManager.Downloaders;
 using SiraUtil.Web;
 using System;
 using System.Collections.Generic;
@@ -16,14 +16,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using Zenject;
-using Accessors = PlaylistManager.Utilities.Accessors;
+using Accessors = PlaylistManager.Downloaders.Accessors;
 
 namespace PlaylistManager.UI
 {
     public class PlaylistDetailViewButtonsController : IInitializable, IDisposable, INotifyPropertyChanged, ILevelCollectionUpdater, ILevelCategoryUpdater, ILevelCollectionsTableUpdater
     {
         private readonly IHttpService siraHttpService;
-        private readonly PlaylistDownloader playlistDownloader;
+        private readonly PlaylistSequentialDownloader playlistDownloader;
         private readonly LevelPackDetailViewController levelPackDetailViewController;
         private readonly PopupModalsController popupModalsController;
         private readonly PlaylistDetailsViewController playlistDetailsViewController;
@@ -43,7 +43,7 @@ namespace PlaylistManager.UI
         [UIComponent("sync-button")]
         private readonly Transform syncButtonTransform;
 
-        public PlaylistDetailViewButtonsController(IHttpService siraHttpService, PlaylistDownloader playlistDownloader, LevelPackDetailViewController levelPackDetailViewController, 
+        internal PlaylistDetailViewButtonsController(IHttpService siraHttpService, PlaylistSequentialDownloader playlistDownloader, LevelPackDetailViewController levelPackDetailViewController, 
             PopupModalsController popupModalsController, PlaylistDetailsViewController playlistDetailsViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController)
         {
             this.siraHttpService = siraHttpService;
@@ -147,7 +147,7 @@ namespace PlaylistManager.UI
 
         private void OnQueueUpdated()
         {
-            if (PlaylistDownloader.downloadQueue.Count == 0)
+            if (PlaylistSequentialDownloader.downloadQueue.Count == 0)
             {
                 DownloadQueueEntry = null;
                 UpdateMissingSongs();
@@ -311,7 +311,7 @@ namespace PlaylistManager.UI
             {
                 this.selectedPlaylist = selectedPlaylist;
                 this.parentManager = parentManager;
-                DownloadQueueEntry = PlaylistDownloader.downloadQueue.OfType<DownloadQueueEntry>().Where(x => x.playlist == selectedPlaylist).FirstOrDefault();
+                DownloadQueueEntry = PlaylistSequentialDownloader.downloadQueue.OfType<DownloadQueueEntry>().Where(x => x.playlist == selectedPlaylist).FirstOrDefault();
                 UpdateMissingSongs();
 
                 rootTransform.gameObject.SetActive(true);

@@ -3,7 +3,7 @@ using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using HMUI;
 using PlaylistManager.HarmonyPatches;
-using PlaylistManager.Utilities;
+using PlaylistManager.Downloaders;
 using System;
 using System.Reflection;
 using UnityEngine;
@@ -14,7 +14,7 @@ namespace PlaylistManager.UI
 {
     public class PlaylistDownloaderViewController : MonoBehaviour, IInitializable, IDisposable
     {
-        private PlaylistDownloader playlistDownloader;
+        private PlaylistSequentialDownloader playlistDownloader;
         private PopupModalsController popupModalsController;
         private bool parsed;
         private bool refreshRequested;
@@ -26,7 +26,7 @@ namespace PlaylistManager.UI
         private readonly RectTransform rootTransform;
 
         [Inject]
-        public void Construct(PlaylistDownloader playlistDownloader, PopupModalsController popupModalsController)
+        internal void Construct(PlaylistSequentialDownloader playlistDownloader, PopupModalsController popupModalsController)
         {
             this.playlistDownloader = playlistDownloader;
             this.popupModalsController = popupModalsController;
@@ -70,7 +70,7 @@ namespace PlaylistManager.UI
         {
             parsed = true;
             transform.SetParent(rootTransform);
-            customListTableData.data = PlaylistDownloader.downloadQueue;
+            customListTableData.data = PlaylistSequentialDownloader.downloadQueue;
             customListTableData.tableView.ReloadDataKeepingPosition();
         }
 
@@ -99,7 +99,7 @@ namespace PlaylistManager.UI
                 customListTableData.tableView.ReloadDataKeepingPosition();
             }
 
-            if (PlaylistDownloader.downloadQueue.Count == 0)
+            if (PlaylistSequentialDownloader.downloadQueue.Count == 0)
             {
                 if (SceneManager.GetActiveScene().name == "GameCore")
                 {

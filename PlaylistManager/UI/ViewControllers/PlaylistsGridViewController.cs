@@ -3,7 +3,7 @@ using BeatSaberMarkupLanguage.Attributes;
 using HMUI;
 using PlaylistManager.HarmonyPatches;
 using PlaylistManager.Types;
-using PlaylistManager.Utilities;
+using PlaylistManager.Downloaders;
 using System;
 using System.Reflection;
 using UnityEngine;

@@ -2,7 +2,7 @@
 using HMUI;
 using PlaylistManager.HarmonyPatches;
 using PlaylistManager.Interfaces;
-using PlaylistManager.Utilities;
+using PlaylistManager.Downloaders;
 using System;
 using System.Collections.Generic;
 using System.Linq;
