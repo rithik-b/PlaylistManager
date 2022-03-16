@@ -94,6 +94,8 @@ namespace PlaylistManager.UI
             Accessors.PlatformHelperAccessor(ref scrollView) = platformHelper;
             annotatedBeatmapLevelCollectionsGridView.gameObject.SetActive(true);
             gridScrollView.enabled = false;
+            
+            annotatedBeatmapLevelCollectionsGridView.gameObject.AddComponent<GridViewPointerObserver>();
 
             // Subbing to events
             annotatedBeatmapLevelCollectionsTableViewController.didOpenBeatmapLevelCollectionsEvent += AnnotatedBeatmapLevelCollectionsGridView_didOpenAnnotatedBeatmapLevelCollectionEvent;
