@@ -15,20 +15,8 @@ namespace PlaylistManager.Types
             gridScrollView = GetComponent<GridScrollView>();
         }
 
-        public void OnPointerEnter(PointerEventData eventData)
-        {
-            if (gridView.rowCount <= 1)
-            {
-                gridScrollView.OnHover();
-            }
-        }
+        public void OnPointerEnter(PointerEventData eventData) => gridScrollView.OnHover();
 
-        public void OnPointerExit(PointerEventData eventData)
-        {
-            if (gridView.rowCount <= 1)
-            {
-                gridScrollView.OnLeave();
-            }
-        }
+        public void OnPointerExit(PointerEventData eventData) => gridScrollView.OnLeave();
     }
 }

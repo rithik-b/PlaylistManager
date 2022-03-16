@@ -95,6 +95,7 @@ namespace PlaylistManager.UI
             annotatedBeatmapLevelCollectionsGridView.gameObject.SetActive(true);
             gridScrollView.enabled = false;
             
+            // Setting up observer for hovering/leaving the grid view
             annotatedBeatmapLevelCollectionsGridView.gameObject.AddComponent<GridViewPointerObserver>();
 
             // Subbing to events
@@ -105,13 +106,11 @@ namespace PlaylistManager.UI
         private void AnnotatedBeatmapLevelCollectionsGridView_didOpenAnnotatedBeatmapLevelCollectionEvent()
         {
             scrollBar.gameObject.SetActive(true);
-            gridScrollView.OnHover();
         }
 
         private void AnnotatedBeatmapLevelCollectionsGridView_didCloseAnnotatedBeatmapLevelCollectionEvent()
         {
             scrollBar.gameObject.SetActive(false);
-            gridScrollView.OnLeave();
         }
     }
 }
