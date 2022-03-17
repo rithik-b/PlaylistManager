@@ -38,7 +38,7 @@ namespace PlaylistManager.Downloaders
         internal event Action QueueUpdatedEvent;
         
         internal static readonly List<object> downloadQueue = new();
-        private static readonly LinkedList<Playlist> coversToRefresh = new();
+        private static readonly LinkedList<BeatSaberPlaylistsLib.Types.Playlist> coversToRefresh = new();
 
         private PopupContents _pendingPopup;
         internal PopupContents PendingPopup
@@ -241,7 +241,7 @@ namespace PlaylistManager.Downloaders
 
             downloadQueueEntry.parentManager.StorePlaylist(downloadQueueEntry.playlist);
 
-            if (downloadQueueEntry.playlist is Playlist playlist)
+            if (downloadQueueEntry.playlist is BeatSaberPlaylistsLib.Types.Playlist playlist)
             {
                 coversToRefresh.AddLast(playlist);
             }
