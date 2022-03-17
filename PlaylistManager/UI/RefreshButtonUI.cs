@@ -1,6 +1,6 @@
 ﻿using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.MenuButtons;
-using PlaylistManager.Utilities;
+using PlaylistManager.Downloaders;
 using SongCore;
 using SongCore.UI;
 using System;
@@ -11,41 +11,44 @@ namespace PlaylistManager.UI
 {
     public class RefreshButtonUI : IInitializable, IDisposable
     {
-        public MenuButton _refreshButton;
-        internal ProgressBar _progressBar;
-        const int MESSAGE_TIME = 5;
+        private MenuButton refreshButton;
+        private ProgressBar progressBar;
+        private const int kMessageTime = 5;
 
         public void Initialize()
         {
-            _refreshButton = new MenuButton("Refresh Playlists", "Refresh Songs & Playlists", RefreshButtonPressed, true);
-            MenuButtons.instance.RegisterButton(_refreshButton);
+            refreshButton = new MenuButton("Refresh Playlists", "Refresh Songs & Playlists", RefreshButtonPressed);
+            MenuButtons.instance.RegisterButton(refreshButton);
             Loader.SongsLoadedEvent += SongsLoaded;
         }
 
         private async void SongsLoaded(Loader _, System.Collections.Concurrent.ConcurrentDictionary<string, CustomPreviewBeatmapLevel> songs)
         {
-            if (_progressBar == null)
+            if (progressBar == null)
             {
-                _progressBar = ProgressBar.Create();
+                progressBar = ProgressBar.Create();
             }
-            int numPlaylists = await Task.Run(() => PlaylistLibUtils.playlistManager.GetAllPlaylists(true).Length);
+            
+            var numPlaylists = await Task.Run(() => PlaylistLibUtils.playlistManager.GetAllPlaylists(true).Length).ConfigureAwait(false);
 
-            _progressBar.enabled = true;
-            _progressBar.ShowMessage($"\n{numPlaylists} playlists loaded.", MESSAGE_TIME);
+            progressBar.enabled = true;
+            progressBar.ShowMessage($"\n{numPlaylists} playlists loaded.", kMessageTime);
         }
 
         public void Dispose()
         {
-            UnityEngine.Object.Destroy(_progressBar);
+            UnityEngine.Object.Destroy(progressBar);
             if (BSMLParser.IsSingletonAvailable && MenuButtons.IsSingletonAvailable)
-                MenuButtons.instance.UnregisterButton(_refreshButton);
+                MenuButtons.instance.UnregisterButton(refreshButton);
             Loader.SongsLoadedEvent -= SongsLoaded;
         }
 
-        internal void RefreshButtonPressed()
+        private void RefreshButtonPressed()
         {
             if (!Loader.AreSongsLoading)
+            {
                 Loader.Instance.RefreshSongs(fullRefresh: false);
+            }
         }
     }
 }

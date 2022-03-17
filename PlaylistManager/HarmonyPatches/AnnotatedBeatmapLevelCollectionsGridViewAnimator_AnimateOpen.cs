@@ -10,9 +10,9 @@ namespace PlaylistManager.HarmonyPatches
     {
         internal static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
-            List<CodeInstruction> codes = new List<CodeInstruction>(instructions);
-            int index = -1;
-            for (int i = 0; i < codes.Count - 1; i++)
+            var codes = new List<CodeInstruction>(instructions);
+            var index = -1;
+            for (var i = 0; i < codes.Count - 1; i++)
             {
                 if (codes[i].opcode == OpCodes.Ldloc_3  && codes[i + 1].opcode == OpCodes.Call)
                 {

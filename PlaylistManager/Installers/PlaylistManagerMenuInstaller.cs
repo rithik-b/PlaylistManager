@@ -1,8 +1,8 @@
-﻿using Zenject;
+﻿using PlaylistManager.AffinityPatches;
+using Zenject;
 using PlaylistManager.UI;
 using PlaylistManager.Managers;
 using PlaylistManager.Configuration;
-using PlaylistManager.HarmonyPatches;
 
 namespace PlaylistManager.Installers
 {
@@ -30,11 +30,11 @@ namespace PlaylistManager.Installers
             Container.BindInterfacesAndSelfTo<DifficultyHighlighter>().AsSingle();
 
             Container.BindInterfacesTo<RefreshButtonUI>().AsSingle();
+            
+            Container.BindInterfacesTo<LevelCollectionCellSetDataPatch>().AsSingle();
 
             Container.BindInterfacesTo<PlaylistUIManager>().AsSingle();
             Container.BindInterfacesAndSelfTo<PlaylistDataManager>().AsSingle();
-
-            Container.BindInterfacesTo<LevelCollectionCellSetDataPatch>().AsSingle();
 
             if (PluginConfig.Instance.FoldersDisabled)
             {

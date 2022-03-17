@@ -1,7 +1,7 @@
 ﻿using BeatSaberPlaylistsLib.Types;
 using IPA.Utilities;
 using PlaylistManager.Interfaces;
-using PlaylistManager.Utilities;
+using PlaylistManager.Downloaders;
 using System;
 
 namespace PlaylistManager.UI

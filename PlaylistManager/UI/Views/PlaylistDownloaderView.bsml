@@ -8,7 +8,7 @@
 			<button id='abort-button' on-click='abort-clicked' ignore-layout='true' text='Abort' face-color='red' hover-hint='Abort this download' anchor-pos-x='70' anchor-pos-y='-5' />
 			<vertical  anchor-pos-x='20' anchor-min-x='0' anchor-max-x='0' child-align='MiddleLeft' vertical-fit='PreferredSize'>
 				<text text='~playlist-name' italics='true' font-size='4' />
-				<text text='~playlist-author' italics='true' font-size='3' />
+				<text text='~playlist-subtext' italics='true' font-size='3' />
 			</vertical>
 		</horizontal>
 	</custom-list>

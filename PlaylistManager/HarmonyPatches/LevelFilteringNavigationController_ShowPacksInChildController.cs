@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
 using HarmonyLib;
-using PlaylistManager.Utilities;
+using PlaylistManager.Downloaders;
 using System;
 
 namespace PlaylistManager.HarmonyPatches

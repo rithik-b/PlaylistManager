@@ -7,7 +7,7 @@ using BeatSaberPlaylistsLib.Legacy;
 using BeatSaberPlaylistsLib.Types;
 using HMUI;
 using PlaylistManager.Interfaces;
-using PlaylistManager.Utilities;
+using PlaylistManager.Downloaders;
 using System;
 using System.ComponentModel;
 using System.IO;
@@ -87,10 +87,10 @@ namespace PlaylistManager.UI
         {
             parsed = true;
 
-            ModalView nameKeyboardModal = nameSettingTransform.Find("BSMLModalKeyboard").GetComponent<ModalView>();
+            var nameKeyboardModal = nameSettingTransform.Find("BSMLModalKeyboard").GetComponent<ModalView>();
             Accessors.AnimateCanvasAccessor(ref nameKeyboardModal) = false;
 
-            ModalView authorKeyboardModal = authorSettingTransform.Find("BSMLModalKeyboard").GetComponent<ModalView>();
+            var authorKeyboardModal = authorSettingTransform.Find("BSMLModalKeyboard").GetComponent<ModalView>();
             Accessors.AnimateCanvasAccessor(ref authorKeyboardModal) = false;
         }
 
@@ -131,7 +131,7 @@ namespace PlaylistManager.UI
         [UIValue("playlist-name")]
         private string PlaylistName
         {
-            get => selectedPlaylist == null ? " " : (selectedPlaylist as BeatSaberPlaylistsLib.Types.IPlaylist).packName;
+            get => selectedPlaylist == null ? " " : (selectedPlaylist as IPlaylist).packName;
             set
             {
                 selectedPlaylist.Title = value;
@@ -140,8 +140,8 @@ namespace PlaylistManager.UI
                     selectedPlaylist.SpriteLoaded += SelectedPlaylist_SpriteLoaded;
                     selectedPlaylist.RaiseCoverImageChangedForDefaultCover();
                 }
-                parentManager.StorePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
-                Events.RaisePlaylistRenamed((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist, parentManager);
+                parentManager.StorePlaylist((IPlaylist)selectedPlaylist);
+                Events.RaisePlaylistRenamed((IPlaylist)selectedPlaylist, parentManager);
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistName)));
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NameHint)));
             }
@@ -160,7 +160,7 @@ namespace PlaylistManager.UI
             set
             {
                 selectedPlaylist.Author = value;
-                parentManager.StorePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
+                parentManager.StorePlaylist((IPlaylist)selectedPlaylist);
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistAuthor)));
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AuthorHint)));
             }
@@ -199,10 +199,10 @@ namespace PlaylistManager.UI
 
         private void ClonePlaylist()
         {
-            string playlistPath = Path.Combine(parentManager.PlaylistPath, $"{selectedPlaylist.Filename}.{selectedPlaylist.SuggestedExtension}");
+            var playlistPath = Path.Combine(parentManager.PlaylistPath, $"{selectedPlaylist.Filename}.{selectedPlaylist.SuggestedExtension}");
             if (File.Exists(playlistPath))
             {
-                BeatSaberPlaylistsLib.Types.IPlaylist clonedPlaylist = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.DefaultHandler?.Deserialize(File.OpenRead(playlistPath));
+                var clonedPlaylist = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.DefaultHandler?.Deserialize(File.OpenRead(playlistPath));
                 clonedPlaylist.ReadOnly = false;
                 parentManager.StorePlaylist(clonedPlaylist);
                 PlaylistLibUtils.playlistManager.RequestRefresh("PlaylistManager (plugin)");
@@ -232,7 +232,7 @@ namespace PlaylistManager.UI
             set
             {
                 selectedPlaylist.ReadOnly = value;
-                parentManager.StorePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
+                parentManager.StorePlaylist((IPlaylist)selectedPlaylist);
                 UpdateReadOnly();
             }
         }
@@ -288,7 +288,7 @@ namespace PlaylistManager.UI
                     }
                 }
 
-                parentManager.StorePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
+                parentManager.StorePlaylist((IPlaylist)selectedPlaylist);
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistAllowDuplicates)));
             }
 
@@ -303,7 +303,7 @@ namespace PlaylistManager.UI
         {
             if (!PlaylistReadOnly)
             {
-                imageSelectionModalController.ShowModal((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
+                imageSelectionModalController.ShowModal((IPlaylist)selectedPlaylist);
             }
         }
 
@@ -314,7 +314,7 @@ namespace PlaylistManager.UI
             {
                 selectedPlaylist.SetCover(imageBytes);
                 _ = selectedPlaylist.Sprite;
-                parentManager.StorePlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)selectedPlaylist);
+                parentManager.StorePlaylist((IPlaylist)selectedPlaylist);
             }
             catch (Exception e)
             {

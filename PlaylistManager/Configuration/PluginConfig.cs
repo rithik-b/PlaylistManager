@@ -25,7 +25,7 @@ namespace PlaylistManager.Configuration
 
         [UseConverter(typeof(EnumConverter<SyncOptions>))]
         [NonNullable]
-        public virtual SyncOptions SyncOption { get; set; } = PluginConfig.SyncOptions.On;
+        public virtual SyncOptions SyncOption { get; set; } = SyncOptions.On;
 
         /// <summary>
         /// Call this to force BSIPA to update the config file. This is also called by BSIPA if it detects the file was modified.

@@ -1,13 +1,28 @@
 ﻿using System;
 
-namespace PlaylistManager.Utilities
+namespace PlaylistManager.Downloaders
 {
     public class Events
     {
+        /// <summary>
+        /// Raised when an <see cref="BeatSaberPlaylistsLib.Types.IPlaylistSong"/> is selected inside a playlist
+        /// </summary>
         public static event Action<BeatSaberPlaylistsLib.Types.IPlaylistSong> playlistSongSelected;
+        /// <summary>
+        /// Raised when an <see cref="BeatSaberPlaylistsLib.Types.IPlaylist"/> is selected in the menu
+        /// </summary>
         public static event Action<BeatSaberPlaylistsLib.Types.IPlaylist, BeatSaberPlaylistsLib.PlaylistManager> playlistSelected;
+        /// <summary>
+        /// Raised when an <see cref="BeatSaberPlaylistsLib.Types.IPlaylistSong"/> is added to an <see cref="BeatSaberPlaylistsLib.Types.IPlaylist"/>
+        /// </summary>
         public static event Action<BeatSaberPlaylistsLib.Types.IPlaylistSong, BeatSaberPlaylistsLib.Types.IPlaylist> playlistSongAdded;
+        /// <summary>
+        /// Raised when an <see cref="BeatSaberPlaylistsLib.Types.IPlaylistSong"/> is removed from an <see cref="BeatSaberPlaylistsLib.Types.IPlaylist"/>
+        /// </summary>
         public static event Action<BeatSaberPlaylistsLib.Types.IPlaylistSong, BeatSaberPlaylistsLib.Types.IPlaylist> playlistSongRemoved;
+        /// <summary>
+        /// Raised when an <see cref="BeatSaberPlaylistsLib.Types.IPlaylist"> is renamed
+        /// </summary>
         public static event Action<BeatSaberPlaylistsLib.Types.IPlaylist, BeatSaberPlaylistsLib.PlaylistManager> playlistRenamed;
 
         internal static void RaisePlaylistSongSelected(BeatSaberPlaylistsLib.Types.IPlaylistSong playlistSong) => playlistSongSelected?.Invoke(playlistSong);

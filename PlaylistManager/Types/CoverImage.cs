@@ -21,9 +21,9 @@ namespace PlaylistManager.Types
         public bool Blacklist { get; private set; }
         public event EventHandler SpriteLoaded;
 
-        private static readonly object _loaderLock = new object();
+        private static readonly object _loaderLock = new();
         private static bool CoroutineRunning = false;
-        private static readonly Queue<Action> SpriteQueue = new Queue<Action>();
+        private static readonly Queue<Action> SpriteQueue = new();
 
         public CoverImage(string path)
         {
@@ -58,9 +58,9 @@ namespace PlaylistManager.Types
             {
                 try
                 {
-                    using (FileStream imageStream = File.Open(coverImage.Path, FileMode.Open))
+                    using (var imageStream = File.Open(coverImage.Path, FileMode.Open))
                     {
-                        byte[] imageBytes = new byte[imageStream.Length];
+                        var imageBytes = new byte[imageStream.Length];
                         imageStream.Read(imageBytes, 0, (int)imageStream.Length);
                         coverImage._sprite = BeatSaberMarkupLanguage.Utilities.LoadSpriteRaw(imageBytes);
                         if (coverImage._sprite != null)

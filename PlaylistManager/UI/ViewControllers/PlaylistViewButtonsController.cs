@@ -3,7 +3,7 @@ using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using HMUI;
 using PlaylistManager.Interfaces;
-using PlaylistManager.Utilities;
+using PlaylistManager.Downloaders;
 using System;
 using System.ComponentModel;
 using System.Reflection;
@@ -17,7 +17,7 @@ namespace PlaylistManager.UI
     {
         private readonly PopupModalsController popupModalsController;
         private readonly TweeningManager uwuTweenyManager;
-        private readonly PlaylistDownloader playlistDownloader;
+        private readonly PlaylistSequentialDownloader playlistDownloader;
         private readonly PlaylistDownloaderViewController playlistDownloaderViewController;
         private readonly PlaylistManagerFlowCoordinator playlistManagerFlowCoordinator;
 
@@ -52,7 +52,7 @@ namespace PlaylistManager.UI
 
         private Vector3 queueModalPosition;
 
-        public PlaylistViewButtonsController(PopupModalsController popupModalsController, TimeTweeningManager uwuTweenyManager, PlaylistDownloader playlistDownloader, PlaylistDownloaderViewController playlistDownloaderViewController,
+        public PlaylistViewButtonsController(PopupModalsController popupModalsController, TimeTweeningManager uwuTweenyManager, PlaylistSequentialDownloader playlistDownloader, PlaylistDownloaderViewController playlistDownloaderViewController,
             MainFlowCoordinator mainFlowCoordinator, PlaylistManagerFlowCoordinator playlistManagerFlowCoordinator, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController,
             LevelFilteringNavigationController levelFilteringNavigationController, SelectLevelCategoryViewController selectLevelCategoryViewController)
         {
@@ -92,7 +92,7 @@ namespace PlaylistManager.UI
             uwuTweenyManager.KillAllTweens(downloadButtonText);
             if (playlistDownloader.PendingPopup != null)
             {
-                FloatTween tween = new FloatTween(0.35f, 0.6f, val =>
+                var tween = new FloatTween(0.35f, 0.6f, val =>
                 {
                     downloadButtonText.color = new Color(val, val, val);
                 }, 0.75f, EaseType.InOutBack);
@@ -131,7 +131,7 @@ namespace PlaylistManager.UI
             downloadButtonTextColor = downloadButtonText.color;
 
             flowButton.transform.localScale = new Vector3(0.42f, 0.42f, 1f);
-            ImageView icon = flowButton.image as ImageView;
+            var icon = flowButton.image as ImageView;
             Accessors.SkewAccessor(ref icon) = 0.18f;
         }
 
@@ -150,7 +150,7 @@ namespace PlaylistManager.UI
                 return;
             }
 
-            BeatSaberPlaylistsLib.Types.IPlaylist playlist = PlaylistLibUtils.CreatePlaylistWithConfig(playlistName, parentManager ?? BeatSaberPlaylistsLib.PlaylistManager.DefaultManager);
+            var playlist = PlaylistLibUtils.CreatePlaylistWithConfig(playlistName, parentManager ?? BeatSaberPlaylistsLib.PlaylistManager.DefaultManager);
             popupModalsController.ShowYesNoModal(rootTransform, $"Successfully created {playlist.collectionName}", () =>
             {
                 // In case the category isn't already playlists which it shouldn't be
@@ -175,7 +175,7 @@ namespace PlaylistManager.UI
         }
 
         [UIValue("queue-interactable")]
-        private bool QueueInteractable => PlaylistDownloader.downloadQueue.Count != 0;
+        private bool QueueInteractable => PlaylistSequentialDownloader.downloadQueue.Count != 0;
 
         #endregion
 

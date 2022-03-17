@@ -9,12 +9,23 @@ using UnityEngine.UI;
 
 namespace PlaylistManager.Types
 {
-    public class DownloadQueueEntry : INotifyPropertyChanged, IProgress<double>
+    /// <summary>
+    /// A wrapper class containing download information of a playlist
+    /// </summary>
+    public class DownloadQueueEntry : INotifyPropertyChanged, IProgress<double>, IProgress<float>
     {
-        public readonly BeatSaberPlaylistsLib.Types.IPlaylist playlist;
+        /// <summary>
+        /// Playlist to download
+        /// </summary>
+        public readonly IPlaylist playlist;
+        
+        /// <summary>
+        /// Folder this <see cref="IPlaylist"/> is stored in
+        /// </summary>
         public readonly BeatSaberPlaylistsLib.PlaylistManager parentManager;
-        public CancellationTokenSource cancellationTokenSource;
-        public bool Aborted;
+        
+        internal CancellationTokenSource cancellationTokenSource;
+        public bool Aborted { get; private set; }
         public event Action<DownloadQueueEntry> DownloadAbortedEvent;
 
         private ImageView bgImage;
@@ -23,15 +34,42 @@ namespace PlaylistManager.Types
         private readonly ImageView playlistCoverView;
 
         [UIValue("playlist-name")]
-        public string PlaylistName => playlist?.packName ?? " ";
+        public string PlaylistName => playlist?.packName ?? "";
 
-        [UIValue("playlist-author")]
-        public string PlaylistAuthor => playlist?.Author ?? " ";
+        [UIValue("playlist-subtext")]
+        public string PlaylistSubtext => (playlist?.Author ?? "") + (missingLevels != null ? $" [{completedLevels}/{missingLevels} downloaded]" : " [Download Queued]");
 
         public event PropertyChangedEventHandler PropertyChanged;
-        public float Progress { get; private set; }
 
-        public DownloadQueueEntry(BeatSaberPlaylistsLib.Types.IPlaylist playlist, BeatSaberPlaylistsLib.PlaylistManager parentManager)
+        private double progress;
+        /// <summary>
+        /// Download Progress
+        /// </summary>
+        public double Progress
+        {
+            get => progress;
+            private set
+            {
+                progress = value;
+                if (bgImage != null)
+                {
+                    var color = SongCore.Utilities.HSBColor.ToColor(new SongCore.Utilities.HSBColor(Mathf.PingPong((float) (Progress * 0.35f), 1), 1, 1));
+                    color.a = 0.35f;
+                    bgImage.color = color;
+                    bgImage.fillAmount = (float) Progress;
+                }
+            }
+        }
+        
+        private int completedLevels;
+        private int? missingLevels;
+        
+        /// <summary>
+        /// Create a playlist download entry
+        /// </summary>
+        /// <param name="playlist"><see cref="playlist"/></param>
+        /// <param name="parentManager"><see cref="parentManager"/></param>
+        public DownloadQueueEntry(IPlaylist playlist, BeatSaberPlaylistsLib.PlaylistManager parentManager)
         {
             this.playlist = playlist;
             this.parentManager = parentManager;
@@ -62,7 +100,7 @@ namespace PlaylistManager.Types
             playlistCoverView.sprite = playlist.coverImage;
             playlistCoverView.rectTransform.sizeDelta = new Vector2(8, 0);
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistName)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistAuthor)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistSubtext)));
 
             bgImage = playlistCoverView.transform.parent.gameObject.AddComponent<ImageView>();
             bgImage.enabled = true;
@@ -72,7 +110,7 @@ namespace PlaylistManager.Types
             bgImage.fillAmount = 0;
             bgImage.material = BeatSaberMarkupLanguage.Utilities.ImageResources.NoGlowMat;
 
-            Report(Progress);
+            Progress = progress;
         }
 
         private void OnSpriteLoad(object sender, EventArgs e)
@@ -92,16 +130,20 @@ namespace PlaylistManager.Types
             Aborted = true;
         }
 
-        public void Report(double progressDouble)
+        public void Report(double value) => Progress = missingLevels != null ? ((double)completedLevels / missingLevels ?? 1) + (value / missingLevels ?? 1) : 0;
+        public void Report(float value) => Report((double)value);
+        
+        internal void SetMissingLevels(int value)
         {
-            if (bgImage != null)
-            {
-                Progress = (float)progressDouble;
-                Color color = SongCore.Utilities.HSBColor.ToColor(new SongCore.Utilities.HSBColor(Mathf.PingPong(Progress * 0.35f, 1), 1, 1));
-                color.a = 0.35f;
-                bgImage.color = color;
-                bgImage.fillAmount = Progress;
-            }
+            missingLevels = value;
+            completedLevels = 0;
+            Progress = 0;
+        }
+
+        internal void SetTotalProgress(int value)
+        {
+            completedLevels = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistSubtext)));
         }
     }
 }

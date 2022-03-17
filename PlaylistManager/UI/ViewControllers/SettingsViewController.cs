@@ -61,8 +61,8 @@ namespace PlaylistManager.UI
         [UIAction("ok-click")]
         private void OkClicked()
         {
-            bool fetchName = !PluginConfig.Instance.AutomaticAuthorName && AutomaticAuthorName;
-            bool softRestart = SoftRestart;
+            var fetchName = !PluginConfig.Instance.AutomaticAuthorName && AutomaticAuthorName;
+            var softRestart = SoftRestart;
 
             // Save all values to config
             PluginConfig.Instance.DefaultImageDisabled = DefaultImageDisabled;

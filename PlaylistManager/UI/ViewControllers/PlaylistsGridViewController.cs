@@ -3,12 +3,13 @@ using BeatSaberMarkupLanguage.Attributes;
 using HMUI;
 using PlaylistManager.HarmonyPatches;
 using PlaylistManager.Types;
-using PlaylistManager.Utilities;
+using PlaylistManager.Downloaders;
 using System;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
+using Object = UnityEngine.Object;
 
 namespace PlaylistManager.UI
 {
@@ -41,7 +42,7 @@ namespace PlaylistManager.UI
             annotatedBeatmapLevelCollectionsGridViewAnimator = Accessors.GridViewAnimatorAccessor(ref annotatedBeatmapLevelCollectionsGridView);
 
             // Removing last column of GridView to make space for our scroller
-            RectTransform rectTransform = annotatedBeatmapLevelCollectionsGridView.gameObject.GetComponent<RectTransform>();
+            var rectTransform = annotatedBeatmapLevelCollectionsGridView.gameObject.GetComponent<RectTransform>();
             rectTransform.sizeDelta = new Vector2(-10f, 0);
             rectTransform.localPosition = new Vector3(-5f, -7.5f, 0);
 
@@ -68,18 +69,18 @@ namespace PlaylistManager.UI
             Accessors.PageControlAccessor(ref annotatedBeatmapLevelCollectionsGridView).gameObject.SetActive(false);
 
             // Getting Viewport and Content
-            RectTransform viewport = Accessors.GridViewportAccessor(ref annotatedBeatmapLevelCollectionsGridViewAnimator);
-            RectTransform content = Accessors.GridContentAccessor(ref annotatedBeatmapLevelCollectionsGridViewAnimator);
+            var viewport = Accessors.GridViewportAccessor(ref annotatedBeatmapLevelCollectionsGridViewAnimator);
+            var content = Accessors.GridContentAccessor(ref annotatedBeatmapLevelCollectionsGridViewAnimator);
             content.localPosition = Vector3.zero;
 
             // Breaking up ScrollBar from ScrollView
             scrollBar = bsmlScrollView.transform.Find("ScrollBar");
             scrollBar.SetParent(vertical);
             vertical.SetParent(viewport);
-            Button pageUpButton = Accessors.PageUpAccessor(ref bsmlScrollView);
-            Button pageDownButton = Accessors.PageDownAccessor(ref bsmlScrollView);
-            VerticalScrollIndicator verticalScrollIndicator = Accessors.ScrollIndicatorAccessor(ref bsmlScrollView);
-            GameObject.Destroy(bsmlScrollView.gameObject);
+            var pageUpButton = Accessors.PageUpAccessor(ref bsmlScrollView);
+            var pageDownButton = Accessors.PageDownAccessor(ref bsmlScrollView);
+            var verticalScrollIndicator = Accessors.ScrollIndicatorAccessor(ref bsmlScrollView);
+            Object.Destroy(bsmlScrollView.gameObject);
             scrollBar.gameObject.SetActive(false);
 
             // Adding GridScrollView to GridView
@@ -93,6 +94,9 @@ namespace PlaylistManager.UI
             Accessors.PlatformHelperAccessor(ref scrollView) = platformHelper;
             annotatedBeatmapLevelCollectionsGridView.gameObject.SetActive(true);
             gridScrollView.enabled = false;
+            
+            // Setting up observer for hovering/leaving the grid view
+            annotatedBeatmapLevelCollectionsGridView.gameObject.AddComponent<GridViewPointerObserver>();
 
             // Subbing to events
             annotatedBeatmapLevelCollectionsTableViewController.didOpenBeatmapLevelCollectionsEvent += AnnotatedBeatmapLevelCollectionsGridView_didOpenAnnotatedBeatmapLevelCollectionEvent;
@@ -102,13 +106,11 @@ namespace PlaylistManager.UI
         private void AnnotatedBeatmapLevelCollectionsGridView_didOpenAnnotatedBeatmapLevelCollectionEvent()
         {
             scrollBar.gameObject.SetActive(true);
-            gridScrollView.OnHover();
         }
 
         private void AnnotatedBeatmapLevelCollectionsGridView_didCloseAnnotatedBeatmapLevelCollectionEvent()
         {
             scrollBar.gameObject.SetActive(false);
-            gridScrollView.OnLeave();
         }
     }
 }

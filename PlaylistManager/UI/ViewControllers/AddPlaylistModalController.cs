@@ -6,7 +6,7 @@ using static BeatSaberMarkupLanguage.Components.CustomListTableData;
 using System.Reflection;
 using System.Linq;
 using HMUI;
-using PlaylistManager.Utilities;
+using PlaylistManager.Downloaders;
 using UnityEngine;
 using PlaylistManager.Configuration;
 using BeatSaberPlaylistsLib.Types;
@@ -24,7 +24,7 @@ namespace PlaylistManager.UI
 
         private BeatSaberPlaylistsLib.PlaylistManager parentManager;
         private List<BeatSaberPlaylistsLib.PlaylistManager> childManagers;
-        private List<BeatSaberPlaylistsLib.Types.IPlaylist> childPlaylists;
+        private List<IPlaylist> childPlaylists;
 
         private readonly Sprite folderIcon;
         private bool parsed;
@@ -106,17 +106,17 @@ namespace PlaylistManager.UI
             var childPlaylists = parentManager.GetAllPlaylists(false).Where(playlist => !playlist.ReadOnly);
             this.childPlaylists = childPlaylists.ToList();
 
-            foreach (BeatSaberPlaylistsLib.PlaylistManager playlistManager in childManagers)
+            foreach (var playlistManager in childManagers)
             {
                 playlistTableData.data.Add(new CustomCellInfo(Path.GetFileName(playlistManager.PlaylistPath), "Folder", folderIcon));
             }
-            foreach (BeatSaberPlaylistsLib.Types.IPlaylist playlist in childPlaylists)
+            foreach (var playlist in childPlaylists)
             {
-                if (playlist is IDeferredSpriteLoad deferredSpriteLoadPlaylist && !deferredSpriteLoadPlaylist.SpriteWasLoaded)
+                if (playlist is IStagedSpriteLoad stagedSpriteLoadPlaylist && !stagedSpriteLoadPlaylist.SmallSpriteWasLoaded)
                 {
-                    deferredSpriteLoadPlaylist.SpriteLoaded -= DeferredSpriteLoadPlaylist_SpriteLoaded;
-                    deferredSpriteLoadPlaylist.SpriteLoaded += DeferredSpriteLoadPlaylist_SpriteLoaded;
-                    _ = playlist.coverImage;
+                    stagedSpriteLoadPlaylist.SpriteLoaded -= StagedSpriteLoadPlaylist_SpriteLoaded;
+                    stagedSpriteLoadPlaylist.SpriteLoaded += StagedSpriteLoadPlaylist_SpriteLoaded;
+                    _ = playlist.smallCoverImage;
                 }
                 else
                 {
@@ -129,23 +129,23 @@ namespace PlaylistManager.UI
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FolderText)));
         }
 
-        private void DeferredSpriteLoadPlaylist_SpriteLoaded(object sender, EventArgs e)
+        private void StagedSpriteLoadPlaylist_SpriteLoaded(object sender, EventArgs e)
         {
-            if (sender is IDeferredSpriteLoad deferredSpriteLoadPlaylist)
+            if (sender is IStagedSpriteLoad stagedSpriteLoadPlaylist)
             {
-                if (parentManager.GetAllPlaylists(false).Contains((BeatSaberPlaylistsLib.Types.IPlaylist)deferredSpriteLoadPlaylist))
+                if (parentManager.GetAllPlaylists(false).Contains((IPlaylist)stagedSpriteLoadPlaylist))
                 {
-                    ShowPlaylist((BeatSaberPlaylistsLib.Types.IPlaylist)deferredSpriteLoadPlaylist);
+                    ShowPlaylist((IPlaylist)stagedSpriteLoadPlaylist);
                 }
                 playlistTableData.tableView.ReloadDataKeepingPosition();
-                (deferredSpriteLoadPlaylist).SpriteLoaded -= DeferredSpriteLoadPlaylist_SpriteLoaded;
+                (stagedSpriteLoadPlaylist).SpriteLoaded -= StagedSpriteLoadPlaylist_SpriteLoaded;
             }
         }
 
-        private void ShowPlaylist(BeatSaberPlaylistsLib.Types.IPlaylist playlist)
+        private void ShowPlaylist(IPlaylist playlist)
         {
-            string subName = string.Format("{0} songs", playlist.beatmapLevelCollection.beatmapLevels.Length);
-            if (Array.Exists(playlist.beatmapLevelCollection.beatmapLevels, level => level.levelID == standardLevelDetailViewController.selectedDifficultyBeatmap.level.levelID))
+            var subName = string.Format("{0} songs", playlist.beatmapLevelCollection.beatmapLevels.Count);
+            if (playlist.beatmapLevelCollection.beatmapLevels.Any(level => level.levelID == standardLevelDetailViewController.selectedDifficultyBeatmap.level.levelID))
             {
                 if (!playlist.AllowDuplicates)
                 {
@@ -154,7 +154,7 @@ namespace PlaylistManager.UI
                 }
                 subName += " (contains song)";
             }
-            playlistTableData.data.Add(new CustomCellInfo(playlist.collectionName, subName, playlist.coverImage));
+            playlistTableData.data.Add(new CustomCellInfo(playlist.collectionName, subName, playlist.smallCoverImage));
         }
 
         [UIAction("select-cell")]
@@ -245,12 +245,12 @@ namespace PlaylistManager.UI
                 return;
             }
 
-            BeatSaberPlaylistsLib.Types.IPlaylist playlist = PlaylistLibUtils.CreatePlaylistWithConfig(playlistName, parentManager);
+            var playlist = PlaylistLibUtils.CreatePlaylistWithConfig(playlistName, parentManager);
 
             if (playlist is IDeferredSpriteLoad deferredSpriteLoadPlaylist && !deferredSpriteLoadPlaylist.SpriteWasLoaded)
             {
-                deferredSpriteLoadPlaylist.SpriteLoaded -= DeferredSpriteLoadPlaylist_SpriteLoaded;
-                deferredSpriteLoadPlaylist.SpriteLoaded += DeferredSpriteLoadPlaylist_SpriteLoaded;
+                deferredSpriteLoadPlaylist.SpriteLoaded -= StagedSpriteLoadPlaylist_SpriteLoaded;
+                deferredSpriteLoadPlaylist.SpriteLoaded += StagedSpriteLoadPlaylist_SpriteLoaded;
                 _ = playlist.coverImage;
             }
 
@@ -263,7 +263,7 @@ namespace PlaylistManager.UI
             folderName = folderName.Replace("/", "").Replace("\\", "").Replace(".", "");
             if (!string.IsNullOrEmpty(folderName))
             {
-                BeatSaberPlaylistsLib.PlaylistManager childManager = parentManager.CreateChildManager(folderName);
+                var childManager = parentManager.CreateChildManager(folderName);
 
                 if (childManagers.Contains(childManager))
                 {

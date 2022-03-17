@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Zenject;
 using PlaylistManager.Interfaces;
 using PlaylistManager.Configuration;
-using PlaylistManager.Utilities;
+using PlaylistManager.Downloaders;
 using PlaylistManager.HarmonyPatches;
 using System.Linq;
 using PlaylistManager.UI;
@@ -17,7 +17,7 @@ namespace PlaylistManager.Managers
         private readonly SelectLevelCategoryViewController selectLevelCategoryViewController;
         private readonly StandardLevelDetailViewController standardLevelDetailViewController;
         private readonly SettingsViewController settingsViewController;
-        private readonly PlaylistDownloader playlistDownloader;
+        private readonly PlaylistSequentialDownloader playlistDownloader;
 
         private int downloadingBeatmapCollectionIdx;
         private IAnnotatedBeatmapLevelCollection[] downloadingBeatmapLevelCollections;
@@ -31,7 +31,7 @@ namespace PlaylistManager.Managers
 
         internal PlaylistUIManager(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, LevelCollectionNavigationController levelCollectionNavigationController,
             SelectLevelCategoryViewController selectLevelCategoryViewController, StandardLevelDetailViewController standardLevelDetailViewController, SettingsViewController settingsViewController,
-            PlaylistDownloader playlistDownloader, List<ILevelCategoryUpdater> levelCategoryUpdaters, IPMRefreshable refreshable, IPlatformUserModel platformUserModel)
+            PlaylistSequentialDownloader playlistDownloader, List<ILevelCategoryUpdater> levelCategoryUpdaters, IPMRefreshable refreshable, IPlatformUserModel platformUserModel)
         {
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
             this.levelCollectionNavigationController = levelCollectionNavigationController;
@@ -80,7 +80,7 @@ namespace PlaylistManager.Managers
 
         private void SelectLevelCategoryViewController_didSelectLevelCategoryEvent(SelectLevelCategoryViewController selectLevelCategoryViewController, SelectLevelCategoryViewController.LevelCategory levelCategory)
         {
-            foreach (ILevelCategoryUpdater levelCategoryUpdater in levelCategoryUpdaters)
+            foreach (var levelCategoryUpdater in levelCategoryUpdaters)
             {
                 levelCategoryUpdater.LevelCategoryUpdated(levelCategory, false);
             }
@@ -88,7 +88,7 @@ namespace PlaylistManager.Managers
 
         private void SelectLevelCategoryViewController_didActivateEvent(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
-            foreach (ILevelCategoryUpdater levelCategoryUpdater in levelCategoryUpdaters)
+            foreach (var levelCategoryUpdater in levelCategoryUpdaters)
             {
                 levelCategoryUpdater.LevelCategoryUpdated(selectLevelCategoryViewController.selectedLevelCategory, true);
             }
@@ -96,7 +96,7 @@ namespace PlaylistManager.Managers
 
         private void SelectLevelCategoryViewController_didDeactivateEvent(bool removedFromHierarchy, bool screenSystemDisabling)
         {
-            foreach (ILevelCategoryUpdater levelCategoryUpdater in levelCategoryUpdaters)
+            foreach (var levelCategoryUpdater in levelCategoryUpdaters)
             {
                 levelCategoryUpdater.LevelCategoryUpdated(SelectLevelCategoryViewController.LevelCategory.None, false);
             }
@@ -104,7 +104,7 @@ namespace PlaylistManager.Managers
 
         private void PlaylistDownloader_QueueUpdatedEvent()
         {
-            if (PlaylistDownloader.downloadQueue.Count == 0)
+            if (PlaylistSequentialDownloader.downloadQueue.Count == 0)
             {
                 SongCore_RefreshLevelPacks.PacksToBeRefreshedEvent += OnPacksToBeRefreshed;
             }
@@ -149,7 +149,7 @@ namespace PlaylistManager.Managers
         {
             if (PluginConfig.Instance.AutomaticAuthorName)
             {
-                UserInfo user = await platformUserModel.GetUserInfo();
+                var user = await platformUserModel.GetUserInfo();
                 if (PluginConfig.Instance.AuthorName == null && user == null)
                 {
                     PluginConfig.Instance.AuthorName = nameof(PlaylistManager);

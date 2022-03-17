@@ -4,14 +4,16 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using BeatSaberPlaylistsLib;
 using BeatSaberPlaylistsLib.Blist;
 using BeatSaberPlaylistsLib.Legacy;
 using BeatSaberPlaylistsLib.Types;
+using JetBrains.Annotations;
 using PlaylistManager.Configuration;
 using UnityEngine;
 
-namespace PlaylistManager.Utilities
+namespace PlaylistManager.Downloaders
 {
     public class PlaylistLibUtils
     {
@@ -26,21 +28,21 @@ namespace PlaylistManager.Utilities
             }
         }
 
-        public static BeatSaberPlaylistsLib.Types.IPlaylist CreatePlaylistWithConfig(string playlistName, BeatSaberPlaylistsLib.PlaylistManager playlistManager)
+        public static IPlaylist CreatePlaylistWithConfig(string playlistName, BeatSaberPlaylistsLib.PlaylistManager playlistManager)
         {
-            string playlistAuthorName = PluginConfig.Instance.AuthorName;
-            bool easterEgg = playlistAuthorName.ToUpper().Contains("BINTER") && playlistName.ToUpper().Contains("TECH") && PluginConfig.Instance.EasterEggs;
+            var playlistAuthorName = PluginConfig.Instance.AuthorName;
+            var easterEgg = playlistAuthorName.ToUpper().Contains("BINTER") && playlistName.ToUpper().Contains("TECH") && PluginConfig.Instance.EasterEggs;
             return CreatePlaylist(playlistName, playlistAuthorName, playlistManager, !PluginConfig.Instance.DefaultImageDisabled, PluginConfig.Instance.DefaultAllowDuplicates, easterEgg);
         }
 
-        public static BeatSaberPlaylistsLib.Types.IPlaylist CreatePlaylist(string playlistName, string playlistAuthorName, BeatSaberPlaylistsLib.PlaylistManager playlistManager, bool defaultCover = true,
+        public static IPlaylist CreatePlaylist(string playlistName, string playlistAuthorName, BeatSaberPlaylistsLib.PlaylistManager playlistManager, bool defaultCover = true,
             bool allowDups = true, bool easterEgg = false)
         {
-            BeatSaberPlaylistsLib.Types.IPlaylist playlist = playlistManager.CreatePlaylist("", playlistName, playlistAuthorName, "");
+            var playlist = playlistManager.CreatePlaylist("", playlistName, playlistAuthorName, "");
 
             if (defaultCover)
             {
-                using (Stream imageStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(ICON_PATH))
+                using (var imageStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(ICON_PATH))
                 {
                     playlist.SetCover(imageStream);
                 }
@@ -79,55 +81,32 @@ namespace PlaylistManager.Utilities
             return "";
         }
 
-        public static List<IPlaylistSong> GetMissingSongs(BeatSaberPlaylistsLib.Types.IPlaylist playlist, HashSet<string> ownedHashes = null)
+        public static List<IPlaylistSong> GetMissingSongs(IPlaylist playlist, HashSet<string> ownedHashes = null)
         {
-            if (playlist is LegacyPlaylist legacyPlaylist)
+            if (playlist != null)
             {
-                return legacyPlaylist.Where(s => s.PreviewBeatmapLevel == null && !(ownedHashes?.Contains(s.Hash) ?? false)).Distinct(IPlaylistSongComparer<IPlaylistSong>.Default).ToList();
+                return playlist.Where(s => s.PreviewBeatmapLevel == null && !(ownedHashes?.Contains(s.Hash) ?? false)).Distinct(IPlaylistSongComparer<IPlaylistSong>.Default).ToList();
             }
-            else if (playlist is BlistPlaylist blistPlaylist)
-            {
-                return blistPlaylist.Where(s => s.PreviewBeatmapLevel == null && !(ownedHashes?.Contains(s.Hash) ?? false)).Distinct(IPlaylistSongComparer<IPlaylistSong>.Default).ToList();
-            }
-            else
-            {
-                return null;
-            }
+            return new List<IPlaylistSong>();
         }
 
         #region Image
-
-        private static DrawSettings defaultDrawSettings = new DrawSettings
-        {
-            Color = System.Drawing.Color.White,
-            DrawStyle = DrawStyle.Normal,
-            Font = BeatSaberPlaylistsLib.Utilities.FindFont("Microsoft Sans Serif", 20, FontStyle.Regular),
-            StringFormat = new StringFormat()
-            {
-                Alignment = StringAlignment.Center,
-                LineAlignment = StringAlignment.Near
-            },
-            MinTextSize = 20,
-            MaxTextSize = 20,
-            WrapWidth = 10
-        };
+        
 
         private static Stream GetFolderImageStream() =>
             Assembly.GetExecutingAssembly().GetManifestResourceStream("PlaylistManager.Icons.FolderIcon.png");
-
-        internal static Sprite DrawFolderIcon(string str)
+        
+        internal static async Task<Sprite> GeneratePlaylistIcon(IPlaylist playlist)
         {
-            if (str.Length > 15)
+            using var coverStream = await playlist.GetDefaultCoverStream();
+            if (coverStream != null)
             {
-                str = str.Substring(0, 15) + "...";
+                Sprite? sprite = null;
+                await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() => sprite = BeatSaberMarkupLanguage.Utilities.LoadSpriteRaw(coverStream.ToArray()));
+                return sprite ? sprite : BeatSaberPlaylistsLib.Utilities.DefaultSprite;
             }
-            Image img = ImageUtilities.DrawString("\n"+str, Image.FromStream(GetFolderImageStream()), defaultDrawSettings);
-            MemoryStream ms = new MemoryStream();
-            img.Save(ms, ImageFormat.Png);
-            return BeatSaberMarkupLanguage.Utilities.LoadSpriteRaw(ms.ToArray());
+            return BeatSaberPlaylistsLib.Utilities.DefaultSprite;
         }
-
-        internal static Sprite GeneratePlaylistIcon(BeatSaberPlaylistsLib.Types.IPlaylist playlist) => BeatSaberMarkupLanguage.Utilities.LoadSpriteRaw(BeatSaberPlaylistsLib.Utilities.GenerateCoverForPlaylist(playlist).ToArray());
 
         #endregion
     }

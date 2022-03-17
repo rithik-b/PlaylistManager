@@ -51,7 +51,7 @@ namespace PlaylistManager.Types
 		public override void UpdateContentSize()
 		{
 			SetContentSize(contentSize);
-			bool active = contentSize - (_fixedCellSize * 3) > 0f;
+			var active = contentSize - (_fixedCellSize * 3) > 0f;
 
 			_pageUpButton.gameObject.SetActive(active); 
 			_pageDownButton.gameObject.SetActive(active);
@@ -72,7 +72,7 @@ namespace PlaylistManager.Types
 
         public override void SetDestinationPos(float value)
         {
-			float difference = contentSize - (_fixedCellSize * 4);
+			var difference = contentSize - (_fixedCellSize * 4);
             if (difference <= 0f)
             {
                 _destinationPos = zeroPos;
