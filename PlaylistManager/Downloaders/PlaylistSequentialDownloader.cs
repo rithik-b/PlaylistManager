@@ -118,10 +118,11 @@ namespace PlaylistManager.Downloaders
             await downloadSemaphore.WaitAsync();
             if (downloadQueue.Count > 0 && !disposed)
             {
-                await DownloadPlaylist(downloadQueue.OfType<DownloadQueueEntry>().FirstOrDefault());
-                if (downloadQueue.Count > 0 && !disposed)
+                var toDownload = downloadQueue.OfType<DownloadQueueEntry>().FirstOrDefault();
+                await DownloadPlaylist(toDownload);
+                if (!disposed)
                 {
-                    downloadQueue.RemoveAt(0);
+                    downloadQueue.Remove(toDownload);
                 }
                 QueueUpdatedEvent?.Invoke();
             }

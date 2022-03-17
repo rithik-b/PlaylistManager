@@ -37,7 +37,7 @@ namespace PlaylistManager.Types
         public string PlaylistName => playlist?.packName ?? "";
 
         [UIValue("playlist-subtext")]
-        public string PlaylistSubtext => (playlist?.Author ?? "") + $" [{completedLevels}/{missingLevels} downloaded]";
+        public string PlaylistSubtext => (playlist?.Author ?? "") + (missingLevels != null ? $" [{completedLevels}/{missingLevels} downloaded]" : " [Download Queued]");
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -62,7 +62,7 @@ namespace PlaylistManager.Types
         }
         
         private int completedLevels;
-        private int missingLevels = 1; // Just in case a divide by 0 happens
+        private int? missingLevels;
         
         /// <summary>
         /// Create a playlist download entry
@@ -130,7 +130,7 @@ namespace PlaylistManager.Types
             Aborted = true;
         }
 
-        public void Report(double value) => Progress = ((double)completedLevels / missingLevels) + (value / missingLevels);
+        public void Report(double value) => Progress = missingLevels != null ? ((double)completedLevels / missingLevels ?? 1) + (value / missingLevels ?? 1) : 0;
         public void Report(float value) => Report((double)value);
         
         internal void SetMissingLevels(int value)

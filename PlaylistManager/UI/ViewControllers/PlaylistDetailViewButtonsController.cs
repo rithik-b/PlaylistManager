@@ -311,7 +311,7 @@ namespace PlaylistManager.UI
             {
                 this.selectedPlaylist = selectedPlaylist;
                 this.parentManager = parentManager;
-                DownloadQueueEntry = PlaylistSequentialDownloader.downloadQueue.OfType<DownloadQueueEntry>().Where(x => x.playlist == selectedPlaylist).FirstOrDefault();
+                DownloadQueueEntry = PlaylistSequentialDownloader.downloadQueue.OfType<DownloadQueueEntry>().FirstOrDefault(x => x.playlist == selectedPlaylist);
                 UpdateMissingSongs();
 
                 rootTransform.gameObject.SetActive(true);
