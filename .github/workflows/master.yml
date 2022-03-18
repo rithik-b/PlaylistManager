@@ -33,7 +33,7 @@ jobs:
                 workflow: BuildMaster.yml
                 workflow_conclusion: success
                 name: BeatSaberPlaylistsLib_BS
-                repo: rithik-b/BeatSaberPlaylistsLib
+                repo: Zingabopp/BeatSaberPlaylistsLib
                 path: ${{github.workspace}}/Refs
             - name: Build
               id: Build
