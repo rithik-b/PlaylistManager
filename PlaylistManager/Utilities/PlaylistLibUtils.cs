@@ -13,7 +13,7 @@ using JetBrains.Annotations;
 using PlaylistManager.Configuration;
 using UnityEngine;
 
-namespace PlaylistManager.Downloaders
+namespace PlaylistManager.Utilities
 {
     public class PlaylistLibUtils
     {

@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using Zenject;
 using PlaylistManager.Interfaces;
 using PlaylistManager.Configuration;
-using PlaylistManager.Downloaders;
+using PlaylistManager.Utilities;
 using PlaylistManager.HarmonyPatches;
 using System.Linq;
+using PlaylistManager.Downloaders;
 using PlaylistManager.UI;
 
 namespace PlaylistManager.Managers

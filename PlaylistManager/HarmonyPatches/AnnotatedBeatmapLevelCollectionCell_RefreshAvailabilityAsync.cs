@@ -1,6 +1,6 @@
 ﻿using HarmonyLib;
 using PlaylistManager.Configuration;
-using PlaylistManager.Downloaders;
+using PlaylistManager.Utilities;
 
 /*
  * This patch removes the download icon for empty beatmaplevelcollections

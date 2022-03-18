@@ -6,7 +6,7 @@ using static BeatSaberMarkupLanguage.Components.CustomListTableData;
 using System.Reflection;
 using System.Linq;
 using HMUI;
-using PlaylistManager.Downloaders;
+using PlaylistManager.Utilities;
 using UnityEngine;
 using PlaylistManager.Configuration;
 using BeatSaberPlaylistsLib.Types;

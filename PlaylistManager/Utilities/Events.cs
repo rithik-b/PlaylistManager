@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace PlaylistManager.Downloaders
+namespace PlaylistManager.Utilities
 {
     public class Events
     {

@@ -7,7 +7,7 @@ using BeatSaberPlaylistsLib.Legacy;
 using BeatSaberPlaylistsLib.Types;
 using HMUI;
 using PlaylistManager.Interfaces;
-using PlaylistManager.Downloaders;
+using PlaylistManager.Utilities;
 using System;
 using System.ComponentModel;
 using System.IO;

@@ -6,7 +6,7 @@ using Zenject;
 using BeatSaberPlaylistsLib.Types;
 using UnityEngine;
 using System.ComponentModel;
-using PlaylistManager.Downloaders;
+using PlaylistManager.Utilities;
 using System;
 using PlaylistManager.Configuration;
 

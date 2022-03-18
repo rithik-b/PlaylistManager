@@ -1,6 +1,6 @@
 ﻿using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.MenuButtons;
-using PlaylistManager.Downloaders;
+using PlaylistManager.Utilities;
 using SongCore;
 using SongCore.UI;
 using System;

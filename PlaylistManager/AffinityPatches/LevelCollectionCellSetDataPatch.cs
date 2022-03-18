@@ -2,7 +2,7 @@
 using UnityEngine.UI;
 using BeatSaberPlaylistsLib.Types;
 using System.Runtime.CompilerServices;
-using PlaylistManager.Downloaders;
+using PlaylistManager.Utilities;
 using HMUI;
 using PlaylistManager.Configuration;
 using SiraUtil.Affinity;

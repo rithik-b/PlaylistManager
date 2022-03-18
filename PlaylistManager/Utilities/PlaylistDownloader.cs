@@ -1,5 +1,6 @@
 ﻿using System;
 using PlaylistManager.Downloaders;
+using PlaylistManager.Utilities;
 using PlaylistManager.Types;
 
 namespace PlaylistManager.Utilities

@@ -1,7 +1,8 @@
 ﻿using System;
+using PlaylistManager.Downloaders;
 using Zenject;
 
-namespace PlaylistManager.Downloaders
+namespace PlaylistManager.Utilities
 {
     internal class DownloadPauser : IInitializable, IDisposable
     {

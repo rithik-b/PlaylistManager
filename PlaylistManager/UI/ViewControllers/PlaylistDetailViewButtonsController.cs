@@ -4,7 +4,7 @@ using BeatSaberPlaylistsLib.Types;
 using PlaylistManager.Configuration;
 using PlaylistManager.Interfaces;
 using PlaylistManager.Types;
-using PlaylistManager.Downloaders;
+using PlaylistManager.Utilities;
 using SiraUtil.Web;
 using System;
 using System.Collections.Generic;
@@ -14,9 +14,10 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using PlaylistManager.Downloaders;
 using UnityEngine;
 using Zenject;
-using Accessors = PlaylistManager.Downloaders.Accessors;
+using Accessors = PlaylistManager.Utilities.Accessors;
 
 namespace PlaylistManager.UI
 {
