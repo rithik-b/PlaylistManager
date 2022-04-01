@@ -9,6 +9,11 @@ namespace PlaylistManager.AffinityPatches
         [AffinityPatch(typeof(TMP_Text), nameof(TMP_Text.text), AffinityMethodType.Setter)]
         private void Joke(ref string value)
         {
+            if (value == null)
+            {
+                return;
+            }
+
             if (value.EndsWith("er") || value.EndsWith("tor") || value.EndsWith("ear"))
             {
                 value += "? I hardly know her!";
