@@ -1,6 +1,7 @@
 ﻿using System;
 using PlaylistManager.AffinityPatches;
 using PlaylistManager.Utilities;
+using Polyglot;
 using Zenject;
 
 namespace PlaylistManager.Installers
@@ -11,8 +12,7 @@ namespace PlaylistManager.Installers
         {
             Container.BindInterfacesAndSelfTo<PlaylistDownloader>().AsSingle();
             
-            Container.BindInterfacesTo<LevelCollectionCellSetDataPatch>().AsSingle();
-            if (DateTime.Now.Month == 4 && DateTime.Now.Day == 1)
+            if (DateTime.Now.Month == 4 && DateTime.Now.Day == 1 && LocalizationProvider.Instance.localization.SelectedLanguage == Language.English)
             {
                 Container.BindInterfacesTo<Amogus>().AsSingle();
             }
