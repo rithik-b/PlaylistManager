@@ -332,8 +332,7 @@ namespace PlaylistManager.Downloaders
                     }
                     else
                     {
-                        var latest = song.LatestVersion;
-                        await BeatmapDownloadByCustomURL(latest.DownloadURL.Replace(latest.Hash, hash.ToLowerInvariant()), FolderNameForBeatsaverMap(song), token, progress as IProgress<float>);
+                        await BeatmapDownloadByCustomURL($"https://cdn.beatsaver.com/{hash.ToLowerInvariant()}.zip", FolderNameForBeatsaverMap(song), token, progress as IProgress<float>);
                     }
                 }
                 catch (Exception e)
