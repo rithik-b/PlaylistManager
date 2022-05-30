@@ -332,8 +332,7 @@ namespace PlaylistManager.Downloaders
                     }
                     else
                     {
-                        var latest = song.LatestVersion;
-                        await BeatmapDownloadByCustomURL(latest.DownloadURL.Replace(latest.Hash, hash.ToLowerInvariant()), FolderNameForBeatsaverMap(song), token, progress as IProgress<float>);
+                        await BeatmapDownloadByCustomURL($"https://cdn.beatsaver.com/{hash.ToLowerInvariant()}.zip", FolderNameForBeatsaverMap(song), token, progress as IProgress<float>);
                     }
                 }
                 catch (Exception e)
@@ -381,7 +380,7 @@ namespace PlaylistManager.Downloaders
         private string FolderNameForBeatsaverMap(Beatmap song)
         {
             // A workaround for the max path issue and long folder names
-            var longFolderName = song.ID + " (" + song.Metadata.LevelAuthorName + " - " + song.Metadata.SongName;
+            var longFolderName = song.ID + " (" + song.Metadata.SongName + " - " + song.Metadata.LevelAuthorName;
             return longFolderName.Truncate(49, true) + ")";
         }
 
