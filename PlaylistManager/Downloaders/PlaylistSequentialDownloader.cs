@@ -380,7 +380,7 @@ namespace PlaylistManager.Downloaders
         private string FolderNameForBeatsaverMap(Beatmap song)
         {
             // A workaround for the max path issue and long folder names
-            var longFolderName = song.ID + " (" + song.Metadata.LevelAuthorName + " - " + song.Metadata.SongName;
+            var longFolderName = song.ID + " (" + song.Metadata.SongName + " - " + song.Metadata.LevelAuthorName;
             return longFolderName.Truncate(49, true) + ")";
         }
 
