@@ -246,7 +246,7 @@ namespace PlaylistManager.UI
                 if (httpResponse.Successful)
                 {
                     selectedPlaylist.Clear(); // Clear all songs
-                    PlaylistLibUtils.playlistManager.DefaultHandler.Populate(await httpResponse.ReadAsStreamAsync(), selectedPlaylist);
+                    BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.DefaultHandler.Populate(await httpResponse.ReadAsStreamAsync(), selectedPlaylist);
                     parentManager.StorePlaylist(selectedPlaylist);
                 }
                 else

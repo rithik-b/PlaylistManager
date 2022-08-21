@@ -205,7 +205,7 @@ namespace PlaylistManager.UI
                 var clonedPlaylist = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.DefaultHandler?.Deserialize(File.OpenRead(playlistPath));
                 clonedPlaylist.ReadOnly = false;
                 parentManager.StorePlaylist(clonedPlaylist);
-                PlaylistLibUtils.playlistManager.RequestRefresh("PlaylistManager (plugin)");
+                BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.RequestRefresh("PlaylistManager (plugin)");
                 popupModalsController.ShowOkModal(modalTransform, "Playlist Cloned!", null, animateParentCanvas: false);
             }
             else

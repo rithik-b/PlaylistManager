@@ -8,18 +8,22 @@ using UnityEngine;
 using System.ComponentModel;
 using PlaylistManager.Utilities;
 using System;
+using System.Linq;
+using System.Threading.Tasks;
 using PlaylistManager.Configuration;
+using PlaylistManager.Services;
 
 namespace PlaylistManager.UI
 {
-    public class LevelDetailButtonsViewController : IInitializable, IDisposable, IPreviewBeatmapLevelUpdater, ILevelCollectionUpdater, INotifyPropertyChanged
+    internal class LevelDetailButtonsViewController : IInitializable, IDisposable, IPreviewBeatmapLevelUpdater, ILevelCollectionUpdater, INotifyPropertyChanged
     {
-        private StandardLevelDetailViewController standardLevelDetailViewController;
-        private LevelCollectionTableView levelCollectionTableView;
+        private readonly StandardLevelDetailViewController standardLevelDetailViewController;
+        private readonly LevelCollectionTableView levelCollectionTableView;
         private readonly LevelCollectionNavigationController levelCollectionNavigationController;
         private readonly AddPlaylistModalController addPlaylistController;
         private readonly PopupModalsController popupModalsController;
         private readonly DifficultyHighlighter difficultyHighlighter;
+        private readonly AuthorNameService authorNameService;
 
         public event PropertyChangedEventHandler PropertyChanged;
         private IPreviewBeatmapLevel selectedBeatmapLevel;
@@ -33,7 +37,7 @@ namespace PlaylistManager.UI
         private RectTransform rootTransform;
 
         public LevelDetailButtonsViewController(StandardLevelDetailViewController standardLevelDetailViewController, LevelCollectionViewController levelCollectionViewController, LevelCollectionNavigationController levelCollectionNavigationController,
-               AddPlaylistModalController addPlaylistController, PopupModalsController popupModalsController, DifficultyHighlighter difficultyHighlighter)
+               AddPlaylistModalController addPlaylistController, PopupModalsController popupModalsController, DifficultyHighlighter difficultyHighlighter, AuthorNameService authorNameService)
         {
             this.standardLevelDetailViewController = standardLevelDetailViewController;
             levelCollectionTableView = Accessors.LevelCollectionTableViewAccessor(ref levelCollectionViewController);
@@ -41,6 +45,7 @@ namespace PlaylistManager.UI
             this.addPlaylistController = addPlaylistController;
             this.popupModalsController = popupModalsController;
             this.difficultyHighlighter = difficultyHighlighter;
+            this.authorNameService = authorNameService;
         }
 
         public void Initialize()
@@ -107,23 +112,30 @@ namespace PlaylistManager.UI
             }
 
             levelCollectionTableView.ClearSelection();
+            _ = ResetPlaylist();
+        }
 
-            // The cutie list
-            if ((PluginConfig.Instance.AuthorName.ToUpper().Contains("GOOBIE") || PluginConfig.Instance.AuthorName.ToUpper().Contains("ERIS") || 
-                 PluginConfig.Instance.AuthorName.ToUpper().Contains("PINK") || PluginConfig.Instance.AuthorName.ToUpper().Contains("CANDL3"))  && PluginConfig.Instance.EasterEggs)
+        private async Task ResetPlaylist()
+        {
+            if (PluginConfig.Instance.EasterEggs)
             {
-                levelCollectionNavigationController.SetDataForPack(selectedPlaylist, true, true, $"{PluginConfig.Instance.AuthorName} Cute");
-            }
-            else if (PluginConfig.Instance.AuthorName.ToUpper().Contains("JOSHABI"))
-            {
-                levelCollectionNavigationController.SetDataForPack(selectedPlaylist, true, true, $"*Sneeze*");
-            }
-            else
-            {
-                levelCollectionNavigationController.SetDataForPack(selectedPlaylist, true, true, "Play");
-            }
+                var authorName = await authorNameService.GetNameAsync();
+                var cutieList = new[] {"GOOBIE", "ERIS", "PINK", "CANDL3"};
 
-            levelCollectionNavigationController.HideDetailViewController();
+                if (cutieList.Any(n => authorName.ToUpper().Contains(n)))
+                {
+                    levelCollectionNavigationController.SetDataForPack(selectedPlaylist, true, true, $"{authorName} Cute");
+                    return;
+                }
+
+                if (authorName.ToUpper().Contains("JOSHABI"))
+                {
+                    levelCollectionNavigationController.SetDataForPack(selectedPlaylist, true, true, "*Sneeze*");
+                    return;
+                }
+            }
+            
+            levelCollectionNavigationController.SetDataForPack(selectedPlaylist, true, true, "Play");
         }
 
         #endregion

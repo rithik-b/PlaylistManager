@@ -29,7 +29,7 @@ namespace PlaylistManager.UI
                 progressBar = ProgressBar.Create();
             }
             
-            var numPlaylists = await Task.Run(() => PlaylistLibUtils.playlistManager.GetAllPlaylists(true).Length).ConfigureAwait(false);
+            var numPlaylists = await Task.Run(() => BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.GetAllPlaylists(true).Length).ConfigureAwait(false);
 
             progressBar.enabled = true;
             progressBar.ShowMessage($"\n{numPlaylists} playlists loaded.", kMessageTime);

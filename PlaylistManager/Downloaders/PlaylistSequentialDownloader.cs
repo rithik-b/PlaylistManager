@@ -14,6 +14,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using PlaylistManager.Services;
 using PlaylistManager.Utilities;
 using SongCore;
 using Zenject;
@@ -24,6 +25,7 @@ namespace PlaylistManager.Downloaders
     {
         private readonly IHttpService siraHttpService;
         private readonly BeatSaver beatSaverInstance;
+        private readonly AuthorNameService authorNameService;
         private readonly SemaphoreSlim downloadSemaphore;
         private static readonly HashSet<string> ownedHashes = new();
         private DownloadQueueEntry currentDownload;
@@ -51,11 +53,12 @@ namespace PlaylistManager.Downloaders
             }
         }
 
-        public PlaylistSequentialDownloader(UBinder<Plugin, PluginMetadata> metadata, IHttpService siraHttpService)
+        public PlaylistSequentialDownloader(UBinder<Plugin, PluginMetadata> metadata, IHttpService siraHttpService, AuthorNameService authorNameService)
         {
             this.siraHttpService = siraHttpService;
             var options = new BeatSaverOptions(metadata.Value.Name, metadata.Value.HVersion.ToString());
             beatSaverInstance = new BeatSaver(options);
+            this.authorNameService = authorNameService;
             downloadSemaphore = new SemaphoreSlim(1, 1);
             pauseSemaphore = new SemaphoreSlim(0, 1);
             popupSemaphore = new SemaphoreSlim(0, 1);
@@ -452,12 +455,12 @@ namespace PlaylistManager.Downloaders
             zipStream.Close();
         }
 
-        private void CreateDrivePopup()
+        private async Task CreateDrivePopup()
         {
             var popupText = "You are running out of disk space (less than 100MB), continuing the download can cause issues such as corrupt game configs" +
                             " (as there may not be enough space to save them).";
 
-            if (PluginConfig.Instance.EasterEggs && PluginConfig.Instance.AuthorName.ToUpper().Contains("SKALX"))
+            if (PluginConfig.Instance.EasterEggs && (await authorNameService.GetNameAsync()).Contains("SKALX"))
             {
                 popupText = "Remember the October 26th, 2021 \"JoeSaber\" incident? Wanna do it again?";
             }

@@ -7,7 +7,9 @@ using PlaylistManager.Utilities;
 using System;
 using System.ComponentModel;
 using System.Reflection;
+using System.Threading.Tasks;
 using PlaylistManager.Downloaders;
+using PlaylistManager.Services;
 using Tweening;
 using UnityEngine;
 using Zenject;
@@ -21,6 +23,7 @@ namespace PlaylistManager.UI
         private readonly PlaylistSequentialDownloader playlistDownloader;
         private readonly PlaylistDownloaderViewController playlistDownloaderViewController;
         private readonly PlaylistManagerFlowCoordinator playlistManagerFlowCoordinator;
+        private readonly PlaylistCreationService playlistCreationService;
 
         private readonly MainFlowCoordinator mainFlowCoordinator;
         private readonly AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
@@ -55,7 +58,7 @@ namespace PlaylistManager.UI
 
         public PlaylistViewButtonsController(PopupModalsController popupModalsController, TimeTweeningManager uwuTweenyManager, PlaylistSequentialDownloader playlistDownloader, PlaylistDownloaderViewController playlistDownloaderViewController,
             MainFlowCoordinator mainFlowCoordinator, PlaylistManagerFlowCoordinator playlistManagerFlowCoordinator, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController,
-            LevelFilteringNavigationController levelFilteringNavigationController, SelectLevelCategoryViewController selectLevelCategoryViewController)
+            LevelFilteringNavigationController levelFilteringNavigationController, SelectLevelCategoryViewController selectLevelCategoryViewController, PlaylistCreationService playlistCreationService)
         {
             this.popupModalsController = popupModalsController;
             this.uwuTweenyManager = uwuTweenyManager;
@@ -67,6 +70,7 @@ namespace PlaylistManager.UI
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
             this.levelFilteringNavigationController = levelFilteringNavigationController;
             this.selectLevelCategoryViewController = selectLevelCategoryViewController;
+            this.playlistCreationService = playlistCreationService;
             levelCategorySegmentedControl = Accessors.LevelCategorySegmentedControlAccessor(ref selectLevelCategoryViewController);
         }
 
@@ -141,24 +145,31 @@ namespace PlaylistManager.UI
         [UIAction("create-click")]
         private void CreateClicked()
         {
-            popupModalsController.ShowKeyboard(rootTransform, CreatePlaylist);
+            popupModalsController.ShowKeyboard(rootTransform, (playlistName) =>
+            {
+                _ = CreatePlaylistAsync(playlistName);
+            });
         }
 
-        private void CreatePlaylist(string playlistName)
+        private async Task CreatePlaylistAsync(string playlistName)
         {
             if (string.IsNullOrWhiteSpace(playlistName))
             {
                 return;
             }
 
-            var playlist = PlaylistLibUtils.CreatePlaylistWithConfig(playlistName, parentManager ?? BeatSaberPlaylistsLib.PlaylistManager.DefaultManager);
-            popupModalsController.ShowYesNoModal(rootTransform, $"Successfully created {playlist.collectionName}", () =>
+            var playlist = await playlistCreationService.CreatePlaylistAsync(playlistName, parentManager ?? BeatSaberPlaylistsLib.PlaylistManager.DefaultManager);
+
+            await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() =>
             {
-                // In case the category isn't already playlists which it shouldn't be
-                levelCategorySegmentedControl.SelectCellWithNumber(1);
-                selectLevelCategoryViewController.LevelFilterCategoryIconSegmentedControlDidSelectCell(levelCategorySegmentedControl, 1);
-                levelFilteringNavigationController.SelectAnnotatedBeatmapLevelCollection(playlist);
-            }, "Go to playlist", "Dismiss");
+                popupModalsController.ShowYesNoModal(rootTransform, $"Successfully created {playlist.collectionName}", () =>
+                {
+                    // In case the category isn't already playlists which it shouldn't be
+                    levelCategorySegmentedControl.SelectCellWithNumber(1);
+                    selectLevelCategoryViewController.LevelFilterCategoryIconSegmentedControlDidSelectCell(levelCategorySegmentedControl, 1);
+                    levelFilteringNavigationController.SelectAnnotatedBeatmapLevelCollection(playlist);
+                }, "Go to playlist", "Dismiss");
+            });
         }
 
         #endregion

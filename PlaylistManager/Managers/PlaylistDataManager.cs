@@ -99,7 +99,7 @@ namespace PlaylistManager
             {
                 Events.RaisePlaylistSelected(selectedPlaylist, parentManager);
                 this.selectedPlaylist = selectedPlaylist;
-                parentManager = PlaylistLibUtils.playlistManager.GetManagerForPlaylist(selectedPlaylist);
+                parentManager = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.GetManagerForPlaylist(selectedPlaylist);
             }
             else
             {

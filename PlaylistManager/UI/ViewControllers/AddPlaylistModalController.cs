@@ -14,13 +14,16 @@ using BeatSaberMarkupLanguage.Parser;
 using System.IO;
 using System.ComponentModel;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using PlaylistManager.Services;
 
 namespace PlaylistManager.UI
 {
-    public class AddPlaylistModalController : INotifyPropertyChanged
+    internal class AddPlaylistModalController : INotifyPropertyChanged
     {
         private readonly StandardLevelDetailViewController standardLevelDetailViewController;
         private readonly PopupModalsController popupModalsController;
+        private readonly PlaylistCreationService playlistCreationService;
 
         private BeatSaberPlaylistsLib.PlaylistManager parentManager;
         private List<BeatSaberPlaylistsLib.PlaylistManager> childManagers;
@@ -55,10 +58,11 @@ namespace PlaylistManager.UI
         [UIParams]
         private readonly BSMLParserParams parserParams;
 
-        public AddPlaylistModalController(StandardLevelDetailViewController standardLevelDetailViewController, PopupModalsController popupModalsController)
+        public AddPlaylistModalController(StandardLevelDetailViewController standardLevelDetailViewController, PopupModalsController popupModalsController, PlaylistCreationService playlistCreationService)
         {
             this.standardLevelDetailViewController = standardLevelDetailViewController;
             this.popupModalsController = popupModalsController;
+            this.playlistCreationService = playlistCreationService;
             folderIcon = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.FolderIcon.png");
             parsed = false;
         }
@@ -94,7 +98,7 @@ namespace PlaylistManager.UI
             Parse();
             parserParams.EmitEvent("close-modal");
             parserParams.EmitEvent("open-modal");
-            ShowPlaylistsForManager(PlaylistLibUtils.playlistManager);
+            ShowPlaylistsForManager(BeatSaberPlaylistsLib.PlaylistManager.DefaultManager);
         }
 
         internal void ShowPlaylistsForManager(BeatSaberPlaylistsLib.PlaylistManager parentManager)
@@ -233,21 +237,23 @@ namespace PlaylistManager.UI
         [UIAction("select-option")]
         private void OnOptionSelect(TableView tableView, int index)
         {
-            popupModalsController.ShowKeyboard(modalTransform, index == 0 ? CreatePlaylist : CreateFolder, animateParentCanvas: false);
+            popupModalsController.ShowKeyboard(modalTransform,
+                index == 0 ? playlistName => _ = CreatePlaylistAsync(playlistName) : CreateFolder,
+                animateParentCanvas: false);
             tableView.ClearSelection();
             parserParams.EmitEvent("close-dropdown");
         }
 
-        private void CreatePlaylist(string playlistName)
+        private async Task CreatePlaylistAsync(string playlistName)
         {
             if (string.IsNullOrWhiteSpace(playlistName))
             {
                 return;
             }
 
-            var playlist = PlaylistLibUtils.CreatePlaylistWithConfig(playlistName, parentManager);
+            var playlist = await playlistCreationService.CreatePlaylistAsync(playlistName, parentManager);
 
-            if (playlist is IDeferredSpriteLoad deferredSpriteLoadPlaylist && !deferredSpriteLoadPlaylist.SpriteWasLoaded)
+            if (playlist is IDeferredSpriteLoad {SpriteWasLoaded: false} deferredSpriteLoadPlaylist)
             {
                 deferredSpriteLoadPlaylist.SpriteLoaded -= StagedSpriteLoadPlaylist_SpriteLoaded;
                 deferredSpriteLoadPlaylist.SpriteLoaded += StagedSpriteLoadPlaylist_SpriteLoaded;
@@ -274,7 +280,7 @@ namespace PlaylistManager.UI
                     playlistTableData.data.Insert(childManagers.Count, new CustomCellInfo(Path.GetFileName(childManager.PlaylistPath), "Folder", folderIcon));
                     playlistTableData.tableView.ReloadDataKeepingPosition();
                     childManagers.Add(childManager);
-                    PlaylistLibUtils.playlistManager.RequestRefresh("PlaylistManager (plugin)");
+                    BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.RequestRefresh("PlaylistManager (plugin)");
                 }
             }
         }

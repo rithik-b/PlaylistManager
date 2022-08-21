@@ -8,7 +8,7 @@ namespace PlaylistManager.Configuration
 {
     internal class PluginConfig
     {
-        public static PluginConfig Instance { get; set; }
+        public static PluginConfig Instance { get; set; } = null!;
         public virtual string AuthorName { get; set; } = nameof(PlaylistManager);
         public virtual bool AutomaticAuthorName { get; set; } = true;
         public virtual bool DefaultImageDisabled { get; set; } = false;

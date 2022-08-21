@@ -21,7 +21,7 @@ namespace PlaylistManager.UI
         private readonly LevelPackDetailViewController levelPackDetailViewController;
         private readonly PopupModalsController popupModalsController;
 
-        private readonly string IMAGES_PATH = Path.Combine(PlaylistLibUtils.playlistManager.PlaylistPath, "CoverImages");
+        private readonly string IMAGES_PATH = Path.Combine(BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.PlaylistPath, "CoverImages");
         private readonly Sprite playlistManagerIcon;
         private readonly Dictionary<string, CoverImage> coverImages;
         private bool parsed;

@@ -26,13 +26,12 @@ namespace PlaylistManager.Managers
 
         private readonly List<ILevelCategoryUpdater> levelCategoryUpdaters;
         private readonly IPMRefreshable refreshable;
-        private readonly IPlatformUserModel platformUserModel;
 
         public event Action<IAnnotatedBeatmapLevelCollection[], int> LevelCollectionTableViewUpdatedEvent;
 
         internal PlaylistUIManager(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, LevelCollectionNavigationController levelCollectionNavigationController,
             SelectLevelCategoryViewController selectLevelCategoryViewController, StandardLevelDetailViewController standardLevelDetailViewController, SettingsViewController settingsViewController,
-            PlaylistSequentialDownloader playlistDownloader, List<ILevelCategoryUpdater> levelCategoryUpdaters, IPMRefreshable refreshable, IPlatformUserModel platformUserModel)
+            PlaylistSequentialDownloader playlistDownloader, List<ILevelCategoryUpdater> levelCategoryUpdaters, IPMRefreshable refreshable)
         {
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
             this.levelCollectionNavigationController = levelCollectionNavigationController;
@@ -43,7 +42,6 @@ namespace PlaylistManager.Managers
 
             this.levelCategoryUpdaters = levelCategoryUpdaters;
             this.refreshable = refreshable;
-            this.platformUserModel = platformUserModel;
         }
 
         public void Initialize()
@@ -57,11 +55,7 @@ namespace PlaylistManager.Managers
             playlistDownloader.QueueUpdatedEvent += PlaylistDownloader_QueueUpdatedEvent;
 
             // Whenever a refresh is requested
-            PlaylistLibUtils.playlistManager.PlaylistsRefreshRequested += PlaylistManager_PlaylistsRefreshRequested;
-
-            // For assigning playlist author
-            settingsViewController.NameFetchRequestedEvent += AssignAuthor;
-            AssignAuthor();
+            BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.PlaylistsRefreshRequested += PlaylistManager_PlaylistsRefreshRequested;
         }
 
         public void Dispose()
@@ -74,9 +68,7 @@ namespace PlaylistManager.Managers
             SongCore_RefreshLevelPacks.PacksToBeRefreshedEvent -= OnPacksToBeRefreshed;
             LevelFilteringNavigationController_UpdateSecondChildControllerContent.SecondChildControllerUpdatedEvent -= LevelFilteringNavigationController_SecondChildControllerUpdatedEvent;
 
-            PlaylistLibUtils.playlistManager.PlaylistsRefreshRequested -= PlaylistManager_PlaylistsRefreshRequested;
-
-            settingsViewController.NameFetchRequestedEvent -= AssignAuthor;
+            BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.PlaylistsRefreshRequested -= PlaylistManager_PlaylistsRefreshRequested;
         }
 
         private void SelectLevelCategoryViewController_didSelectLevelCategoryEvent(SelectLevelCategoryViewController selectLevelCategoryViewController, SelectLevelCategoryViewController.LevelCategory levelCategory)
@@ -144,26 +136,6 @@ namespace PlaylistManager.Managers
         {
             Plugin.Log.Info("Playlist Refresh requested by: " + requester);
             refreshable.Refresh();
-        }
-
-        private async void AssignAuthor()
-        {
-            if (PluginConfig.Instance.AutomaticAuthorName)
-            {
-                var user = await platformUserModel.GetUserInfo();
-                if (PluginConfig.Instance.AuthorName == null && user == null)
-                {
-                    PluginConfig.Instance.AuthorName = nameof(PlaylistManager);
-                }
-                else
-                {
-                    PluginConfig.Instance.AuthorName = user?.userName ?? PluginConfig.Instance.AuthorName;
-                }
-            }
-            else
-            {
-                PluginConfig.Instance.AuthorName = PluginConfig.Instance.AuthorName;
-            }
         }
     }
 }

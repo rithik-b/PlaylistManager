@@ -17,53 +17,6 @@ namespace PlaylistManager.Utilities
 {
     public class PlaylistLibUtils
     {
-        private const string ICON_PATH = "PlaylistManager.Icons.DefaultIcon.png";
-        private const string EASTER_EGG_URL = "https://raw.githubusercontent.com/rithik-b/PlaylistManager/master/img/easteregg.bplist";
-
-        public static BeatSaberPlaylistsLib.PlaylistManager playlistManager
-        {
-            get
-            {
-                return BeatSaberPlaylistsLib.PlaylistManager.DefaultManager;
-            }
-        }
-
-        public static IPlaylist CreatePlaylistWithConfig(string playlistName, BeatSaberPlaylistsLib.PlaylistManager playlistManager)
-        {
-            var playlistAuthorName = PluginConfig.Instance.AuthorName;
-            var easterEgg = playlistAuthorName.ToUpper().Contains("BINTER") && playlistName.ToUpper().Contains("TECH") && PluginConfig.Instance.EasterEggs;
-            return CreatePlaylist(playlistName, playlistAuthorName, playlistManager, !PluginConfig.Instance.DefaultImageDisabled, PluginConfig.Instance.DefaultAllowDuplicates, easterEgg);
-        }
-
-        public static IPlaylist CreatePlaylist(string playlistName, string playlistAuthorName, BeatSaberPlaylistsLib.PlaylistManager playlistManager, bool defaultCover = true,
-            bool allowDups = true, bool easterEgg = false)
-        {
-            var playlist = playlistManager.CreatePlaylist("", playlistName, playlistAuthorName, "");
-
-            if (defaultCover)
-            {
-                using (var imageStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(ICON_PATH))
-                {
-                    playlist.SetCover(imageStream);
-                }
-            }
-
-
-            if (!allowDups)
-            {
-                playlist.AllowDuplicates = false;
-            }
-
-            if (easterEgg)
-            {
-                playlist.SetCustomData("syncURL", EASTER_EGG_URL);
-            }
-
-            playlistManager.StorePlaylist(playlist);
-            PlaylistLibUtils.playlistManager.RequestRefresh("PlaylistManager (plugin)");
-            return playlist;
-        }
-
         public static string GetIdentifierForPlaylistSong(IPlaylistSong playlistSong)
         {
             if (playlistSong.Identifiers.HasFlag(Identifier.Hash))
