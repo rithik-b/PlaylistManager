@@ -7,72 +7,69 @@ using PlaylistManager.Utilities;
 using System;
 using System.ComponentModel;
 using System.Reflection;
+using BeatSaberMarkupLanguage.Components;
 using UnityEngine;
 
 namespace PlaylistManager.UI
 {
-    public class PopupModalsController : INotifyPropertyChanged
+    public class PopupModalsController : NotifiableBase
     {
         private readonly MainMenuViewController mainMenuViewController;
         private bool parsed;
-        public event PropertyChangedEventHandler PropertyChanged;
-
+        
         private Action? yesButtonPressed;
         private Action? noButtonPressed;
         private Action? okButtonPressed;
 
         private Action<string>? keyboardPressed;
 
-        private string _yesNoText = "";
-        private string _checkboxText = "";
-        private string _yesButtonText = "Yes";
-        private string _noButtonText = "No";
+        private string yesNoText = "";
+        private string checkboxText = "";
+        private string yesButtonText = "Yes";
+        private string noButtonText = "No";
 
-        private bool _checkboxValue = false;
-        private bool _checkboxActive = false;
+        private bool checkboxValue;
+        private bool checkboxActive;
 
-        private string _okText = "";
-        private string _okButtonText = "Ok";
+        private string okText = "";
+        private string okButtonText = "Ok";
 
-        private string _loadingText = "";
+        private string loadingText = "";
 
-        private string _keyboardText = "";
+        private string keyboardText = "";
 
         [UIComponent("root")]
-        private readonly RectTransform rootTransform;
+        private readonly RectTransform rootTransform = null!;
 
         [UIComponent("yes-no-modal")]
-        private readonly RectTransform yesNoModalTransform;
+        private readonly RectTransform yesNoModalTransform = null!;
 
         [UIComponent("yes-no-modal")]
-        private ModalView yesNoModalView;
+        private ModalView yesNoModalView = null!;
 
         private Vector3 yesNoModalPosition;
 
         [UIComponent("ok-modal")]
-        private readonly RectTransform okModalTransform;
+        private readonly RectTransform okModalTransform = null!;
 
         [UIComponent("ok-modal")]
-        private ModalView okModalView;
+        private ModalView okModalView = null!;
 
         private Vector3 okModalPosition;
 
         [UIComponent("loading-modal")]
-        private readonly RectTransform loadingModalTransform;
-
-        [UIComponent("loading-modal")]
-        private ModalView loadingModalView;
+        private readonly RectTransform loadingModalTransform = null!;
 
         private Vector3 loadingModalPosition;
 
         [UIComponent("keyboard")]
-        private readonly RectTransform keyboardTransform;
+        private readonly RectTransform keyboardTransform = null!;
 
         [UIComponent("keyboard")]
-        private ModalView keyboardModalView;
+        private ModalView keyboardModalView = null!;
 
         [UIParams]
-        private readonly BSMLParserParams parserParams;
+        private readonly BSMLParserParams parserParams = null!;
 
         public PopupModalsController(MainMenuViewController mainMenuViewController)
         {
@@ -113,7 +110,9 @@ namespace PlaylistManager.UI
                 popupContents.noButtonText, popupContents.noButtonPressedCallback, popupContents.animateParentCanvas, popupContents.checkboxText);
         }
 
-        internal void ShowYesNoModal(Transform parent, string text, Action yesButtonPressedCallback, string yesButtonText = "Yes", string noButtonText = "No", Action noButtonPressedCallback = null, bool animateParentCanvas = true, string checkboxText = "")
+        internal void ShowYesNoModal(Transform parent, string text, Action? yesButtonPressedCallback,
+            string yesButtonText = "Yes", string noButtonText = "No", Action? noButtonPressedCallback = null,
+            bool animateParentCanvas = true, string checkboxText = "")
         {
             Parse();
             yesNoModalTransform.localPosition = yesNoModalPosition;
@@ -161,55 +160,55 @@ namespace PlaylistManager.UI
         [UIValue("yes-no-text")]
         private string YesNoText
         {
-            get => _yesNoText;
+            get => yesNoText;
             set
             {
-                _yesNoText = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(YesNoText)));
+                yesNoText = value;
+                NotifyPropertyChanged(nameof(YesNoText));
             }
         }
 
         [UIValue("yes-button-text")]
         private string YesButtonText
         {
-            get => _yesButtonText;
+            get => yesButtonText;
             set
             {
-                _yesButtonText = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(YesButtonText)));
+                yesButtonText = value;
+                NotifyPropertyChanged(nameof(YesButtonText));
             }
         }
 
         [UIValue("no-button-text")]
         private string NoButtonText
         {
-            get => _noButtonText;
+            get => noButtonText;
             set
             {
-                _noButtonText = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NoButtonText)));
+                noButtonText = value;
+                NotifyPropertyChanged(nameof(NoButtonText));
             }
         }
 
         [UIValue("checkbox-text")]
         private string CheckboxText
         {
-            get => _checkboxText;
+            get => checkboxText;
             set
             {
-                _checkboxText = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CheckboxText)));
+                checkboxText = value;
+                NotifyPropertyChanged(nameof(CheckboxText));
             }
         }
 
         [UIValue("checkbox-active")]
         private bool CheckboxActive
         {
-            get => _checkboxActive;
+            get => checkboxActive;
             set
             {
-                _checkboxActive = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CheckboxActive)));
+                checkboxActive = value;
+                NotifyPropertyChanged(nameof(CheckboxActive));
             }
         }
 
@@ -218,11 +217,11 @@ namespace PlaylistManager.UI
 
         public bool CheckboxValue
         {
-            get => _checkboxValue;
+            get => checkboxValue;
             private set
             {
-                _checkboxValue = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Checkbox)));
+                checkboxValue = value;
+                NotifyPropertyChanged(nameof(Checkbox));
             }
         }
 
@@ -237,7 +236,8 @@ namespace PlaylistManager.UI
             ShowOkModal(popupContents.parent, popupContents.message, popupContents.buttonPressedCallback, popupContents.okButtonText, popupContents.animateParentCanvas);
         }
 
-        internal void ShowOkModal(Transform parent, string text, Action? buttonPressedCallback, string okButtonText = "Ok", bool animateParentCanvas = true)
+        internal void ShowOkModal(Transform parent, string text, Action? buttonPressedCallback,
+            string okButtonText = "Ok", bool animateParentCanvas = true)
         {
             Parse();
             okModalTransform.localPosition = okModalPosition;
@@ -266,22 +266,22 @@ namespace PlaylistManager.UI
         [UIValue("ok-text")]
         internal string OkText
         {
-            get => _okText;
+            get => okText;
             set
             {
-                _okText = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(OkText)));
+                okText = value;
+                NotifyPropertyChanged(nameof(OkText));
             }
         }
 
         [UIValue("ok-button-text")]
         internal string OkButtonText
         {
-            get => _okButtonText;
+            get => okButtonText;
             set
             {
-                _okButtonText = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(OkButtonText)));
+                okButtonText = value;
+                NotifyPropertyChanged(nameof(OkButtonText));
             }
         }
 
@@ -309,11 +309,11 @@ namespace PlaylistManager.UI
         [UIValue("loading-text")]
         private string LoadingText
         {
-            get => _loadingText;
+            get => loadingText;
             set
             {
-                _loadingText = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LoadingText)));
+                loadingText = value;
+                NotifyPropertyChanged(nameof(LoadingText));
             }
         }
 
@@ -323,7 +323,8 @@ namespace PlaylistManager.UI
 
         // Methods
 
-        internal void ShowKeyboard(Transform parent, Action<string> keyboardPressedCallback, string keyboardText = "", bool animateParentCanvas = true)
+        internal void ShowKeyboard(Transform parent, Action<string>? keyboardPressedCallback,
+            string keyboardText = "", bool animateParentCanvas = true)
         {
             Parse(); 
             keyboardTransform.transform.SetParent(rootTransform);
@@ -352,8 +353,8 @@ namespace PlaylistManager.UI
         [UIValue("keyboard-text")]
         private string KeyboardText
         {
-            get => _keyboardText;
-            set => _keyboardText = value;
+            get => keyboardText;
+            set => keyboardText = value;
         }
 
         #endregion
