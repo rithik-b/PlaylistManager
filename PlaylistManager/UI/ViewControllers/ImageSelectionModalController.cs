@@ -3,7 +3,6 @@ using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.Parser;
 using HMUI;
-using PlaylistManager.Types;
 using PlaylistManager.Utilities;
 using System;
 using System.Collections.Generic;
@@ -11,57 +10,62 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using BeatSaberPlaylistsLib;
 using UnityEngine;
+using Zenject;
 using static BeatSaberMarkupLanguage.Components.CustomListTableData;
 
 namespace PlaylistManager.UI
 {
-    public class ImageSelectionModalController : NotifiableBase
+    public class ImageSelectionModalController : NotifiableBase, IInitializable
     {
         private readonly LevelPackDetailViewController levelPackDetailViewController;
         private readonly PopupModalsController popupModalsController;
 
-        private readonly string IMAGES_PATH = Path.Combine(BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.PlaylistPath, "CoverImages");
+        private readonly string imagesPath = Path.Combine(BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.PlaylistPath, "CoverImages");
         private readonly Sprite playlistManagerIcon;
-        private readonly Dictionary<string, CoverImage> coverImages;
+        private readonly Dictionary<string, Sprite> coverImages;
         private bool parsed;
         private int selectedIndex;
-
-        public event Action<byte[]> ImageSelectedEvent;
+        
+        public event Action<byte[]?>? ImageSelectedEvent;
 
         [UIComponent("list")]
-        public CustomListTableData customListTableData;
+        private readonly CustomListTableData customListTableData = null!;
 
         [UIComponent("modal")]
-        private readonly RectTransform modalTransform;
+        private readonly RectTransform modalTransform = null!;
 
         [UIComponent("modal")]
-        private ModalView modalView;
+        private ModalView modalView = null!;
 
         private Vector3 modalPosition;
 
         [UIParams]
-        private readonly BSMLParserParams parserParams;
+        private readonly BSMLParserParams parserParams = null!;
 
         public ImageSelectionModalController(LevelPackDetailViewController levelPackDetailViewController, PopupModalsController popupModalsController)
         {
             this.levelPackDetailViewController = levelPackDetailViewController;
             this.popupModalsController = popupModalsController;
 
+            coverImages = new Dictionary<string, Sprite>();
+            playlistManagerIcon = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.DefaultCover.png");
+            parsed = false;
+        }
+        
+        public void Initialize()
+        {
             // Have to do this in case directory perms are not given
             try
             {
-                Directory.CreateDirectory(IMAGES_PATH);
-                File.Create(Path.Combine(IMAGES_PATH, ".plignore"));
+                Directory.CreateDirectory(imagesPath);
+                File.Create(Path.Combine(imagesPath, ".plignore"));
             }
             catch (Exception e)
             {
                 Plugin.Log.Error($"Could not make images path.\nExcepton:{e.Message}");
             }
-
-            coverImages = new Dictionary<string, CoverImage>();
-            playlistManagerIcon = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.DefaultIcon.png");
-            parsed = false;
         }
 
         private void Parse()
@@ -86,10 +90,10 @@ namespace PlaylistManager.UI
             Parse();
             parserParams.EmitEvent("close-modal");
             parserParams.EmitEvent("open-modal");
-            ShowImages(playlist);
+            _ = ShowImages(playlist).ConfigureAwait(false);
         }
 
-        private void LoadImages()
+        private IEnumerable<string> GetImagePaths()
         {
             foreach (var imageToDelete in coverImages.Where(coverImage => !File.Exists(coverImage.Key)).ToList())
             {
@@ -97,18 +101,12 @@ namespace PlaylistManager.UI
             }
 
             string[] ext = { "jpg", "png" };
-            var imageFiles = Directory.EnumerateFiles(IMAGES_PATH, "*.*", SearchOption.AllDirectories).Where(s => ext.Contains(Path.GetExtension(s).TrimStart('.').ToLowerInvariant()));
+            var imagePaths = Directory.EnumerateFiles(imagesPath, "*.*", SearchOption.AllDirectories).Where(s => ext.Contains(Path.GetExtension(s).TrimStart('.').ToLowerInvariant()));
 
-            foreach (var file in imageFiles)
-            {
-                if (!coverImages.ContainsKey(file))
-                {
-                    coverImages.Add(file, new CoverImage(file));
-                }
-            }
+            return imagePaths;
         }
 
-        private async void ShowImages(BeatSaberPlaylistsLib.Types.IPlaylist playlist)
+        private async Task ShowImages(BeatSaberPlaylistsLib.Types.IPlaylist playlist)
         {
             await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() => customListTableData.data.Clear());
 
@@ -120,17 +118,31 @@ namespace PlaylistManager.UI
             // Add default image
             customListTableData.data.Add(new CustomCellInfo("PlaylistManager Icon", "Default", playlistManagerIcon));
 
-            LoadImages();
-            foreach (var coverImage in coverImages)
+            var imagePaths = GetImagePaths();
+            foreach (var imagePath in imagePaths)
             {
-                if(!coverImage.Value.SpriteWasLoaded && !coverImage.Value.Blacklist)
+                if (coverImages.TryGetValue(imagePath, out var outSprite))
                 {
-                    coverImage.Value.SpriteLoaded += CoverImage_SpriteLoaded;
-                    _ = coverImage.Value.Sprite;
+                    customListTableData.data.Add(new CustomCellInfo(Path.GetFileName(imagePath), imagePath, outSprite));
                 }
-                else if(coverImage.Value.SpriteWasLoaded)
+                else
                 {
-                    customListTableData.data.Add(new CustomCellInfo(Path.GetFileName(coverImage.Key), coverImage.Key, coverImage.Value.Sprite));
+                    try
+                    {
+                        using var imageStream = File.Open(imagePath, FileMode.Open);
+                        var imageBytes = imageStream.ToArray();
+                        await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() =>
+                        {
+                            var sprite = BeatSaberMarkupLanguage.Utilities.LoadSpriteRaw(imageBytes);
+                            customListTableData.data.Add(new CustomCellInfo(Path.GetFileName(imagePath), imagePath, sprite));
+                            coverImages[imagePath] = sprite;
+                        });
+                    }
+                    catch (Exception e)
+                    {
+                        Plugin.Log.Error("Could not load " + imagePath + "\nException message: " + e.Message);
+                    }
+                    await Task.Delay(100);
                 }
             }
             
@@ -139,34 +151,17 @@ namespace PlaylistManager.UI
             _ = ViewControllerMonkeyCleanup();
         }
 
-        private void CoverImage_SpriteLoaded(object sender, EventArgs e)
-        {
-            if (sender is CoverImage coverImage)
-            {
-                if (coverImage.SpriteWasLoaded)
-                {
-                    customListTableData.data.Add(new CustomCellInfo(Path.GetFileName(coverImage.Path), coverImage.Path, coverImage.Sprite));
-                    customListTableData.tableView.ReloadDataKeepingPosition();
-
-                    if (customListTableData.data.Count == 4)
-                    {
-                        customListTableData.tableView.AddCellToReusableCells(customListTableData.tableView.dataSource.CellForIdx(customListTableData.tableView, 3));
-                    }
-                    _ = ViewControllerMonkeyCleanup();
-                }
-                coverImage.SpriteLoaded -= CoverImage_SpriteLoaded;
-            }
-        }
-
         [UIAction("select-cell")]
         private void OnCellSelect(TableView tableView, int index)
         {
             customListTableData.tableView.ClearSelection();
             selectedIndex = index;
-            popupModalsController.ShowYesNoModal(modalTransform, "Are you sure you want to change the image of the playlist? This cannot be reverted.", ChangeImage, animateParentCanvas: false);
+            popupModalsController.ShowYesNoModal(modalTransform,
+                "Are you sure you want to change the image of the playlist? This cannot be reverted.",
+                () => _ = ChangeImage().ConfigureAwait(false), animateParentCanvas: false);
         }
 
-        private void ChangeImage()
+        private Task ChangeImage()
         {
             if (selectedIndex == 0)
             {
@@ -175,33 +170,34 @@ namespace PlaylistManager.UI
             }
             else if (selectedIndex == 1)
             {
-                using (var imageStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("PlaylistManager.Icons.DefaultIcon.png"))
-                {
-                    var imageBytes = new byte[imageStream.Length];
-                    imageStream.Read(imageBytes, 0, (int)imageStream.Length);
-                    ImageSelectedEvent?.Invoke(imageBytes);
-                    parserParams.EmitEvent("close-modal");
-                }
+                using var imageStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("PlaylistManager.Icons.DefaultCover.png");
+                var imageBytes = imageStream!.ToArray();
+                ImageSelectedEvent?.Invoke(imageBytes);
+                parserParams.EmitEvent("close-modal");
             }
             else
             {
                 var selectedImagePath = customListTableData.data[selectedIndex].subtext;
                 try
                 {
-                    using (var imageStream = File.Open(selectedImagePath, FileMode.Open))
-                    {
-                        var imageBytes = new byte[imageStream.Length];
-                        imageStream.Read(imageBytes, 0, (int)imageStream.Length);
-                        ImageSelectedEvent?.Invoke(imageBytes);
-                        parserParams.EmitEvent("close-modal");
-                    }
+                    using var imageStream = File.Open(selectedImagePath, FileMode.Open);
+                    var imageBytes = imageStream.ToArray();
+                    ImageSelectedEvent?.Invoke(imageBytes);
+                    parserParams.EmitEvent("close-modal");
                 }
                 catch (Exception e)
                 {
-                    popupModalsController.ShowOkModal(modalTransform, "There was an error loading this image. Check logs for more details.", null, animateParentCanvas: false);
-                    Plugin.Log.Critical("Could not load " + selectedImagePath + "\nException message: " + e.Message);
+                    IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() =>
+                    {
+                        popupModalsController.ShowOkModal(modalTransform,
+                            "There was an error loading this image. Check logs for more details.",
+                            null, animateParentCanvas: false);
+                    });
+                    Plugin.Log.Error("Could not load " + selectedImagePath + "\nException message: " + e.Message);
                 }
             }
+            
+            return Task.CompletedTask;
         }
 
         private async Task ViewControllerMonkeyCleanup()
@@ -215,15 +211,15 @@ namespace PlaylistManager.UI
             IsLoading = false;
         }
 
-        private bool _isLoading;
+        private bool isLoading;
 
         [UIValue("is-loading")]
         private bool IsLoading
         {
-            get => _isLoading;
+            get => isLoading;
             set
             {
-                _isLoading = value;
+                isLoading = value;
                 NotifyPropertyChanged();
                 NotifyPropertyChanged(nameof(IsNotLoading));
             }

@@ -17,11 +17,11 @@ namespace PlaylistManager.UI
         private bool parsed;
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private Action yesButtonPressed;
-        private Action noButtonPressed;
-        private Action okButtonPressed;
+        private Action? yesButtonPressed;
+        private Action? noButtonPressed;
+        private Action? okButtonPressed;
 
-        private Action<string> keyboardPressed;
+        private Action<string>? keyboardPressed;
 
         private string _yesNoText = "";
         private string _checkboxText = "";
@@ -237,7 +237,7 @@ namespace PlaylistManager.UI
             ShowOkModal(popupContents.parent, popupContents.message, popupContents.buttonPressedCallback, popupContents.okButtonText, popupContents.animateParentCanvas);
         }
 
-        internal void ShowOkModal(Transform parent, string text, Action buttonPressedCallback, string okButtonText = "Ok", bool animateParentCanvas = true)
+        internal void ShowOkModal(Transform parent, string text, Action? buttonPressedCallback, string okButtonText = "Ok", bool animateParentCanvas = true)
         {
             Parse();
             okModalTransform.localPosition = okModalPosition;
