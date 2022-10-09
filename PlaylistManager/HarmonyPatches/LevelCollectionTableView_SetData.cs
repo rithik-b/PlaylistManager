@@ -25,7 +25,7 @@ namespace PlaylistManager.HarmonyPatches
                     // If statement anyway for safety
                     if (previewBeatmapLevels[i] is IPlaylistSong playlistSong)
                     {
-                        previewBeatmapLevels[i] = playlistSong.PreviewBeatmapLevel;
+                        previewBeatmapLevels[i] = playlistSong.PreviewBeatmapLevel!;
                     }
                 }
             }

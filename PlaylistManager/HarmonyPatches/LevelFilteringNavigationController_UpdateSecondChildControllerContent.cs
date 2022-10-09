@@ -8,7 +8,7 @@ namespace PlaylistManager.HarmonyPatches
         typeof(SelectLevelCategoryViewController.LevelCategory)})]
     public class LevelFilteringNavigationController_UpdateSecondChildControllerContent
     {
-        internal static event Action SecondChildControllerUpdatedEvent;
+        internal static event Action? SecondChildControllerUpdatedEvent;
         internal static void Postfix()
         {
             SecondChildControllerUpdatedEvent?.Invoke();

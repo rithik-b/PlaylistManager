@@ -14,7 +14,7 @@ namespace PlaylistManager.HarmonyPatches
         typeof(TableView), typeof(int)})]
     public class LevelCollectionTableView_HandleDidSelectRowEvent
     {
-        internal static event Action<IPreviewBeatmapLevel> DidSelectLevelEvent;
+        internal static event Action<IPreviewBeatmapLevel>? DidSelectLevelEvent;
         internal static void Prefix(int row, bool ____showLevelPackHeader)
         {
             if (____showLevelPackHeader)
