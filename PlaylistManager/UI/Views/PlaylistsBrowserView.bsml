@@ -1,0 +1,12 @@
+<bg id="root" xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
+    <horizontal id="heading" bg="panel-fade-gradient" bg-color="grey" child-expand-width="false" child-expand-height="false" horizontal-fit='PreferredSize' vertical-fit="PreferredSize" pref-width="60" pref-height="10" anchor-pos-x="-2.5" anchor-pos-y="27.4" spacing="2" pad-left="2" child-align="MiddleLeft" active="~back-active">
+        <button text='🔙' on-click='back-button-pressed' />
+        <img id="folder-icon" pref-width="5" preserve-aspect="true" />
+        <text text='~folder-text' font-align="Center" font-size="5" italics="true" bold="true" overflow-mode="Ellipsis" />
+    </horizontal>
+    <vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' anchor-pos-x='-2' anchor-pos-y='-4'>
+        <list id='list' pref-height='50' pref-width='56' select-cell='select-cell' list-style='List' show-scrollbar='true' stick-scrolling='true' />
+    </vertical>
+    <modal id='modal' show-event='open-modal' hide-event='close-modal' clickerino-offerino-closerino='true' move-to-center='false' size-delta-x='65' size-delta-y='65'>   
+	</modal>
+</bg>

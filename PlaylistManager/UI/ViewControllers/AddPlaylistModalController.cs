@@ -19,51 +19,43 @@ using PlaylistManager.Services;
 
 namespace PlaylistManager.UI
 {
-    internal class AddPlaylistModalController : INotifyPropertyChanged
+    internal class AddPlaylistModalController : NotifiableBase
     {
         private readonly StandardLevelDetailViewController standardLevelDetailViewController;
+        private readonly PlaylistsBrowserViewController playlistsBrowserViewController;
         private readonly PopupModalsController popupModalsController;
         private readonly PlaylistCreationService playlistCreationService;
-
-        private BeatSaberPlaylistsLib.PlaylistManager parentManager;
-        private List<BeatSaberPlaylistsLib.PlaylistManager> childManagers;
-        private List<IPlaylist> childPlaylists;
-
-        private readonly Sprite folderIcon;
+        
         private bool parsed;
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        [UIComponent("list")]
-        public CustomListTableData playlistTableData;
 
         [UIComponent("dropdown-options")]
-        public CustomListTableData dropdownTableData;
+        private readonly CustomListTableData dropdownTableData = null!;
 
         [UIComponent("highlight-checkbox")]
-        private readonly RectTransform highlightCheckboxTransform;
+        private readonly RectTransform highlightCheckboxTransform = null!;
 
         [UIComponent("modal")]
-        private readonly RectTransform modalTransform;
+        private readonly RectTransform modalTransform = null!;
 
         private Vector3 modalPosition;
 
         [UIComponent("create-dropdown")]
-        private ModalView createModal;
+        private ModalView createModal = null!;
 
         [UIComponent("create-dropdown")]
-        private readonly RectTransform createModalTransform;
+        private readonly RectTransform createModalTransform = null!;
 
         private Vector3 createModalPosition;
 
         [UIParams]
-        private readonly BSMLParserParams parserParams;
+        private readonly BSMLParserParams parserParams = null!;
 
-        public AddPlaylistModalController(StandardLevelDetailViewController standardLevelDetailViewController, PopupModalsController popupModalsController, PlaylistCreationService playlistCreationService)
+        public AddPlaylistModalController(StandardLevelDetailViewController standardLevelDetailViewController, PlaylistsBrowserViewController playlistsBrowserViewController, PopupModalsController popupModalsController, PlaylistCreationService playlistCreationService)
         {
             this.standardLevelDetailViewController = standardLevelDetailViewController;
+            this.playlistsBrowserViewController = playlistsBrowserViewController;
             this.popupModalsController = popupModalsController;
             this.playlistCreationService = playlistCreationService;
-            folderIcon = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.FolderIcon.png");
             parsed = false;
         }
 
@@ -98,119 +90,33 @@ namespace PlaylistManager.UI
             Parse();
             parserParams.EmitEvent("close-modal");
             parserParams.EmitEvent("open-modal");
-            ShowPlaylistsForManager(BeatSaberPlaylistsLib.PlaylistManager.DefaultManager);
+            playlistsBrowserViewController.ShowPlaylistBrowser(modalTransform, OnCellSelect);
         }
 
-        internal void ShowPlaylistsForManager(BeatSaberPlaylistsLib.PlaylistManager parentManager)
+        private void OnCellSelect(IPlaylist selectedPlaylist)
         {
-            playlistTableData.data.Clear();
-
-            this.parentManager = parentManager;
-            childManagers = parentManager.GetChildManagers().ToList();
-            var childPlaylists = parentManager.GetAllPlaylists(false).Where(playlist => !playlist.ReadOnly);
-            this.childPlaylists = childPlaylists.ToList();
-
-            foreach (var playlistManager in childManagers)
+            var playlistSong = HighlightDifficulty ? selectedPlaylist.Add(standardLevelDetailViewController.selectedDifficultyBeatmap) :
+                selectedPlaylist.Add(standardLevelDetailViewController.selectedDifficultyBeatmap.level);
+            try
             {
-                playlistTableData.data.Add(new CustomCellInfo(Path.GetFileName(playlistManager.PlaylistPath), "Folder", folderIcon));
+                if (playlistSong == null)
+                {
+                    throw new Exception("PlaylistSong is null");
+                }
+                playlistsBrowserViewController.ParentManager.StorePlaylist(selectedPlaylist);
+                popupModalsController.ShowOkModal(modalTransform,
+                    $"Song successfully added to {selectedPlaylist.collectionName}", null, animateParentCanvas: false);
+                Events.RaisePlaylistSongAdded(playlistSong, selectedPlaylist);
             }
-            foreach (var playlist in childPlaylists)
+            catch (Exception e)
             {
-                if (playlist is IStagedSpriteLoad stagedSpriteLoadPlaylist && !stagedSpriteLoadPlaylist.SmallSpriteWasLoaded)
-                {
-                    stagedSpriteLoadPlaylist.SpriteLoaded -= StagedSpriteLoadPlaylist_SpriteLoaded;
-                    stagedSpriteLoadPlaylist.SpriteLoaded += StagedSpriteLoadPlaylist_SpriteLoaded;
-                    _ = playlist.smallCoverImage;
-                }
-                else
-                {
-                    ShowPlaylist(playlist);
-                }
+                popupModalsController.ShowOkModal(modalTransform, "An error occured while adding song to playlist.", null, animateParentCanvas: false);
+                Plugin.Log.Error($"An exception was thrown while adding a song to a playlist.\nException Message: {e.Message}");
             }
-            playlistTableData.tableView.ReloadData();
-
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(BackActive)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FolderText)));
-        }
-
-        private void StagedSpriteLoadPlaylist_SpriteLoaded(object sender, EventArgs e)
-        {
-            if (sender is IStagedSpriteLoad stagedSpriteLoadPlaylist)
+            finally
             {
-                if (parentManager.GetAllPlaylists(false).Contains((IPlaylist)stagedSpriteLoadPlaylist))
-                {
-                    ShowPlaylist((IPlaylist)stagedSpriteLoadPlaylist);
-                }
-                playlistTableData.tableView.ReloadDataKeepingPosition();
-                (stagedSpriteLoadPlaylist).SpriteLoaded -= StagedSpriteLoadPlaylist_SpriteLoaded;
+                playlistsBrowserViewController.Refresh();
             }
-        }
-
-        private void ShowPlaylist(IPlaylist playlist)
-        {
-            var subName = string.Format("{0} songs", playlist.beatmapLevelCollection.beatmapLevels.Count);
-            if (playlist.beatmapLevelCollection.beatmapLevels.Any(level => level.levelID == standardLevelDetailViewController.selectedDifficultyBeatmap.level.levelID))
-            {
-                if (!playlist.AllowDuplicates)
-                {
-                    childPlaylists.Remove(playlist);
-                    return;
-                }
-                subName += " (contains song)";
-            }
-            playlistTableData.data.Add(new CustomCellInfo(playlist.collectionName, subName, playlist.smallCoverImage));
-        }
-
-        [UIAction("select-cell")]
-        private void OnCellSelect(TableView tableView, int index)
-        {
-            playlistTableData.tableView.ClearSelection();
-            // Folder Selected
-            if (index < childManagers.Count)
-            {
-                ShowPlaylistsForManager(childManagers[index]);
-            }
-            else
-            {
-                index -= childManagers.Count;
-                var selectedPlaylist = childPlaylists[index];
-                IPlaylistSong playlistSong;
-                if (HighlightDifficulty)
-                {
-                    playlistSong = selectedPlaylist.Add(standardLevelDetailViewController.selectedDifficultyBeatmap);
-                }
-                else
-                {
-                    playlistSong = selectedPlaylist.Add(standardLevelDetailViewController.selectedDifficultyBeatmap.level);
-                }
-                try
-                {
-                    parentManager.StorePlaylist(selectedPlaylist);
-                    popupModalsController.ShowOkModal(modalTransform, string.Format("Song successfully added to {0}", selectedPlaylist.collectionName), null, animateParentCanvas: false);
-                    Events.RaisePlaylistSongAdded(playlistSong, selectedPlaylist);
-                }
-                catch (Exception e)
-                {
-                    popupModalsController.ShowOkModal(modalTransform, "An error occured while adding song to playlist.", null, animateParentCanvas: false);
-                    Plugin.Log.Critical(string.Format("An exception was thrown while adding a song to a playlist.\nException Message: {0}", e.Message));
-                }
-                finally
-                {
-                    ShowPlaylistsForManager(parentManager);
-                }
-            }
-        }
-
-        [UIAction("back-button-pressed")]
-        private void BackButtonPressed()
-        {
-            ShowPlaylistsForManager(parentManager.Parent);
-        }
-
-        [UIValue("folder-text")]
-        private string FolderText
-        {
-            get => parentManager == null ? "" : Path.GetFileName(parentManager.PlaylistPath);
         }
 
         [UIValue("highlight-difficulty")]
@@ -220,14 +126,8 @@ namespace PlaylistManager.UI
             set
             {
                 PluginConfig.Instance.HighlightDifficulty = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(HighlightDifficulty)));
+                NotifyPropertyChanged();
             }
-        }
-
-        [UIValue("back-active")]
-        private bool BackActive
-        {
-            get => parentManager != null && parentManager.Parent != null;
         }
 
         #endregion
@@ -251,37 +151,40 @@ namespace PlaylistManager.UI
                 return;
             }
 
-            var playlist = await playlistCreationService.CreatePlaylistAsync(playlistName, parentManager);
-
-            if (playlist is IDeferredSpriteLoad {SpriteWasLoaded: false} deferredSpriteLoadPlaylist)
-            {
-                deferredSpriteLoadPlaylist.SpriteLoaded -= StagedSpriteLoadPlaylist_SpriteLoaded;
-                deferredSpriteLoadPlaylist.SpriteLoaded += StagedSpriteLoadPlaylist_SpriteLoaded;
-                _ = playlist.coverImage;
-            }
-
-            childPlaylists.Add(playlist);
-            playlistTableData.tableView.ReloadDataKeepingPosition();
+            await playlistCreationService.CreatePlaylistAsync(playlistName, playlistsBrowserViewController.ParentManager);
+            playlistsBrowserViewController.Refresh();
         }
 
         private void CreateFolder(string folderName)
         {
             folderName = folderName.Replace("/", "").Replace("\\", "").Replace(".", "");
-            if (!string.IsNullOrEmpty(folderName))
+            
+            if (string.IsNullOrEmpty(folderName))
             {
-                var childManager = parentManager.CreateChildManager(folderName);
+                return;
+            }
 
-                if (childManagers.Contains(childManager))
-                {
-                    popupModalsController.ShowOkModal(modalTransform, "\"" + folderName + "\" already exists! Please use a different name.", null, animateParentCanvas: false);
-                }
-                else
-                {
-                    playlistTableData.data.Insert(childManagers.Count, new CustomCellInfo(Path.GetFileName(childManager.PlaylistPath), "Folder", folderIcon));
-                    playlistTableData.tableView.ReloadDataKeepingPosition();
-                    childManagers.Add(childManager);
-                    BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.RequestRefresh("PlaylistManager (plugin)");
-                }
+            BeatSaberPlaylistsLib.PlaylistManager childManager;
+            try
+            {
+                childManager = playlistsBrowserViewController.ParentManager.CreateChildManager(folderName);
+            }
+            catch (Exception e)
+            {
+                popupModalsController.ShowOkModal(modalTransform, "An error occured while creating a folder.",
+                    null, animateParentCanvas: false);
+                Plugin.Log.Error($"An exception was thrown while adding a song to a playlist.\nException Message: {e.Message}");
+                return;
+            }
+
+            if (playlistsBrowserViewController.ChildManagers?.Contains(childManager) ?? false)
+            {
+                popupModalsController.ShowOkModal(modalTransform, "\"" + folderName + "\" already exists! Please use a different name.", null, animateParentCanvas: false);
+            }
+            else
+            {
+                playlistsBrowserViewController.Refresh();
+                BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.RequestRefresh("PlaylistManager (plugin)");
             }
         }
 

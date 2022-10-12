@@ -11,6 +11,7 @@ namespace PlaylistManager.Installers
         public override void InstallBindings()
         {
             Container.BindInterfacesTo<LevelDetailButtonsViewController>().AsSingle();
+            Container.BindInterfacesAndSelfTo<PlaylistsBrowserViewController>().AsSingle();
             Container.BindInterfacesAndSelfTo<AddPlaylistModalController>().AsSingle();
             Container.BindInterfacesTo<PlaylistDetailViewButtonsController>().AsSingle();
             Container.BindInterfacesAndSelfTo<PlaylistDetailsViewController>().AsSingle();
