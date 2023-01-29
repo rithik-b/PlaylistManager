@@ -7,8 +7,8 @@ namespace PlaylistManager.Types
 {
     internal class GridScrollView : ScrollView
     {
-		private AnnotatedBeatmapLevelCollectionsGridView annotatedBeatmapLevelCollectionsGridView;
-		private AnnotatedBeatmapLevelCollectionsGridViewAnimator annotatedBeatmapLevelCollectionsGridViewAnimator;
+		private AnnotatedBeatmapLevelCollectionsGridView annotatedBeatmapLevelCollectionsGridView = null!;
+		private AnnotatedBeatmapLevelCollectionsGridViewAnimator annotatedBeatmapLevelCollectionsGridViewAnimator = null!;
 
 		private float zeroPos;
 		private float endPos;

@@ -17,36 +17,35 @@ using Zenject;
 
 namespace PlaylistManager.UI
 {
-    public class PlaylistDetailsViewController : IInitializable, IDisposable, ILevelCollectionUpdater, INotifyPropertyChanged
+    public class PlaylistDetailsViewController : NotifiableBase, IInitializable, IDisposable, ILevelCollectionUpdater, INotifyPropertyChanged
     {
         private readonly LevelPackDetailViewController levelPackDetailViewController;
         private readonly ImageSelectionModalController imageSelectionModalController;
         private readonly PopupModalsController popupModalsController;
 
         private bool parsed;
-        private Playlist selectedPlaylist;
-        private BeatSaberPlaylistsLib.PlaylistManager parentManager;
-        public event PropertyChangedEventHandler PropertyChanged;
+        private Playlist? selectedPlaylist;
+        private BeatSaberPlaylistsLib.PlaylistManager? parentManager;
 
-        [UIComponent("modal")]
-        private readonly RectTransform modalTransform;
+        [UIComponent("modal")] 
+        private readonly RectTransform modalTransform = null!;
 
         private Vector3 modalPosition;
 
         [UIComponent("name-setting")]
-        private RectTransform nameSettingTransform;
+        private readonly RectTransform nameSettingTransform = null!;
 
         [UIComponent("author-setting")]
-        private RectTransform authorSettingTransform;
+        private readonly RectTransform authorSettingTransform = null!;
 
         [UIComponent("playlist-cover")]
-        private readonly ClickableImage playlistCoverView;
+        private readonly ClickableImage playlistCoverView = null!;
 
         [UIComponent("text-page")]
-        private TextPageScrollView descriptionTextPage;
+        private readonly TextPageScrollView descriptionTextPage = null!;
 
         [UIParams]
-        private readonly BSMLParserParams parserParams;
+        private readonly BSMLParserParams parserParams = null!;
 
         public PlaylistDetailsViewController(LevelPackDetailViewController levelPackDetailViewController, ImageSelectionModalController imageSelectionModalController,
             PopupModalsController popupModalsController)
@@ -101,13 +100,15 @@ namespace PlaylistManager.UI
             parserParams.EmitEvent("open-modal");
 
             // Update values
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistName)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NameHint)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistAuthor)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AuthorHint))); 
+            NotifyPropertyChanged(nameof(PlaylistName));
+            NotifyPropertyChanged(nameof(NameHint));
+            NotifyPropertyChanged(nameof(PlaylistAuthor));
+            NotifyPropertyChanged(nameof(AuthorHint));
+            
             UpdateReadOnly();
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistAllowDuplicates)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistDescription)));
+            NotifyPropertyChanged(nameof(PlaylistAllowDuplicates));
+            NotifyPropertyChanged(nameof(PlaylistDescription));
+            
             playlistCoverView.sprite = selectedPlaylist.Sprite;
             descriptionTextPage.ScrollTo(0, true);
         }
@@ -140,43 +141,34 @@ namespace PlaylistManager.UI
                     selectedPlaylist.SpriteLoaded += SelectedPlaylist_SpriteLoaded;
                     selectedPlaylist.RaiseCoverImageChangedForDefaultCover();
                 }
-                parentManager.StorePlaylist((IPlaylist)selectedPlaylist);
-                Events.RaisePlaylistRenamed((IPlaylist)selectedPlaylist, parentManager);
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistName)));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NameHint)));
+                parentManager.StorePlaylist(selectedPlaylist);
+                Events.RaisePlaylistRenamed(selectedPlaylist, parentManager);
+                NotifyPropertyChanged();
+                NotifyPropertyChanged(nameof(NameHint));
             }
         }
 
         [UIValue("name-hint")]
-        private string NameHint
-        {
-            get => string.IsNullOrWhiteSpace(PlaylistName) ? " " : PlaylistName;
-        }
+        private string NameHint => string.IsNullOrWhiteSpace(PlaylistName) ? " " : PlaylistName;
 
         [UIValue("playlist-author")]
         private string PlaylistAuthor
         {
-            get => selectedPlaylist == null || selectedPlaylist.Author == null ? " " : selectedPlaylist.Author;
+            get => selectedPlaylist?.Author ?? " ";
             set
             {
                 selectedPlaylist.Author = value;
-                parentManager.StorePlaylist((IPlaylist)selectedPlaylist);
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistAuthor)));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AuthorHint)));
+                parentManager.StorePlaylist(selectedPlaylist);
+                NotifyPropertyChanged();
+                NotifyPropertyChanged(nameof(AuthorHint));
             }
         }
 
         [UIValue("author-hint")]
-        private string AuthorHint
-        {
-            get => string.IsNullOrWhiteSpace(PlaylistAuthor) ? " " : PlaylistAuthor;
-        }
+        private string AuthorHint => string.IsNullOrWhiteSpace(PlaylistAuthor) ? " " : PlaylistAuthor;
 
         [UIValue("playlist-description")]
-        private string PlaylistDescription
-        {
-            get => selectedPlaylist == null || selectedPlaylist.Description == null ? "" : selectedPlaylist.Description;
-        }
+        private string PlaylistDescription => selectedPlaylist?.Description ?? "";
 
         #endregion
 
@@ -189,9 +181,9 @@ namespace PlaylistManager.UI
         {
             if (playlistReadOnly)
             {
-                playlistReadOnly = true;
+                PlaylistReadOnly = true;
             }
-            else if (PlaylistAllowDuplicates != PlaylistReadOnly)
+            else if (playlistReadOnly != PlaylistReadOnly)
             {
                 popupModalsController.ShowYesNoModal(modalTransform, "To turn off read only, this playlist will be cloned and writing will be enabled on the clone. Proceed?", ClonePlaylist, noButtonPressedCallback: UpdateReadOnly, animateParentCanvas: false);
             }
@@ -217,10 +209,10 @@ namespace PlaylistManager.UI
 
         private void UpdateReadOnly()
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistReadOnly)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ReadOnlyVisible)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Editable)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CoverHint)));
+            NotifyPropertyChanged(nameof(PlaylistReadOnly));
+            NotifyPropertyChanged(nameof(ReadOnlyVisible));
+            NotifyPropertyChanged(nameof(Editable));
+            NotifyPropertyChanged(nameof(CoverHint));
         }
 
         // Values
@@ -228,7 +220,7 @@ namespace PlaylistManager.UI
         [UIValue("playlist-read-only")]
         private bool PlaylistReadOnly
         {
-            get => selectedPlaylist == null ? false : selectedPlaylist.ReadOnly;
+            get => selectedPlaylist is {ReadOnly: true};
             set
             {
                 selectedPlaylist.ReadOnly = value;
@@ -271,7 +263,7 @@ namespace PlaylistManager.UI
         [UIValue("playlist-allow-duplicates")]
         private bool PlaylistAllowDuplicates
         {
-            get => selectedPlaylist == null ? false : selectedPlaylist.AllowDuplicates;
+            get => selectedPlaylist is {AllowDuplicates: true};
             set
             {
                 selectedPlaylist.AllowDuplicates = value;
@@ -288,8 +280,8 @@ namespace PlaylistManager.UI
                     }
                 }
 
-                parentManager.StorePlaylist((IPlaylist)selectedPlaylist);
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistAllowDuplicates)));
+                parentManager.StorePlaylist(selectedPlaylist);
+                NotifyPropertyChanged();
             }
 
         }

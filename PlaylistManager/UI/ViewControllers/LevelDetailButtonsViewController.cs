@@ -10,12 +10,13 @@ using PlaylistManager.Utilities;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using BeatSaberMarkupLanguage.Components;
 using PlaylistManager.Configuration;
 using PlaylistManager.Services;
 
 namespace PlaylistManager.UI
 {
-    internal class LevelDetailButtonsViewController : IInitializable, IDisposable, IPreviewBeatmapLevelUpdater, ILevelCollectionUpdater, INotifyPropertyChanged
+    internal class LevelDetailButtonsViewController : NotifiableBase, IInitializable, IDisposable, IPreviewBeatmapLevelUpdater, ILevelCollectionUpdater, INotifyPropertyChanged
     {
         private readonly StandardLevelDetailViewController standardLevelDetailViewController;
         private readonly LevelCollectionTableView levelCollectionTableView;
@@ -25,7 +26,6 @@ namespace PlaylistManager.UI
         private readonly DifficultyHighlighter difficultyHighlighter;
         private readonly AuthorNameService authorNameService;
 
-        public event PropertyChangedEventHandler PropertyChanged;
         private IPreviewBeatmapLevel selectedBeatmapLevel;
         private IPlaylist selectedPlaylist;
         private BeatSaberPlaylistsLib.PlaylistManager parentManager;
@@ -76,7 +76,7 @@ namespace PlaylistManager.UI
             set
             {
                 _addActive = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AddActive)));
+                NotifyPropertyChanged();
             }
         }
 
@@ -148,15 +148,15 @@ namespace PlaylistManager.UI
             difficultyHighlighter.ToggleSelectedDifficultyHighlight();
             parentManager.StorePlaylist(selectedPlaylist);
             selectedDifficultyHighlighted = !selectedDifficultyHighlighted;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(HighlightButtonText)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(HighlightButtonHover)));
+            NotifyPropertyChanged(nameof(HighlightButtonText));
+            NotifyPropertyChanged(nameof(HighlightButtonHover));
         }
 
         private void DifficultyHighlighter_selectedDifficultyChanged(bool selectedDifficultyHighlighted)
         {
             this.selectedDifficultyHighlighted = selectedDifficultyHighlighted;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(HighlightButtonText)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(HighlightButtonHover)));
+            NotifyPropertyChanged(nameof(HighlightButtonText));
+            NotifyPropertyChanged(nameof(HighlightButtonHover));
         }
 
         [UIValue("highlight-button-text")]
@@ -174,7 +174,7 @@ namespace PlaylistManager.UI
             set
             {
                 _isPlaylistSong = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsPlaylistSong)));
+                NotifyPropertyChanged();
             }
         }
 

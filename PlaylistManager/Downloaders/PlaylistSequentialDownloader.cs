@@ -182,7 +182,7 @@ namespace PlaylistManager.Downloaders
             {
                 if (preferCustomArchiveURL && missingSongs[i].TryGetCustomData("customArchiveURL", out var outCustomArchiveURL))
                 {
-                    var customArchiveURL = (string)outCustomArchiveURL;
+                    var customArchiveURL = (string)outCustomArchiveURL!;
                     var identifier = PlaylistLibUtils.GetIdentifierForPlaylistSong(missingSongs[i]);
                     if (identifier == "")
                     {

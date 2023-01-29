@@ -19,7 +19,7 @@ using Zenject;
 
 namespace PlaylistManager.UI
 {
-    public class FoldersViewController : IInitializable, IDisposable, INotifyPropertyChanged, ILevelCollectionsTableUpdater, ILevelCategoryUpdater, IPMRefreshable, TableView.IDataSource
+    public class FoldersViewController : NotifiableBase, IInitializable, IDisposable, INotifyPropertyChanged, ILevelCollectionsTableUpdater, ILevelCategoryUpdater, IPMRefreshable, TableView.IDataSource
     {
         private readonly AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
         private readonly MainFlowCoordinator mainFlowCoordinator;
@@ -28,23 +28,22 @@ namespace PlaylistManager.UI
         private readonly HoverHintController hoverHintController;
         private BeatmapLevelsModel beatmapLevelsModel;
 
-        private FloatingScreen floatingScreen;
+        private FloatingScreen floatingScreen = null!;
         private readonly Sprite levelPacksSprite;
         private readonly Sprite customPacksSprite;
         private readonly Sprite playlistsSprite;
         private readonly Sprite foldersSprite;
         private readonly Sprite folderIcon;
 
-        public event PropertyChangedEventHandler PropertyChanged;
-        public event Action<IAnnotatedBeatmapLevelCollection[], int> LevelCollectionTableViewUpdatedEvent;
-        public event Action<BeatSaberPlaylistsLib.PlaylistManager> ParentManagerUpdatedEvent;
+        public event Action<IAnnotatedBeatmapLevelCollection[], int>? LevelCollectionTableViewUpdatedEvent;
+        public event Action<BeatSaberPlaylistsLib.PlaylistManager?>? ParentManagerUpdatedEvent;
 
         private readonly List<CustomListTableData.CustomCellInfo> tableCells;
-        private BeatSaberPlaylistsLib.PlaylistManager _currentParentManager;
-        private List<BeatSaberPlaylistsLib.PlaylistManager> currentManagers;
+        private BeatSaberPlaylistsLib.PlaylistManager? _currentParentManager;
+        private List<BeatSaberPlaylistsLib.PlaylistManager>? currentManagers;
         private FolderMode folderMode;
 
-        public BeatSaberPlaylistsLib.PlaylistManager CurrentParentManager
+        public BeatSaberPlaylistsLib.PlaylistManager? CurrentParentManager
         {
             get => _currentParentManager;
             private set
@@ -55,19 +54,19 @@ namespace PlaylistManager.UI
         }
 
         [UIComponent("root")]
-        private RectTransform rootTransform;
+        private readonly RectTransform rootTransform = null!;
 
         [UIComponent("back-rect")]
-        private RectTransform backTransform;
+        private readonly RectTransform backTransform = null!;
 
         [UIComponent("rename-button")]
-        private Button renameButton;
+        private readonly Button renameButton = null!;
 
         [UIComponent("delete-button")]
-        private Button deleteButton;
+        private readonly Button deleteButton = null!;
 
-        [UIComponent("folder-list")]
-        public CustomListTableData customListTableData;
+        [UIComponent("folder-list")] 
+        private readonly CustomListTableData customListTableData = null!;
 
         public FoldersViewController(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, MainFlowCoordinator mainFlowCoordinator, 
             LevelSelectionNavigationController levelSelectionNavigationController, PopupModalsController popupModalsController, HoverHintController hoverHintController,
@@ -168,8 +167,8 @@ namespace PlaylistManager.UI
                 }
 
                 backTransform.gameObject.SetActive(true);
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FolderText)));
-
+                NotifyPropertyChanged(nameof(FolderText));
+                
                 // If root, can't rename or delete
                 if (currentParentManager.Parent == null)
                 {
@@ -231,8 +230,8 @@ namespace PlaylistManager.UI
                 }
             }
 
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LeftButtonEnabled)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(RightButtonEnabled)));
+            NotifyPropertyChanged(nameof(LeftButtonEnabled));
+            NotifyPropertyChanged(nameof(RightButtonEnabled));
         }
 
         [UIAction("folder-select")]
@@ -329,7 +328,7 @@ namespace PlaylistManager.UI
                 if (folderName != Path.GetFileName(CurrentParentManager.PlaylistPath))
                 {
                     CurrentParentManager.RenameManager(folderName);
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FolderText)));
+                    NotifyPropertyChanged(nameof(FolderText));
                 }
             }
         }

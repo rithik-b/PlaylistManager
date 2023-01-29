@@ -11,13 +11,17 @@ namespace PlaylistManager.UI
 {
     public class RefreshButtonUI : IInitializable, IDisposable
     {
-        private MenuButton refreshButton;
-        private ProgressBar progressBar;
+        private readonly MenuButton refreshButton;
+        private ProgressBar? progressBar;
         private const int kMessageTime = 5;
 
-        public void Initialize()
+        public RefreshButtonUI()
         {
             refreshButton = new MenuButton("Refresh Playlists", "Refresh Songs & Playlists", RefreshButtonPressed);
+        }
+        
+        public void Initialize()
+        {
             MenuButtons.instance.RegisterButton(refreshButton);
             Loader.SongsLoadedEvent += SongsLoaded;
         }

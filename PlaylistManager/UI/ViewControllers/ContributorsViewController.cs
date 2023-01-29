@@ -14,27 +14,23 @@ namespace PlaylistManager.UI
     [ViewDefinition("PlaylistManager.UI.Views.ContributorsView.bsml")]
     internal class ContributorsViewController : BSMLAutomaticViewController, IInitializable, IDisposable
     {
-        private PopupModalsController popupModalsController;
-        private List<object> contributors;
-
+        [Inject]
+        private readonly PopupModalsController popupModalsController = null!;
+        
         [UIComponent("contributors-list")]
         private readonly CustomCellListTableData customListTableData;
-
-        [Inject]
-        public void Contruct(PopupModalsController popupModalsController)
+        
+        private readonly List<object> contributors = new()
         {
-            this.popupModalsController = popupModalsController;
-        }
+            new Contributor("PixelBoom", "PlaylistManager (PC)", "PlaylistManager.Icons.Pixel.png", "https://www.youtube.com/channel/UCrk1WH6hCAdfrAtzv-q9hvQ",
+                "https://www.twitch.tv/pixelboom58", "https://github.com/rithik-b", "https://ko-fi.com/pixelboom"),
+            new Contributor("Metalit", "PlaylistManager (Quest)", "PlaylistManager.Icons.Metalit.png", github: "https://github.com/Metalit"),
+            new Contributor("Zingabopp", "BeatSaberPlaylistsLib (PC)", "PlaylistManager.Icons.Zinga.png", github: "https://github.com/Zingabopp", kofi: "https://ko-fi.com/zingabopp"),
+            new Contributor("Auros", "Major Contributor (PC)", "PlaylistManager.Icons.Auros.png", twitch: "https://www.twitch.tv/aurosvr", github: "https://github.com/Auros", kofi: "https://ko-fi.com/auros")
+        };
 
         public void Initialize()
         {
-            contributors = new List<object>();
-            contributors.Add(new Contributor("PixelBoom", "PlaylistManager (PC)", "PlaylistManager.Icons.Pixel.png", "https://www.youtube.com/channel/UCrk1WH6hCAdfrAtzv-q9hvQ",
-                "https://www.twitch.tv/pixelboom58", "https://github.com/rithik-b", "https://ko-fi.com/pixelboom"));
-            contributors.Add(new Contributor("Metalit", "PlaylistManager (Quest)", "PlaylistManager.Icons.Metalit.png", github: "https://github.com/Metalit"));
-            contributors.Add(new Contributor("Zingabopp", "BeatSaberPlaylistsLib (PC)", "PlaylistManager.Icons.Zinga.png", github: "https://github.com/Zingabopp", kofi: "https://ko-fi.com/zingabopp"));
-            contributors.Add(new Contributor("Auros", "Major Contributor (PC)", "PlaylistManager.Icons.Auros.png", twitch: "https://www.twitch.tv/aurosvr", github: "https://github.com/Auros", kofi: "https://ko-fi.com/auros"));
-
             foreach (var contributor in contributors.OfType<Contributor>())
             {
                 contributor.OpenURL += URLRequested;
