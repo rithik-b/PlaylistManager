@@ -15,32 +15,31 @@ namespace PlaylistManager.UI
 {
     public class PlaylistsGridViewController : IInitializable, IDisposable
     {
-        private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsTableViewController;
+        private readonly AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsTableViewController;
         private AnnotatedBeatmapLevelCollectionsGridView annotatedBeatmapLevelCollectionsGridView;
         private AnnotatedBeatmapLevelCollectionsGridViewAnimator annotatedBeatmapLevelCollectionsGridViewAnimator;
 
         private readonly IVRPlatformHelper platformHelper;
 
-        private GridScrollView gridScrollView;
-        private Transform scrollBar;
+        private GridScrollView? gridScrollView;
+        private Transform? scrollBar;
 
         [UIComponent("scroll-view")]
-        private ScrollView bsmlScrollView;
+        private ScrollView bsmlScrollView = null!;
 
         [UIComponent("vertical")]
-        private RectTransform vertical;
+        private readonly RectTransform vertical = null!;
 
         public PlaylistsGridViewController(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsTableViewController, IVRPlatformHelper platformHelper)
         {
             this.annotatedBeatmapLevelCollectionsTableViewController = annotatedBeatmapLevelCollectionsTableViewController;
             this.platformHelper = platformHelper;
+            annotatedBeatmapLevelCollectionsGridView = Accessors.AnnotatedBeatmapLevelCollectionsGridViewAccessor(ref annotatedBeatmapLevelCollectionsTableViewController);
+            annotatedBeatmapLevelCollectionsGridViewAnimator = Accessors.GridViewAnimatorAccessor(ref annotatedBeatmapLevelCollectionsGridView);
         }
 
         public void Initialize()
         {
-            annotatedBeatmapLevelCollectionsGridView = Accessors.AnnotatedBeatmapLevelCollectionsGridViewAccessor(ref annotatedBeatmapLevelCollectionsTableViewController);
-            annotatedBeatmapLevelCollectionsGridViewAnimator = Accessors.GridViewAnimatorAccessor(ref annotatedBeatmapLevelCollectionsGridView);
-
             // Removing last column of GridView to make space for our scroller
             var rectTransform = annotatedBeatmapLevelCollectionsGridView.gameObject.GetComponent<RectTransform>();
             rectTransform.sizeDelta = new Vector2(-10f, 0);

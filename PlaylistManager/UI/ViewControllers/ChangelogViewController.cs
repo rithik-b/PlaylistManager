@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
@@ -11,14 +12,9 @@ namespace PlaylistManager.UI
     [ViewDefinition("PlaylistManager.UI.Views.ChangelogView.bsml")]
     internal class ChangelogViewController : BSMLAutomaticViewController
     {
-        private ISiraSyncService siraSyncService;
-        private string _changelog;
-
         [Inject]
-        public void Construct(ISiraSyncService siraSyncService)
-        {
-            this.siraSyncService = siraSyncService;
-        }
+        private readonly ISiraSyncService siraSyncService = null!;
+        private string _changelog = "";
 
         [UIAction("#post-parse")]
         private async void PostParse()

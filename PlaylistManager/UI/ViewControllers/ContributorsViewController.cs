@@ -18,7 +18,7 @@ namespace PlaylistManager.UI
         private readonly PopupModalsController popupModalsController = null!;
         
         [UIComponent("contributors-list")]
-        private readonly CustomCellListTableData customListTableData;
+        private readonly CustomCellListTableData customListTableData = null!;
         
         private readonly List<object> contributors = new()
         {

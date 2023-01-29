@@ -109,7 +109,7 @@ namespace PlaylistManager.UI
             NotifyPropertyChanged(nameof(PlaylistAllowDuplicates));
             NotifyPropertyChanged(nameof(PlaylistDescription));
             
-            playlistCoverView.sprite = selectedPlaylist.Sprite;
+            playlistCoverView.sprite = selectedPlaylist!.Sprite;
             descriptionTextPage.ScrollTo(0, true);
         }
 
@@ -191,10 +191,15 @@ namespace PlaylistManager.UI
 
         private void ClonePlaylist()
         {
+            if (selectedPlaylist == null || parentManager == null)
+            {
+                return;
+            }
+            
             var playlistPath = Path.Combine(parentManager.PlaylistPath, $"{selectedPlaylist.Filename}.{selectedPlaylist.SuggestedExtension}");
             if (File.Exists(playlistPath))
             {
-                var clonedPlaylist = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.DefaultHandler?.Deserialize(File.OpenRead(playlistPath));
+                var clonedPlaylist = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.DefaultHandler?.Deserialize(File.OpenRead(playlistPath))!;
                 clonedPlaylist.ReadOnly = false;
                 parentManager.StorePlaylist(clonedPlaylist);
                 BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.RequestRefresh("PlaylistManager (plugin)");
@@ -223,6 +228,11 @@ namespace PlaylistManager.UI
             get => selectedPlaylist is {ReadOnly: true};
             set
             {
+                if (selectedPlaylist == null || parentManager == null)
+                {
+                    return;
+                }
+                
                 selectedPlaylist.ReadOnly = value;
                 parentManager.StorePlaylist((IPlaylist)selectedPlaylist);
                 UpdateReadOnly();
@@ -299,14 +309,14 @@ namespace PlaylistManager.UI
             }
         }
 
-        private void ImageSelectionModalController_ImageSelectedEvent(byte[] imageBytes)
+        private void ImageSelectionModalController_ImageSelectedEvent(byte[]? imageBytes)
         {
             selectedPlaylist.SpriteLoaded += SelectedPlaylist_SpriteLoaded;
             try
             {
                 selectedPlaylist.SetCover(imageBytes);
                 _ = selectedPlaylist.Sprite;
-                parentManager.StorePlaylist((IPlaylist)selectedPlaylist);
+                parentManager.StorePlaylist(selectedPlaylist);
             }
             catch (Exception e)
             {

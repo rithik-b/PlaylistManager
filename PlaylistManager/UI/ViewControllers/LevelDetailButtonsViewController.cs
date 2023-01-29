@@ -26,15 +26,15 @@ namespace PlaylistManager.UI
         private readonly DifficultyHighlighter difficultyHighlighter;
         private readonly AuthorNameService authorNameService;
 
-        private IPreviewBeatmapLevel selectedBeatmapLevel;
-        private IPlaylist selectedPlaylist;
-        private BeatSaberPlaylistsLib.PlaylistManager parentManager;
+        private IPreviewBeatmapLevel? selectedBeatmapLevel;
+        private IPlaylist? selectedPlaylist;
+        private BeatSaberPlaylistsLib.PlaylistManager? parentManager;
         private bool _addActive;
         private bool _isPlaylistSong;
         private bool selectedDifficultyHighlighted;
 
         [UIComponent("root")]
-        private RectTransform rootTransform;
+        private readonly RectTransform rootTransform = null!;
 
         public LevelDetailButtonsViewController(StandardLevelDetailViewController standardLevelDetailViewController, LevelCollectionViewController levelCollectionViewController, LevelCollectionNavigationController levelCollectionNavigationController,
                AddPlaylistModalController addPlaylistController, PopupModalsController popupModalsController, DifficultyHighlighter difficultyHighlighter, AuthorNameService authorNameService)
@@ -99,6 +99,9 @@ namespace PlaylistManager.UI
 
         private void RemoveSong()
         {
+            if (selectedPlaylist == null || parentManager == null || selectedBeatmapLevel == null)
+                return;
+            
             selectedPlaylist.Remove((IPlaylistSong)selectedBeatmapLevel);
             try
             {
@@ -108,7 +111,7 @@ namespace PlaylistManager.UI
             catch (Exception e)
             {
                 popupModalsController.ShowOkModal(standardLevelDetailViewController.transform, "An error occured while removing a song from the playlist.", null);
-                Plugin.Log.Critical(string.Format("An exception was thrown while adding a song to a playlist.\nException Message: {0}", e.Message));
+                Plugin.Log.Critical($"An exception was thrown while adding a song to a playlist.\nException Message: {e.Message}");
             }
 
             levelCollectionTableView.ClearSelection();

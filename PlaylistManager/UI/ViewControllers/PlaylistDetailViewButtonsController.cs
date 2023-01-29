@@ -8,12 +8,12 @@ using PlaylistManager.Utilities;
 using SiraUtil.Web;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using BeatSaberMarkupLanguage.Components;
 using PlaylistManager.Downloaders;
 using UnityEngine;
 using Zenject;
@@ -21,7 +21,7 @@ using Accessors = PlaylistManager.Utilities.Accessors;
 
 namespace PlaylistManager.UI
 {
-    public class PlaylistDetailViewButtonsController : IInitializable, IDisposable, INotifyPropertyChanged, ILevelCollectionUpdater, ILevelCategoryUpdater, ILevelCollectionsTableUpdater
+    public class PlaylistDetailViewButtonsController : NotifiableBase, IInitializable, IDisposable, ILevelCollectionUpdater, ILevelCategoryUpdater, ILevelCollectionsTableUpdater
     {
         private readonly IHttpService siraHttpService;
         private readonly PlaylistSequentialDownloader playlistDownloader;
@@ -30,19 +30,17 @@ namespace PlaylistManager.UI
         private readonly PlaylistDetailsViewController playlistDetailsViewController;
         private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
 
-        private IPlaylist selectedPlaylist;
-        private BeatSaberPlaylistsLib.PlaylistManager parentManager;
-        private List<IPlaylistSong> _missingSongs;
-        private DownloadQueueEntry _downloadQueueEntry;
-
-        public event Action<IAnnotatedBeatmapLevelCollection[], int> LevelCollectionTableViewUpdatedEvent;
-        public event PropertyChangedEventHandler PropertyChanged;
-
+        private IPlaylist? selectedPlaylist;
+        private BeatSaberPlaylistsLib.PlaylistManager? parentManager;
+        private List<IPlaylistSong>? _missingSongs;
+        
+        public event Action<IAnnotatedBeatmapLevelCollection[], int>? LevelCollectionTableViewUpdatedEvent;
+        
         [UIComponent("root")]
-        private readonly Transform rootTransform;
+        private readonly Transform rootTransform = null!;
 
         [UIComponent("sync-button")]
-        private readonly Transform syncButtonTransform;
+        private readonly Transform syncButtonTransform = null!;
 
         internal PlaylistDetailViewButtonsController(IHttpService siraHttpService, PlaylistSequentialDownloader playlistDownloader, LevelPackDetailViewController levelPackDetailViewController, 
             PopupModalsController popupModalsController, PlaylistDetailsViewController playlistDetailsViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController)
@@ -87,6 +85,11 @@ namespace PlaylistManager.UI
         [UIAction("delete-click")]
         private void OnDelete()
         {
+            if (selectedPlaylist == null || parentManager == null)
+            {
+                return;
+            }
+            
             var numberOfSongs = selectedPlaylist.beatmapLevelCollection.beatmapLevels.Count;
             var checkboxText = numberOfSongs > 0 ? $"Also delete all {numberOfSongs} songs from the game." : "";
             popupModalsController.ShowYesNoModal(rootTransform, $"Are you sure you would like to delete the playlist \"{selectedPlaylist.packName}\"?", DeleteButtonPressed, checkboxText: checkboxText);
@@ -113,7 +116,7 @@ namespace PlaylistManager.UI
         {
             popupModalsController.ShowLoadingModal(rootTransform, "Deleting Playlist & Songs");
 
-            var beatmapLevels = selectedPlaylist.beatmapLevelCollection.beatmapLevels;
+            var beatmapLevels = selectedPlaylist!.beatmapLevelCollection.beatmapLevels;
             var levelPaths = new List<string>();
             foreach (var beatmapLevel in beatmapLevels.OfType<CustomPreviewBeatmapLevel>())
             {
@@ -126,7 +129,7 @@ namespace PlaylistManager.UI
 
         private void DeletePlaylist()
         {
-            parentManager.DeletePlaylist(selectedPlaylist, true);
+            parentManager!.DeletePlaylist(selectedPlaylist!, true);
             var selectedIndex = annotatedBeatmapLevelCollectionsViewController.selectedItemIndex;
             var annotatedBeatmapLevelCollections = Accessors.AnnotatedBeatmapLevelCollectionsAccessor(ref annotatedBeatmapLevelCollectionsViewController).ToList();
             annotatedBeatmapLevelCollections.RemoveAt(selectedIndex);
@@ -141,8 +144,9 @@ namespace PlaylistManager.UI
         [UIAction("download-click")]
         private void DownloadClick()
         {
-            DownloadQueueEntry = new DownloadQueueEntry(selectedPlaylist, parentManager);
-            playlistDownloader.QueuePlaylist(DownloadQueueEntry);
+            var downloadQueueEntry = new DownloadQueueEntry(selectedPlaylist, parentManager);
+            playlistDownloader.QueuePlaylist(downloadQueueEntry);
+            IsDownloading = true;
             popupModalsController.ShowOkModal(rootTransform, $"{selectedPlaylist.collectionName} has been added to the download queue!", null);
         }
 
@@ -150,7 +154,7 @@ namespace PlaylistManager.UI
         {
             if (PlaylistSequentialDownloader.downloadQueue.Count == 0)
             {
-                DownloadQueueEntry = null;
+                IsDownloading = false;
                 UpdateMissingSongs();
             }
         }
@@ -163,21 +167,22 @@ namespace PlaylistManager.UI
             set
             {
                 _missingSongs = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DownloadInteractable)));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DownloadHint)));
+                NotifyPropertyChanged(nameof(DownloadInteractable));
+                NotifyPropertyChanged(nameof(DownloadHint));
             }
         }
 
-        private DownloadQueueEntry DownloadQueueEntry
+        private bool isDownloading;
+        private bool IsDownloading
         {
-            get => _downloadQueueEntry;
+            get => isDownloading;
             set
             {
-                _downloadQueueEntry = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DownloadInteractable)));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DownloadHint)));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DeleteHint)));
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistNotDownloading)));
+                isDownloading = value;
+                NotifyPropertyChanged(nameof(DownloadInteractable));
+                NotifyPropertyChanged(nameof(DownloadHint));
+                NotifyPropertyChanged(nameof(DeleteHint));
+                NotifyPropertyChanged(nameof(IsNotDownloading));
             }
         }
 
@@ -186,7 +191,7 @@ namespace PlaylistManager.UI
         {
             get
             {
-                if (DownloadQueueEntry != null)
+                if (IsDownloading)
                 {
                     return "Playlist is downloading";
                 }
@@ -205,7 +210,7 @@ namespace PlaylistManager.UI
         {
             get
             {
-                if (DownloadQueueEntry != null)
+                if (IsDownloading)
                 {
                     return "Can't delete playlist when it is downloading";
                 }
@@ -215,11 +220,11 @@ namespace PlaylistManager.UI
         }
 
         [UIValue("download-interactable")]
-        private bool DownloadInteractable => DownloadQueueEntry == null && MissingSongs != null && MissingSongs.Count > 0;
+        private bool DownloadInteractable => IsNotDownloading && MissingSongs != null && MissingSongs.Count > 0;
 
 
-        [UIValue("playlist-not-downloading")]
-        private bool PlaylistNotDownloading => DownloadQueueEntry == null;
+        [UIValue("is-not-downloading")]
+        private bool IsNotDownloading => !IsDownloading;
 
         #endregion
 
@@ -289,8 +294,9 @@ namespace PlaylistManager.UI
 
         private void DownloadAccepted()
         {
-            DownloadQueueEntry = new DownloadQueueEntry(selectedPlaylist, parentManager);
-            playlistDownloader.QueuePlaylist(DownloadQueueEntry);
+            var downloadQueueEntry = new DownloadQueueEntry(selectedPlaylist, parentManager);
+            playlistDownloader.QueuePlaylist(downloadQueueEntry);
+            IsDownloading = true;
             popupModalsController.ShowOkModal(rootTransform, "Playlist Synced and added to Download Queue!", null);
         }
 
@@ -312,7 +318,7 @@ namespace PlaylistManager.UI
             {
                 this.selectedPlaylist = selectedPlaylist;
                 this.parentManager = parentManager;
-                DownloadQueueEntry = PlaylistSequentialDownloader.downloadQueue.OfType<DownloadQueueEntry>().FirstOrDefault(x => x.playlist == selectedPlaylist);
+                IsDownloading = PlaylistSequentialDownloader.downloadQueue.Any(x => ((DownloadQueueEntry)x).playlist == selectedPlaylist);
                 UpdateMissingSongs();
 
                 rootTransform.gameObject.SetActive(true);

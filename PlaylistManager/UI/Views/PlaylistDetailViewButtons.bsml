@@ -3,6 +3,6 @@
 	<icon-button id='sync-button' icon='PlaylistManager.Icons.Sync.png' anchor-pos-x='51' anchor-pos-y='-3' hover-hint='Sync Playlist' on-click='sync-click' interactable='~playlist-not-downloading' />
 	<vertical>
 		<button text='⏬ Download' italics='false' on-click='download-click' hover-hint='~download-hint' interactable='~download-interactable' />
-		<button text='🗑 Delete' italics='false' on-click='delete-click' hover-hint='~delete-hint' interactable='~playlist-not-downloading' />
+		<button text='🗑 Delete' italics='false' on-click='delete-click' hover-hint='~delete-hint' interactable='~is-not-downloading' />
 	</vertical>
 </bg>

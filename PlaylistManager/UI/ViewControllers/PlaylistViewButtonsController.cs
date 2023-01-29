@@ -5,7 +5,6 @@ using HMUI;
 using PlaylistManager.Interfaces;
 using PlaylistManager.Utilities;
 using System;
-using System.ComponentModel;
 using System.Reflection;
 using System.Threading.Tasks;
 using PlaylistManager.Downloaders;
@@ -16,7 +15,7 @@ using Zenject;
 
 namespace PlaylistManager.UI
 {
-    internal class PlaylistViewButtonsController : IInitializable, IDisposable, INotifyPropertyChanged, ILevelCategoryUpdater, IParentManagerUpdater
+    internal class PlaylistViewButtonsController : NotifiableBase, IInitializable, IDisposable, ILevelCategoryUpdater, IParentManagerUpdater
     {
         private readonly PopupModalsController popupModalsController;
         private readonly TweeningManager uwuTweenyManager;
@@ -31,28 +30,26 @@ namespace PlaylistManager.UI
         private readonly SelectLevelCategoryViewController selectLevelCategoryViewController;
         private readonly IconSegmentedControl levelCategorySegmentedControl;
 
-
-        private BeatSaberPlaylistsLib.PlaylistManager parentManager;
-        public event PropertyChangedEventHandler PropertyChanged;
-
+        private BeatSaberPlaylistsLib.PlaylistManager? parentManager;
+        
         [UIComponent("root")]
-        private readonly RectTransform rootTransform;
+        private readonly RectTransform rootTransform = null!;
 
         [UIComponent("download-button")]
-        private readonly RectTransform downloadButtonTransform;
+        private readonly RectTransform downloadButtonTransform = null!;
 
-        private CurvedTextMeshPro downloadButtonText;
+        private CurvedTextMeshPro downloadButtonText = null!;
 
         private Color downloadButtonTextColor;
 
         [UIComponent("flow-button")]
-        private readonly ButtonIconImage flowButton;
+        private readonly ButtonIconImage flowButton = null!;
 
         [UIComponent("queue-modal")]
-        private readonly ModalView queueModal;
+        private readonly ModalView queueModal = null!;
 
         [UIComponent("queue-modal")]
-        private readonly RectTransform queueModalTransform;
+        private readonly RectTransform queueModalTransform = null!;
 
         private Vector3 queueModalPosition;
 
@@ -87,10 +84,7 @@ namespace PlaylistManager.UI
             playlistDownloader.PopupEvent -= TweenButton;
         }
 
-        private void DownloadQueueUpdated()
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(QueueInteractable)));
-        }
+        private void DownloadQueueUpdated() => NotifyPropertyChanged(nameof(QueueInteractable));
 
         private void TweenButton()
         {
