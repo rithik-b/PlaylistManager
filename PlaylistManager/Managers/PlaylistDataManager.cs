@@ -1,5 +1,4 @@
-﻿using IPA.Utilities;
-using PlaylistManager.HarmonyPatches;
+﻿using PlaylistManager.HarmonyPatches;
 using PlaylistManager.Interfaces;
 using PlaylistManager.UI;
 using PlaylistManager.Utilities;
@@ -21,9 +20,7 @@ namespace PlaylistManager
         private readonly List<IPreviewBeatmapLevelUpdater> previewBeatmapLevelUpdaters;
         private readonly List<IParentManagerUpdater> parentManagerUpdaters;
 
-        public BeatSaberPlaylistsLib.Types.IPlaylist selectedPlaylist;
-        public BeatSaberPlaylistsLib.Types.IPlaylistSong selectedPlaylistSong;
-        public BeatSaberPlaylistsLib.PlaylistManager parentManager;
+        private BeatSaberPlaylistsLib.PlaylistManager? parentManager;
 
         private readonly BeatmapLevelPack emptyBeatmapLevelPack;
 
@@ -98,12 +95,10 @@ namespace PlaylistManager
             if (annotatedBeatmapLevelCollection is BeatSaberPlaylistsLib.Types.IPlaylist selectedPlaylist)
             {
                 Events.RaisePlaylistSelected(selectedPlaylist, parentManager);
-                this.selectedPlaylist = selectedPlaylist;
                 parentManager = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.GetManagerForPlaylist(selectedPlaylist);
             }
             else
             {
-                this.selectedPlaylist = null;
                 parentManager = null;
             }
             foreach (var levelCollectionUpdater in levelCollectionUpdaters)
@@ -117,11 +112,9 @@ namespace PlaylistManager
             if (previewBeatmapLevel is BeatSaberPlaylistsLib.Types.IPlaylistSong selectedPlaylistSong)
             {
                 Events.RaisePlaylistSongSelected(selectedPlaylistSong);
-                this.selectedPlaylistSong = selectedPlaylistSong;
             }
             else
             {
-                this.selectedPlaylistSong = null;
             }
             foreach (var previewBeatmapLevelUpdater in previewBeatmapLevelUpdaters)
             {

@@ -21,24 +21,24 @@ namespace PlaylistManager.Utilities
         {
             if (playlistSong.Identifiers.HasFlag(Identifier.Hash))
             {
-                return playlistSong.Hash;
+                return playlistSong.Hash!;
             }
             if (playlistSong.Identifiers.HasFlag(Identifier.Key))
             {
-                return playlistSong.Key;
+                return playlistSong.Key!;
             }
             if (playlistSong.Identifiers.HasFlag(Identifier.LevelId))
             {
-                return playlistSong.LevelId;
+                return playlistSong.LevelId!;
             }
             return "";
         }
 
-        public static List<IPlaylistSong> GetMissingSongs(IPlaylist playlist, HashSet<string> ownedHashes = null)
+        public static List<IPlaylistSong> GetMissingSongs(IPlaylist? playlist, HashSet<string>? ownedHashes = null)
         {
             if (playlist != null)
             {
-                return playlist.Where(s => s.PreviewBeatmapLevel == null && !(ownedHashes?.Contains(s.Hash) ?? false)).Distinct(IPlaylistSongComparer<IPlaylistSong>.Default).ToList();
+                return playlist.Where(s => s.PreviewBeatmapLevel == null && !(ownedHashes?.Contains(s.Hash ?? "") ?? false)).Distinct(IPlaylistSongComparer<IPlaylistSong>.Default).ToList();
             }
             return new List<IPlaylistSong>();
         }

@@ -28,7 +28,7 @@ namespace PlaylistManager.Downloaders
         private readonly AuthorNameService authorNameService;
         private readonly SemaphoreSlim downloadSemaphore;
         private static readonly HashSet<string> ownedHashes = new();
-        private DownloadQueueEntry currentDownload;
+        private DownloadQueueEntry? currentDownload;
 
         private readonly SemaphoreSlim pauseSemaphore;
         private readonly SemaphoreSlim popupSemaphore;
@@ -36,14 +36,14 @@ namespace PlaylistManager.Downloaders
         private bool ignoredDiskWarning;
         private bool disposed;
 
-        internal event Action PopupEvent;
-        internal event Action QueueUpdatedEvent;
+        internal event Action? PopupEvent;
+        internal event Action? QueueUpdatedEvent;
         
         internal static readonly List<object> downloadQueue = new();
         private static readonly LinkedList<BeatSaberPlaylistsLib.Types.Playlist> coversToRefresh = new();
 
-        private PopupContents _pendingPopup;
-        internal PopupContents PendingPopup
+        private PopupContents? _pendingPopup;
+        internal PopupContents? PendingPopup
         {
             get => _pendingPopup;
             private set
@@ -261,7 +261,7 @@ namespace PlaylistManager.Downloaders
 
         #region Map Download
 
-        private async Task BeatSaverBeatmapDownload(Beatmap song, BeatmapVersion songversion, CancellationToken token, IProgress<double> progress = null)
+        private async Task BeatSaverBeatmapDownload(Beatmap song, BeatmapVersion songversion, CancellationToken token, IProgress<double>? progress = null)
         {
             var customSongsPath = CustomLevelPathHelper.customLevelsDirectoryPath;
             if (!Directory.Exists(customSongsPath))
@@ -277,7 +277,7 @@ namespace PlaylistManager.Downloaders
             }
         }
 
-        private async Task<string> BeatmapDownloadByKey(string key, CancellationToken token, IProgress<double> progress = null)
+        private async Task<string> BeatmapDownloadByKey(string key, CancellationToken token, IProgress<double>? progress = null)
         {
             if (!token.IsCancellationRequested)
             {
@@ -307,7 +307,7 @@ namespace PlaylistManager.Downloaders
             return "";
         }
 
-        private async Task BeatmapDownloadByHash(string hash, CancellationToken token, IProgress<double> progress = null)
+        private async Task BeatmapDownloadByHash(string hash, CancellationToken token, IProgress<double>? progress = null)
         {
             if (!token.IsCancellationRequested)
             {
@@ -348,7 +348,7 @@ namespace PlaylistManager.Downloaders
             }
         }
 
-        private async Task BeatmapDownloadByCustomURL(string url, string songName, CancellationToken token, IProgress<float> progress = null)
+        private async Task BeatmapDownloadByCustomURL(string url, string songName, CancellationToken token, IProgress<float>? progress = null)
         {
             if (!token.IsCancellationRequested)
             {

@@ -88,15 +88,15 @@ namespace PlaylistManager.UI
             }
         }
         
-        internal void ShowModal(PopupContents popupContents)
+        internal void ShowModal(PopupContents popupContents, Transform parent)
         {
             if (popupContents is OkPopupContents okPopupContents)
             {
-                ShowOkModal(okPopupContents);
+                ShowOkModal(okPopupContents, parent);
             }
             else if (popupContents is YesNoPopupContents yesNoPopupContents)
             {
-                ShowYesNoModal(yesNoPopupContents);
+                ShowYesNoModal(yesNoPopupContents, parent);
             }
         }
 
@@ -104,9 +104,9 @@ namespace PlaylistManager.UI
 
         // Methods
 
-        private void ShowYesNoModal(YesNoPopupContents popupContents)
+        private void ShowYesNoModal(YesNoPopupContents popupContents, Transform parent)
         {
-            ShowYesNoModal(popupContents.parent, popupContents.message, popupContents.yesButtonPressedCallback, popupContents.yesButtonText,
+            ShowYesNoModal(parent, popupContents.message, popupContents.yesButtonPressedCallback, popupContents.yesButtonText,
                 popupContents.noButtonText, popupContents.noButtonPressedCallback, popupContents.animateParentCanvas, popupContents.checkboxText);
         }
 
@@ -231,9 +231,9 @@ namespace PlaylistManager.UI
 
         // Methods
 
-        private void ShowOkModal(OkPopupContents popupContents)
+        private void ShowOkModal(OkPopupContents popupContents, Transform parent)
         {
-            ShowOkModal(popupContents.parent, popupContents.message, popupContents.buttonPressedCallback, popupContents.okButtonText, popupContents.animateParentCanvas);
+            ShowOkModal(parent, popupContents.message, popupContents.buttonPressedCallback, popupContents.okButtonText, popupContents.animateParentCanvas);
         }
 
         internal void ShowOkModal(Transform parent, string text, Action? buttonPressedCallback,

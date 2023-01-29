@@ -12,11 +12,9 @@ namespace PlaylistManager
     [Plugin(RuntimeOptions.DynamicInit)]
     public class Plugin
     {
-        internal static Plugin Instance { get; private set; }
-        internal static IPALogger Log { get; private set; }
-
-        public const string HarmonyId = "com.github.rithik-b.PlaylistManager";
-        internal static Harmony harmony;
+        internal static IPALogger Log { get; private set; } = null!;
+        private const string kHarmonyId = "com.github.rithik-b.PlaylistManager";
+        private static Harmony harmony = null!;
 
         [Init]
         /// <summary>
@@ -26,9 +24,8 @@ namespace PlaylistManager
         /// </summary>
         public Plugin(IPALogger logger, Zenjector zenjector)
         {
-            Instance = this;
             Log = logger;
-            harmony = new Harmony(HarmonyId);
+            harmony = new Harmony(kHarmonyId);
             zenjector.UseMetadataBinder<Plugin>();
             zenjector.UseHttpService();
             zenjector.UseSiraSync(SiraUtil.Web.SiraSync.SiraSyncServiceType.GitHub, "rithik-b");

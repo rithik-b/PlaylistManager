@@ -1,12 +1,13 @@
 ﻿using System;
 using System.ComponentModel;
 using BeatSaberMarkupLanguage.Attributes;
+using BeatSaberMarkupLanguage.Components;
 using HMUI;
 using UnityEngine;
 
 namespace PlaylistManager.Types
 {
-    internal class Contributor : INotifyPropertyChanged
+    internal class Contributor : NotifiableBase
     {
         [UIValue("name")]
         public string name { get; private set; }
@@ -14,35 +15,34 @@ namespace PlaylistManager.Types
         [UIValue("role")]
         public string role { get; private set; }
 
-        public string iconPath { get; private set; }
+        private string iconPath { get; }
 
         [UIComponent("icon")]
-        private readonly ImageView iconImage;
+        private readonly ImageView iconImage = null!;
 
-        public string youtube { get; private set; }
+        private string? youtube { get; }
 
         [UIValue("youtube-active")]
         private bool YoutubeActive => !string.IsNullOrEmpty(youtube);
 
-        public string twitch { get; private set; }
+        private string? twitch { get; }
 
         [UIValue("twitch-active")]
         private bool TwitchActive => !string.IsNullOrEmpty(twitch);
 
-        public string github { get; private set; }
+        private string? github { get; }
 
         [UIValue("github-active")]
         private bool GithubActive => !string.IsNullOrEmpty(github);
 
-        public string kofi { get; private set; }
+        private string? kofi { get; }
 
         [UIValue("kofi-active")]
         private bool KofiActive => !string.IsNullOrEmpty(kofi);
 
-        public event Action<string> OpenURL;
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public Contributor(string name, string role, string icon, string youtube = null, string twitch = null, string github = null, string kofi = null)
+        public event Action<string>? OpenURL;
+        
+        public Contributor(string name, string role, string icon, string? youtube = null, string? twitch = null, string? github = null, string? kofi = null)
         {
             this.name = name;
             this.role = role;
@@ -56,25 +56,25 @@ namespace PlaylistManager.Types
         [UIAction("#post-parse")]
         private void PostParse()
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(name)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(role)));
+            NotifyPropertyChanged(nameof(name));
+            NotifyPropertyChanged(nameof(role));
             iconImage.sprite = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly(iconPath);
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(YoutubeActive)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TwitchActive)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(GithubActive)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(KofiActive)));
+            NotifyPropertyChanged(nameof(YoutubeActive));
+            NotifyPropertyChanged(nameof(TwitchActive));
+            NotifyPropertyChanged(nameof(GithubActive));
+            NotifyPropertyChanged(nameof(KofiActive));
         }
 
         [UIAction("youtube-click")]
-        private void YoutubeClicked() => OpenURL?.Invoke(youtube);
+        private void YoutubeClicked() => OpenURL?.Invoke(youtube!);
 
         [UIAction("twitch-click")]
-        private void TwitchClicked() => OpenURL?.Invoke(twitch);
+        private void TwitchClicked() => OpenURL?.Invoke(twitch!);
 
         [UIAction("github-click")]
-        private void GithubClicked() => OpenURL?.Invoke(github);
+        private void GithubClicked() => OpenURL?.Invoke(github!);
 
         [UIAction("kofi-click")]
-        private void KofiClicked() => OpenURL?.Invoke(kofi);
+        private void KofiClicked() => OpenURL?.Invoke(kofi!);
     }
 }

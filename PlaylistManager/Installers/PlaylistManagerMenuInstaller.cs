@@ -3,6 +3,7 @@ using Zenject;
 using PlaylistManager.UI;
 using PlaylistManager.Managers;
 using PlaylistManager.Configuration;
+using PlaylistManager.Consumers;
 
 namespace PlaylistManager.Installers
 {
@@ -36,6 +37,8 @@ namespace PlaylistManager.Installers
 
             Container.BindInterfacesTo<PlaylistUIManager>().AsSingle();
             Container.BindInterfacesAndSelfTo<PlaylistDataManager>().AsSingle();
+            
+            Container.BindInterfacesTo<OnDownloadCompleteConsumer>().AsSingle();
 
             if (PluginConfig.Instance.FoldersDisabled)
             {

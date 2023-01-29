@@ -2,42 +2,24 @@
 using System.Collections.Generic;
 using Zenject;
 using PlaylistManager.Interfaces;
-using PlaylistManager.Configuration;
-using PlaylistManager.Utilities;
-using PlaylistManager.HarmonyPatches;
-using System.Linq;
 using PlaylistManager.Downloaders;
-using PlaylistManager.UI;
 
 namespace PlaylistManager.Managers
 {
     internal class PlaylistUIManager : IInitializable, IDisposable, ILevelCollectionsTableUpdater
     {
-        private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
-        private readonly LevelCollectionNavigationController levelCollectionNavigationController;
         private readonly SelectLevelCategoryViewController selectLevelCategoryViewController;
-        private readonly StandardLevelDetailViewController standardLevelDetailViewController;
-        private readonly SettingsViewController settingsViewController;
         private readonly PlaylistSequentialDownloader playlistDownloader;
-
-        private int downloadingBeatmapCollectionIdx;
-        private IAnnotatedBeatmapLevelCollection[] downloadingBeatmapLevelCollections;
-        private IPreviewBeatmapLevel downloadingBeatmap;
 
         private readonly List<ILevelCategoryUpdater> levelCategoryUpdaters;
         private readonly IPMRefreshable refreshable;
 
-        public event Action<IAnnotatedBeatmapLevelCollection[], int> LevelCollectionTableViewUpdatedEvent;
+        public event Action<IAnnotatedBeatmapLevelCollection[], int>? LevelCollectionTableViewUpdatedEvent;
 
-        internal PlaylistUIManager(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, LevelCollectionNavigationController levelCollectionNavigationController,
-            SelectLevelCategoryViewController selectLevelCategoryViewController, StandardLevelDetailViewController standardLevelDetailViewController, SettingsViewController settingsViewController,
+        internal PlaylistUIManager(SelectLevelCategoryViewController selectLevelCategoryViewController,
             PlaylistSequentialDownloader playlistDownloader, List<ILevelCategoryUpdater> levelCategoryUpdaters, IPMRefreshable refreshable)
         {
-            this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
-            this.levelCollectionNavigationController = levelCollectionNavigationController;
             this.selectLevelCategoryViewController = selectLevelCategoryViewController;
-            this.standardLevelDetailViewController = standardLevelDetailViewController;
-            this.settingsViewController = settingsViewController;
             this.playlistDownloader = playlistDownloader;
 
             this.levelCategoryUpdaters = levelCategoryUpdaters;
@@ -51,9 +33,6 @@ namespace PlaylistManager.Managers
             selectLevelCategoryViewController.didActivateEvent += SelectLevelCategoryViewController_didActivateEvent;
             selectLevelCategoryViewController.didDeactivateEvent += SelectLevelCategoryViewController_didDeactivateEvent;
 
-            // When all playlists finish downloading
-            playlistDownloader.QueueUpdatedEvent += PlaylistDownloader_QueueUpdatedEvent;
-
             // Whenever a refresh is requested
             BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.PlaylistsRefreshRequested += PlaylistManager_PlaylistsRefreshRequested;
         }
@@ -63,11 +42,7 @@ namespace PlaylistManager.Managers
             selectLevelCategoryViewController.didSelectLevelCategoryEvent -= SelectLevelCategoryViewController_didSelectLevelCategoryEvent;
             selectLevelCategoryViewController.didActivateEvent -= SelectLevelCategoryViewController_didActivateEvent;
             selectLevelCategoryViewController.didDeactivateEvent -= SelectLevelCategoryViewController_didDeactivateEvent;
-
-            playlistDownloader.QueueUpdatedEvent -= PlaylistDownloader_QueueUpdatedEvent;
-            SongCore_RefreshLevelPacks.PacksToBeRefreshedEvent -= OnPacksToBeRefreshed;
-            LevelFilteringNavigationController_UpdateSecondChildControllerContent.SecondChildControllerUpdatedEvent -= LevelFilteringNavigationController_SecondChildControllerUpdatedEvent;
-
+            
             BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.PlaylistsRefreshRequested -= PlaylistManager_PlaylistsRefreshRequested;
         }
 
@@ -92,43 +67,6 @@ namespace PlaylistManager.Managers
             foreach (var levelCategoryUpdater in levelCategoryUpdaters)
             {
                 levelCategoryUpdater.LevelCategoryUpdated(SelectLevelCategoryViewController.LevelCategory.None, false);
-            }
-        }
-
-        private void PlaylistDownloader_QueueUpdatedEvent()
-        {
-            if (PlaylistSequentialDownloader.downloadQueue.Count == 0)
-            {
-                SongCore_RefreshLevelPacks.PacksToBeRefreshedEvent += OnPacksToBeRefreshed;
-            }
-        }
-
-        private void OnPacksToBeRefreshed()
-        {
-            SongCore_RefreshLevelPacks.PacksToBeRefreshedEvent -= OnPacksToBeRefreshed;
-
-            if (levelCollectionNavigationController.isActiveAndEnabled)
-            {
-                if (annotatedBeatmapLevelCollectionsViewController.isActiveAndEnabled)
-                {
-                    downloadingBeatmapLevelCollections = Accessors.AnnotatedBeatmapLevelCollectionsAccessor(ref annotatedBeatmapLevelCollectionsViewController).ToArray();
-                    downloadingBeatmapCollectionIdx = annotatedBeatmapLevelCollectionsViewController.selectedItemIndex;
-                }
-                downloadingBeatmap = levelCollectionNavigationController.selectedBeatmapLevel;
-                LevelFilteringNavigationController_UpdateSecondChildControllerContent.SecondChildControllerUpdatedEvent += LevelFilteringNavigationController_SecondChildControllerUpdatedEvent;
-            }
-        }
-
-        private void LevelFilteringNavigationController_SecondChildControllerUpdatedEvent()
-        {
-            LevelFilteringNavigationController_UpdateSecondChildControllerContent.SecondChildControllerUpdatedEvent -= LevelFilteringNavigationController_SecondChildControllerUpdatedEvent;
-            if (annotatedBeatmapLevelCollectionsViewController.isActiveAndEnabled)
-            {
-                LevelCollectionTableViewUpdatedEvent?.Invoke(downloadingBeatmapLevelCollections, downloadingBeatmapCollectionIdx);
-            }
-            if (levelCollectionNavigationController.isActiveAndEnabled && downloadingBeatmap != null)
-            {
-                levelCollectionNavigationController.SelectLevel(downloadingBeatmap);
             }
         }
 

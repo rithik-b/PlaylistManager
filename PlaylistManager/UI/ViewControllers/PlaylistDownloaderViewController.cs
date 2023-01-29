@@ -85,11 +85,10 @@ namespace PlaylistManager.UI
 
         private void DontMessWithGameObjectsOffMainThread()
         {
-            playlistDownloader.PendingPopup.parent = rootTransform;
             playlistDownloader.PendingPopup.animateParentCanvas = !rootTransform.GetComponentInParent<ModalView>();
             if (rootTransform.gameObject.activeInHierarchy)
             {
-                popupModalsController.ShowModal(playlistDownloader.PendingPopup);
+                popupModalsController.ShowModal(playlistDownloader.PendingPopup, rootTransform);
             }
         }
 
