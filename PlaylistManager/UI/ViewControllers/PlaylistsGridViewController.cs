@@ -21,8 +21,8 @@ namespace PlaylistManager.UI
 
         private readonly IVRPlatformHelper platformHelper;
 
-        private GridScrollView? gridScrollView;
-        private Transform? scrollBar;
+        private GridScrollView gridScrollView = null!;
+        private Transform scrollBar = null!;
 
         [UIComponent("scroll-view")]
         private ScrollView bsmlScrollView = null!;

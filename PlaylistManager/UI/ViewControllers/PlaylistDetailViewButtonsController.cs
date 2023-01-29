@@ -144,10 +144,10 @@ namespace PlaylistManager.UI
         [UIAction("download-click")]
         private void DownloadClick()
         {
-            var downloadQueueEntry = new DownloadQueueEntry(selectedPlaylist, parentManager);
+            var downloadQueueEntry = new DownloadQueueEntry(selectedPlaylist!, parentManager!);
             playlistDownloader.QueuePlaylist(downloadQueueEntry);
             IsDownloading = true;
-            popupModalsController.ShowOkModal(rootTransform, $"{selectedPlaylist.collectionName} has been added to the download queue!", null);
+            popupModalsController.ShowOkModal(rootTransform, $"{selectedPlaylist!.collectionName} has been added to the download queue!", null);
         }
 
         private void OnQueueUpdated()
@@ -161,7 +161,7 @@ namespace PlaylistManager.UI
 
         private void UpdateMissingSongs() => MissingSongs = PlaylistLibUtils.GetMissingSongs(selectedPlaylist);
 
-        private List<IPlaylistSong> MissingSongs
+        private List<IPlaylistSong>? MissingSongs
         {
             get => _missingSongs;
             set
@@ -233,17 +233,16 @@ namespace PlaylistManager.UI
         [UIAction("sync-click")]
         private async Task SyncPlaylistAsync()
         {
-            if (!selectedPlaylist.TryGetCustomData("syncURL", out var outSyncURL))
+            if (!selectedPlaylist!.TryGetCustomData("syncURL", out var outSyncURL))
             {
                 popupModalsController.ShowOkModal(rootTransform, "Error: The selected playlist cannot be synced", null);
                 return;
             }
 
-            var syncURL = (string)outSyncURL;
+            var syncURL = (string)outSyncURL!;
             var tokenSource = new CancellationTokenSource();
 
             popupModalsController.ShowOkModal(rootTransform, "Syncing Playlist", () => tokenSource.Cancel(), "Cancel");
-            Stream playlistStream = null;
 
             try
             {
@@ -251,8 +250,8 @@ namespace PlaylistManager.UI
                 if (httpResponse.Successful)
                 {
                     selectedPlaylist.Clear(); // Clear all songs
-                    BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.DefaultHandler.Populate(await httpResponse.ReadAsStreamAsync(), selectedPlaylist);
-                    parentManager.StorePlaylist(selectedPlaylist);
+                    BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.DefaultHandler!.Populate(await httpResponse.ReadAsStreamAsync(), selectedPlaylist);
+                    parentManager!.StorePlaylist(selectedPlaylist);
                 }
                 else
                 {
@@ -294,7 +293,7 @@ namespace PlaylistManager.UI
 
         private void DownloadAccepted()
         {
-            var downloadQueueEntry = new DownloadQueueEntry(selectedPlaylist, parentManager);
+            var downloadQueueEntry = new DownloadQueueEntry(selectedPlaylist!, parentManager!);
             playlistDownloader.QueuePlaylist(downloadQueueEntry);
             IsDownloading = true;
             popupModalsController.ShowOkModal(rootTransform, "Playlist Synced and added to Download Queue!", null);

@@ -135,6 +135,9 @@ namespace PlaylistManager.UI
             get => selectedPlaylist == null ? " " : (selectedPlaylist as IPlaylist).packName;
             set
             {
+                if (selectedPlaylist == null || parentManager == null)
+                    return;
+                
                 selectedPlaylist.Title = value;
                 if (!selectedPlaylist.HasCover)
                 {
@@ -157,6 +160,9 @@ namespace PlaylistManager.UI
             get => selectedPlaylist?.Author ?? " ";
             set
             {
+                if (selectedPlaylist == null || parentManager == null)
+                    return;
+                
                 selectedPlaylist.Author = value;
                 parentManager.StorePlaylist(selectedPlaylist);
                 NotifyPropertyChanged();
@@ -276,6 +282,11 @@ namespace PlaylistManager.UI
             get => selectedPlaylist is {AllowDuplicates: true};
             set
             {
+                if (selectedPlaylist == null || parentManager == null)
+                {
+                    return;
+                }
+                
                 selectedPlaylist.AllowDuplicates = value;
 
                 if (!value)
@@ -305,18 +316,18 @@ namespace PlaylistManager.UI
         {
             if (!PlaylistReadOnly)
             {
-                imageSelectionModalController.ShowModal((IPlaylist)selectedPlaylist);
+                imageSelectionModalController.ShowModal(selectedPlaylist!);
             }
         }
 
         private void ImageSelectionModalController_ImageSelectedEvent(byte[]? imageBytes)
         {
-            selectedPlaylist.SpriteLoaded += SelectedPlaylist_SpriteLoaded;
+            selectedPlaylist!.SpriteLoaded += SelectedPlaylist_SpriteLoaded;
             try
             {
                 selectedPlaylist.SetCover(imageBytes);
                 _ = selectedPlaylist.Sprite;
-                parentManager.StorePlaylist(selectedPlaylist);
+                parentManager!.StorePlaylist(selectedPlaylist);
             }
             catch (Exception e)
             {
@@ -327,8 +338,11 @@ namespace PlaylistManager.UI
 
         private void SelectedPlaylist_SpriteLoaded(object sender, EventArgs e)
         {
-            playlistCoverView.sprite = selectedPlaylist.Sprite;
-            selectedPlaylist.SpriteLoaded -= SelectedPlaylist_SpriteLoaded;
+            if (sender is IDeferredSpriteLoad deferredSpriteLoad)
+            {
+                playlistCoverView.sprite = deferredSpriteLoad.Sprite;
+                deferredSpriteLoad.SpriteLoaded -= SelectedPlaylist_SpriteLoaded;
+            }
         }
 
         [UIValue("cover-hint")]

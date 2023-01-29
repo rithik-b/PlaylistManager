@@ -15,23 +15,20 @@ namespace PlaylistManager.UI
 {
     public class PlaylistDownloaderViewController : MonoBehaviour, IInitializable, IDisposable
     {
-        private PlaylistSequentialDownloader playlistDownloader;
-        private PopupModalsController popupModalsController;
+        [Inject]
+        private readonly PlaylistSequentialDownloader playlistDownloader = null!;
+        
+        [Inject]
+        private PopupModalsController popupModalsController = null!;
+        
         private bool parsed;
         private bool refreshRequested;
 
         [UIComponent("download-list")]
-        private readonly CustomCellListTableData customListTableData;
+        private readonly CustomCellListTableData customListTableData = null!;
 
         [UIComponent("root")]
-        private readonly RectTransform rootTransform;
-
-        [Inject]
-        internal void Construct(PlaylistSequentialDownloader playlistDownloader, PopupModalsController popupModalsController)
-        {
-            this.playlistDownloader = playlistDownloader;
-            this.popupModalsController = popupModalsController;
-        }
+        private readonly RectTransform rootTransform = null!;
 
         public void SetParent(Transform parent, Vector3? scale = null)
         {
@@ -85,7 +82,7 @@ namespace PlaylistManager.UI
 
         private void DontMessWithGameObjectsOffMainThread()
         {
-            playlistDownloader.PendingPopup.animateParentCanvas = !rootTransform.GetComponentInParent<ModalView>();
+            playlistDownloader.PendingPopup!.animateParentCanvas = !rootTransform.GetComponentInParent<ModalView>();
             if (rootTransform.gameObject.activeInHierarchy)
             {
                 popupModalsController.ShowModal(playlistDownloader.PendingPopup, rootTransform);

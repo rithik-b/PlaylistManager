@@ -208,11 +208,11 @@ namespace PlaylistManager.Downloaders
                 }
                 else if (!string.IsNullOrEmpty(missingSongs[i].Hash))
                 {
-                    await BeatmapDownloadByHash(missingSongs[i].Hash, downloadQueueEntry.cancellationTokenSource.Token, downloadQueueEntry);
+                    await BeatmapDownloadByHash(missingSongs[i].Hash!, downloadQueueEntry.cancellationTokenSource.Token, downloadQueueEntry);
                 }
                 else if (!string.IsNullOrEmpty(missingSongs[i].Key))
                 {
-                    var hash = await BeatmapDownloadByKey(missingSongs[i].Key.ToLower(), downloadQueueEntry.cancellationTokenSource.Token, downloadQueueEntry);
+                    var hash = await BeatmapDownloadByKey(missingSongs[i].Key!.ToLower(), downloadQueueEntry.cancellationTokenSource.Token, downloadQueueEntry);
                     if (!string.IsNullOrEmpty(hash))
                     {
                         missingSongs[i].Hash = hash;
@@ -416,7 +416,7 @@ namespace PlaylistManager.Downloaders
 
                     if (driveInfo.AvailableFreeSpace - totalSize < 104857600 && !ignoredDiskWarning) // If less than 100MB
                     {
-                        CreateDrivePopup();
+                        _ = CreateDrivePopup();
 
                         await popupSemaphore.WaitAsync();
                         PendingPopup = null;

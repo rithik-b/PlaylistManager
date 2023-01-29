@@ -149,7 +149,7 @@ namespace PlaylistManager.UI
         private void HighlightButtonClick()
         {
             difficultyHighlighter.ToggleSelectedDifficultyHighlight();
-            parentManager.StorePlaylist(selectedPlaylist);
+            parentManager!.StorePlaylist(selectedPlaylist!);
             selectedDifficultyHighlighted = !selectedDifficultyHighlighted;
             NotifyPropertyChanged(nameof(HighlightButtonText));
             NotifyPropertyChanged(nameof(HighlightButtonHover));

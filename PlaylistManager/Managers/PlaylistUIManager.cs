@@ -6,16 +6,14 @@ using PlaylistManager.Downloaders;
 
 namespace PlaylistManager.Managers
 {
-    internal class PlaylistUIManager : IInitializable, IDisposable, ILevelCollectionsTableUpdater
+    internal class PlaylistUIManager : IInitializable, IDisposable
     {
         private readonly SelectLevelCategoryViewController selectLevelCategoryViewController;
         private readonly PlaylistSequentialDownloader playlistDownloader;
 
         private readonly List<ILevelCategoryUpdater> levelCategoryUpdaters;
         private readonly IPMRefreshable refreshable;
-
-        public event Action<IAnnotatedBeatmapLevelCollection[], int>? LevelCollectionTableViewUpdatedEvent;
-
+        
         internal PlaylistUIManager(SelectLevelCategoryViewController selectLevelCategoryViewController,
             PlaylistSequentialDownloader playlistDownloader, List<ILevelCategoryUpdater> levelCategoryUpdaters, IPMRefreshable refreshable)
         {

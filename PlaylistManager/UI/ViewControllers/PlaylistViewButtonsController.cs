@@ -130,7 +130,7 @@ namespace PlaylistManager.UI
             downloadButtonTextColor = downloadButtonText.color;
 
             flowButton.transform.localScale = new Vector3(0.42f, 0.42f, 1f);
-            var icon = flowButton.image as ImageView;
+            var icon = (ImageView)flowButton.image;
             Accessors.SkewAccessor(ref icon) = 0.18f;
         }
 
