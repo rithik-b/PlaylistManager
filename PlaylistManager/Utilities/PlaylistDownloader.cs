@@ -11,7 +11,7 @@ namespace PlaylistManager.Utilities
     public class PlaylistDownloader
     {
         private readonly PlaylistSequentialDownloader playlistSequentialDownloader;
-        internal static event Action<DownloadQueueEntry> PlaylistQueuedEvent;
+        internal static event Action<DownloadQueueEntry>? PlaylistQueuedEvent;
         
         internal PlaylistDownloader(PlaylistSequentialDownloader playlistSequentialDownloader)
         {

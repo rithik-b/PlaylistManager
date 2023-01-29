@@ -10,11 +10,12 @@ namespace PlaylistManager.UI
     [ViewDefinition("PlaylistManager.UI.Views.SettingsView.bsml")]
     internal class SettingsViewController : BSMLAutomaticViewController
     {
-        private MenuTransitionsHelper menuTransitionsHelper;
+        [Inject]
+        private readonly MenuTransitionsHelper menuTransitionsHelper = null!;
 
         private bool _defaultImageDisabled;
         private bool _defaultAllowDuplicates;
-        private string _authorName;
+        private string _authorName = string.Empty;
         private bool _automaticAuthorName;
         private bool _playlistHoverHints;
         private float _playlistScrollSpeed;
@@ -26,15 +27,8 @@ namespace PlaylistManager.UI
         private bool _driveFullProtection;
         private bool _easterEggs;
 
-        public event Action DismissFlowEvent;
-        public event Action NameFetchRequestedEvent;
-
-        [Inject]
-        public void Construct(MenuTransitionsHelper menuTransitionsHelper)
-        {
-            this.menuTransitionsHelper = menuTransitionsHelper;
-        }
-
+        public event Action? DismissFlowEvent;
+        
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
             base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
@@ -86,10 +80,6 @@ namespace PlaylistManager.UI
             else
             {
                 DismissFlowEvent?.Invoke();
-                if (fetchName)
-                {
-                    NameFetchRequestedEvent?.Invoke();
-                }
             }
         }
 

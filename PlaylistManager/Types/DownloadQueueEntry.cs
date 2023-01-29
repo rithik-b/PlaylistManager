@@ -4,6 +4,7 @@ using HMUI;
 using System;
 using System.ComponentModel;
 using System.Threading;
+using BeatSaberMarkupLanguage.Components;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,7 +13,7 @@ namespace PlaylistManager.Types
     /// <summary>
     /// A wrapper class containing download information of a playlist
     /// </summary>
-    public class DownloadQueueEntry : INotifyPropertyChanged, IProgress<double>, IProgress<float>
+    public class DownloadQueueEntry : NotifiableBase, IProgress<double>, IProgress<float>
     {
         /// <summary>
         /// Playlist to download
@@ -26,21 +27,19 @@ namespace PlaylistManager.Types
         
         internal CancellationTokenSource cancellationTokenSource;
         public bool Aborted { get; private set; }
-        public event Action<DownloadQueueEntry> DownloadAbortedEvent;
+        public event Action<DownloadQueueEntry>? DownloadAbortedEvent;
 
-        private ImageView bgImage;
+        private ImageView? bgImage;
 
         [UIComponent("playlist-cover")]
-        private readonly ImageView playlistCoverView;
+        private readonly ImageView playlistCoverView = null!;
 
         [UIValue("playlist-name")]
         public string PlaylistName => playlist?.packName ?? "";
 
         [UIValue("playlist-subtext")]
         public string PlaylistSubtext => (playlist?.Author ?? "") + (missingLevels != null ? $" [{completedLevels}/{missingLevels} downloaded]" : " [Download Queued]");
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
+        
         private double progress;
         /// <summary>
         /// Download Progress
@@ -99,8 +98,8 @@ namespace PlaylistManager.Types
 
             playlistCoverView.sprite = playlist.coverImage;
             playlistCoverView.rectTransform.sizeDelta = new Vector2(8, 0);
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistName)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistSubtext)));
+            NotifyPropertyChanged(nameof(PlaylistName));
+            NotifyPropertyChanged(nameof(PlaylistSubtext));
 
             bgImage = playlistCoverView.transform.parent.gameObject.AddComponent<ImageView>();
             bgImage.enabled = true;
@@ -143,7 +142,7 @@ namespace PlaylistManager.Types
         internal void SetTotalProgress(int value)
         {
             completedLevels = value;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistSubtext)));
+            NotifyPropertyChanged(nameof(PlaylistSubtext));
         }
     }
 }

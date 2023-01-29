@@ -12,13 +12,13 @@ namespace PlaylistManager.UI
 {
     public class DifficultyHighlighter : IPreviewBeatmapLevelUpdater, IDisposable, IInitializable
     {
-        private BeatmapCharacteristicSegmentedControlController beatmapCharacteristicSegmentedControlController;
+        private readonly BeatmapCharacteristicSegmentedControlController beatmapCharacteristicSegmentedControlController;
         private readonly IconSegmentedControl beatmapCharacteristicSegmentedControl;
         private BeatmapDifficultySegmentedControlController beatmapDifficultySegmentedControlController;
         private SegmentedControl beatmapDifficultySegmentedControl;
-        private PlaylistSong selectedPlaylistSong;
+        private PlaylistSong? selectedPlaylistSong;
 
-        internal event Action<bool> selectedDifficultyChanged;
+        internal event Action<bool>? selectedDifficultyChanged;
 
         public DifficultyHighlighter(StandardLevelDetailViewController standardLevelDetailViewController)
         {
@@ -84,20 +84,19 @@ namespace PlaylistManager.UI
                 var difficultyCells = Accessors.SegmentedControllerCellsAccessor(ref beatmapDifficultySegmentedControl);
                 if (IsSelectedDifficultyHighlighted)
                 {
-                    selectedPlaylistSong.Difficulties.RemoveAll(d => d.BeatmapDifficulty == beatmapDifficultySegmentedControlController.selectedDifficulty);
+                    selectedPlaylistSong.Difficulties?.RemoveAll(d => d.BeatmapDifficulty == beatmapDifficultySegmentedControlController.selectedDifficulty);
                     var cellToUnhighlight = difficultyCells[beatmapDifficultySegmentedControlController.GetClosestDifficultyIndex(beatmapDifficultySegmentedControlController.selectedDifficulty)];
                     var textToUnhighlight = cellToUnhighlight.GetComponentInChildren<CurvedTextMeshPro>();
                     textToUnhighlight.faceColor = new UnityEngine.Color32(255, 255, 255, 255);
                 }
                 else
                 {
-                    if (selectedPlaylistSong.Difficulties == null)
+                    selectedPlaylistSong.Difficulties ??= new List<Difficulty>();
+                    var difficulty = new Difficulty
                     {
-                        selectedPlaylistSong.Difficulties = new List<Difficulty>();
-                    }
-                    var difficulty = new Difficulty();
-                    difficulty.BeatmapDifficulty = beatmapDifficultySegmentedControlController.selectedDifficulty;
-                    difficulty.Characteristic = beatmapCharacteristicSegmentedControlController.selectedBeatmapCharacteristic.serializedName;
+                        BeatmapDifficulty = beatmapDifficultySegmentedControlController.selectedDifficulty,
+                        Characteristic = beatmapCharacteristicSegmentedControlController.selectedBeatmapCharacteristic.serializedName
+                    };
                     selectedPlaylistSong.AddDifficulty(difficulty);
 
                     var cellToHighlight = difficultyCells[beatmapDifficultySegmentedControlController.GetClosestDifficultyIndex(beatmapDifficultySegmentedControlController.selectedDifficulty)];
@@ -128,7 +127,7 @@ namespace PlaylistManager.UI
         {
             get
             {
-                if (selectedPlaylistSong != null && selectedPlaylistSong.Difficulties != null && selectedPlaylistSong.Difficulties.Count != 0)
+                if (selectedPlaylistSong is {Difficulties: {Count: not 0}})
                 {
                     var difficulties = selectedPlaylistSong.Difficulties.FindAll(difficulty => difficulty.Characteristic.ToUpper() == beatmapCharacteristicSegmentedControlController.selectedBeatmapCharacteristic.serializedName.ToUpper());
                     return difficulties.Select(d => d.BeatmapDifficulty).Contains(beatmapDifficultySegmentedControlController.selectedDifficulty);

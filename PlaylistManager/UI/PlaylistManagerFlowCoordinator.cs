@@ -7,18 +7,16 @@ namespace PlaylistManager.UI
 {
     internal class PlaylistManagerFlowCoordinator : FlowCoordinator, IInitializable, IDisposable
     {
-        private FlowCoordinator parentFlowCoordinator;
-        private SettingsViewController settingsViewController;
-        private ChangelogViewController changelogViewController;
-        private ContributorsViewController contributorsViewController;
-
+        private FlowCoordinator? parentFlowCoordinator;
+        
         [Inject]
-        public void Construct(SettingsViewController settingsViewController, ChangelogViewController changelogViewController, ContributorsViewController contributorsViewController)
-        {
-            this.settingsViewController = settingsViewController;
-            this.changelogViewController = changelogViewController;
-            this.contributorsViewController = contributorsViewController;
-        }
+        private readonly SettingsViewController settingsViewController = null!;
+        
+        [Inject]
+        private readonly ChangelogViewController changelogViewController = null!;
+        
+        [Inject]
+        private readonly ContributorsViewController contributorsViewController = null!;
 
         public void Initialize()
         {
@@ -45,7 +43,8 @@ namespace PlaylistManager.UI
         {
             changelogViewController.gameObject.SetActive(false);
             contributorsViewController.gameObject.SetActive(false);
-            parentFlowCoordinator.DismissFlowCoordinator(this, animationDirection: ViewController.AnimationDirection.Vertical);
+            if (parentFlowCoordinator != null)
+                parentFlowCoordinator.DismissFlowCoordinator(this, animationDirection: ViewController.AnimationDirection.Vertical);
         }
     }
 }

@@ -24,7 +24,7 @@ namespace PlaylistManager.UI
         private async void PostParse()
         {
             var rawChangelog = await siraSyncService.LatestChangelog();
-            Changelog = await Task.Run(() => MarkdownParse(rawChangelog));
+            Changelog = await Task.Run(() => rawChangelog != null ? MarkdownParse(rawChangelog) : "Could not load changelog.");
         }
 
         private string MarkdownParse(string original)

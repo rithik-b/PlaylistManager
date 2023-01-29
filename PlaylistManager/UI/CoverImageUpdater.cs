@@ -11,7 +11,7 @@ namespace PlaylistManager.UI
         private readonly LevelPackDetailViewController levelPackDetailViewController;
         private LevelCollectionNavigationController levelCollectionNavigationController;
 
-        private Playlist selectedPlaylist;
+        private Playlist? selectedPlaylist;
 
         public CoverImageUpdater(LevelPackDetailViewController levelPackDetailViewController, LevelCollectionNavigationController levelCollectionNavigationController)
         {
@@ -21,9 +21,12 @@ namespace PlaylistManager.UI
 
         private void SelectedPlaylist_SpriteLoaded(object sender, EventArgs e)
         {
-            levelPackDetailViewController.SetData((IBeatmapLevelPack)selectedPlaylist);
+            if (sender is not Playlist selectedPlaylist) 
+                return;
+            
+            levelPackDetailViewController.SetData(selectedPlaylist);
             levelPackDetailViewController.ShowContent(LevelPackDetailViewController.ContentType.Owned);
-            Accessors.LevelPackAccessor(ref levelCollectionNavigationController) = selectedPlaylist as IBeatmapLevelPack;
+            Accessors.LevelPackAccessor(ref levelCollectionNavigationController) = selectedPlaylist;
         }
 
         public void LevelCollectionUpdated(IAnnotatedBeatmapLevelCollection annotatedBeatmapLevelCollection, BeatSaberPlaylistsLib.PlaylistManager parentManager)

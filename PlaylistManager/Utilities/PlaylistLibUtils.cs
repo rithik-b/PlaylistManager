@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using BeatSaberPlaylistsLib;
 using BeatSaberPlaylistsLib.Blist;
@@ -44,12 +42,8 @@ namespace PlaylistManager.Utilities
         }
 
         #region Image
-        
 
-        private static Stream GetFolderImageStream() =>
-            Assembly.GetExecutingAssembly().GetManifestResourceStream("PlaylistManager.Icons.FolderIcon.png");
-        
-        internal static async Task<Sprite> GeneratePlaylistIcon(IPlaylist playlist)
+        internal static async Task<Sprite?> GeneratePlaylistIcon(IPlaylist playlist)
         {
             using var coverStream = await playlist.GetDefaultCoverStream();
             if (coverStream != null)
