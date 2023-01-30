@@ -2,6 +2,6 @@
 {
     interface IParentManagerUpdater
     {
-        public void ParentManagerUpdated(BeatSaberPlaylistsLib.PlaylistManager playlistManager);
+        public void ParentManagerUpdated(BeatSaberPlaylistsLib.PlaylistManager? playlistManager);
     }
 }

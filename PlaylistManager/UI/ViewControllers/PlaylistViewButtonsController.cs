@@ -119,7 +119,7 @@ namespace PlaylistManager.UI
             }
         }
 
-        public void ParentManagerUpdated(BeatSaberPlaylistsLib.PlaylistManager parentManager) => this.parentManager = parentManager;
+        public void ParentManagerUpdated(BeatSaberPlaylistsLib.PlaylistManager? parentManager) => this.parentManager = parentManager;
 
         [UIAction("#post-parse")]
         private void PostParse()

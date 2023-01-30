@@ -325,7 +325,7 @@ namespace PlaylistManager.UI
             selectedPlaylist!.SpriteLoaded += SelectedPlaylist_SpriteLoaded;
             try
             {
-                selectedPlaylist.SetCover(imageBytes);
+                selectedPlaylist.SetCover(imageBytes!);
                 _ = selectedPlaylist.Sprite;
                 parentManager!.StorePlaylist(selectedPlaylist);
             }
@@ -350,7 +350,7 @@ namespace PlaylistManager.UI
 
         #endregion
 
-        public void LevelCollectionUpdated(IAnnotatedBeatmapLevelCollection annotatedBeatmapLevelCollection, BeatSaberPlaylistsLib.PlaylistManager parentManager)
+        public void LevelCollectionUpdated(IAnnotatedBeatmapLevelCollection annotatedBeatmapLevelCollection, BeatSaberPlaylistsLib.PlaylistManager? parentManager)
         {
             if (this.selectedPlaylist != null)
             {

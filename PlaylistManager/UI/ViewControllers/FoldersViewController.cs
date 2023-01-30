@@ -134,7 +134,7 @@ namespace PlaylistManager.UI
             }
         }
 
-        private void SetupList(BeatSaberPlaylistsLib.PlaylistManager currentParentManager, bool setBeatmapLevelCollections = true)
+        private void SetupList(BeatSaberPlaylistsLib.PlaylistManager? currentParentManager, bool setBeatmapLevelCollections = true)
         {
             customListTableData.tableView.ClearSelection();
             tableCells.Clear();
@@ -266,7 +266,7 @@ namespace PlaylistManager.UI
             }
             else
             {
-                SetupList(currentManagers[selectedCellIndex]);
+                SetupList(currentManagers![selectedCellIndex]);
             }
         }
 
@@ -293,9 +293,9 @@ namespace PlaylistManager.UI
             folderName = folderName.Replace("/", "").Replace("\\", "").Replace(".", "");
             if (!string.IsNullOrEmpty(folderName))
             {
-                var childManager = CurrentParentManager.CreateChildManager(folderName);
+                var childManager = CurrentParentManager!.CreateChildManager(folderName);
 
-                if (currentManagers.Contains(childManager))
+                if (currentManagers!.Contains(childManager))
                 {
                     popupModalsController.ShowOkModal(levelSelectionNavigationController.transform, "\"" + folderName + "\" already exists! Please use a different name.", null);
                 }
@@ -317,7 +317,7 @@ namespace PlaylistManager.UI
         [UIAction("rename-folder")]
         private void RenameButtonClicked()
         {
-            popupModalsController.ShowKeyboard(levelSelectionNavigationController.transform, RenameKeyboardEnter, keyboardText: Path.GetFileName(CurrentParentManager.PlaylistPath));
+            popupModalsController.ShowKeyboard(levelSelectionNavigationController.transform, RenameKeyboardEnter, keyboardText: Path.GetFileName(CurrentParentManager!.PlaylistPath));
         }
 
         private void RenameKeyboardEnter(string folderName)
@@ -325,7 +325,7 @@ namespace PlaylistManager.UI
             folderName = folderName.Replace("/", "").Replace("\\", "").Replace(".", "");
             if (!string.IsNullOrEmpty(folderName))
             {
-                if (folderName != Path.GetFileName(CurrentParentManager.PlaylistPath))
+                if (folderName != Path.GetFileName(CurrentParentManager!.PlaylistPath))
                 {
                     CurrentParentManager.RenameManager(folderName);
                     NotifyPropertyChanged(nameof(FolderText));
@@ -340,12 +340,12 @@ namespace PlaylistManager.UI
         [UIAction("delete-folder")]
         private void DeleteButtonClicked()
         {
-            popupModalsController.ShowYesNoModal(levelSelectionNavigationController.transform, string.Format("Are you sure you want to delete {0} along with all playlists and subfolders?", Path.GetFileName(CurrentParentManager.PlaylistPath)), DeleteConfirm);
+            popupModalsController.ShowYesNoModal(levelSelectionNavigationController.transform, string.Format("Are you sure you want to delete {0} along with all playlists and subfolders?", Path.GetFileName(CurrentParentManager!.PlaylistPath)), DeleteConfirm);
         }
 
         private void DeleteConfirm()
         {
-            CurrentParentManager.Parent?.DeleteChildManager(CurrentParentManager, true);
+            CurrentParentManager!.Parent?.DeleteChildManager(CurrentParentManager, true);
             BackButtonClicked();
         }
 
@@ -401,7 +401,7 @@ namespace PlaylistManager.UI
             }
             else if (folderMode == FolderMode.Folders)
             {
-                var annotatedBeatmapLevelCollections = CurrentParentManager.GetAllPlaylists(false);
+                var annotatedBeatmapLevelCollections = CurrentParentManager!.GetAllPlaylists(false);
                 var indexToSelect = annotatedBeatmapLevelCollections.IndexOf(annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection);
                 if (indexToSelect != -1)
                 {
@@ -460,7 +460,7 @@ namespace PlaylistManager.UI
                 folderCell = tableCell.gameObject.AddComponent<FolderCell>();
             }
 
-            return folderCell ? folderCell : tableCell.GetComponent<FolderCell>();
+            return folderCell != null ? folderCell : tableCell.GetComponent<FolderCell>();
         }
         
         public float CellSize() => 15;

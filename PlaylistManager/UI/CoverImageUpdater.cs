@@ -29,7 +29,7 @@ namespace PlaylistManager.UI
             Accessors.LevelPackAccessor(ref levelCollectionNavigationController) = selectedPlaylist;
         }
 
-        public void LevelCollectionUpdated(IAnnotatedBeatmapLevelCollection annotatedBeatmapLevelCollection, BeatSaberPlaylistsLib.PlaylistManager parentManager)
+        public void LevelCollectionUpdated(IAnnotatedBeatmapLevelCollection annotatedBeatmapLevelCollection, BeatSaberPlaylistsLib.PlaylistManager? parentManager)
         {
             if (this.selectedPlaylist != null)
             {

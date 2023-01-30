@@ -272,6 +272,11 @@ namespace PlaylistManager.Downloaders
             if (!ownedHashes.Contains(songversion.Hash.ToUpper()))
             {
                 var zip = await songversion.DownloadZIP(token, progress).ConfigureAwait(false);
+                if (zip == null)
+                {
+                    Plugin.Log.Error($"Failed to download Song {songversion.Key}. Unable to download ZIP.");
+                    return;
+                }
                 await ExtractZipAsync(zip, customSongsPath, FolderNameForBeatsaverMap(song)).ConfigureAwait(false);
                 ownedHashes.Add(songversion.Hash.ToUpper());
             }
@@ -320,7 +325,7 @@ namespace PlaylistManager.Downloaders
                         return;
                     }
 
-                    BeatmapVersion matchingVersion = null;
+                    BeatmapVersion? matchingVersion = null;
                     foreach (var version in song.Versions)
                     {
                         if (string.Equals(hash, version.Hash, StringComparison.OrdinalIgnoreCase))
@@ -329,7 +334,7 @@ namespace PlaylistManager.Downloaders
                         }
                     }
 
-                    if (matchingVersion != null)
+                    if (matchingVersion! != null!)
                     {
                         await BeatSaverBeatmapDownload(song, matchingVersion, token, progress);
                     }
@@ -423,7 +428,7 @@ namespace PlaylistManager.Downloaders
 
                         if (!ignoredDiskWarning)
                         {
-                            currentDownload.AbortDownload();
+                            currentDownload!.AbortDownload();
                             downloadQueue.Clear();
                             downloadQueue.Add(currentDownload); // Add it back because we remove the first element of queue after a download
                             return;

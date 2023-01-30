@@ -311,7 +311,7 @@ namespace PlaylistManager.UI
             }
         }
 
-        public void LevelCollectionUpdated(IAnnotatedBeatmapLevelCollection selectedBeatmapLevelCollection, BeatSaberPlaylistsLib.PlaylistManager parentManager)
+        public void LevelCollectionUpdated(IAnnotatedBeatmapLevelCollection selectedBeatmapLevelCollection, BeatSaberPlaylistsLib.PlaylistManager? parentManager)
         {
             if (selectedBeatmapLevelCollection is IPlaylist selectedPlaylist)
             {

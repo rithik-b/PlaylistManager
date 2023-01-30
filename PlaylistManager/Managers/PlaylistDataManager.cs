@@ -122,7 +122,7 @@ namespace PlaylistManager
             }
         }
 
-        private void FoldersViewController_ParentManagerUpdatedEvent(BeatSaberPlaylistsLib.PlaylistManager parentManager)
+        private void FoldersViewController_ParentManagerUpdatedEvent(BeatSaberPlaylistsLib.PlaylistManager? parentManager)
         {
             foreach (var parentManagerUpdater in parentManagerUpdaters)
             {
