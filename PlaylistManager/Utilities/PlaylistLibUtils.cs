@@ -98,9 +98,10 @@ namespace PlaylistManager.Utilities
             var playlists = playlistManager.GetAllPlaylists(true, out AggregateException ex);
             if (ex is not null)
             {
+                Plugin.Log.Error(ex.Message);
                 foreach (var e in ex.InnerExceptions)
                 {
-                    Plugin.Log.Error($"Could not load playlist. Exception: {e}");
+                    Plugin.Log.Error(e.ToString());
                 }
             }
 
