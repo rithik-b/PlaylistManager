@@ -1,4 +1,5 @@
-﻿using SiraUtil.Affinity;
+﻿using System;
+using SiraUtil.Affinity;
 using TMPro;
 
 namespace PlaylistManager.AffinityPatches
@@ -14,7 +15,7 @@ namespace PlaylistManager.AffinityPatches
                 return;
             }
 
-            if (value.EndsWith("er") || value.EndsWith("tor") || value.EndsWith("ear"))
+            if (value.EndsWith("er", StringComparison.Ordinal) || value.EndsWith("tor", StringComparison.Ordinal) || value.EndsWith("ear", StringComparison.Ordinal))
             {
                 value += "? I hardly know her!";
             }
