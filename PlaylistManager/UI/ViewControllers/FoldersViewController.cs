@@ -242,7 +242,7 @@ namespace PlaylistManager.UI
             {
                 if (selectedCellIndex == 0)
                 {
-                    IAnnotatedBeatmapLevelCollection[] annotatedBeatmapLevelCollections = beatmapLevelsModel.customLevelPackCollection.beatmapLevelPacks.Concat(PlaylistLibUtils.playlistManager.GetAllPlaylists(true)).ToArray();
+                    IAnnotatedBeatmapLevelCollection[] annotatedBeatmapLevelCollections = beatmapLevelsModel.customLevelPackCollection.beatmapLevelPacks.Concat(PlaylistLibUtils.TryGetAllPlaylists()).ToArray();
                     LevelCollectionTableViewUpdatedEvent?.Invoke(annotatedBeatmapLevelCollections, 0);
                     folderMode = FolderMode.AllPacks;
 
@@ -255,7 +255,7 @@ namespace PlaylistManager.UI
                 }
                 else if (selectedCellIndex == 2)
                 {
-                    IAnnotatedBeatmapLevelCollection[] annotatedBeatmapLevelCollections = PlaylistLibUtils.playlistManager.GetAllPlaylists(true);
+                    IAnnotatedBeatmapLevelCollection[] annotatedBeatmapLevelCollections = PlaylistLibUtils.TryGetAllPlaylists();
                     LevelCollectionTableViewUpdatedEvent?.Invoke(annotatedBeatmapLevelCollections, 0);
                     folderMode = FolderMode.Playlists;
                 }
@@ -384,7 +384,7 @@ namespace PlaylistManager.UI
 
             if (folderMode == FolderMode.AllPacks)
             {
-                var annotatedBeatmapLevelCollections = beatmapLevelsModel.customLevelPackCollection.beatmapLevelPacks.Concat(PlaylistLibUtils.playlistManager.GetAllPlaylists(true)).ToArray();
+                var annotatedBeatmapLevelCollections = beatmapLevelsModel.customLevelPackCollection.beatmapLevelPacks.Concat(PlaylistLibUtils.TryGetAllPlaylists()).ToArray();
                 var indexToSelect = annotatedBeatmapLevelCollections.IndexOf(annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection);
                 if (indexToSelect != -1)
                 {
@@ -393,7 +393,7 @@ namespace PlaylistManager.UI
             }
             else if (folderMode == FolderMode.Playlists)
             {
-                var annotatedBeatmapLevelCollections = PlaylistLibUtils.playlistManager.GetAllPlaylists(true);
+                var annotatedBeatmapLevelCollections = PlaylistLibUtils.TryGetAllPlaylists();
                 var indexToSelect = annotatedBeatmapLevelCollections.IndexOf(annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection);
                 if (indexToSelect != -1)
                 {

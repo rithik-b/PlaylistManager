@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -90,12 +91,26 @@ namespace PlaylistManager.Utilities
             return new List<IPlaylistSong>();
         }
 
+        public static IPlaylist[] TryGetAllPlaylists()
+        {
+            var playlists = playlistManager.GetAllPlaylists(true, out AggregateException ex);
+            if (ex is not null)
+            {
+                foreach (var e in ex.InnerExceptions)
+                {
+                    Plugin.Log.Error($"Could not load playlist. Exception: {e}");
+                }
+            }
+
+            return playlists;
+        }
+
         #region Image
-        
+
 
         private static Stream GetFolderImageStream() =>
             Assembly.GetExecutingAssembly().GetManifestResourceStream("PlaylistManager.Icons.FolderIcon.png");
-        
+
         internal static async Task<Sprite> GeneratePlaylistIcon(IPlaylist playlist)
         {
             using var coverStream = await playlist.GetDefaultCoverStream();

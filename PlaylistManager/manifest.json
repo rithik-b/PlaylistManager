@@ -15,7 +15,7 @@
         "SongCore": "^3.9.5",
         "BeatSaberMarkupLanguage": "^1.6.2",
         "SiraUtil": "^3.0.0",
-        "BeatSaberPlaylistsLib": "^1.6.0",
+        "BeatSaberPlaylistsLib": "^1.6.7",
         "BeatSaverSharp": "^3.3.0"
     },
     "links": {
