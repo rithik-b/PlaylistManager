@@ -33,16 +33,16 @@
           <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BeatmapCore.dll</HintPath>
           <Private>False</Private>
         </Reference>
-        <Reference Include="BGNet">
-          <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BGNet.dll</HintPath>
-          <Private>False</Private>
-        </Reference>
         <Reference Include="Hive.Versioning">
           <HintPath>$(BeatSaberDir)\Libs\Hive.Versioning.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="Polyglot, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
           <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Polyglot.dll</HintPath>
+        </Reference>
+        <Reference Include="Tweening">
+            <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Tweening.dll</HintPath>
+            <Private>false</Private>
         </Reference>
         <Reference Include="UnityEngine">
             <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.dll</HintPath>
@@ -60,32 +60,12 @@
             <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.UI.dll</HintPath>
             <Private>False</Private>
         </Reference>
-        <Reference Include="UnityEngine.UIElementsModule">
-            <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.UIElementsModule.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
         <Reference Include="UnityEngine.UIModule">
             <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.UIModule.dll</HintPath>
             <Private>False</Private>
         </Reference>
-        <Reference Include="UnityEngine.VRModule">
-            <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.VRModule.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
         <Reference Include="System">
             <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\System.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="System.Data">
-            <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\System.Data.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="System.Xml">
-            <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\System.Xml.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="System.Xml.Linq">
-            <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\System.Xml.Linq.dll</HintPath>
             <Private>False</Private>
         </Reference>
         <Reference Include="HMLib">
@@ -136,6 +116,10 @@
         </Reference>
         <Reference Include="Zenject-usage">
             <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Zenject-usage.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+        <Reference Include="mscorlib">
+            <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\mscorlib.dll</HintPath>
             <Private>false</Private>
         </Reference>
     </ItemGroup>

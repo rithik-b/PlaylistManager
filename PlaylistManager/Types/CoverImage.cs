@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using PlaylistManager.Utilities;
 using UnityEngine;
 
 /*
@@ -86,7 +87,7 @@ namespace PlaylistManager.Types
             });
 
             if (!CoroutineRunning)
-                SharedCoroutineStarter.instance.StartCoroutine(SpriteLoadCoroutine());
+                PlaylistLibUtils.coroutineStarter.StartCoroutine(SpriteLoadCoroutine());
         }
 
         private static IEnumerator<YieldInstruction> SpriteLoadCoroutine()
@@ -105,7 +106,7 @@ namespace PlaylistManager.Types
             }
             CoroutineRunning = false;
             if (SpriteQueue.Count > 0)
-                SharedCoroutineStarter.instance.StartCoroutine(SpriteLoadCoroutine());
+                PlaylistLibUtils.coroutineStarter.StartCoroutine(SpriteLoadCoroutine());
         }
     }
 }

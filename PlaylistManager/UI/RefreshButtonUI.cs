@@ -38,8 +38,7 @@ namespace PlaylistManager.UI
         public void Dispose()
         {
             UnityEngine.Object.Destroy(progressBar);
-            if (BSMLParser.IsSingletonAvailable && MenuButtons.IsSingletonAvailable)
-                MenuButtons.instance.UnregisterButton(refreshButton);
+            MenuButtons.instance.UnregisterButton(refreshButton);
             Loader.SongsLoadedEvent -= SongsLoaded;
         }
 
