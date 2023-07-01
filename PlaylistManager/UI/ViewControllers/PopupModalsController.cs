@@ -90,7 +90,7 @@ namespace PlaylistManager.UI
                 parsed = true;
             }
         }
-        
+
         internal void ShowModal(PopupContents popupContents)
         {
             if (popupContents is OkPopupContents okPopupContents)
@@ -130,8 +130,8 @@ namespace PlaylistManager.UI
             CheckboxValue = false;
             CheckboxActive = !string.IsNullOrEmpty(checkboxText);
 
-            Accessors.AnimateCanvasAccessor(ref yesNoModalView) = animateParentCanvas;
-            Accessors.ViewValidAccessor(ref yesNoModalView) = false; // Need to do this to show the animation after parent changes
+            yesNoModalView._animateParentCanvas = animateParentCanvas;
+            yesNoModalView._viewIsValid = false; // Need to do this to show the animation after parent changes
 
             parserParams.EmitEvent("close-yes-no");
             parserParams.EmitEvent("open-yes-no");
@@ -247,8 +247,8 @@ namespace PlaylistManager.UI
             OkButtonText = okButtonText;
             okButtonPressed = buttonPressedCallback;
 
-            Accessors.AnimateCanvasAccessor(ref okModalView) = animateParentCanvas;
-            Accessors.ViewValidAccessor(ref yesNoModalView) = false;
+            okModalView._animateParentCanvas = animateParentCanvas;
+            yesNoModalView._viewIsValid = false;
 
             parserParams.EmitEvent("close-ok");
             parserParams.EmitEvent("open-ok");
@@ -297,8 +297,8 @@ namespace PlaylistManager.UI
 
             LoadingText = text;
 
-            Accessors.AnimateCanvasAccessor(ref okModalView) = animateParentCanvas;
-            Accessors.ViewValidAccessor(ref yesNoModalView) = false;
+            okModalView._animateParentCanvas = animateParentCanvas;
+            yesNoModalView._viewIsValid = false;
 
             parserParams.EmitEvent("close-loading");
             parserParams.EmitEvent("open-loading");
@@ -325,7 +325,7 @@ namespace PlaylistManager.UI
 
         internal void ShowKeyboard(Transform parent, Action<string> keyboardPressedCallback, string keyboardText = "", bool animateParentCanvas = true)
         {
-            Parse(); 
+            Parse();
             keyboardTransform.transform.SetParent(rootTransform);
             keyboardTransform.transform.SetParent(parent);
 
@@ -333,8 +333,8 @@ namespace PlaylistManager.UI
 
             keyboardPressed = keyboardPressedCallback;
 
-            Accessors.AnimateCanvasAccessor(ref keyboardModalView) = animateParentCanvas;
-            Accessors.ViewValidAccessor(ref yesNoModalView) = false;
+            keyboardModalView._animateParentCanvas = animateParentCanvas;
+            yesNoModalView._viewIsValid = false;
 
             parserParams.EmitEvent("close-keyboard");
             parserParams.EmitEvent("open-keyboard");

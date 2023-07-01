@@ -81,7 +81,7 @@ namespace PlaylistManager.UI
             parsed = true;
             highlightCheckboxTransform.transform.localScale *= 0.5f;
 
-            Accessors.AnimateCanvasAccessor(ref createModal) = false;
+            createModal._animateParentCanvas = false;
             dropdownTableData.data.Add(new CustomCellInfo("Playlist"));
             dropdownTableData.data.Add(new CustomCellInfo("Folder"));
             dropdownTableData.tableView.ReloadData();

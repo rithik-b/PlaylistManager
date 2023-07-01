@@ -67,7 +67,7 @@ namespace PlaylistManager.UI
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
             this.levelFilteringNavigationController = levelFilteringNavigationController;
             this.selectLevelCategoryViewController = selectLevelCategoryViewController;
-            levelCategorySegmentedControl = Accessors.LevelCategorySegmentedControlAccessor(ref selectLevelCategoryViewController);
+            levelCategorySegmentedControl = selectLevelCategoryViewController._levelFilterCategoryIconSegmentedControl;
         }
 
         public void Initialize()
@@ -133,7 +133,7 @@ namespace PlaylistManager.UI
 
             flowButton.transform.localScale = new Vector3(0.42f, 0.42f, 1f);
             var icon = flowButton.image as ImageView;
-            Accessors.SkewAccessor(ref icon) = 0.18f;
+            icon._skew = 0.18f;
         }
 
         #region Create Playlist

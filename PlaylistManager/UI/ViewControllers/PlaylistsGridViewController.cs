@@ -38,8 +38,8 @@ namespace PlaylistManager.UI
 
         public void Initialize()
         {
-            annotatedBeatmapLevelCollectionsGridView = Accessors.AnnotatedBeatmapLevelCollectionsGridViewAccessor(ref annotatedBeatmapLevelCollectionsTableViewController);
-            annotatedBeatmapLevelCollectionsGridViewAnimator = Accessors.GridViewAnimatorAccessor(ref annotatedBeatmapLevelCollectionsGridView);
+            annotatedBeatmapLevelCollectionsGridView = annotatedBeatmapLevelCollectionsTableViewController._annotatedBeatmapLevelCollectionsGridView;
+            annotatedBeatmapLevelCollectionsGridViewAnimator = annotatedBeatmapLevelCollectionsGridView._animator;
 
             // Removing last column of GridView to make space for our scroller
             var rectTransform = annotatedBeatmapLevelCollectionsGridView.gameObject.GetComponent<RectTransform>();
@@ -66,20 +66,20 @@ namespace PlaylistManager.UI
         private void PostParse()
         {
             // Removing PageControl as it looks really ugly with a lot of playlists, scroll indicator replaces this
-            Accessors.PageControlAccessor(ref annotatedBeatmapLevelCollectionsGridView).gameObject.SetActive(false);
+            annotatedBeatmapLevelCollectionsGridView._pageControl.gameObject.SetActive(false);
 
             // Getting Viewport and Content
-            var viewport = Accessors.GridViewportAccessor(ref annotatedBeatmapLevelCollectionsGridViewAnimator);
-            var content = Accessors.GridContentAccessor(ref annotatedBeatmapLevelCollectionsGridViewAnimator);
+            var viewport = annotatedBeatmapLevelCollectionsGridViewAnimator._viewportTransform;
+            var content = annotatedBeatmapLevelCollectionsGridViewAnimator._contentTransform;
             content.localPosition = Vector3.zero;
 
             // Breaking up ScrollBar from ScrollView
             scrollBar = bsmlScrollView.transform.Find("ScrollBar");
             scrollBar.SetParent(vertical);
             vertical.SetParent(viewport);
-            var pageUpButton = Accessors.PageUpAccessor(ref bsmlScrollView);
-            var pageDownButton = Accessors.PageDownAccessor(ref bsmlScrollView);
-            var verticalScrollIndicator = Accessors.ScrollIndicatorAccessor(ref bsmlScrollView);
+            var pageUpButton = bsmlScrollView._pageUpButton;
+            var pageDownButton = bsmlScrollView._pageDownButton;
+            var verticalScrollIndicator = bsmlScrollView._verticalScrollIndicator;
             Object.Destroy(bsmlScrollView.gameObject);
             scrollBar.gameObject.SetActive(false);
 
@@ -94,7 +94,7 @@ namespace PlaylistManager.UI
             Accessors.PlatformHelperAccessor(ref scrollView) = platformHelper;
             annotatedBeatmapLevelCollectionsGridView.gameObject.SetActive(true);
             gridScrollView.enabled = false;
-            
+
             // Setting up observer for hovering/leaving the grid view
             annotatedBeatmapLevelCollectionsGridView.gameObject.AddComponent<GridViewPointerObserver>();
 

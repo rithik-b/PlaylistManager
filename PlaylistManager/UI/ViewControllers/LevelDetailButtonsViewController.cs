@@ -36,7 +36,7 @@ namespace PlaylistManager.UI
                AddPlaylistModalController addPlaylistController, PopupModalsController popupModalsController, DifficultyHighlighter difficultyHighlighter)
         {
             this.standardLevelDetailViewController = standardLevelDetailViewController;
-            levelCollectionTableView = Accessors.LevelCollectionTableViewAccessor(ref levelCollectionViewController);
+            levelCollectionTableView = levelCollectionViewController._levelCollectionTableView;
             this.levelCollectionNavigationController = levelCollectionNavigationController;
             this.addPlaylistController = addPlaylistController;
             this.popupModalsController = popupModalsController;

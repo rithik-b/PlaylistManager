@@ -119,7 +119,7 @@ namespace PlaylistManager.Managers
             {
                 if (annotatedBeatmapLevelCollectionsViewController.isActiveAndEnabled)
                 {
-                    downloadingBeatmapLevelCollections = Accessors.AnnotatedBeatmapLevelCollectionsAccessor(ref annotatedBeatmapLevelCollectionsViewController).ToArray();
+                    downloadingBeatmapLevelCollections = annotatedBeatmapLevelCollectionsViewController._annotatedBeatmapLevelCollections.ToArray();
                     downloadingBeatmapCollectionIdx = annotatedBeatmapLevelCollectionsViewController.selectedItemIndex;
                 }
                 downloadingBeatmap = levelCollectionNavigationController.selectedBeatmapLevel;

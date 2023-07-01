@@ -11,7 +11,7 @@
     "gameVersion": "1.20.0",
     "icon": "PlaylistManager.Icons.Logo.png",
     "dependsOn": {
-        "BSIPA": "^4.2.1",
+        "BSIPA": "^4.3.0",
         "SongCore": "^3.9.5",
         "BeatSaberMarkupLanguage": "^1.6.2",
         "SiraUtil": "^3.0.0",

@@ -71,13 +71,13 @@ namespace PlaylistManager.AffinityPatches
                         return;
                     }
 
-                    var collection = Accessors.BeatmapCollectionAccessor(ref tableCell);
+                    var collection = tableCell._annotatedBeatmapLevelCollection;
                     if (collection == stagedSpriteLoad)
                     {
 #if DEBUG
                         //Plugin.Log.Debug($"Updating image for {collection.collectionName}");
 #endif
-                        Accessors.CoverImageAccessor(ref tableCell).sprite = stagedSpriteLoad.SmallSprite;
+                        tableCell._coverImage.sprite = stagedSpriteLoad.SmallSprite;
                     }
                     else
                     {
