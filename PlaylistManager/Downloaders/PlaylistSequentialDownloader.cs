@@ -266,10 +266,11 @@ namespace PlaylistManager.Downloaders
                 Directory.CreateDirectory(customSongsPath);
             }
 
-            if (ownedHashes.Add(songversion.Hash))
+            if (!ownedHashes.Contains(songversion.Hash))
             {
                 var zip = await songversion.DownloadZIP(token, progress).ConfigureAwait(false);
                 await ExtractZipAsync(zip, customSongsPath, FolderNameForBeatsaverMap(song)).ConfigureAwait(false);
+                ownedHashes.Add(songversion.Hash);
             }
         }
 
