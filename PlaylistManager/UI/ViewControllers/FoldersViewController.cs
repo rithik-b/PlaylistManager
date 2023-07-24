@@ -323,6 +323,7 @@ namespace PlaylistManager.UI
 
         private void RenameKeyboardEnter(string folderName)
         {
+            if (CurrentParentManager.Parent == null) return;
             folderName = folderName.Replace("/", "").Replace("\\", "").Replace(".", "");
             if (!string.IsNullOrEmpty(folderName))
             {
