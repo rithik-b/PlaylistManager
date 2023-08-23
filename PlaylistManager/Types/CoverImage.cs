@@ -1,8 +1,8 @@
-﻿using BeatSaberPlaylistsLib.Types;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using PlaylistManager.Utilities;
+using BeatSaberPlaylistsLib;
+using BeatSaberPlaylistsLib.Types;
 using UnityEngine;
 
 /*
@@ -87,7 +87,7 @@ namespace PlaylistManager.Types
             });
 
             if (!CoroutineRunning)
-                PlaylistLibUtils.coroutineStarter.StartCoroutine(SpriteLoadCoroutine());
+                SharedCoroutineStarter.instance.StartCoroutine(SpriteLoadCoroutine());
         }
 
         private static IEnumerator<YieldInstruction> SpriteLoadCoroutine()
@@ -106,7 +106,7 @@ namespace PlaylistManager.Types
             }
             CoroutineRunning = false;
             if (SpriteQueue.Count > 0)
-                PlaylistLibUtils.coroutineStarter.StartCoroutine(SpriteLoadCoroutine());
+                SharedCoroutineStarter.instance.StartCoroutine(SpriteLoadCoroutine());
         }
     }
 }

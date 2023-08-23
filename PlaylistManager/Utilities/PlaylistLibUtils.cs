@@ -29,8 +29,6 @@ namespace PlaylistManager.Utilities
             }
         }
 
-        public static ICoroutineStarter coroutineStarter { get; set; }
-
         public static IPlaylist CreatePlaylistWithConfig(string playlistName, BeatSaberPlaylistsLib.PlaylistManager playlistManager)
         {
             var playlistAuthorName = PluginConfig.Instance.AuthorName;
