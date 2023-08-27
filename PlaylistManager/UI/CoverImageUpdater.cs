@@ -23,7 +23,7 @@ namespace PlaylistManager.UI
         {
             levelPackDetailViewController.SetData((IBeatmapLevelPack)selectedPlaylist);
             levelPackDetailViewController.ShowContent(LevelPackDetailViewController.ContentType.Owned);
-            Accessors.LevelPackAccessor(ref levelCollectionNavigationController) = selectedPlaylist as IBeatmapLevelPack;
+            levelCollectionNavigationController._levelPack = selectedPlaylist;
         }
 
         public void LevelCollectionUpdated(IAnnotatedBeatmapLevelCollection annotatedBeatmapLevelCollection, BeatSaberPlaylistsLib.PlaylistManager parentManager)

@@ -1,10 +1,9 @@
-﻿using BeatSaberMarkupLanguage;
-using BeatSaberMarkupLanguage.MenuButtons;
+﻿using BeatSaberMarkupLanguage.MenuButtons;
 using PlaylistManager.Utilities;
 using SongCore;
 using SongCore.UI;
 using System;
-using System.Threading.Tasks;
+using IPA.Utilities.Async;
 using Zenject;
 
 namespace PlaylistManager.UI
@@ -28,8 +27,12 @@ namespace PlaylistManager.UI
             {
                 progressBar = ProgressBar.Create();
             }
-            
-            var numPlaylists = await Task.Run(() => PlaylistLibUtils.playlistManager.GetAllPlaylists(true).Length).ConfigureAwait(false);
+
+            var numPlaylists = await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
+            {
+                PlaylistLibUtils.playlistManager.RefreshPlaylists(true);
+                return PlaylistLibUtils.playlistManager.GetPlaylistCount(true);
+            }).ConfigureAwait(false);
 
             progressBar.enabled = true;
             progressBar.ShowMessage($"\n{numPlaylists} playlists loaded.", kMessageTime);
@@ -38,8 +41,7 @@ namespace PlaylistManager.UI
         public void Dispose()
         {
             UnityEngine.Object.Destroy(progressBar);
-            if (BSMLParser.IsSingletonAvailable && MenuButtons.IsSingletonAvailable)
-                MenuButtons.instance.UnregisterButton(refreshButton);
+            MenuButtons.instance.UnregisterButton(refreshButton);
             Loader.SongsLoadedEvent -= SongsLoaded;
         }
 

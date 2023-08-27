@@ -30,7 +30,7 @@ namespace PlaylistManager.UI
             settingsViewController.DismissFlowEvent -= DismissFlowCoordinator;
         }
 
-        protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
+        public override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
             ProvideInitialViewControllers(settingsViewController, changelogViewController, contributorsViewController);
         }

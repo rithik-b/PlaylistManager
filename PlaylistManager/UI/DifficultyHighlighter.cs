@@ -22,11 +22,11 @@ namespace PlaylistManager.UI
 
         public DifficultyHighlighter(StandardLevelDetailViewController standardLevelDetailViewController)
         {
-            var standardLevelDetailView = Accessors.StandardLevelDetailViewAccessor(ref standardLevelDetailViewController);
-            beatmapCharacteristicSegmentedControlController = Accessors.BeatmapCharacteristicSegmentedControlController(ref standardLevelDetailView);
-            beatmapCharacteristicSegmentedControl = Accessors.BeatmapCharacteristicsSegmentedControlAccessor(ref beatmapCharacteristicSegmentedControlController);
-            beatmapDifficultySegmentedControlController = Accessors.BeatmapDifficultySegmentedControlControllerAccessor(ref standardLevelDetailView);
-            beatmapDifficultySegmentedControl = Accessors.BeatmapDifficultySegmentedControlAccessor(ref beatmapDifficultySegmentedControlController);
+            var standardLevelDetailView = standardLevelDetailViewController._standardLevelDetailView;
+            beatmapCharacteristicSegmentedControlController = standardLevelDetailView._beatmapCharacteristicSegmentedControlController;
+            beatmapCharacteristicSegmentedControl = beatmapCharacteristicSegmentedControlController._segmentedControl;
+            beatmapDifficultySegmentedControlController = standardLevelDetailView._beatmapDifficultySegmentedControlController;
+            beatmapDifficultySegmentedControl = beatmapDifficultySegmentedControlController._difficultySegmentedControl;
         }
 
         public void Initialize()
@@ -59,9 +59,9 @@ namespace PlaylistManager.UI
         {
             if (selectedPlaylistSong != null && selectedPlaylistSong.Difficulties != null && selectedPlaylistSong.Difficulties.Count != 0)
             {
-                var difficultiesToHighlight = selectedPlaylistSong.Difficulties.FindAll(difficulty => difficulty.Characteristic.ToUpper() == beatmapCharacteristicSegmentedControlController.selectedBeatmapCharacteristic.serializedName.ToUpper());
-                var availaibleDifficulties = Accessors.DifficultiesAccessor(ref beatmapDifficultySegmentedControlController);
-                var difficultyCells = Accessors.SegmentedControllerCellsAccessor(ref beatmapDifficultySegmentedControl);
+                var difficultiesToHighlight = selectedPlaylistSong.Difficulties.FindAll(difficulty => difficulty.Characteristic.Equals(beatmapCharacteristicSegmentedControlController.selectedBeatmapCharacteristic.serializedName, StringComparison.OrdinalIgnoreCase));
+                var availaibleDifficulties = beatmapDifficultySegmentedControlController._difficulties;
+                var difficultyCells = beatmapDifficultySegmentedControl.cells;
 
                 foreach (var difficulty in difficultiesToHighlight)
                 {
@@ -81,7 +81,7 @@ namespace PlaylistManager.UI
         {
             if (selectedPlaylistSong != null)
             {
-                var difficultyCells = Accessors.SegmentedControllerCellsAccessor(ref beatmapDifficultySegmentedControl);
+                var difficultyCells = beatmapDifficultySegmentedControl.cells;
                 if (IsSelectedDifficultyHighlighted)
                 {
                     selectedPlaylistSong.Difficulties.RemoveAll(d => d.BeatmapDifficulty == beatmapDifficultySegmentedControlController.selectedDifficulty);
@@ -130,7 +130,7 @@ namespace PlaylistManager.UI
             {
                 if (selectedPlaylistSong != null && selectedPlaylistSong.Difficulties != null && selectedPlaylistSong.Difficulties.Count != 0)
                 {
-                    var difficulties = selectedPlaylistSong.Difficulties.FindAll(difficulty => difficulty.Characteristic.ToUpper() == beatmapCharacteristicSegmentedControlController.selectedBeatmapCharacteristic.serializedName.ToUpper());
+                    var difficulties = selectedPlaylistSong.Difficulties.FindAll(difficulty => difficulty.Characteristic.Equals(beatmapCharacteristicSegmentedControlController.selectedBeatmapCharacteristic.serializedName, StringComparison.OrdinalIgnoreCase));
                     return difficulties.Select(d => d.BeatmapDifficulty).Contains(beatmapDifficultySegmentedControlController.selectedDifficulty);
                 }
                 return false;

@@ -48,17 +48,17 @@ namespace PlaylistManager.Types
 			enabled = false;
         }
 
-		public override void UpdateContentSize()
+		public new void UpdateContentSize()
 		{
 			SetContentSize(contentSize);
 			var active = contentSize - (_fixedCellSize * 3) > 0f;
 
-			_pageUpButton.gameObject.SetActive(active); 
+			_pageUpButton.gameObject.SetActive(active);
 			_pageDownButton.gameObject.SetActive(active);
 			_verticalScrollIndicator.gameObject.SetActive(active);
 		}
 
-		public override void RefreshButtons()
+		public new void RefreshButtons()
 		{
 			if (_pageUpButton != null)
 			{
@@ -70,7 +70,7 @@ namespace PlaylistManager.Types
 			}
 		}
 
-        public override void SetDestinationPos(float value)
+        public new void SetDestinationPos(float value)
         {
 			var difference = contentSize - (_fixedCellSize * 4);
             if (difference <= 0f)
@@ -82,7 +82,7 @@ namespace PlaylistManager.Types
 		}
 
 		// We ignore the position given here since it is normalized
-		public override void UpdateVerticalScrollIndicator(float _)
+		public new void UpdateVerticalScrollIndicator(float _)
         {
 			if (_verticalScrollIndicator != null)
 			{

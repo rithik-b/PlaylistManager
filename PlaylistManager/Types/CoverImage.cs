@@ -1,7 +1,8 @@
-﻿using BeatSaberPlaylistsLib.Types;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using BeatSaberPlaylistsLib;
+using BeatSaberPlaylistsLib.Types;
 using UnityEngine;
 
 /*

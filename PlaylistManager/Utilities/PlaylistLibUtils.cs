@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -31,7 +32,7 @@ namespace PlaylistManager.Utilities
         public static IPlaylist CreatePlaylistWithConfig(string playlistName, BeatSaberPlaylistsLib.PlaylistManager playlistManager)
         {
             var playlistAuthorName = PluginConfig.Instance.AuthorName;
-            var easterEgg = playlistAuthorName.ToUpper().Contains("BINTER") && playlistName.ToUpper().Contains("TECH") && PluginConfig.Instance.EasterEggs;
+            var easterEgg = playlistAuthorName.IndexOf("BINTER", StringComparison.OrdinalIgnoreCase) >= 0 && playlistName.IndexOf("TECH", StringComparison.OrdinalIgnoreCase) >= 0 && PluginConfig.Instance.EasterEggs;
             return CreatePlaylist(playlistName, playlistAuthorName, playlistManager, !PluginConfig.Instance.DefaultImageDisabled, PluginConfig.Instance.DefaultAllowDuplicates, easterEgg);
         }
 
@@ -90,12 +91,27 @@ namespace PlaylistManager.Utilities
             return new List<IPlaylistSong>();
         }
 
+        public static IPlaylist[] TryGetAllPlaylists()
+        {
+            var playlists = playlistManager.GetAllPlaylists(true, out AggregateException ex);
+            if (ex is not null)
+            {
+                Plugin.Log.Error(ex.Message);
+                foreach (var e in ex.InnerExceptions)
+                {
+                    Plugin.Log.Error(e.ToString());
+                }
+            }
+
+            return playlists;
+        }
+
         #region Image
-        
+
 
         private static Stream GetFolderImageStream() =>
             Assembly.GetExecutingAssembly().GetManifestResourceStream("PlaylistManager.Icons.FolderIcon.png");
-        
+
         internal static async Task<Sprite> GeneratePlaylistIcon(IPlaylist playlist)
         {
             using var coverStream = await playlist.GetDefaultCoverStream();

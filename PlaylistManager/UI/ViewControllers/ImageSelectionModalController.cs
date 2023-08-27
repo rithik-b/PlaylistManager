@@ -78,7 +78,7 @@ namespace PlaylistManager.UI
         private void PostParse()
         {
             parsed = true;
-            Accessors.AnimateCanvasAccessor(ref modalView) = false;
+            modalView._animateParentCanvas = false;
         }
 
         internal void ShowModal(BeatSaberPlaylistsLib.Types.IPlaylist playlist)
@@ -113,7 +113,7 @@ namespace PlaylistManager.UI
             await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() => customListTableData.data.Clear());
 
             IsLoading = true;
-            
+
             // Add clear image
             customListTableData.data.Add(new CustomCellInfo("Clear Icon", "Clear", await PlaylistLibUtils.GeneratePlaylistIcon(playlist)));
 
@@ -133,7 +133,7 @@ namespace PlaylistManager.UI
                     customListTableData.data.Add(new CustomCellInfo(Path.GetFileName(coverImage.Key), coverImage.Key, coverImage.Value.Sprite));
                 }
             }
-            
+
             await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() => customListTableData.tableView.ReloadData());
             customListTableData.tableView.ScrollToCellWithIdx(0, TableView.ScrollPositionType.Beginning, false);
             _ = ViewControllerMonkeyCleanup();
@@ -210,7 +210,7 @@ namespace PlaylistManager.UI
             var imageViews = customListTableData.tableView.GetComponentsInChildren<ImageView>(true);
             for (var i = 0; i < imageViews.Length; i++)
             {
-                Accessors.SkewAccessor(ref imageViews[i]) = 0f;
+                imageViews[i]._skew = 0f;
             }
             IsLoading = false;
         }

@@ -44,7 +44,7 @@ namespace PlaylistManager.UI
         [UIComponent("sync-button")]
         private readonly Transform syncButtonTransform;
 
-        internal PlaylistDetailViewButtonsController(IHttpService siraHttpService, PlaylistSequentialDownloader playlistDownloader, LevelPackDetailViewController levelPackDetailViewController, 
+        internal PlaylistDetailViewButtonsController(IHttpService siraHttpService, PlaylistSequentialDownloader playlistDownloader, LevelPackDetailViewController levelPackDetailViewController,
             PopupModalsController popupModalsController, PlaylistDetailsViewController playlistDetailsViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController)
         {
             this.siraHttpService = siraHttpService;
@@ -128,7 +128,7 @@ namespace PlaylistManager.UI
         {
             parentManager.DeletePlaylist(selectedPlaylist, true);
             var selectedIndex = annotatedBeatmapLevelCollectionsViewController.selectedItemIndex;
-            var annotatedBeatmapLevelCollections = Accessors.AnnotatedBeatmapLevelCollectionsAccessor(ref annotatedBeatmapLevelCollectionsViewController).ToList();
+            var annotatedBeatmapLevelCollections = annotatedBeatmapLevelCollectionsViewController._annotatedBeatmapLevelCollections.ToList();
             annotatedBeatmapLevelCollections.RemoveAt(selectedIndex);
             selectedIndex--;
             LevelCollectionTableViewUpdatedEvent?.Invoke(annotatedBeatmapLevelCollections.ToArray(), selectedIndex < 0 ? 0 : selectedIndex);

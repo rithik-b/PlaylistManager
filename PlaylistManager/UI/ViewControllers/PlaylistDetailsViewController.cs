@@ -88,10 +88,10 @@ namespace PlaylistManager.UI
             parsed = true;
 
             var nameKeyboardModal = nameSettingTransform.Find("BSMLModalKeyboard").GetComponent<ModalView>();
-            Accessors.AnimateCanvasAccessor(ref nameKeyboardModal) = false;
+            nameKeyboardModal._animateParentCanvas = false;
 
             var authorKeyboardModal = authorSettingTransform.Find("BSMLModalKeyboard").GetComponent<ModalView>();
-            Accessors.AnimateCanvasAccessor(ref authorKeyboardModal) = false;
+            authorKeyboardModal._animateParentCanvas = false;
         }
 
         internal void ShowDetails()
@@ -104,7 +104,7 @@ namespace PlaylistManager.UI
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistName)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NameHint)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistAuthor)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AuthorHint))); 
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AuthorHint)));
             UpdateReadOnly();
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistAllowDuplicates)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistDescription)));

@@ -69,7 +69,7 @@ namespace PlaylistManager.UI
         [UIComponent("folder-list")]
         public CustomListTableData customListTableData;
 
-        public FoldersViewController(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, MainFlowCoordinator mainFlowCoordinator, 
+        public FoldersViewController(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, MainFlowCoordinator mainFlowCoordinator,
             LevelSelectionNavigationController levelSelectionNavigationController, PopupModalsController popupModalsController, HoverHintController hoverHintController,
             BeatmapLevelsModel beatmapLevelsModel)
         {
@@ -242,20 +242,20 @@ namespace PlaylistManager.UI
             {
                 if (selectedCellIndex == 0)
                 {
-                    IAnnotatedBeatmapLevelCollection[] annotatedBeatmapLevelCollections = Accessors.CustomLevelPackCollectionAccessor(ref beatmapLevelsModel).beatmapLevelPacks.Concat(PlaylistLibUtils.playlistManager.GetAllPlaylists(true)).ToArray();
+                    IAnnotatedBeatmapLevelCollection[] annotatedBeatmapLevelCollections = beatmapLevelsModel.customLevelPackCollection.beatmapLevelPacks.Concat(PlaylistLibUtils.TryGetAllPlaylists()).ToArray();
                     LevelCollectionTableViewUpdatedEvent?.Invoke(annotatedBeatmapLevelCollections, 0);
                     folderMode = FolderMode.AllPacks;
 
                 }
                 else if (selectedCellIndex == 1)
                 {
-                    IAnnotatedBeatmapLevelCollection[] annotatedBeatmapLevelCollections = Accessors.CustomLevelPackCollectionAccessor(ref beatmapLevelsModel).beatmapLevelPacks;
+                    IAnnotatedBeatmapLevelCollection[] annotatedBeatmapLevelCollections = beatmapLevelsModel.customLevelPackCollection.beatmapLevelPacks;
                     LevelCollectionTableViewUpdatedEvent?.Invoke(annotatedBeatmapLevelCollections, 0);
                     folderMode = FolderMode.CustomPacks;
                 }
                 else if (selectedCellIndex == 2)
                 {
-                    IAnnotatedBeatmapLevelCollection[] annotatedBeatmapLevelCollections = PlaylistLibUtils.playlistManager.GetAllPlaylists(true);
+                    IAnnotatedBeatmapLevelCollection[] annotatedBeatmapLevelCollections = PlaylistLibUtils.TryGetAllPlaylists();
                     LevelCollectionTableViewUpdatedEvent?.Invoke(annotatedBeatmapLevelCollections, 0);
                     folderMode = FolderMode.Playlists;
                 }
@@ -291,6 +291,7 @@ namespace PlaylistManager.UI
 
         private void CreateKeyboardEnter(string folderName)
         {
+            if (CurrentParentManager == null) return;
             folderName = folderName.Replace("/", "").Replace("\\", "").Replace(".", "");
             if (!string.IsNullOrEmpty(folderName))
             {
@@ -323,6 +324,7 @@ namespace PlaylistManager.UI
 
         private void RenameKeyboardEnter(string folderName)
         {
+            if (CurrentParentManager?.Parent == null) return;
             folderName = folderName.Replace("/", "").Replace("\\", "").Replace(".", "");
             if (!string.IsNullOrEmpty(folderName))
             {
@@ -346,7 +348,7 @@ namespace PlaylistManager.UI
 
         private void DeleteConfirm()
         {
-            CurrentParentManager.Parent?.DeleteChildManager(CurrentParentManager, true);
+            CurrentParentManager?.Parent?.DeleteChildManager(CurrentParentManager, true);
             BackButtonClicked();
         }
 
@@ -384,7 +386,7 @@ namespace PlaylistManager.UI
 
             if (folderMode == FolderMode.AllPacks)
             {
-                var annotatedBeatmapLevelCollections = Accessors.CustomLevelPackCollectionAccessor(ref beatmapLevelsModel).beatmapLevelPacks.Concat(PlaylistLibUtils.playlistManager.GetAllPlaylists(true)).ToArray();
+                var annotatedBeatmapLevelCollections = beatmapLevelsModel.customLevelPackCollection.beatmapLevelPacks.Concat(PlaylistLibUtils.TryGetAllPlaylists()).ToArray();
                 var indexToSelect = annotatedBeatmapLevelCollections.IndexOf(annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection);
                 if (indexToSelect != -1)
                 {
@@ -393,7 +395,7 @@ namespace PlaylistManager.UI
             }
             else if (folderMode == FolderMode.Playlists)
             {
-                var annotatedBeatmapLevelCollections = PlaylistLibUtils.playlistManager.GetAllPlaylists(true);
+                var annotatedBeatmapLevelCollections = PlaylistLibUtils.TryGetAllPlaylists();
                 var indexToSelect = annotatedBeatmapLevelCollections.IndexOf(annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection);
                 if (indexToSelect != -1)
                 {
@@ -463,7 +465,7 @@ namespace PlaylistManager.UI
 
             return folderCell ? folderCell : tableCell.GetComponent<FolderCell>();
         }
-        
+
         public float CellSize() => 15;
 
         public int NumberOfCells() => tableCells.Count;

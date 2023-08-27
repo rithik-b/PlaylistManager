@@ -25,7 +25,7 @@ namespace PlaylistManager.Downloaders
         private readonly IHttpService siraHttpService;
         private readonly BeatSaver beatSaverInstance;
         private readonly SemaphoreSlim downloadSemaphore;
-        private static readonly HashSet<string> ownedHashes = new();
+        private static readonly HashSet<string> ownedHashes = new(StringComparer.OrdinalIgnoreCase);
         private DownloadQueueEntry currentDownload;
 
         private readonly SemaphoreSlim pauseSemaphore;
@@ -36,7 +36,7 @@ namespace PlaylistManager.Downloaders
 
         internal event Action PopupEvent;
         internal event Action QueueUpdatedEvent;
-        
+
         internal static readonly List<object> downloadQueue = new();
         private static readonly LinkedList<BeatSaberPlaylistsLib.Types.Playlist> coversToRefresh = new();
 
@@ -68,12 +68,12 @@ namespace PlaylistManager.Downloaders
             {
                 downloadQueueEntry.DownloadAbortedEvent += OnDownloadAborted;
             }
-            
+
             foreach (DownloadQueueEntry _ in downloadQueue)
             {
                 IterateQueue();
             }
-            
+
             PlaylistDownloader.PlaylistQueuedEvent += OnPlaylistQueued;
         }
 
@@ -89,7 +89,7 @@ namespace PlaylistManager.Downloaders
             {
                 downloadQueueEntry.DownloadAbortedEvent -= OnDownloadAborted;
             }
-            
+
             PlaylistDownloader.PlaylistQueuedEvent -= OnPlaylistQueued;
         }
 
@@ -98,7 +98,7 @@ namespace PlaylistManager.Downloaders
             downloadQueue.Add(downloadQueueEntry);
             OnPlaylistQueued(downloadQueueEntry);
         }
-        
+
         private void OnPlaylistQueued(DownloadQueueEntry downloadQueueEntry)
         {
             downloadQueueEntry.DownloadAbortedEvent += OnDownloadAborted;
@@ -109,7 +109,7 @@ namespace PlaylistManager.Downloaders
         private void OnDownloadAborted(DownloadQueueEntry downloadQueueEntry)
         {
             downloadQueueEntry.DownloadAbortedEvent -= OnDownloadAborted;
-            downloadQueue.Remove(downloadQueueEntry); 
+            downloadQueue.Remove(downloadQueueEntry);
             QueueUpdatedEvent?.Invoke();
         }
 
@@ -209,7 +209,7 @@ namespace PlaylistManager.Downloaders
                 }
                 else if (!string.IsNullOrEmpty(missingSongs[i].Key))
                 {
-                    var hash = await BeatmapDownloadByKey(missingSongs[i].Key.ToLower(), downloadQueueEntry.cancellationTokenSource.Token, downloadQueueEntry);
+                    var hash = await BeatmapDownloadByKey(missingSongs[i].Key.ToLowerInvariant(), downloadQueueEntry.cancellationTokenSource.Token, downloadQueueEntry);
                     if (!string.IsNullOrEmpty(hash))
                     {
                         missingSongs[i].Hash = hash;
@@ -245,7 +245,7 @@ namespace PlaylistManager.Downloaders
             {
                 coversToRefresh.AddLast(playlist);
             }
-            
+
             downloadQueueEntry.DownloadAbortedEvent -= OnDownloadAborted;
             currentDownload = null;
         }
@@ -266,11 +266,11 @@ namespace PlaylistManager.Downloaders
                 Directory.CreateDirectory(customSongsPath);
             }
 
-            if (!ownedHashes.Contains(songversion.Hash.ToUpper()))
+            if (!ownedHashes.Contains(songversion.Hash))
             {
                 var zip = await songversion.DownloadZIP(token, progress).ConfigureAwait(false);
                 await ExtractZipAsync(zip, customSongsPath, FolderNameForBeatsaverMap(song)).ConfigureAwait(false);
-                ownedHashes.Add(songversion.Hash.ToUpper());
+                ownedHashes.Add(songversion.Hash);
             }
         }
 
@@ -291,7 +291,7 @@ namespace PlaylistManager.Downloaders
                     {
                         await BeatSaverBeatmapDownload(song, song.LatestVersion, token, progress);
                     }
-                    return song.LatestVersion.Hash;   
+                    return song.LatestVersion.Hash;
                 }
                 catch (Exception e)
                 {
@@ -299,7 +299,7 @@ namespace PlaylistManager.Downloaders
                     {
                         Plugin.Log.Error($"Failed to download Song {key}. Exception: {e}");
                     }
-                }   
+                }
             }
             return "";
         }
@@ -373,7 +373,7 @@ namespace PlaylistManager.Downloaders
                     {
                         Plugin.Log.Error($"Failed to download Song {url}");
                     }
-                }   
+                }
             }
         }
 
@@ -457,7 +457,7 @@ namespace PlaylistManager.Downloaders
             var popupText = "You are running out of disk space (less than 100MB), continuing the download can cause issues such as corrupt game configs" +
                             " (as there may not be enough space to save them).";
 
-            if (PluginConfig.Instance.EasterEggs && PluginConfig.Instance.AuthorName.ToUpper().Contains("SKALX"))
+            if (PluginConfig.Instance.EasterEggs && PluginConfig.Instance.AuthorName.IndexOf("SKALX", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 popupText = "Remember the October 26th, 2021 \"JoeSaber\" incident? Wanna do it again?";
             }
