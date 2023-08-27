@@ -291,6 +291,7 @@ namespace PlaylistManager.UI
 
         private void CreateKeyboardEnter(string folderName)
         {
+            if (CurrentParentManager == null) return;
             folderName = folderName.Replace("/", "").Replace("\\", "").Replace(".", "");
             if (!string.IsNullOrEmpty(folderName))
             {
@@ -323,7 +324,7 @@ namespace PlaylistManager.UI
 
         private void RenameKeyboardEnter(string folderName)
         {
-            if (CurrentParentManager.Parent == null) return;
+            if (CurrentParentManager?.Parent == null) return;
             folderName = folderName.Replace("/", "").Replace("\\", "").Replace(".", "");
             if (!string.IsNullOrEmpty(folderName))
             {
@@ -347,7 +348,7 @@ namespace PlaylistManager.UI
 
         private void DeleteConfirm()
         {
-            CurrentParentManager.Parent?.DeleteChildManager(CurrentParentManager, true);
+            CurrentParentManager?.Parent?.DeleteChildManager(CurrentParentManager, true);
             BackButtonClicked();
         }
 
