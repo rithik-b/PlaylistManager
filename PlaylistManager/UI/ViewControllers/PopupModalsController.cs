@@ -326,7 +326,6 @@ namespace PlaylistManager.UI
         internal void ShowKeyboard(Transform parent, Action<string> keyboardPressedCallback, string keyboardText = "", bool animateParentCanvas = true)
         {
             Parse();
-            keyboardTransform.transform.SetParent(rootTransform);
             keyboardTransform.transform.SetParent(parent);
 
             KeyboardText = keyboardText;
