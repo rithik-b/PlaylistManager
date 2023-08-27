@@ -1,5 +1,4 @@
-﻿using BeatSaberMarkupLanguage;
-using BeatSaberMarkupLanguage.MenuButtons;
+﻿using BeatSaberMarkupLanguage.MenuButtons;
 using PlaylistManager.Utilities;
 using SongCore;
 using SongCore.UI;
@@ -32,7 +31,7 @@ namespace PlaylistManager.UI
             var numPlaylists = await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
             {
                 PlaylistLibUtils.playlistManager.RefreshPlaylists(true);
-                return PlaylistLibUtils.TryGetAllPlaylists().Length;
+                return PlaylistLibUtils.playlistManager.GetPlaylistCount(true);
             }).ConfigureAwait(false);
 
             progressBar.enabled = true;
