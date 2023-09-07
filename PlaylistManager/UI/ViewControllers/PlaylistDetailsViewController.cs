@@ -189,9 +189,9 @@ namespace PlaylistManager.UI
         {
             if (playlistReadOnly)
             {
-                playlistReadOnly = true;
+                PlaylistReadOnly = true;
             }
-            else if (PlaylistAllowDuplicates != PlaylistReadOnly)
+            else if (PlaylistReadOnly != playlistReadOnly)
             {
                 popupModalsController.ShowYesNoModal(modalTransform, "To turn off read only, this playlist will be cloned and writing will be enabled on the clone. Proceed?", ClonePlaylist, noButtonPressedCallback: UpdateReadOnly, animateParentCanvas: false);
             }
