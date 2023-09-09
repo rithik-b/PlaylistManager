@@ -3,7 +3,7 @@ using PlaylistManager.Utilities;
 using SongCore;
 using SongCore.UI;
 using System;
-using IPA.Utilities.Async;
+using System.Threading.Tasks;
 using Zenject;
 
 namespace PlaylistManager.UI
@@ -28,11 +28,13 @@ namespace PlaylistManager.UI
                 progressBar = ProgressBar.Create();
             }
 
-            var numPlaylists = await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
-            {
-                PlaylistLibUtils.playlistManager.RefreshPlaylists(true);
-                return PlaylistLibUtils.playlistManager.GetPlaylistCount(true);
-            }).ConfigureAwait(false);
+            PlaylistLibUtils.playlistManager.RefreshPlaylists(true);
+            var numPlaylists = PlaylistLibUtils.playlistManager.GetPlaylistCount(true);
+
+            // This event handler is loading sprites and accessing Unity objects so it must be done on the main thread.
+            // Although SongsLoadedEvent is already invoked on the main thread, the default event handler in ProgressBar
+            // will overwrite our message. We're essentially skipping a frame to let the default event handler run first.
+            await Task.Yield();
 
             progressBar.enabled = true;
             progressBar.ShowMessage($"\n{numPlaylists} playlists loaded.", kMessageTime);
