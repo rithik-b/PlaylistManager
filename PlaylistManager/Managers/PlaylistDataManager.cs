@@ -1,10 +1,10 @@
-﻿using IPA.Utilities;
+﻿using System;
+using System.Collections.Generic;
 using PlaylistManager.HarmonyPatches;
 using PlaylistManager.Interfaces;
 using PlaylistManager.UI;
 using PlaylistManager.Utilities;
-using System;
-using System.Collections.Generic;
+using UnityEngine;
 using Zenject;
 
 namespace PlaylistManager
@@ -88,7 +88,7 @@ namespace PlaylistManager
             }
         }
 
-        private void LevelFilteringNavigationController_didSelectAnnotatedBeatmapLevelCollectionEvent(LevelFilteringNavigationController _, IAnnotatedBeatmapLevelCollection annotatedBeatmapLevelCollection, UnityEngine.GameObject __, BeatmapCharacteristicSO ___)
+        private void LevelFilteringNavigationController_didSelectAnnotatedBeatmapLevelCollectionEvent(LevelFilteringNavigationController controller, IAnnotatedBeatmapLevelCollection annotatedBeatmapLevelCollection, GameObject noDataInfoPrefab, bool sortAlphabetically, BeatmapCharacteristicSO preferredBeatmapCharacteristic)
         {
             AnnotatedBeatmapLevelCollectionsViewController_didSelectAnnotatedBeatmapLevelCollectionEvent(annotatedBeatmapLevelCollection);
         }

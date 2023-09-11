@@ -112,15 +112,15 @@ namespace PlaylistManager.UI
             if ((PluginConfig.Instance.AuthorName.IndexOf("GOOBIE", StringComparison.OrdinalIgnoreCase) >= 0 || PluginConfig.Instance.AuthorName.IndexOf("ERIS", StringComparison.OrdinalIgnoreCase) >= 0 ||
                  PluginConfig.Instance.AuthorName.IndexOf("PINK", StringComparison.OrdinalIgnoreCase) >= 0 || PluginConfig.Instance.AuthorName.IndexOf("CANDL3", StringComparison.OrdinalIgnoreCase) >= 0) && PluginConfig.Instance.EasterEggs)
             {
-                levelCollectionNavigationController.SetDataForPack(selectedPlaylist, true, true, $"{PluginConfig.Instance.AuthorName} Cute");
+                levelCollectionNavigationController.SetDataForPack(selectedPlaylist, true, true, $"{PluginConfig.Instance.AuthorName} Cute", false);
             }
             else if (PluginConfig.Instance.AuthorName.IndexOf("JOSHABI", StringComparison.OrdinalIgnoreCase) >= 0)
             {
-                levelCollectionNavigationController.SetDataForPack(selectedPlaylist, true, true, $"*Sneeze*");
+                levelCollectionNavigationController.SetDataForPack(selectedPlaylist, true, true, $"*Sneeze*", false);
             }
             else
             {
-                levelCollectionNavigationController.SetDataForPack(selectedPlaylist, true, true, "Play");
+                levelCollectionNavigationController.SetDataForPack(selectedPlaylist, true, true, "Play", false);
             }
 
             levelCollectionNavigationController.HideDetailViewController();
