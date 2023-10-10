@@ -6,6 +6,7 @@ using PlaylistManager.Configuration;
 using PlaylistManager.Utilities;
 using PlaylistManager.HarmonyPatches;
 using System.Linq;
+using System.Threading;
 using PlaylistManager.Downloaders;
 using PlaylistManager.UI;
 
@@ -150,7 +151,7 @@ namespace PlaylistManager.Managers
         {
             if (PluginConfig.Instance.AutomaticAuthorName)
             {
-                var user = await platformUserModel.GetUserInfo();
+                var user = await platformUserModel.GetUserInfo(CancellationToken.None);
                 if (PluginConfig.Instance.AuthorName == null && user == null)
                 {
                     PluginConfig.Instance.AuthorName = nameof(PlaylistManager);
