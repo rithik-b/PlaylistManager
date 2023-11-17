@@ -291,7 +291,11 @@ namespace PlaylistManager.UI
 
         private void CreateKeyboardEnter(string folderName)
         {
-            if (CurrentParentManager == null) return;
+            if (CurrentParentManager == null)
+            {
+                return;
+            }
+
             folderName = folderName.Replace("/", "").Replace("\\", "").Replace(".", "");
             if (!string.IsNullOrEmpty(folderName))
             {
@@ -324,7 +328,11 @@ namespace PlaylistManager.UI
 
         private void RenameKeyboardEnter(string folderName)
         {
-            if (CurrentParentManager?.Parent == null) return;
+            if (CurrentParentManager?.Parent == null)
+            {
+                return;
+            }
+
             folderName = folderName.Replace("/", "").Replace("\\", "").Replace(".", "");
             if (!string.IsNullOrEmpty(folderName))
             {
@@ -356,6 +364,11 @@ namespace PlaylistManager.UI
 
         public void LevelCategoryUpdated(SelectLevelCategoryViewController.LevelCategory levelCategory, bool viewControllerActivated)
         {
+            if (rootTransform == null)
+            {
+                return;
+            }
+
             if (levelCategory == SelectLevelCategoryViewController.LevelCategory.CustomSongs)
             {
                 rootTransform.gameObject.SetActive(true);
