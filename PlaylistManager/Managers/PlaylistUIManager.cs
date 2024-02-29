@@ -22,14 +22,14 @@ namespace PlaylistManager.Managers
         private readonly PlaylistSequentialDownloader playlistDownloader;
 
         private int downloadingBeatmapCollectionIdx;
-        private IAnnotatedBeatmapLevelCollection[] downloadingBeatmapLevelCollections;
-        private IPreviewBeatmapLevel downloadingBeatmap;
+        private BeatmapLevelPack[] downloadingBeatmapLevelCollections;
+        private BeatmapLevel downloadingBeatmap;
 
         private readonly List<ILevelCategoryUpdater> levelCategoryUpdaters;
         private readonly IPMRefreshable refreshable;
         private readonly IPlatformUserModel platformUserModel;
 
-        public event Action<IAnnotatedBeatmapLevelCollection[], int> LevelCollectionTableViewUpdatedEvent;
+        public event Action<IReadOnlyList<BeatmapLevelPack>, int> LevelCollectionTableViewUpdatedEvent;
 
         internal PlaylistUIManager(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, LevelCollectionNavigationController levelCollectionNavigationController,
             SelectLevelCategoryViewController selectLevelCategoryViewController, StandardLevelDetailViewController standardLevelDetailViewController, SettingsViewController settingsViewController,
@@ -123,7 +123,7 @@ namespace PlaylistManager.Managers
                     downloadingBeatmapLevelCollections = annotatedBeatmapLevelCollectionsViewController._annotatedBeatmapLevelCollections.ToArray();
                     downloadingBeatmapCollectionIdx = annotatedBeatmapLevelCollectionsViewController.selectedItemIndex;
                 }
-                downloadingBeatmap = levelCollectionNavigationController.selectedBeatmapLevel;
+                downloadingBeatmap = levelCollectionNavigationController.beatmapLevel;
                 LevelFilteringNavigationController_UpdateSecondChildControllerContent.SecondChildControllerUpdatedEvent += LevelFilteringNavigationController_SecondChildControllerUpdatedEvent;
             }
         }

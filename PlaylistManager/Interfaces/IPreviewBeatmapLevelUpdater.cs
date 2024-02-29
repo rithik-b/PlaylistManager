@@ -2,6 +2,6 @@
 {
     interface IPreviewBeatmapLevelUpdater
     {
-        public void PreviewBeatmapLevelUpdated(IPreviewBeatmapLevel beatmapLevel);
+        public void PreviewBeatmapLevelUpdated(BeatmapLevel beatmapLevel);
     }
 }

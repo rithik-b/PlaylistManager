@@ -24,7 +24,7 @@ namespace PlaylistManager.UI
         private readonly PopupModalsController popupModalsController;
 
         private bool parsed;
-        private Playlist selectedPlaylist;
+        private IPlaylist selectedPlaylist;
         private BeatSaberPlaylistsLib.PlaylistManager parentManager;
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -131,7 +131,7 @@ namespace PlaylistManager.UI
         [UIValue("playlist-name")]
         private string PlaylistName
         {
-            get => selectedPlaylist == null ? " " : (selectedPlaylist as IPlaylist).packName;
+            get => selectedPlaylist == null ? " " : selectedPlaylist.Title;
             set
             {
                 selectedPlaylist.Title = value;
@@ -140,6 +140,7 @@ namespace PlaylistManager.UI
                     selectedPlaylist.SpriteLoaded += SelectedPlaylist_SpriteLoaded;
                     selectedPlaylist.RaiseCoverImageChangedForDefaultCover();
                 }
+                selectedPlaylist.RaisePlaylistChanged();
                 parentManager.StorePlaylist((IPlaylist)selectedPlaylist);
                 Events.RaisePlaylistRenamed((IPlaylist)selectedPlaylist, parentManager);
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistName)));
@@ -160,6 +161,7 @@ namespace PlaylistManager.UI
             set
             {
                 selectedPlaylist.Author = value;
+                selectedPlaylist.RaisePlaylistChanged();
                 parentManager.StorePlaylist((IPlaylist)selectedPlaylist);
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistAuthor)));
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AuthorHint)));
@@ -204,6 +206,7 @@ namespace PlaylistManager.UI
             {
                 var clonedPlaylist = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.DefaultHandler?.Deserialize(File.OpenRead(playlistPath));
                 clonedPlaylist.ReadOnly = false;
+                selectedPlaylist.RaisePlaylistChanged();
                 parentManager.StorePlaylist(clonedPlaylist);
                 PlaylistLibUtils.playlistManager.RequestRefresh("PlaylistManager (plugin)");
                 popupModalsController.ShowOkModal(modalTransform, "Playlist Cloned!", null, animateParentCanvas: false);
@@ -232,6 +235,7 @@ namespace PlaylistManager.UI
             set
             {
                 selectedPlaylist.ReadOnly = value;
+                selectedPlaylist.RaisePlaylistChanged();
                 parentManager.StorePlaylist((IPlaylist)selectedPlaylist);
                 UpdateReadOnly();
             }
@@ -288,6 +292,7 @@ namespace PlaylistManager.UI
                     }
                 }
 
+                selectedPlaylist.RaisePlaylistChanged();
                 parentManager.StorePlaylist((IPlaylist)selectedPlaylist);
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistAllowDuplicates)));
             }
@@ -314,6 +319,7 @@ namespace PlaylistManager.UI
             {
                 selectedPlaylist.SetCover(imageBytes);
                 _ = selectedPlaylist.Sprite;
+                selectedPlaylist.RaisePlaylistChanged();
                 parentManager.StorePlaylist((IPlaylist)selectedPlaylist);
             }
             catch (Exception e)
@@ -334,16 +340,16 @@ namespace PlaylistManager.UI
 
         #endregion
 
-        public void LevelCollectionUpdated(IAnnotatedBeatmapLevelCollection annotatedBeatmapLevelCollection, BeatSaberPlaylistsLib.PlaylistManager parentManager)
+        public void LevelCollectionUpdated(BeatmapLevelPack annotatedBeatmapLevelCollection, BeatSaberPlaylistsLib.PlaylistManager parentManager)
         {
             if (this.selectedPlaylist != null)
             {
                 this.selectedPlaylist.SpriteLoaded -= SelectedPlaylist_SpriteLoaded;
             }
 
-            if (annotatedBeatmapLevelCollection is Playlist selectedPlaylist)
+            if (annotatedBeatmapLevelCollection is PlaylistLevelPack selectedPlaylist)
             {
-                this.selectedPlaylist = selectedPlaylist;
+                this.selectedPlaylist = selectedPlaylist.playlist;
                 this.parentManager = parentManager;
             }
             else

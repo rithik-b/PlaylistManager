@@ -152,12 +152,12 @@ namespace PlaylistManager.UI
             }
 
             var playlist = PlaylistLibUtils.CreatePlaylistWithConfig(playlistName, parentManager ?? BeatSaberPlaylistsLib.PlaylistManager.DefaultManager);
-            popupModalsController.ShowYesNoModal(rootTransform, $"Successfully created {playlist.collectionName}", () =>
+            popupModalsController.ShowYesNoModal(rootTransform, $"Successfully created {playlist.Title}", () =>
             {
                 // In case the category isn't already playlists which it shouldn't be
                 levelCategorySegmentedControl.SelectCellWithNumber(1);
                 selectLevelCategoryViewController.LevelFilterCategoryIconSegmentedControlDidSelectCell(levelCategorySegmentedControl, 1);
-                levelFilteringNavigationController.SelectAnnotatedBeatmapLevelCollection(playlist);
+                levelFilteringNavigationController.SelectAnnotatedBeatmapLevelCollection(playlist.PlaylistLevelPack);
             }, "Go to playlist", "Dismiss");
         }
 

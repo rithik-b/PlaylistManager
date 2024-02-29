@@ -12,9 +12,9 @@ namespace PlaylistManager.HarmonyPatches
     [HarmonyPatch(typeof(AnnotatedBeatmapLevelCollectionCell), nameof(AnnotatedBeatmapLevelCollectionCell.RefreshAvailabilityAsync))]
     internal class AnnotatedBeatmapLevelCollectionCell_RefreshAvailabilityAsync
     {
-        private static void Postfix(AnnotatedBeatmapLevelCollectionCell __instance, IAnnotatedBeatmapLevelCollection ____annotatedBeatmapLevelCollection)
+        private static void Postfix(AnnotatedBeatmapLevelCollectionCell __instance, BeatmapLevelPack ____beatmapLevelPack)
         {
-            if (____annotatedBeatmapLevelCollection is BeatSaberPlaylistsLib.Types.IPlaylist playlist)
+            if (____beatmapLevelPack is BeatSaberPlaylistsLib.Types.IPlaylist playlist)
             {
                 __instance.SetDownloadIconVisible(PluginConfig.Instance.ShowDownloadIcon && PlaylistLibUtils.GetMissingSongs(playlist).Count > 0);
             }

@@ -139,7 +139,7 @@ namespace PlaylistManager.Downloaders
             }
         }
 
-        private void OnSongsLoaded(Loader arg1, ConcurrentDictionary<string, CustomPreviewBeatmapLevel> arg2)
+        private void OnSongsLoaded(Loader loader, ConcurrentDictionary<string, BeatmapLevel> beatmapLevels)
         {
             Loader.SongsLoadedEvent -= OnSongsLoaded;
             foreach (var playlist in coversToRefresh)
@@ -239,6 +239,7 @@ namespace PlaylistManager.Downloaders
                 }
             }
 
+            downloadQueueEntry.playlist.RaisePlaylistChanged();
             downloadQueueEntry.parentManager.StorePlaylist(downloadQueueEntry.playlist);
 
             if (downloadQueueEntry.playlist is BeatSaberPlaylistsLib.Types.Playlist playlist)

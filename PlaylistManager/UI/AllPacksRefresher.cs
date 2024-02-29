@@ -1,5 +1,6 @@
 ﻿using PlaylistManager.Interfaces;
 using PlaylistManager.Utilities;
+using System;
 using System.Linq;
 
 namespace PlaylistManager.UI
@@ -17,8 +18,8 @@ namespace PlaylistManager.UI
 
         public void Refresh()
         {
-            var annotatedBeatmapLevelCollections = beatmapLevelsModel.customLevelPackCollection.beatmapLevelPacks.Concat(PlaylistLibUtils.TryGetAllPlaylists()).ToArray();
-            var indexToSelect = annotatedBeatmapLevelCollections.IndexOf(annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelCollection);
+            var annotatedBeatmapLevelCollections = beatmapLevelsModel._customLevelsRepository.beatmapLevelPacks.Concat(PlaylistLibUtils.TryGetAllPlaylistsAsLevelPacks()).ToArray();
+            var indexToSelect = Array.FindIndex(annotatedBeatmapLevelCollections, (pack) => pack.packID == annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelPack.packID);
             if (indexToSelect != -1)
             {
                 annotatedBeatmapLevelCollectionsViewController.SetData(annotatedBeatmapLevelCollections, indexToSelect, false);

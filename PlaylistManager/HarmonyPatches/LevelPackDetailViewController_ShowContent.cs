@@ -8,7 +8,7 @@ namespace PlaylistManager.HarmonyPatches
     [HarmonyPatch(typeof(LevelPackDetailViewController), nameof(LevelPackDetailViewController.ShowContent))]
     internal class LevelPackDetailViewController_ShowContent
     {
-        private static bool Prefix(LevelPackDetailViewController.ContentType contentType, IBeatmapLevelPack ____pack, ImageView ____packImage, Sprite ____blurredPackArtwork, GameObject ____detailWrapper, LoadingControl ____loadingControl)
+        private static bool Prefix(LevelPackDetailViewController.ContentType contentType, BeatmapLevelPack ____pack, ImageView ____packImage, Sprite ____blurredPackArtwork, GameObject ____detailWrapper, LoadingControl ____loadingControl)
         {
             if (contentType == LevelPackDetailViewController.ContentType.Owned && ____pack is BeatSaberPlaylistsLib.Types.IPlaylist)
             {

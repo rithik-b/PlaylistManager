@@ -22,7 +22,7 @@ namespace PlaylistManager.UI
         private readonly DifficultyHighlighter difficultyHighlighter;
 
         public event PropertyChangedEventHandler PropertyChanged;
-        private IPreviewBeatmapLevel selectedBeatmapLevel;
+        private BeatmapLevel selectedBeatmapLevel;
         private IPlaylist selectedPlaylist;
         private BeatSaberPlaylistsLib.PlaylistManager parentManager;
         private bool _addActive;
@@ -82,7 +82,7 @@ namespace PlaylistManager.UI
         [UIAction("remove-button-click")]
         private void DisplayRemoveWarning()
         {
-            if (selectedBeatmapLevel is IPlaylistSong)
+            if (selectedBeatmapLevel is PlaylistLevel)
             {
                 popupModalsController.ShowYesNoModal(standardLevelDetailViewController.transform, string.Format("Are you sure you would like to remove {0} from the playlist?", selectedBeatmapLevel.songName), RemoveSong);
             }
@@ -94,11 +94,18 @@ namespace PlaylistManager.UI
 
         private void RemoveSong()
         {
-            selectedPlaylist.Remove((IPlaylistSong)selectedBeatmapLevel);
+            if (selectedBeatmapLevel is not PlaylistLevel playlistLevel)
+            {
+                return;
+            }
+
+            selectedPlaylist.Remove(playlistLevel.playlistSong);
+
             try
             {
+                selectedPlaylist.RaisePlaylistChanged();
                 parentManager.StorePlaylist(selectedPlaylist);
-                Events.RaisePlaylistSongRemoved((IPlaylistSong)selectedBeatmapLevel, selectedPlaylist);
+                Events.RaisePlaylistSongRemoved(playlistLevel.playlistSong, selectedPlaylist);
             }
             catch (Exception e)
             {
@@ -112,15 +119,15 @@ namespace PlaylistManager.UI
             if ((PluginConfig.Instance.AuthorName.IndexOf("GOOBIE", StringComparison.OrdinalIgnoreCase) >= 0 || PluginConfig.Instance.AuthorName.IndexOf("ERIS", StringComparison.OrdinalIgnoreCase) >= 0 ||
                  PluginConfig.Instance.AuthorName.IndexOf("PINK", StringComparison.OrdinalIgnoreCase) >= 0 || PluginConfig.Instance.AuthorName.IndexOf("CANDL3", StringComparison.OrdinalIgnoreCase) >= 0) && PluginConfig.Instance.EasterEggs)
             {
-                levelCollectionNavigationController.SetDataForPack(selectedPlaylist, true, true, $"{PluginConfig.Instance.AuthorName} Cute", false);
+                levelCollectionNavigationController.SetDataForPack(selectedPlaylist.PlaylistLevelPack, true, true, $"{PluginConfig.Instance.AuthorName} Cute", false);
             }
             else if (PluginConfig.Instance.AuthorName.IndexOf("JOSHABI", StringComparison.OrdinalIgnoreCase) >= 0)
             {
-                levelCollectionNavigationController.SetDataForPack(selectedPlaylist, true, true, $"*Sneeze*", false);
+                levelCollectionNavigationController.SetDataForPack(selectedPlaylist.PlaylistLevelPack, true, true, $"*Sneeze*", false);
             }
             else
             {
-                levelCollectionNavigationController.SetDataForPack(selectedPlaylist, true, true, "Play", false);
+                levelCollectionNavigationController.SetDataForPack(selectedPlaylist.PlaylistLevelPack, true, true, "Play", false);
             }
 
             levelCollectionNavigationController.HideDetailViewController();
@@ -134,6 +141,7 @@ namespace PlaylistManager.UI
         private void HighlightButtonClick()
         {
             difficultyHighlighter.ToggleSelectedDifficultyHighlight();
+            selectedPlaylist.RaisePlaylistChanged();
             parentManager.StorePlaylist(selectedPlaylist);
             selectedDifficultyHighlighted = !selectedDifficultyHighlighted;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(HighlightButtonText)));
@@ -166,7 +174,7 @@ namespace PlaylistManager.UI
             }
         }
 
-        public void PreviewBeatmapLevelUpdated(IPreviewBeatmapLevel beatmapLevel)
+        public void PreviewBeatmapLevelUpdated(BeatmapLevel beatmapLevel)
         {
             selectedBeatmapLevel = beatmapLevel;
             if (beatmapLevel.levelID.EndsWith(" WIP"))
@@ -174,7 +182,7 @@ namespace PlaylistManager.UI
                 AddActive = false;
                 IsPlaylistSong = false;
             }
-            else if (beatmapLevel is IPlaylistSong && selectedPlaylist is { ReadOnly: false })
+            else if (beatmapLevel is PlaylistLevel && selectedPlaylist is { ReadOnly: false })
             {
                 AddActive = true;
                 IsPlaylistSong = true;
@@ -186,11 +194,11 @@ namespace PlaylistManager.UI
             }
         }
 
-        public void LevelCollectionUpdated(IAnnotatedBeatmapLevelCollection annotatedBeatmapLevelCollection, BeatSaberPlaylistsLib.PlaylistManager parentManager)
+        public void LevelCollectionUpdated(BeatmapLevelPack annotatedBeatmapLevelCollection, BeatSaberPlaylistsLib.PlaylistManager parentManager)
         {
-            if (annotatedBeatmapLevelCollection is IPlaylist selectedPlaylist)
+            if (annotatedBeatmapLevelCollection is PlaylistLevelPack playlistLevelPack)
             {
-                this.selectedPlaylist = selectedPlaylist;
+                this.selectedPlaylist = playlistLevelPack.playlist;
                 this.parentManager = parentManager;
             }
             else

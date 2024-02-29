@@ -2,7 +2,7 @@
 	<horizontal anchor-min-y='1'  bg='panel-top' pad-left='10' pad-right='10' horizontal-fit='PreferredSize'>
 		<text text='PlaylistManager Settings' align='Center' italics='true' font-size='8' />
 	</horizontal>
-	<settings-container size-delta-x='-50' vertical-fit='PreferredSize' child-control-height='true'>
+	<settings-container size-delta='-50 -15' anchor-pos-y='2' vertical-fit='PreferredSize' child-control-height='true'>
 		<text text='Default Playlist Settings' align='Left' italics='true' font-size='5' />
 		<vertical background='round-rect-panel' background-color='white' pad='2'>
 			<checkbox value='no-image' text='Disable Default Icon' hover-hint='Do not add the default playlist image for new playlists.' apply-on-change='true' bind-value='true' />

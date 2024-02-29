@@ -34,7 +34,7 @@ namespace PlaylistManager.Types
         private readonly ImageView playlistCoverView;
 
         [UIValue("playlist-name")]
-        public string PlaylistName => playlist?.packName ?? "";
+        public string PlaylistName => playlist?.Title ?? "";
 
         [UIValue("playlist-subtext")]
         public string PlaylistSubtext => (playlist?.Author ?? "") + (missingLevels != null ? $" [{completedLevels}/{missingLevels} downloaded]" : " [Download Queued]");
@@ -97,7 +97,7 @@ namespace PlaylistManager.Types
                 }
             }
 
-            playlistCoverView.sprite = playlist.coverImage;
+            playlistCoverView.sprite = playlist.Sprite;
             playlistCoverView.rectTransform.sizeDelta = new Vector2(8, 0);
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistName)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PlaylistSubtext)));

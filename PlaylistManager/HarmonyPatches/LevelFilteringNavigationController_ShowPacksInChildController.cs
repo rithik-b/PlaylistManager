@@ -11,11 +11,12 @@ namespace PlaylistManager.HarmonyPatches
     public class LevelFilteringNavigationController_ShowPacksInChildController
     {
         internal static event Action AllPacksViewSelectedEvent;
-        internal static void Prefix(ref IReadOnlyList<IBeatmapLevelPack> beatmapLevelPacks, ref SelectLevelCategoryViewController ____selectLevelCategoryViewController)
+
+        internal static void Prefix(ref IReadOnlyList<BeatmapLevelPack> beatmapLevelPacks, ref SelectLevelCategoryViewController ____selectLevelCategoryViewController)
         {
             if (____selectLevelCategoryViewController.selectedLevelCategory == SelectLevelCategoryViewController.LevelCategory.CustomSongs)
             {
-                beatmapLevelPacks = beatmapLevelPacks.ToArray().AddRangeToArray(PlaylistLibUtils.TryGetAllPlaylists());
+                beatmapLevelPacks = beatmapLevelPacks.ToArray().AddRangeToArray(PlaylistLibUtils.TryGetAllPlaylistsAsLevelPacks());
                 AllPacksViewSelectedEvent?.Invoke();
             }
         }

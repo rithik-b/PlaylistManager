@@ -21,7 +21,7 @@ namespace PlaylistManager.UI
             Loader.SongsLoadedEvent += SongsLoaded;
         }
 
-        private async void SongsLoaded(Loader _, System.Collections.Concurrent.ConcurrentDictionary<string, CustomPreviewBeatmapLevel> songs)
+        private async void SongsLoaded(Loader _, System.Collections.Concurrent.ConcurrentDictionary<string, BeatmapLevel> songs)
         {
             if (progressBar == null)
             {
@@ -37,7 +37,7 @@ namespace PlaylistManager.UI
             await Task.Yield();
 
             progressBar.enabled = true;
-            progressBar.ShowMessage($"\n{numPlaylists} playlists loaded.", kMessageTime);
+            progressBar.ShowMessage($"\n{numPlaylists} playlists loaded.", kMessageTime, false);
         }
 
         public void Dispose()

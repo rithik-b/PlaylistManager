@@ -2,7 +2,6 @@
 using HMUI;
 using PlaylistManager.HarmonyPatches;
 using PlaylistManager.Interfaces;
-using PlaylistManager.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +15,7 @@ namespace PlaylistManager.UI
         private readonly IconSegmentedControl beatmapCharacteristicSegmentedControl;
         private BeatmapDifficultySegmentedControlController beatmapDifficultySegmentedControlController;
         private SegmentedControl beatmapDifficultySegmentedControl;
-        private PlaylistSong selectedPlaylistSong;
+        private IPlaylistSong selectedPlaylistSong;
 
         internal event Action<bool> selectedDifficultyChanged;
 
@@ -43,11 +42,11 @@ namespace PlaylistManager.UI
             BeatmapDifficultySegmentedControlController_SetData.CharacteristicsSegmentedControllerDataSetEvent -= BeatmapDifficultySegmentedControlController_CharacteristicsSegmentedControllerDataSetEvent;
         }
 
-        public void PreviewBeatmapLevelUpdated(IPreviewBeatmapLevel beatmapLevel)
+        public void PreviewBeatmapLevelUpdated(BeatmapLevel beatmapLevel)
         {
-            if (beatmapLevel is PlaylistSong selectedPlaylistSong)
+            if (beatmapLevel is PlaylistLevel selectedPlaylistSong)
             {
-                this.selectedPlaylistSong = selectedPlaylistSong;
+                this.selectedPlaylistSong = selectedPlaylistSong.playlistSong;
             }
             else
             {

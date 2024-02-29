@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using HarmonyLib;
 
 namespace PlaylistManager.HarmonyPatches
@@ -7,25 +8,11 @@ namespace PlaylistManager.HarmonyPatches
     [HarmonyPatch("SetData", MethodType.Normal)]
     public class LevelCollectionViewController_SetData
     {
-        internal static IReadOnlyCollection<IPreviewBeatmapLevel> beatmapLevels;
-        internal static void Prefix(ref IBeatmapLevelCollection beatmapLevelCollection)
+        internal static IReadOnlyCollection<BeatmapLevel> beatmapLevels { get; private set; }
+        
+        internal static void Prefix(ref BeatmapLevel[] beatmapLevels)
         {
-            if (beatmapLevelCollection == null)
-            {
-                beatmapLevels = new IPreviewBeatmapLevel[0];
-            }
-            else if (beatmapLevelCollection is BeatSaberPlaylistsLib.Legacy.LegacyPlaylist legacyPlaylist)
-            {
-                beatmapLevels = legacyPlaylist.BeatmapLevels;
-            }
-            else if (beatmapLevelCollection is BeatSaberPlaylistsLib.Blist.BlistPlaylist blistPlaylist)
-            {
-                beatmapLevels = blistPlaylist.BeatmapLevels;
-            }
-            else
-            {
-                beatmapLevels = beatmapLevelCollection.beatmapLevels;
-            }
+            LevelCollectionViewController_SetData.beatmapLevels = beatmapLevels ?? Array.Empty<BeatmapLevel>();
         }
     }
 }
