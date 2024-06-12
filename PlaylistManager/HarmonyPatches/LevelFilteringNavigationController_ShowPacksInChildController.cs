@@ -6,15 +6,14 @@ using System;
 
 namespace PlaylistManager.HarmonyPatches
 {
-    [HarmonyPatch(typeof(LevelFilteringNavigationController))]
-    [HarmonyPatch("ShowPacksInSecondChildController", MethodType.Normal)]
+    [HarmonyPatch(typeof(LevelFilteringNavigationController), nameof(LevelFilteringNavigationController.ShowPacksInSecondChildController))]
     public class LevelFilteringNavigationController_ShowPacksInChildController
     {
         internal static event Action AllPacksViewSelectedEvent;
 
-        internal static void Prefix(ref IReadOnlyList<BeatmapLevelPack> beatmapLevelPacks, ref SelectLevelCategoryViewController ____selectLevelCategoryViewController)
+        internal static void Prefix(LevelFilteringNavigationController __instance, ref IReadOnlyList<BeatmapLevelPack> beatmapLevelPacks)
         {
-            if (____selectLevelCategoryViewController.selectedLevelCategory == SelectLevelCategoryViewController.LevelCategory.CustomSongs)
+            if (__instance._selectLevelCategoryViewController.selectedLevelCategory == SelectLevelCategoryViewController.LevelCategory.CustomSongs)
             {
                 beatmapLevelPacks = beatmapLevelPacks.ToArray().AddRangeToArray(PlaylistLibUtils.TryGetAllPlaylistsAsLevelPacks());
                 AllPacksViewSelectedEvent?.Invoke();

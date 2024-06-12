@@ -1,19 +1,16 @@
 ﻿using HarmonyLib;
-using HMUI;
 using System;
 using System.Linq;
 
 namespace PlaylistManager.HarmonyPatches
 {
-    [HarmonyPatch(typeof(LevelCollectionTableView), "HandleDidSelectRowEvent",
-        new Type[] {
-        typeof(TableView), typeof(int)})]
+    [HarmonyPatch(typeof(LevelCollectionTableView), nameof(LevelCollectionTableView.HandleDidSelectRowEvent))]
     public class LevelCollectionTableView_HandleDidSelectRowEvent
     {
         internal static event Action<BeatmapLevel> DidSelectLevelEvent;
-        internal static void Prefix(int row, bool ____showLevelPackHeader)
+        internal static void Prefix(LevelCollectionTableView __instance, int row)
         {
-            if (____showLevelPackHeader)
+            if (__instance._showLevelPackHeader)
             {
                 row--;
             }

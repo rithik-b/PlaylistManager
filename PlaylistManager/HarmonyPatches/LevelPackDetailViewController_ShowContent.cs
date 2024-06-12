@@ -1,6 +1,5 @@
 ﻿using BeatSaberPlaylistsLib.Types;
 using HarmonyLib;
-using HMUI;
 using PlaylistManager.Configuration;
 using UnityEngine;
 
@@ -9,17 +8,17 @@ namespace PlaylistManager.HarmonyPatches
     [HarmonyPatch(typeof(LevelPackDetailViewController), nameof(LevelPackDetailViewController.ShowContent))]
     internal class LevelPackDetailViewController_ShowContent
     {
-        private static bool Prefix(LevelPackDetailViewController.ContentType contentType, BeatmapLevelPack ____pack, ImageView ____packImage, Sprite ____blurredPackArtwork, GameObject ____detailWrapper, LoadingControl ____loadingControl)
+        private static bool Prefix(LevelPackDetailViewController __instance, LevelPackDetailViewController.ContentType contentType)
         {
-            if (contentType == LevelPackDetailViewController.ContentType.Owned && ____pack is PlaylistLevelPack)
+            if (contentType == LevelPackDetailViewController.ContentType.Owned && __instance._pack is PlaylistLevelPack)
             {
                 if (PluginConfig.Instance.BlurredArt)
                 {
-                    ____packImage.sprite = ____blurredPackArtwork;
+                    __instance._packImage.sprite = __instance._blurredPackArtwork;
                 }
-                ____packImage.color = new Color(0.5f, 0.5f, 0.5f, 1f);
-                ____loadingControl.Hide();
-                ____detailWrapper.SetActive(true);
+                __instance._packImage.color = new Color(0.5f, 0.5f, 0.5f, 1f);
+                __instance._loadingControl.Hide();
+                __instance._detailWrapper.SetActive(true);
                 return false;
             }
             return true;

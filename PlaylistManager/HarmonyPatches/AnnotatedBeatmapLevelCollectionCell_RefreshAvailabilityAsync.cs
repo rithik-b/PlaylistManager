@@ -13,9 +13,9 @@ namespace PlaylistManager.HarmonyPatches
     [HarmonyPatch(typeof(AnnotatedBeatmapLevelCollectionCell), nameof(AnnotatedBeatmapLevelCollectionCell.RefreshAvailabilityAsync))]
     internal class AnnotatedBeatmapLevelCollectionCell_RefreshAvailabilityAsync
     {
-        private static void Postfix(AnnotatedBeatmapLevelCollectionCell __instance, BeatmapLevelPack ____beatmapLevelPack)
+        private static void Postfix(AnnotatedBeatmapLevelCollectionCell __instance)
         {
-            if (____beatmapLevelPack is PlaylistLevelPack playlistLevelPack)
+            if (__instance._beatmapLevelPack is PlaylistLevelPack playlistLevelPack)
             {
                 __instance.SetDownloadIconVisible(PluginConfig.Instance.ShowDownloadIcon && PlaylistLibUtils.GetMissingSongs(playlistLevelPack.playlist).Count > 0);
             }
