@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using BeatSaberPlaylistsLib.Types;
+using HarmonyLib;
 using HMUI;
 using PlaylistManager.Configuration;
 using UnityEngine;
@@ -10,7 +11,7 @@ namespace PlaylistManager.HarmonyPatches
     {
         private static bool Prefix(LevelPackDetailViewController.ContentType contentType, BeatmapLevelPack ____pack, ImageView ____packImage, Sprite ____blurredPackArtwork, GameObject ____detailWrapper, LoadingControl ____loadingControl)
         {
-            if (contentType == LevelPackDetailViewController.ContentType.Owned && ____pack is BeatSaberPlaylistsLib.Types.IPlaylist)
+            if (contentType == LevelPackDetailViewController.ContentType.Owned && ____pack is PlaylistLevelPack)
             {
                 if (PluginConfig.Instance.BlurredArt)
                 {

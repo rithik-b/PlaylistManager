@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using BeatSaberPlaylistsLib.Types;
+using HarmonyLib;
 using PlaylistManager.Configuration;
 using PlaylistManager.Utilities;
 
@@ -14,9 +15,9 @@ namespace PlaylistManager.HarmonyPatches
     {
         private static void Postfix(AnnotatedBeatmapLevelCollectionCell __instance, BeatmapLevelPack ____beatmapLevelPack)
         {
-            if (____beatmapLevelPack is BeatSaberPlaylistsLib.Types.IPlaylist playlist)
+            if (____beatmapLevelPack is PlaylistLevelPack playlistLevelPack)
             {
-                __instance.SetDownloadIconVisible(PluginConfig.Instance.ShowDownloadIcon && PlaylistLibUtils.GetMissingSongs(playlist).Count > 0);
+                __instance.SetDownloadIconVisible(PluginConfig.Instance.ShowDownloadIcon && PlaylistLibUtils.GetMissingSongs(playlistLevelPack.playlist).Count > 0);
             }
         }
     }
