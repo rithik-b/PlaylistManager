@@ -12,10 +12,10 @@
     "icon": "PlaylistManager.Icons.Logo.png",
     "dependsOn": {
         "BSIPA": "^4.3.0",
-        "SongCore": "^3.9.5",
+        "SongCore": "^3.14.5",
         "BeatSaberMarkupLanguage": "^1.7.5",
         "SiraUtil": "^3.0.0",
-        "BeatSaberPlaylistsLib": "^1.6.8",
+        "BeatSaberPlaylistsLib": "^1.7.0",
         "BeatSaverSharp": "^3.4.5",
         "System.IO.Compression": "^4.6.57",
         "System.IO.Compression.FileSystem": "^4.7.3056"

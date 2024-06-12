@@ -3,16 +3,20 @@ using PlaylistManager.Utilities;
 using SongCore;
 using SongCore.UI;
 using System;
-using System.Threading.Tasks;
 using Zenject;
 
 namespace PlaylistManager.UI
 {
     public class RefreshButtonUI : IInitializable, IDisposable
     {
+        private readonly ProgressBar _progressBar;
+
         private MenuButton refreshButton;
-        private ProgressBar progressBar;
-        private const int kMessageTime = 5;
+
+        private RefreshButtonUI(ProgressBar progressBar)
+        {
+            _progressBar = progressBar;
+        }
 
         public void Initialize()
         {
@@ -21,28 +25,15 @@ namespace PlaylistManager.UI
             Loader.SongsLoadedEvent += SongsLoaded;
         }
 
-        private async void SongsLoaded(Loader _, System.Collections.Concurrent.ConcurrentDictionary<string, BeatmapLevel> songs)
+        private void SongsLoaded(Loader _, System.Collections.Concurrent.ConcurrentDictionary<string, BeatmapLevel> songs)
         {
-            if (progressBar == null)
-            {
-                progressBar = ProgressBar.Create();
-            }
-
             PlaylistLibUtils.playlistManager.RefreshPlaylists(true);
             var numPlaylists = PlaylistLibUtils.playlistManager.GetPlaylistCount(true);
-
-            // This event handler is loading sprites and accessing Unity objects so it must be done on the main thread.
-            // Although SongsLoadedEvent is already invoked on the main thread, the default event handler in ProgressBar
-            // will overwrite our message. We're essentially skipping a frame to let the default event handler run first.
-            await Task.Yield();
-
-            progressBar.enabled = true;
-            progressBar.ShowMessage($"\n{numPlaylists} playlists loaded.", kMessageTime, false);
+            _progressBar.AppendText($"\n{numPlaylists} playlists loaded");
         }
 
         public void Dispose()
         {
-            UnityEngine.Object.Destroy(progressBar);
             MenuButtons.instance.UnregisterButton(refreshButton);
             Loader.SongsLoadedEvent -= SongsLoaded;
         }
