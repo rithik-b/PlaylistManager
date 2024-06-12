@@ -1,4 +1,5 @@
-﻿using SiraUtil.Affinity;
+﻿using System;
+using SiraUtil.Affinity;
 using UnityEngine;
 
 namespace PlaylistManager.AffinityPatches
@@ -65,7 +66,15 @@ namespace PlaylistManager.AffinityPatches
         [AffinityPatch(typeof(AnnotatedBeatmapLevelCollectionsGridViewAnimator), nameof(AnnotatedBeatmapLevelCollectionsGridViewAnimator.GetContentXOffset))]
         private void ComputeNewXOffset(AnnotatedBeatmapLevelCollectionsGridViewAnimator __instance, ref float __result)
         {
-            // TODO
+            var zeroOffset = (__instance._columnCount - 1) / 2f;
+            var maxMove = (__instance._columnCount - __instance._visibleColumnCount) / 2f;
+            var toMove = zeroOffset - __instance._selectedColumn;
+            if (__instance._visibleColumnCount % 2 == 0)
+            {
+                toMove -= 0.5f;
+            }
+
+            __result = Math.Clamp(toMove, -maxMove, maxMove) * __instance._columnWidth;
         }
     }
 }
