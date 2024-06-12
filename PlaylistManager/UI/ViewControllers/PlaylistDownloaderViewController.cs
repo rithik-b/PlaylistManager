@@ -56,14 +56,14 @@ namespace PlaylistManager.UI
         {
             playlistDownloader.PopupEvent += OnPopupRequested;
             playlistDownloader.QueueUpdatedEvent += UpdateQueue;
-            SongCore_MenuLoaded.MenuLoadedEvent += OnMenuLoaded;
+            SceneManager.activeSceneChanged += OnMenuLoaded;
         }
 
         public void Dispose()
         {
             playlistDownloader.PopupEvent -= OnPopupRequested;
             playlistDownloader.QueueUpdatedEvent -= UpdateQueue;
-            SongCore_MenuLoaded.MenuLoadedEvent -= OnMenuLoaded;
+            SceneManager.activeSceneChanged -= OnMenuLoaded;
         }
 
         [UIAction("#post-parse")]
@@ -113,9 +113,9 @@ namespace PlaylistManager.UI
             }
         }
 
-        private void OnMenuLoaded()
+        private void OnMenuLoaded(Scene previousScene, Scene newScene)
         {
-            if (refreshRequested)
+            if (refreshRequested && newScene.name == "MainMenu")
             {
                 refreshRequested = false;
                 playlistDownloader.OnQueueClear();
