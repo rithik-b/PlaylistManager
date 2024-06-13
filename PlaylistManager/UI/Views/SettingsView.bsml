@@ -2,7 +2,7 @@
 	<horizontal anchor-min-y='1'  bg='panel-top' pad-left='10' pad-right='10' horizontal-fit='PreferredSize'>
 		<text text='PlaylistManager Settings' align='Center' italics='true' font-size='8' />
 	</horizontal>
-	<settings-container size-delta='-50 -15' anchor-pos-y='2' vertical-fit='PreferredSize' child-control-height='true'>
+	<settings-container size-delta='-50 -18' anchor-pos-y='5' vertical-fit='PreferredSize' child-control-height='true'>
 		<text text='Default Playlist Settings' align='Left' italics='true' font-size='5' />
 		<vertical background='round-rect-panel' background-color='white' pad='2'>
 			<checkbox value='no-image' text='Disable Default Icon' hover-hint='Do not add the default playlist image for new playlists.' apply-on-change='true' bind-value='true' />
@@ -26,7 +26,9 @@
 			<checkbox value='easter-eggs' text='Easter Eggs' hover-hint='Enable easter eggs in this mod.' apply-on-change='true' bind-value='true' />
 		</vertical>
 	</settings-container>
-	<text anchor-pos-x='55' anchor-pos-y='-47' text='The game will perform a soft restart after applying these settings. Are you sure?' italics='true' color='red' active='~soft-restart' />
+	<horizontal anchor-min='0 0' anchor-max='1 0' anchored-position='0 13'>
+		<text text='The game will perform a soft restart after applying these settings. Are you sure?' italics='true' color='red' active='~soft-restart' align='Center' />
+	</horizontal>
 	<horizontal horizontal-fit='PreferredSize' child-control-height='false' child-expand-height='false' child-align='MiddleCenter' anchor-min-x='0.5' anchor-max-x='0.5' anchor-min-y='0' anchor-max-y='0' size-delta-x='120' size-delta-y='10' pivot-y='0' spacing='2'>
 		<button text='Cancel' pref-width='34' pref-height='10' on-click='cancel-click' />
 		<action-button text='Ok' pref-width='34' pref-height='10' on-click='ok-click' />
