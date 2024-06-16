@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Reflection.Emit;
+using HarmonyLib;
 using SiraUtil.Affinity;
+using SongCore.Utilities;
 using UnityEngine;
 
 namespace PlaylistManager.AffinityPatches
@@ -49,7 +53,6 @@ namespace PlaylistManager.AffinityPatches
             if (selectedLevelCategory == SelectLevelCategoryViewController.LevelCategory.CustomSongs)
             {
                 animator._viewportTransform.localPosition = new Vector3(-animator._columnWidth / 2, 0, 0);
-                // TODO: When adding enough columns to make it only one row, the scroll and animation are broken.
                 __instance._gridView._columnCount += 10;
                 __instance._gridView._visibleColumnCount -= 1;
             }
@@ -75,6 +78,19 @@ namespace PlaylistManager.AffinityPatches
             }
 
             __result = Math.Clamp(toMove, -maxMove, maxMove) * __instance._columnWidth;
+        }
+
+        [AffinityPatch(typeof(AnnotatedBeatmapLevelCollectionsGridView), nameof(AnnotatedBeatmapLevelCollectionsGridView.OnPointerEnter))]
+        [AffinityPatch(typeof(AnnotatedBeatmapLevelCollectionsGridView), nameof(AnnotatedBeatmapLevelCollectionsGridView.OnPointerExit))]
+        [AffinityPatch(typeof(AnnotatedBeatmapLevelCollectionsGridView), nameof(AnnotatedBeatmapLevelCollectionsGridView.HandleCellSelectionDidChange))]
+        [AffinityTranspiler]
+        private IEnumerable<CodeInstruction> OpenCollectionWithOneRow(IEnumerable<CodeInstruction> instructions)
+        {
+            return new CodeMatcher(instructions)
+                .MatchStartForward(new CodeMatch(OpCodes.Ldc_I4_1))
+                .ThrowIfInvalid()
+                .SetOpcodeAndAdvance(OpCodes.Ldc_I4_0)
+                .InstructionEnumeration();
         }
     }
 }
