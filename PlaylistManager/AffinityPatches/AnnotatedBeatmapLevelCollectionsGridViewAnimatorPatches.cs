@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
 using SiraUtil.Affinity;
@@ -90,6 +91,22 @@ namespace PlaylistManager.AffinityPatches
                 .MatchStartForward(new CodeMatch(OpCodes.Ldc_I4_1))
                 .ThrowIfInvalid()
                 .SetOpcodeAndAdvance(OpCodes.Ldc_I4_0)
+                .InstructionEnumeration();
+        }
+
+        [AffinityPatch(typeof(AnnotatedBeatmapLevelCollectionsGridViewAnimator), nameof(AnnotatedBeatmapLevelCollectionsGridViewAnimator.AnimateOpen))]
+        [AffinityTranspiler]
+        private IEnumerable<CodeInstruction> FixViewportWidth(IEnumerable<CodeInstruction> instructions)
+        {
+            return new CodeMatcher(instructions)
+                .MatchStartForward(new CodeMatch(i => i.opcode == OpCodes.Call && i.operand as ConstructorInfo == AccessTools.Constructor(typeof(Vector2), new[] { typeof(float), typeof(float) })))
+                .ThrowIfInvalid()
+                .Advance(-2)
+                .RemoveInstruction()
+                .Insert(
+                    new CodeInstruction(OpCodes.Ldarg_0),
+                    Transpilers.EmitDelegate<Func<AnnotatedBeatmapLevelCollectionsGridViewAnimator, float>>(animator =>
+                        ((animator._columnCount - animator._visibleColumnCount) * 2 + animator._visibleColumnCount) * animator._columnWidth))
                 .InstructionEnumeration();
         }
     }
