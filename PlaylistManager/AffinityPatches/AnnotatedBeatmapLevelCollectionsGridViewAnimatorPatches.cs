@@ -14,9 +14,8 @@ namespace PlaylistManager.AffinityPatches
         private readonly AnnotatedBeatmapLevelCollectionsViewController _annotatedBeatmapLevelCollectionsTableViewController;
         private readonly SelectLevelCategoryViewController _selectLevelCategoryViewController;
 
-        private SelectLevelCategoryViewController.LevelCategory _lastSelectedLevelCategory;
-        private int _initialColumnCount;
-        private int _initialVisibleColumnCount;
+        private int _originalColumnCount;
+        private bool _isGridViewResized;
 
         public AnnotatedBeatmapLevelCollectionsGridViewAnimatorPatches(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsTableViewController, SelectLevelCategoryViewController selectLevelCategoryViewController)
         {
@@ -24,47 +23,55 @@ namespace PlaylistManager.AffinityPatches
             _selectLevelCategoryViewController = selectLevelCategoryViewController;
         }
 
+        // TODO: Doesn't resize on internal restart.
         [AffinityPatch(typeof(AnnotatedBeatmapLevelCollectionsGridView), nameof(AnnotatedBeatmapLevelCollectionsGridView.SetData))]
         [AffinityPrefix]
-        private void AddColumnsAndResize(AnnotatedBeatmapLevelCollectionsGridView __instance)
+        private void AddColumnsAndResize(AnnotatedBeatmapLevelCollectionsGridView __instance, IReadOnlyList<BeatmapLevelPack> annotatedBeatmapLevelCollections)
         {
-            Plugin.Log.Notice($"Column count: {__instance._gridView._columnCount} Row count: {__instance._gridView._rowCount}");
+            if (__instance._gridView._dataSource == null)
+            {
+                return;
+            }
+
+            if (_originalColumnCount == default)
+            {
+                _originalColumnCount = __instance._gridView._columnCount;
+            }
 
             var selectedLevelCategory = _selectLevelCategoryViewController.selectedLevelCategory;
-            if (_lastSelectedLevelCategory == selectedLevelCategory)
-            {
-                return;
-            }
-
-            // Not sure why this could be called with values of 0.
             var animator = _annotatedBeatmapLevelCollectionsTableViewController._annotatedBeatmapLevelCollectionsGridView._animator;
-            if (animator._columnCount == 0 || animator._visibleColumnCount == 0)
-            {
-                return;
-            }
-
-            if (_initialColumnCount == 0 && _initialVisibleColumnCount == 0)
-            {
-                _initialColumnCount = animator._columnCount;
-                _initialVisibleColumnCount = animator._visibleColumnCount;
-            }
-
-            _lastSelectedLevelCategory = selectedLevelCategory;
 
             if (selectedLevelCategory == SelectLevelCategoryViewController.LevelCategory.CustomSongs)
             {
-                animator._viewportTransform.localPosition = new Vector3(-animator._columnWidth / 2, 0, 0);
-                __instance._gridView._columnCount += 10;
-                __instance._gridView._visibleColumnCount -= 1;
+                // Number of columns for max visible row count before it starts clipping with the ground.
+                __instance._gridView._columnCount = Mathf.CeilToInt((annotatedBeatmapLevelCollections?.Count ?? 0) / 5f);
+
+                if (!_isGridViewResized)
+                {
+                    __instance._gridView._visibleColumnCount -= 1;
+
+                    var rectTransform = (RectTransform)__instance._gridView.transform;
+                    rectTransform.sizeDelta -= new Vector2(animator._columnWidth, 0);
+                    rectTransform.anchoredPosition -= new Vector2(animator._columnWidth / 2, 0);
+
+                    _isGridViewResized = true;
+                }
             }
             else if (selectedLevelCategory == SelectLevelCategoryViewController.LevelCategory.MusicPacks)
             {
-                animator._viewportTransform.localPosition = Vector3.zero;
-                __instance._gridView._columnCount = _initialColumnCount;
-                __instance._gridView._visibleColumnCount = _initialVisibleColumnCount;
-            }
+                __instance._gridView._columnCount = _originalColumnCount;
 
-            Plugin.Log.Notice($"Column count is now {__instance._gridView._columnCount}");
+                if (_isGridViewResized)
+                {
+                    __instance._gridView._visibleColumnCount += 1;
+
+                    var rectTransform = (RectTransform)__instance._gridView.transform;
+                    rectTransform.sizeDelta += new Vector2(animator._columnWidth, 0);
+                    rectTransform.anchoredPosition += new Vector2(animator._columnWidth / 2, 0);
+
+                    _isGridViewResized = false;
+                }
+            }
         }
 
         [AffinityPatch(typeof(AnnotatedBeatmapLevelCollectionsGridViewAnimator), nameof(AnnotatedBeatmapLevelCollectionsGridViewAnimator.GetContentXOffset))]
