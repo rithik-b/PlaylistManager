@@ -11,37 +11,27 @@ namespace PlaylistManager.AffinityPatches
 {
     public class AnnotatedBeatmapLevelCollectionsGridViewAnimatorPatches : IAffinity
     {
-        private readonly AnnotatedBeatmapLevelCollectionsViewController _annotatedBeatmapLevelCollectionsTableViewController;
         private readonly SelectLevelCategoryViewController _selectLevelCategoryViewController;
 
         private int _originalColumnCount;
         private Vector2 _originalScreenSize;
         private bool _isGridViewResized;
 
-        public AnnotatedBeatmapLevelCollectionsGridViewAnimatorPatches(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsTableViewController, SelectLevelCategoryViewController selectLevelCategoryViewController)
+        public AnnotatedBeatmapLevelCollectionsGridViewAnimatorPatches(SelectLevelCategoryViewController selectLevelCategoryViewController)
         {
-            _annotatedBeatmapLevelCollectionsTableViewController = annotatedBeatmapLevelCollectionsTableViewController;
             _selectLevelCategoryViewController = selectLevelCategoryViewController;
         }
 
-        // TODO: Doesn't resize on internal restart.
         [AffinityPatch(typeof(AnnotatedBeatmapLevelCollectionsGridView), nameof(AnnotatedBeatmapLevelCollectionsGridView.SetData))]
         [AffinityPrefix]
-        private void AddColumnsAndResize(AnnotatedBeatmapLevelCollectionsGridView __instance, IReadOnlyList<BeatmapLevelPack> annotatedBeatmapLevelCollections)
+        private void ResizeGridView(AnnotatedBeatmapLevelCollectionsGridView __instance, IReadOnlyList<BeatmapLevelPack> annotatedBeatmapLevelCollections)
         {
-            if (__instance._gridView._dataSource == null)
-            {
-                return;
-            }
-
             if (_originalColumnCount == default)
             {
                 _originalColumnCount = __instance._gridView._columnCount;
             }
 
             var selectedLevelCategory = _selectLevelCategoryViewController.selectedLevelCategory;
-            var animator = _annotatedBeatmapLevelCollectionsTableViewController._annotatedBeatmapLevelCollectionsGridView._animator;
-
             if (selectedLevelCategory == SelectLevelCategoryViewController.LevelCategory.CustomSongs)
             {
                 // Number of columns for max visible row count before it starts clipping with the ground.
@@ -52,8 +42,8 @@ namespace PlaylistManager.AffinityPatches
                     __instance._gridView._visibleColumnCount -= 1;
 
                     var rectTransform = (RectTransform)__instance._gridView.transform;
-                    rectTransform.sizeDelta -= new Vector2(animator._columnWidth, 0);
-                    rectTransform.anchoredPosition -= new Vector2(animator._columnWidth / 2, 0);
+                    rectTransform.sizeDelta -= new Vector2(__instance._cellWidth, 0);
+                    rectTransform.anchoredPosition -= new Vector2(__instance._cellWidth / 2, 0);
 
                     _isGridViewResized = true;
                 }
@@ -67,8 +57,8 @@ namespace PlaylistManager.AffinityPatches
                     __instance._gridView._visibleColumnCount += 1;
 
                     var rectTransform = (RectTransform)__instance._gridView.transform;
-                    rectTransform.sizeDelta += new Vector2(animator._columnWidth, 0);
-                    rectTransform.anchoredPosition += new Vector2(animator._columnWidth / 2, 0);
+                    rectTransform.sizeDelta += new Vector2(__instance._cellWidth, 0);
+                    rectTransform.anchoredPosition += new Vector2(__instance._cellWidth / 2, 0);
 
                     _isGridViewResized = false;
                 }
