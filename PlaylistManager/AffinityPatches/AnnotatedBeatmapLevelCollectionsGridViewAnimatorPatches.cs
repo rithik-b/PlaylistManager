@@ -15,6 +15,7 @@ namespace PlaylistManager.AffinityPatches
         private readonly SelectLevelCategoryViewController _selectLevelCategoryViewController;
 
         private int _originalColumnCount;
+        private Vector2 _originalScreenSize;
         private bool _isGridViewResized;
 
         public AnnotatedBeatmapLevelCollectionsGridViewAnimatorPatches(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsTableViewController, SelectLevelCategoryViewController selectLevelCategoryViewController)
@@ -115,6 +116,31 @@ namespace PlaylistManager.AffinityPatches
                     Transpilers.EmitDelegate<Func<AnnotatedBeatmapLevelCollectionsGridViewAnimator, float>>(animator =>
                         ((animator._columnCount - animator._visibleColumnCount) * 2 + animator._visibleColumnCount) * animator._columnWidth))
                 .InstructionEnumeration();
+        }
+
+        [AffinityPatch(typeof(AnnotatedBeatmapLevelCollectionsGridViewAnimator), nameof(AnnotatedBeatmapLevelCollectionsGridViewAnimator.AnimateOpen))]
+        private void ChangeScreenSize(AnnotatedBeatmapLevelCollectionsGridViewAnimator __instance)
+        {
+            if (_isGridViewResized)
+            {
+                var rectTransform = (RectTransform)_selectLevelCategoryViewController.transform;
+                if (rectTransform.anchorMin.x == 0 || rectTransform.anchorMax.x == 0)
+                {
+                    var localPosition = rectTransform.localPosition;
+                    rectTransform.anchorMin = new Vector2(0.5f, rectTransform.anchorMin.y);
+                    rectTransform.anchorMax = new Vector2(0.5f, rectTransform.anchorMax.y);
+                    rectTransform.localPosition = localPosition;
+                }
+
+                rectTransform = (RectTransform)__instance.gameObject.GetComponentInParent<HMUI.Screen>().transform;
+
+                if (_originalScreenSize == default)
+                {
+                    _originalScreenSize = rectTransform.sizeDelta;
+                }
+
+                rectTransform.sizeDelta = new Vector2(_originalScreenSize.x + (__instance._columnCount - __instance._visibleColumnCount - 1) * __instance._columnWidth * 2, _originalScreenSize.y);
+            }
         }
     }
 }
