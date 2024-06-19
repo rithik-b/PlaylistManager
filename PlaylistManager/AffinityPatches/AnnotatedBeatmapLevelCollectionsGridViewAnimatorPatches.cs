@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
 using SiraUtil.Affinity;
@@ -93,24 +92,18 @@ namespace PlaylistManager.AffinityPatches
         }
 
         [AffinityPatch(typeof(AnnotatedBeatmapLevelCollectionsGridViewAnimator), nameof(AnnotatedBeatmapLevelCollectionsGridViewAnimator.AnimateOpen))]
-        [AffinityTranspiler]
-        private IEnumerable<CodeInstruction> FixViewportWidth(IEnumerable<CodeInstruction> instructions)
+        private void ChangeGridAndScreenSize(AnnotatedBeatmapLevelCollectionsGridViewAnimator __instance, bool animated)
         {
-            return new CodeMatcher(instructions)
-                .MatchStartForward(new CodeMatch(i => i.opcode == OpCodes.Call && i.operand as ConstructorInfo == AccessTools.Constructor(typeof(Vector2), new[] { typeof(float), typeof(float) })))
-                .ThrowIfInvalid()
-                .Advance(-2)
-                .RemoveInstruction()
-                .Insert(
-                    new CodeInstruction(OpCodes.Ldarg_0),
-                    Transpilers.EmitDelegate<Func<AnnotatedBeatmapLevelCollectionsGridViewAnimator, float>>(animator =>
-                        ((animator._columnCount - animator._visibleColumnCount) * 2 + animator._visibleColumnCount) * animator._columnWidth))
-                .InstructionEnumeration();
-        }
+            var x = ((__instance._columnCount - __instance._visibleColumnCount) * 2 + __instance._visibleColumnCount) * __instance._columnWidth;
+            if (animated)
+            {
+                __instance._viewportSizeTween.toValue = new Vector2(x, __instance._viewportSizeTween.toValue.y);
+            }
+            else
+            {
+                __instance._viewportTransform.sizeDelta = new Vector2(x, __instance._viewportTransform.sizeDelta.y);
+            }
 
-        [AffinityPatch(typeof(AnnotatedBeatmapLevelCollectionsGridViewAnimator), nameof(AnnotatedBeatmapLevelCollectionsGridViewAnimator.AnimateOpen))]
-        private void ChangeScreenSize(AnnotatedBeatmapLevelCollectionsGridViewAnimator __instance)
-        {
             if (_isGridViewResized)
             {
                 var rectTransform = (RectTransform)_selectLevelCategoryViewController.transform;
