@@ -2,11 +2,10 @@
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using HMUI;
-using PlaylistManager.HarmonyPatches;
-using PlaylistManager.Utilities;
 using System;
-using System.Reflection;
+using IPA.Loader;
 using PlaylistManager.Downloaders;
+using SiraUtil.Zenject;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Zenject;
@@ -17,6 +16,8 @@ namespace PlaylistManager.UI
     {
         private PlaylistSequentialDownloader playlistDownloader;
         private PopupModalsController popupModalsController;
+        private PluginMetadata pluginMetadata;
+        private BSMLParser bsmlParser;
         private bool parsed;
         private bool refreshRequested;
 
@@ -27,17 +28,19 @@ namespace PlaylistManager.UI
         private readonly RectTransform rootTransform;
 
         [Inject]
-        internal void Construct(PlaylistSequentialDownloader playlistDownloader, PopupModalsController popupModalsController)
+        internal void Construct(PlaylistSequentialDownloader playlistDownloader, PopupModalsController popupModalsController, UBinder<Plugin, PluginMetadata> pluginMetadata, BSMLParser bsmlParser)
         {
             this.playlistDownloader = playlistDownloader;
             this.popupModalsController = popupModalsController;
+            this.pluginMetadata = pluginMetadata.Value;
+            this.bsmlParser = bsmlParser;
         }
 
         public void SetParent(Transform parent, Vector3? scale = null)
         {
             if (!parsed)
             {
-                BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.PlaylistDownloaderView.bsml"), parent.gameObject, this);
+                bsmlParser.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(pluginMetadata.Assembly, "PlaylistManager.UI.Views.PlaylistDownloaderView.bsml"), parent.gameObject, this);
             }
             rootTransform.SetParent(parent, false);
             rootTransform.localScale = scale ?? Vector3.one;

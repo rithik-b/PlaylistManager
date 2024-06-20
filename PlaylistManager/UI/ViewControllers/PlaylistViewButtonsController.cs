@@ -6,8 +6,9 @@ using PlaylistManager.Interfaces;
 using PlaylistManager.Utilities;
 using System;
 using System.ComponentModel;
-using System.Reflection;
+using IPA.Loader;
 using PlaylistManager.Downloaders;
+using SiraUtil.Zenject;
 using Tweening;
 using UnityEngine;
 using Zenject;
@@ -27,7 +28,8 @@ namespace PlaylistManager.UI
         private readonly LevelFilteringNavigationController levelFilteringNavigationController;
         private readonly SelectLevelCategoryViewController selectLevelCategoryViewController;
         private readonly IconSegmentedControl levelCategorySegmentedControl;
-
+        private readonly PluginMetadata pluginMetadata;
+        private readonly BSMLParser bsmlParser;
 
         private BeatSaberPlaylistsLib.PlaylistManager parentManager;
         public event PropertyChangedEventHandler PropertyChanged;
@@ -55,7 +57,7 @@ namespace PlaylistManager.UI
 
         public PlaylistViewButtonsController(PopupModalsController popupModalsController, TimeTweeningManager uwuTweenyManager, PlaylistSequentialDownloader playlistDownloader, PlaylistDownloaderViewController playlistDownloaderViewController,
             MainFlowCoordinator mainFlowCoordinator, PlaylistManagerFlowCoordinator playlistManagerFlowCoordinator, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController,
-            LevelFilteringNavigationController levelFilteringNavigationController, SelectLevelCategoryViewController selectLevelCategoryViewController)
+            LevelFilteringNavigationController levelFilteringNavigationController, SelectLevelCategoryViewController selectLevelCategoryViewController, UBinder<Plugin, PluginMetadata> pluginMetadata, BSMLParser bsmlParser)
         {
             this.popupModalsController = popupModalsController;
             this.uwuTweenyManager = uwuTweenyManager;
@@ -68,11 +70,13 @@ namespace PlaylistManager.UI
             this.levelFilteringNavigationController = levelFilteringNavigationController;
             this.selectLevelCategoryViewController = selectLevelCategoryViewController;
             levelCategorySegmentedControl = selectLevelCategoryViewController._levelFilterCategoryIconSegmentedControl;
+            this.pluginMetadata = pluginMetadata.Value;
+            this.bsmlParser = bsmlParser;
         }
 
         public void Initialize()
         {
-            BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.PlaylistViewButtons.bsml"), annotatedBeatmapLevelCollectionsViewController.gameObject, this);
+            bsmlParser.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(pluginMetadata.Assembly, "PlaylistManager.UI.Views.PlaylistViewButtons.bsml"), annotatedBeatmapLevelCollectionsViewController.gameObject, this);
             playlistDownloader.QueueUpdatedEvent += DownloadQueueUpdated;
             playlistDownloader.PopupEvent += TweenButton;
         }

@@ -11,8 +11,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Reflection;
+using IPA.Loader;
 using PlaylistManager.Types;
+using SiraUtil.Zenject;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
@@ -26,7 +27,9 @@ namespace PlaylistManager.UI
         private readonly LevelSelectionNavigationController levelSelectionNavigationController;
         private readonly PopupModalsController popupModalsController;
         private readonly HoverHintController hoverHintController;
-        private BeatmapLevelsModel beatmapLevelsModel;
+        private readonly BeatmapLevelsModel beatmapLevelsModel;
+        private readonly PluginMetadata pluginMetadata;
+        private readonly BSMLParser bsmlParser;
 
         private FloatingScreen floatingScreen;
         private readonly Sprite levelPacksSprite;
@@ -71,7 +74,7 @@ namespace PlaylistManager.UI
 
         public FoldersViewController(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, MainFlowCoordinator mainFlowCoordinator,
             LevelSelectionNavigationController levelSelectionNavigationController, PopupModalsController popupModalsController, HoverHintController hoverHintController,
-            BeatmapLevelsModel beatmapLevelsModel)
+            BeatmapLevelsModel beatmapLevelsModel, UBinder<Plugin, PluginMetadata> pluginMetadata, BSMLParser bsmlParser)
         {
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
             this.mainFlowCoordinator = mainFlowCoordinator;
@@ -79,6 +82,8 @@ namespace PlaylistManager.UI
             this.popupModalsController = popupModalsController;
             this.hoverHintController = hoverHintController;
             this.beatmapLevelsModel = beatmapLevelsModel;
+            this.pluginMetadata = pluginMetadata.Value;
+            this.bsmlParser = bsmlParser;
 
             levelPacksSprite = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.LevelPacks.png");
             customPacksSprite = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.CustomPacks.png");
@@ -97,7 +102,7 @@ namespace PlaylistManager.UI
             transform.eulerAngles = new Vector3(60, 0, 0);
             transform.localScale = new Vector3(0.03f, 0.03f, 0.03f);
 
-            BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.FoldersView.bsml"), floatingScreen.gameObject, this);
+            bsmlParser.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(pluginMetadata.Assembly, "PlaylistManager.UI.Views.FoldersView.bsml"), floatingScreen.gameObject, this);
             LevelFilteringNavigationController_ShowPacksInChildController.AllPacksViewSelectedEvent += LevelFilteringNavigationController_ShowPacksInChildController_AllPacksViewSelectedEvent;
         }
 

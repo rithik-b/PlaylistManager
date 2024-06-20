@@ -11,7 +11,8 @@ using PlaylistManager.Utilities;
 using System;
 using System.ComponentModel;
 using System.IO;
-using System.Reflection;
+using IPA.Loader;
+using SiraUtil.Zenject;
 using UnityEngine;
 using Zenject;
 
@@ -22,6 +23,8 @@ namespace PlaylistManager.UI
         private readonly LevelPackDetailViewController levelPackDetailViewController;
         private readonly ImageSelectionModalController imageSelectionModalController;
         private readonly PopupModalsController popupModalsController;
+        private readonly PluginMetadata pluginMetadata;
+        private readonly BSMLParser bsmlParser;
 
         private bool parsed;
         private IPlaylist selectedPlaylist;
@@ -49,11 +52,13 @@ namespace PlaylistManager.UI
         private readonly BSMLParserParams parserParams;
 
         public PlaylistDetailsViewController(LevelPackDetailViewController levelPackDetailViewController, ImageSelectionModalController imageSelectionModalController,
-            PopupModalsController popupModalsController)
+            PopupModalsController popupModalsController, UBinder<Plugin, PluginMetadata> pluginMetadata, BSMLParser bsmlParser)
         {
             this.levelPackDetailViewController = levelPackDetailViewController;
             this.imageSelectionModalController = imageSelectionModalController;
             this.popupModalsController = popupModalsController;
+            this.pluginMetadata = pluginMetadata.Value;
+            this.bsmlParser = bsmlParser;
             parsed = false;
         }
 
@@ -76,7 +81,7 @@ namespace PlaylistManager.UI
         {
             if (!parsed)
             {
-                BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.PlaylistDetailsView.bsml"), levelPackDetailViewController.transform.Find("Detail").gameObject, this);
+                bsmlParser.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(pluginMetadata.Assembly, "PlaylistManager.UI.Views.PlaylistDetailsView.bsml"), levelPackDetailViewController._detailWrapper.gameObject, this);
                 modalPosition = modalTransform.position;
             }
             modalTransform.position = modalPosition;

@@ -9,19 +9,23 @@ namespace PlaylistManager.UI
 {
     public class RefreshButtonUI : IInitializable, IDisposable
     {
+        private readonly Loader _loader;
         private readonly ProgressBar _progressBar;
+        private readonly MenuButtons _menuButtons;
 
         private MenuButton refreshButton;
 
-        private RefreshButtonUI(ProgressBar progressBar)
+        private RefreshButtonUI(Loader loader, ProgressBar progressBar, MenuButtons menuButtons)
         {
+            _loader = loader;
             _progressBar = progressBar;
+            _menuButtons = menuButtons;
         }
 
         public void Initialize()
         {
             refreshButton = new MenuButton("Refresh Playlists", "Refresh Songs & Playlists", RefreshButtonPressed);
-            MenuButtons.instance.RegisterButton(refreshButton);
+            _menuButtons.RegisterButton(refreshButton);
             Loader.SongsLoadedEvent += SongsLoaded;
         }
 
@@ -34,7 +38,7 @@ namespace PlaylistManager.UI
 
         public void Dispose()
         {
-            MenuButtons.instance.UnregisterButton(refreshButton);
+            _menuButtons.UnregisterButton(refreshButton);
             Loader.SongsLoadedEvent -= SongsLoaded;
         }
 
@@ -42,7 +46,7 @@ namespace PlaylistManager.UI
         {
             if (!Loader.AreSongsLoading)
             {
-                Loader.Instance.RefreshSongs(fullRefresh: false);
+                _loader.RefreshSongs(fullRefresh: false);
             }
         }
     }

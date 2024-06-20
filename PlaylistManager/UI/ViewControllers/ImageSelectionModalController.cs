@@ -9,8 +9,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
+using IPA.Loader;
+using SiraUtil.Zenject;
 using UnityEngine;
 using static BeatSaberMarkupLanguage.Components.CustomListTableData;
 
@@ -20,6 +21,8 @@ namespace PlaylistManager.UI
     {
         private readonly LevelPackDetailViewController levelPackDetailViewController;
         private readonly PopupModalsController popupModalsController;
+        private readonly PluginMetadata pluginMetadata;
+        private readonly BSMLParser bsmlParser;
 
         private readonly string IMAGES_PATH = Path.Combine(PlaylistLibUtils.playlistManager.PlaylistPath, "CoverImages");
         private readonly Sprite playlistManagerIcon;
@@ -43,10 +46,12 @@ namespace PlaylistManager.UI
         [UIParams]
         private readonly BSMLParserParams parserParams;
 
-        public ImageSelectionModalController(LevelPackDetailViewController levelPackDetailViewController, PopupModalsController popupModalsController)
+        public ImageSelectionModalController(LevelPackDetailViewController levelPackDetailViewController, PopupModalsController popupModalsController, UBinder<Plugin, PluginMetadata> pluginMetadata, BSMLParser bsmlParser)
         {
             this.levelPackDetailViewController = levelPackDetailViewController;
             this.popupModalsController = popupModalsController;
+            this.pluginMetadata = pluginMetadata.Value;
+            this.bsmlParser = bsmlParser;
 
             // Have to do this in case directory perms are not given
             try
@@ -68,7 +73,7 @@ namespace PlaylistManager.UI
         {
             if (!parsed)
             {
-                BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.ImageSelectionModal.bsml"), levelPackDetailViewController.transform.Find("Detail").gameObject, this);
+                bsmlParser.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(pluginMetadata.Assembly, "PlaylistManager.UI.Views.ImageSelectionModal.bsml"), levelPackDetailViewController._detailWrapper.gameObject, this);
                 modalPosition = modalTransform.position;
             }
             modalTransform.position = modalPosition;
@@ -175,7 +180,7 @@ namespace PlaylistManager.UI
             }
             else if (selectedIndex == 1)
             {
-                using (var imageStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("PlaylistManager.Icons.DefaultIcon.png"))
+                using (var imageStream = pluginMetadata.Assembly.GetManifestResourceStream("PlaylistManager.Icons.DefaultIcon.png"))
                 {
                     var imageBytes = new byte[imageStream.Length];
                     imageStream.Read(imageBytes, 0, (int)imageStream.Length);

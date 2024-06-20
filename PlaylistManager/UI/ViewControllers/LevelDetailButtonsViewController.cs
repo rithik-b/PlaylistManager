@@ -8,7 +8,9 @@ using UnityEngine;
 using System.ComponentModel;
 using PlaylistManager.Utilities;
 using System;
+using IPA.Loader;
 using PlaylistManager.Configuration;
+using SiraUtil.Zenject;
 
 namespace PlaylistManager.UI
 {
@@ -20,6 +22,8 @@ namespace PlaylistManager.UI
         private readonly AddPlaylistModalController addPlaylistController;
         private readonly PopupModalsController popupModalsController;
         private readonly DifficultyHighlighter difficultyHighlighter;
+        private readonly PluginMetadata pluginMetadata;
+        private readonly BSMLParser bsmlParser;
 
         public event PropertyChangedEventHandler PropertyChanged;
         private BeatmapLevel selectedBeatmapLevel;
@@ -33,7 +37,7 @@ namespace PlaylistManager.UI
         private RectTransform rootTransform;
 
         public LevelDetailButtonsViewController(StandardLevelDetailViewController standardLevelDetailViewController, LevelCollectionViewController levelCollectionViewController, LevelCollectionNavigationController levelCollectionNavigationController,
-               AddPlaylistModalController addPlaylistController, PopupModalsController popupModalsController, DifficultyHighlighter difficultyHighlighter)
+               AddPlaylistModalController addPlaylistController, PopupModalsController popupModalsController, DifficultyHighlighter difficultyHighlighter, UBinder<Plugin, PluginMetadata> pluginMetadata, BSMLParser bsmlParser)
         {
             this.standardLevelDetailViewController = standardLevelDetailViewController;
             levelCollectionTableView = levelCollectionViewController._levelCollectionTableView;
@@ -41,11 +45,13 @@ namespace PlaylistManager.UI
             this.addPlaylistController = addPlaylistController;
             this.popupModalsController = popupModalsController;
             this.difficultyHighlighter = difficultyHighlighter;
+            this.pluginMetadata = pluginMetadata.Value;
+            this.bsmlParser = bsmlParser;
         }
 
         public void Initialize()
         {
-            BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.LevelDetailButtonsView.bsml"), standardLevelDetailViewController.transform.Find("LevelDetail").gameObject, this);
+            bsmlParser.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(pluginMetadata.Assembly, "PlaylistManager.UI.Views.LevelDetailButtonsView.bsml"), standardLevelDetailViewController._standardLevelDetailView.gameObject, this);
             rootTransform.transform.localScale *= 0.7f;
             AddActive = false;
             difficultyHighlighter.selectedDifficultyChanged += DifficultyHighlighter_selectedDifficultyChanged;
