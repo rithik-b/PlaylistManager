@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -16,7 +14,7 @@ using UnityEngine;
 
 namespace PlaylistManager.Utilities
 {
-    public class PlaylistLibUtils
+    public static class PlaylistLibUtils
     {
         private const string ICON_PATH = "PlaylistManager.Icons.DefaultIcon.png";
         private const string EASTER_EGG_URL = "https://raw.githubusercontent.com/rithik-b/PlaylistManager/master/img/easteregg.bplist";

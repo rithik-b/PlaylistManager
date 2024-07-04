@@ -347,19 +347,19 @@ namespace PlaylistManager.UI
 
         public void LevelCollectionUpdated(BeatmapLevelPack annotatedBeatmapLevelCollection, BeatSaberPlaylistsLib.PlaylistManager parentManager)
         {
-            if (this.selectedPlaylist != null)
+            if (selectedPlaylist != null)
             {
-                this.selectedPlaylist.SpriteLoaded -= SelectedPlaylist_SpriteLoaded;
+                selectedPlaylist.SpriteLoaded -= SelectedPlaylist_SpriteLoaded;
             }
 
-            if (annotatedBeatmapLevelCollection is PlaylistLevelPack selectedPlaylist)
+            if (annotatedBeatmapLevelCollection is PlaylistLevelPack playlistLevelPack)
             {
-                this.selectedPlaylist = selectedPlaylist.playlist;
+                selectedPlaylist = playlistLevelPack.playlist;
                 this.parentManager = parentManager;
             }
             else
             {
-                this.selectedPlaylist = null;
+                selectedPlaylist = null;
                 this.parentManager = null;
             }
         }

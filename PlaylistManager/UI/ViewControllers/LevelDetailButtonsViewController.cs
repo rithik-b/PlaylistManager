@@ -1,7 +1,6 @@
 ﻿using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
 using PlaylistManager.Interfaces;
-using System.Reflection;
 using Zenject;
 using BeatSaberPlaylistsLib.Types;
 using UnityEngine;
@@ -14,7 +13,7 @@ using SiraUtil.Zenject;
 
 namespace PlaylistManager.UI
 {
-    public class LevelDetailButtonsViewController : IInitializable, IDisposable, IPreviewBeatmapLevelUpdater, ILevelCollectionUpdater, INotifyPropertyChanged
+    public class LevelDetailButtonsViewController : IInitializable, IDisposable, IBeatmapLevelUpdater, ILevelCollectionUpdater, INotifyPropertyChanged
     {
         private StandardLevelDetailViewController standardLevelDetailViewController;
         private LevelCollectionTableView levelCollectionTableView;
@@ -180,7 +179,7 @@ namespace PlaylistManager.UI
             }
         }
 
-        public void PreviewBeatmapLevelUpdated(BeatmapLevel beatmapLevel)
+        public void BeatmapLevelUpdated(BeatmapLevel beatmapLevel)
         {
             selectedBeatmapLevel = beatmapLevel;
             if (beatmapLevel.levelID.EndsWith(" WIP"))
@@ -204,12 +203,12 @@ namespace PlaylistManager.UI
         {
             if (annotatedBeatmapLevelCollection is PlaylistLevelPack playlistLevelPack)
             {
-                this.selectedPlaylist = playlistLevelPack.playlist;
+                selectedPlaylist = playlistLevelPack.playlist;
                 this.parentManager = parentManager;
             }
             else
             {
-                this.selectedPlaylist = null;
+                selectedPlaylist = null;
                 this.parentManager = null;
             }
         }

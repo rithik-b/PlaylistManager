@@ -313,15 +313,15 @@ namespace PlaylistManager.UI
 
         public void LevelCollectionUpdated(BeatmapLevelPack selectedBeatmapLevelCollection, BeatSaberPlaylistsLib.PlaylistManager parentManager)
         {
-            if (selectedBeatmapLevelCollection is PlaylistLevelPack selectedPlaylist)
+            if (selectedBeatmapLevelCollection is PlaylistLevelPack playlistLevelPack)
             {
-                this.selectedPlaylist = selectedPlaylist.playlist;
+                selectedPlaylist = playlistLevelPack.playlist;
                 this.parentManager = parentManager;
                 DownloadQueueEntry = PlaylistSequentialDownloader.downloadQueue.OfType<DownloadQueueEntry>().FirstOrDefault(x => x.playlist == selectedPlaylist);
                 UpdateMissingSongs();
 
                 rootTransform.gameObject.SetActive(true);
-                if (selectedPlaylist.playlist.TryGetCustomData("syncURL", out var syncURLObj) && syncURLObj is string syncURL && !string.IsNullOrWhiteSpace(syncURL))
+                if (playlistLevelPack.playlist.TryGetCustomData("syncURL", out var syncURLObj) && syncURLObj is string syncURL && !string.IsNullOrWhiteSpace(syncURL))
                 {
                     syncButtonTransform.gameObject.SetActive(true);
                 }
@@ -332,7 +332,7 @@ namespace PlaylistManager.UI
             }
             else
             {
-                this.selectedPlaylist = null;
+                selectedPlaylist = null;
                 this.parentManager = null;
                 MissingSongs = null;
                 rootTransform.gameObject.SetActive(false);

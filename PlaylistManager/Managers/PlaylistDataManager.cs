@@ -19,17 +19,17 @@ namespace PlaylistManager
 
         private readonly List<ILevelCollectionUpdater> levelCollectionUpdaters;
         private readonly List<ILevelCollectionsTableUpdater> levelCollectionsTableUpdaters;
-        private readonly List<IPreviewBeatmapLevelUpdater> previewBeatmapLevelUpdaters;
+        private readonly List<IBeatmapLevelUpdater> beatmapLevelUpdaters;
         private readonly List<IParentManagerUpdater> parentManagerUpdaters;
 
-        public BeatSaberPlaylistsLib.Types.IPlaylist selectedPlaylist;
-        public BeatSaberPlaylistsLib.Types.IPlaylistSong selectedPlaylistSong;
+        public IPlaylist selectedPlaylist;
+        public IPlaylistSong selectedPlaylistSong;
         public BeatSaberPlaylistsLib.PlaylistManager parentManager;
 
         private readonly BeatmapLevelPack emptyBeatmapLevelPack;
 
         internal PlaylistDataManager(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, LevelPackDetailViewController levelPackDetailViewController, LevelFilteringNavigationController levelFilteringNavigationController,
-            [InjectOptional] FoldersViewController foldersViewController, List<ILevelCollectionUpdater> levelCollectionUpdaters, List<ILevelCollectionsTableUpdater> levelCollectionsTableUpdaters, List<IPreviewBeatmapLevelUpdater> previewBeatmapLevelUpdaters,
+            [InjectOptional] FoldersViewController foldersViewController, List<ILevelCollectionUpdater> levelCollectionUpdaters, List<ILevelCollectionsTableUpdater> levelCollectionsTableUpdaters, List<IBeatmapLevelUpdater> beatmapLevelUpdaters,
             List<IParentManagerUpdater> parentManagerUpdaters)
         {
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
@@ -40,7 +40,7 @@ namespace PlaylistManager
 
             this.levelCollectionUpdaters = levelCollectionUpdaters;
             this.levelCollectionsTableUpdaters = levelCollectionsTableUpdaters;
-            this.previewBeatmapLevelUpdaters = previewBeatmapLevelUpdaters;
+            this.beatmapLevelUpdaters = beatmapLevelUpdaters;
 
             emptyBeatmapLevelPack = new BeatmapLevelPack(CustomLevelLoader.kCustomLevelPackPrefixId + "CustomLevels", "Custom Levels", "Custom Levels", BeatSaberMarkupLanguage.Utilities.ImageResources.BlankSprite, BeatSaberMarkupLanguage.Utilities.ImageResources.BlankSprite, Array.Empty<BeatmapLevel>(), PlayerSensitivityFlag.Safe);
         }
@@ -96,15 +96,15 @@ namespace PlaylistManager
 
         private void AnnotatedBeatmapLevelCollectionsViewController_didSelectAnnotatedBeatmapLevelCollectionEvent(BeatmapLevelPack beatmapLevelPack)
         {
-            if (beatmapLevelPack is PlaylistLevelPack selectedPlaylist)
+            if (beatmapLevelPack is PlaylistLevelPack playlistLevelPack)
             {
-                Events.RaisePlaylistSelected(selectedPlaylist.playlist, parentManager);
-                this.selectedPlaylist = selectedPlaylist.playlist;
-                parentManager = PlaylistLibUtils.playlistManager.GetManagerForPlaylist(selectedPlaylist.playlist);
+                Events.RaisePlaylistSelected(playlistLevelPack.playlist, parentManager);
+                selectedPlaylist = playlistLevelPack.playlist;
+                parentManager = PlaylistLibUtils.playlistManager.GetManagerForPlaylist(playlistLevelPack.playlist);
             }
             else
             {
-                this.selectedPlaylist = null;
+                selectedPlaylist = null;
                 parentManager = null;
             }
             foreach (var levelCollectionUpdater in levelCollectionUpdaters)
@@ -113,9 +113,9 @@ namespace PlaylistManager
             }
         }
 
-        private void LevelCollectionTableView_DidSelectLevelEvent(BeatmapLevel previewBeatmapLevel)
+        private void LevelCollectionTableView_DidSelectLevelEvent(BeatmapLevel beatmapLevel)
         {
-            if (previewBeatmapLevel is PlaylistLevel playlistLevel)
+            if (beatmapLevel is PlaylistLevel playlistLevel)
             {
                 Events.RaisePlaylistSongSelected(playlistLevel.playlistSong);
                 selectedPlaylistSong = playlistLevel.playlistSong;
@@ -124,9 +124,9 @@ namespace PlaylistManager
             {
                 selectedPlaylistSong = null;
             }
-            foreach (var previewBeatmapLevelUpdater in previewBeatmapLevelUpdaters)
+            foreach (var beatmapLevelUpdater in beatmapLevelUpdaters)
             {
-                previewBeatmapLevelUpdater.PreviewBeatmapLevelUpdated(previewBeatmapLevel);
+                beatmapLevelUpdater.BeatmapLevelUpdated(beatmapLevel);
             }
         }
 

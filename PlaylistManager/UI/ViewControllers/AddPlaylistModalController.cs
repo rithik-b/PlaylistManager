@@ -3,7 +3,6 @@ using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using static BeatSaberMarkupLanguage.Components.CustomListTableData;
-using System.Reflection;
 using System.Linq;
 using HMUI;
 using PlaylistManager.Utilities;

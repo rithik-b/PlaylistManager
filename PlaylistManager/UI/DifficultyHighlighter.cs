@@ -9,7 +9,7 @@ using Zenject;
 
 namespace PlaylistManager.UI
 {
-    public class DifficultyHighlighter : IPreviewBeatmapLevelUpdater, IDisposable, IInitializable
+    public class DifficultyHighlighter : IBeatmapLevelUpdater, IDisposable, IInitializable
     {
         private BeatmapCharacteristicSegmentedControlController beatmapCharacteristicSegmentedControlController;
         private readonly IconSegmentedControl beatmapCharacteristicSegmentedControl;
@@ -42,15 +42,15 @@ namespace PlaylistManager.UI
             BeatmapDifficultySegmentedControlController_SetData.CharacteristicsSegmentedControllerDataSetEvent -= BeatmapDifficultySegmentedControlController_CharacteristicsSegmentedControllerDataSetEvent;
         }
 
-        public void PreviewBeatmapLevelUpdated(BeatmapLevel beatmapLevel)
+        public void BeatmapLevelUpdated(BeatmapLevel beatmapLevel)
         {
-            if (beatmapLevel is PlaylistLevel selectedPlaylistSong)
+            if (beatmapLevel is PlaylistLevel playlistLevel)
             {
-                this.selectedPlaylistSong = selectedPlaylistSong.playlistSong;
+                selectedPlaylistSong = playlistLevel.playlistSong;
             }
             else
             {
-                this.selectedPlaylistSong = null;
+                selectedPlaylistSong = null;
             }
         }
 

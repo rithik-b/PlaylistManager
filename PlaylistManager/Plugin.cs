@@ -19,7 +19,6 @@ namespace PlaylistManager
         internal static IPALogger Log { get; private set; }
 
         public const string HarmonyId = "com.github.rithik-b.PlaylistManager";
-        internal static Harmony harmony;
 
         [Init]
         /// <summary>

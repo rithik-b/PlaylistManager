@@ -33,10 +33,6 @@
           <HintPath>$(BeatSaberDir)\Libs\0Harmony.dll</HintPath>
           <Private>False</Private>
       </Reference>
-      <Reference Include="AdditionalContentModel.Interfaces">
-          <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\AdditionalContentModel.Interfaces.dll</HintPath>
-          <Private>false</Private>
-      </Reference>
       <Reference Include="BeatmapCore">
           <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BeatmapCore.dll</HintPath>
           <Private>False</Private>

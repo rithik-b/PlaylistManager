@@ -14,10 +14,9 @@ namespace PlaylistManager.Managers
 {
     internal class PlaylistUIManager : IInitializable, IDisposable, ILevelCollectionsTableUpdater
     {
-        private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
+        private readonly AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
         private readonly LevelCollectionNavigationController levelCollectionNavigationController;
         private readonly SelectLevelCategoryViewController selectLevelCategoryViewController;
-        private readonly StandardLevelDetailViewController standardLevelDetailViewController;
         private readonly SettingsViewController settingsViewController;
         private readonly PlaylistSequentialDownloader playlistDownloader;
 
@@ -32,13 +31,12 @@ namespace PlaylistManager.Managers
         public event Action<IReadOnlyList<BeatmapLevelPack>, int> LevelCollectionTableViewUpdatedEvent;
 
         internal PlaylistUIManager(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, LevelCollectionNavigationController levelCollectionNavigationController,
-            SelectLevelCategoryViewController selectLevelCategoryViewController, StandardLevelDetailViewController standardLevelDetailViewController, SettingsViewController settingsViewController,
-            PlaylistSequentialDownloader playlistDownloader, List<ILevelCategoryUpdater> levelCategoryUpdaters, IPMRefreshable refreshable, IPlatformUserModel platformUserModel)
+            SelectLevelCategoryViewController selectLevelCategoryViewController, SettingsViewController settingsViewController, PlaylistSequentialDownloader playlistDownloader,
+            List<ILevelCategoryUpdater> levelCategoryUpdaters, IPMRefreshable refreshable, IPlatformUserModel platformUserModel)
         {
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
             this.levelCollectionNavigationController = levelCollectionNavigationController;
             this.selectLevelCategoryViewController = selectLevelCategoryViewController;
-            this.standardLevelDetailViewController = standardLevelDetailViewController;
             this.settingsViewController = settingsViewController;
             this.playlistDownloader = playlistDownloader;
 
