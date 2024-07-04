@@ -99,10 +99,7 @@ namespace PlaylistManager.UI
 
         private void RemoveSong()
         {
-            if (selectedBeatmapLevel is not PlaylistLevel playlistLevel)
-            {
-                return;
-            }
+            var playlistLevel = (PlaylistLevel)selectedBeatmapLevel;
 
             selectedPlaylist.Remove(playlistLevel.playlistSong);
 
@@ -182,7 +179,7 @@ namespace PlaylistManager.UI
         public void BeatmapLevelUpdated(BeatmapLevel beatmapLevel)
         {
             selectedBeatmapLevel = beatmapLevel;
-            if (beatmapLevel.levelID.EndsWith(" WIP"))
+            if (beatmapLevel.levelID.EndsWith(" WIP", StringComparison.Ordinal))
             {
                 AddActive = false;
                 IsPlaylistSong = false;

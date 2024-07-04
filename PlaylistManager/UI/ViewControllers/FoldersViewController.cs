@@ -189,7 +189,7 @@ namespace PlaylistManager.UI
 
                 if (setBeatmapLevelCollections)
                 {
-                    IReadOnlyList<BeatmapLevelPack> annotatedBeatmapLevelCollections = currentParentManager.GetAllPlaylists(false).Select(p => p.PlaylistLevelPack).ToList();
+                    IReadOnlyList<BeatmapLevelPack> annotatedBeatmapLevelCollections = currentParentManager.GetAllPlaylists(false).Select(p => p.PlaylistLevelPack).ToArray();
                     LevelCollectionTableViewUpdatedEvent?.Invoke(annotatedBeatmapLevelCollections, 0);
                 }
             }
@@ -247,7 +247,7 @@ namespace PlaylistManager.UI
             {
                 if (selectedCellIndex == 0)
                 {
-                    IReadOnlyList<BeatmapLevelPack> annotatedBeatmapLevelCollections = beatmapLevelsModel._customLevelsRepository.beatmapLevelPacks.Concat(PlaylistLibUtils.TryGetAllPlaylistsAsLevelPacks()).ToList();
+                    IReadOnlyList<BeatmapLevelPack> annotatedBeatmapLevelCollections = beatmapLevelsModel._customLevelsRepository.beatmapLevelPacks.Concat(PlaylistLibUtils.TryGetAllPlaylistsAsLevelPacks()).ToArray();
                     LevelCollectionTableViewUpdatedEvent?.Invoke(annotatedBeatmapLevelCollections, 0);
                     folderMode = FolderMode.AllPacks;
 
