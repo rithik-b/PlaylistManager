@@ -13,7 +13,6 @@
 		<text text='User Interface Settings' align='Left' italics='true' font-size='5' />
 		<vertical background='round-rect-panel' background-color='white' pad='2'>
 			<checkbox value='hover-hint' text='Playlist Name on Hover' hover-hint='Show playlist name when hovering over one in the table.' apply-on-change='true' bind-value='true' />
-			<slider-setting value='scroll-speed' text='Playlist Scroll Speed' hover-hint='Set how fast you scroll through the playlists list.' min='1' max='7' increment='0.5' apply-on-change='true' bind-value='true' />
 			<checkbox value='download-icon' text='Show Download Icon' hover-hint='Show download icon for playlists if songs are missing.' apply-on-change='true' bind-value='true' />
 			<checkbox value='blurred-art' text='Blurred Artwork' hover-hint='Use blurred artwork for playlist cover in preview.' apply-on-change='true' bind-value='true' />
 			<checkbox value='no-folders' text='Disable Folders &amp; Categories' hover-hint='Do not use folders and categories (this also disables loading playlists from subfolders).' apply-on-change='true' bind-value='true' />
