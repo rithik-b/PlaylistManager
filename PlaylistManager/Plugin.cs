@@ -33,6 +33,7 @@ namespace PlaylistManager
             Log = logger;
             _metadata = metadata;
             _harmony = new Harmony(HarmonyId);
+            zenjector.UseLogger(logger);
             zenjector.UseMetadataBinder<Plugin>();
             zenjector.UseHttpService();
             zenjector.UseSiraSync(SiraUtil.Web.SiraSync.SiraSyncServiceType.GitHub, "rithik-b");

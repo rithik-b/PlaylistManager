@@ -3,27 +3,30 @@ using System.Collections.Generic;
 using System.Reflection.Emit;
 using HarmonyLib;
 using SiraUtil.Affinity;
+using SiraUtil.Logging;
 using SongCore.Utilities;
 using UnityEngine;
 
 namespace PlaylistManager.AffinityPatches
 {
-    public class AnnotatedBeatmapLevelCollectionsGridViewAnimatorPatches : IAffinity
+    internal class AnnotatedBeatmapLevelCollectionsUIPatches : IAffinity
     {
         private readonly SelectLevelCategoryViewController _selectLevelCategoryViewController;
+        private readonly SiraLog _logger;
 
         private int _originalColumnCount;
         private Vector2 _originalScreenSize;
-        private bool _isGridViewResized;
+        private bool _isGridResized;
 
-        public AnnotatedBeatmapLevelCollectionsGridViewAnimatorPatches(SelectLevelCategoryViewController selectLevelCategoryViewController)
+        private AnnotatedBeatmapLevelCollectionsUIPatches(SelectLevelCategoryViewController selectLevelCategoryViewController, SiraLog logger)
         {
             _selectLevelCategoryViewController = selectLevelCategoryViewController;
+            _logger = logger;
         }
 
         [AffinityPatch(typeof(AnnotatedBeatmapLevelCollectionsGridView), nameof(AnnotatedBeatmapLevelCollectionsGridView.SetData))]
         [AffinityPrefix]
-        private void ResizeGridView(AnnotatedBeatmapLevelCollectionsGridView __instance, IReadOnlyList<BeatmapLevelPack> annotatedBeatmapLevelCollections)
+        private void ResizeGrid(AnnotatedBeatmapLevelCollectionsGridView __instance, IReadOnlyList<BeatmapLevelPack> annotatedBeatmapLevelCollections)
         {
             if (_originalColumnCount == default)
             {
@@ -36,7 +39,8 @@ namespace PlaylistManager.AffinityPatches
                 // Number of columns for max visible row count before it starts clipping with the ground.
                 __instance._gridView._columnCount = Mathf.CeilToInt((annotatedBeatmapLevelCollections?.Count ?? 0) / 5f);
 
-                if (!_isGridViewResized)
+                // Remove one column to make room for our buttons.
+                if (!_isGridResized)
                 {
                     __instance._gridView._visibleColumnCount -= 1;
 
@@ -44,14 +48,15 @@ namespace PlaylistManager.AffinityPatches
                     rectTransform.sizeDelta -= new Vector2(__instance._cellWidth, 0);
                     rectTransform.anchoredPosition -= new Vector2(__instance._cellWidth / 2, 0);
 
-                    _isGridViewResized = true;
+                    _isGridResized = true;
                 }
             }
             else if (selectedLevelCategory == SelectLevelCategoryViewController.LevelCategory.MusicPacks)
             {
                 __instance._gridView._columnCount = _originalColumnCount;
 
-                if (_isGridViewResized)
+                // Restore the removed column since we don't want to show an empty cell.
+                if (_isGridResized)
                 {
                     __instance._gridView._visibleColumnCount += 1;
 
@@ -59,13 +64,26 @@ namespace PlaylistManager.AffinityPatches
                     rectTransform.sizeDelta += new Vector2(__instance._cellWidth, 0);
                     rectTransform.anchoredPosition += new Vector2(__instance._cellWidth / 2, 0);
 
-                    _isGridViewResized = false;
+                    _isGridResized = false;
                 }
             }
         }
 
+        [AffinityPatch(typeof(AnnotatedBeatmapLevelCollectionsGridView), nameof(AnnotatedBeatmapLevelCollectionsGridView.OnPointerEnter))]
+        [AffinityPatch(typeof(AnnotatedBeatmapLevelCollectionsGridView), nameof(AnnotatedBeatmapLevelCollectionsGridView.OnPointerExit))]
+        [AffinityPatch(typeof(AnnotatedBeatmapLevelCollectionsGridView), nameof(AnnotatedBeatmapLevelCollectionsGridView.HandleCellSelectionDidChange))]
+        [AffinityTranspiler]
+        private IEnumerable<CodeInstruction> MakeGridInteractableWithOneRow(IEnumerable<CodeInstruction> instructions)
+        {
+            return new CodeMatcher(instructions)
+                .MatchStartForward(new CodeMatch(OpCodes.Ldc_I4_1))
+                .ThrowIfInvalid()
+                .SetOpcodeAndAdvance(OpCodes.Ldc_I4_0)
+                .InstructionEnumeration();
+        }
+
         [AffinityPatch(typeof(AnnotatedBeatmapLevelCollectionsGridViewAnimator), nameof(AnnotatedBeatmapLevelCollectionsGridViewAnimator.GetContentXOffset))]
-        private void ComputeNewXOffset(AnnotatedBeatmapLevelCollectionsGridViewAnimator __instance, ref float __result)
+        private void RecalculateContentXOffsetBasedOnColumnCount(AnnotatedBeatmapLevelCollectionsGridViewAnimator __instance, ref float __result)
         {
             var zeroOffset = (__instance._columnCount - 1) / 2f;
             var maxMove = (__instance._columnCount - __instance._visibleColumnCount) / 2f;
@@ -75,24 +93,14 @@ namespace PlaylistManager.AffinityPatches
                 toMove -= 0.5f;
             }
 
+            // TODO: Remove.
+            _logger.Debug($"_columnCount: {__instance._columnCount}, _visibleColumnCount: {__instance._visibleColumnCount}");
+
             __result = Math.Clamp(toMove, -maxMove, maxMove) * __instance._columnWidth;
         }
 
-        [AffinityPatch(typeof(AnnotatedBeatmapLevelCollectionsGridView), nameof(AnnotatedBeatmapLevelCollectionsGridView.OnPointerEnter))]
-        [AffinityPatch(typeof(AnnotatedBeatmapLevelCollectionsGridView), nameof(AnnotatedBeatmapLevelCollectionsGridView.OnPointerExit))]
-        [AffinityPatch(typeof(AnnotatedBeatmapLevelCollectionsGridView), nameof(AnnotatedBeatmapLevelCollectionsGridView.HandleCellSelectionDidChange))]
-        [AffinityTranspiler]
-        private IEnumerable<CodeInstruction> OpenCollectionWithOneRow(IEnumerable<CodeInstruction> instructions)
-        {
-            return new CodeMatcher(instructions)
-                .MatchStartForward(new CodeMatch(OpCodes.Ldc_I4_1))
-                .ThrowIfInvalid()
-                .SetOpcodeAndAdvance(OpCodes.Ldc_I4_0)
-                .InstructionEnumeration();
-        }
-
         [AffinityPatch(typeof(AnnotatedBeatmapLevelCollectionsGridViewAnimator), nameof(AnnotatedBeatmapLevelCollectionsGridViewAnimator.AnimateOpen))]
-        private void ChangeGridAndScreenSize(AnnotatedBeatmapLevelCollectionsGridViewAnimator __instance, bool animated)
+        private void RecalculateSizeBasedOnColumnCount(AnnotatedBeatmapLevelCollectionsGridViewAnimator __instance, bool animated)
         {
             var x = ((__instance._columnCount - __instance._visibleColumnCount) * 2 + __instance._visibleColumnCount) * __instance._columnWidth;
             if (animated)
@@ -104,9 +112,11 @@ namespace PlaylistManager.AffinityPatches
                 __instance._viewportTransform.sizeDelta = new Vector2(x, __instance._viewportTransform.sizeDelta.y);
             }
 
-            if (_isGridViewResized)
+            if (_isGridResized)
             {
+                // It would otherwise fly away when setting the Screen size.
                 var rectTransform = (RectTransform)_selectLevelCategoryViewController.transform;
+
                 if (rectTransform.anchorMin.x == 0 || rectTransform.anchorMax.x == 0)
                 {
                     var localPosition = rectTransform.localPosition;
@@ -122,6 +132,7 @@ namespace PlaylistManager.AffinityPatches
                     _originalScreenSize = rectTransform.sizeDelta;
                 }
 
+                // Resizing Screen is needed to allow the hover hint to be shown when the GridView is larger.
                 rectTransform.sizeDelta = new Vector2(_originalScreenSize.x + (__instance._columnCount - __instance._visibleColumnCount - 1) * __instance._columnWidth * 2, _originalScreenSize.y);
             }
         }
