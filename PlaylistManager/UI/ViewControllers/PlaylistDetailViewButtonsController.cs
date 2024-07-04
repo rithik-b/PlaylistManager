@@ -115,17 +115,14 @@ namespace PlaylistManager.UI
 
         private async void DeleteSongs()
         {
-            /*popupModalsController.ShowLoadingModal(rootTransform, "Deleting Playlist & Songs");
+            popupModalsController.ShowLoadingModal(rootTransform, "Deleting Playlist & Songs");
 
-            var beatmapLevels = selectedPlaylist.beatmapLevelPack.beatmapLevels;
-            var levelPaths = new List<string>();
-            foreach (var beatmapLevel in beatmapLevels.OfType<CustomPreviewBeatmapLevel>())
-            {
-                levelPaths.Add(beatmapLevel.customLevelPath);
-            }
+            var levelPaths = selectedPlaylist.BeatmapLevels
+                .Where(l => !l.hasPrecalculatedData)
+                .Select(l => SongCore.Collections.GetCustomLevelPath(l.levelID)).ToList();
             await SongCore.Loader.Instance.DeleteSongsAsync(levelPaths);
 
-            popupModalsController.DismissLoadingModal();*/
+            popupModalsController.DismissLoadingModal();
         }
 
         private void DeletePlaylist()
