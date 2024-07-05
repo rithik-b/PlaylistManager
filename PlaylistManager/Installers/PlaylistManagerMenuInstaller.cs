@@ -25,7 +25,7 @@ namespace PlaylistManager.Installers
             Container.Bind<ChangelogViewController>().FromNewComponentAsViewController().AsSingle();
             Container.BindInterfacesAndSelfTo<ContributorsViewController>().FromNewComponentAsViewController().AsSingle();
 
-            Container.BindInterfacesTo<CoverImageUpdater>().AsSingle();
+            Container.BindInterfacesAndSelfTo<PlaylistUpdater>().AsSingle();
             Container.BindInterfacesAndSelfTo<DifficultyHighlighter>().AsSingle();
 
             Container.BindInterfacesTo<RefreshButtonUI>().AsSingle();

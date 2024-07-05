@@ -49,6 +49,10 @@
           <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BGLib.DotnetExtension.dll</HintPath>
           <Private>false</Private>
       </Reference>
+      <Reference Include="BGLib.UnityExtension">
+        <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BGLib.UnityExtension.dll</HintPath>
+        <Private>false</Private>
+      </Reference>
       <Reference Include="BSML">
           <HintPath>$(BeatSaberDir)\Plugins\BSML.dll</HintPath>
           <Private>False</Private>
@@ -65,6 +69,10 @@
       <Reference Include="HMLib">
           <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\HMLib.dll</HintPath>
           <Private>False</Private>
+      </Reference>
+      <Reference Include="HMRendering">
+        <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\HMRendering.dll</HintPath>
+        <Private>false</Private>
       </Reference>
       <Reference Include="HMUI">
           <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\HMUI.dll</HintPath>

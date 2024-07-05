@@ -189,6 +189,7 @@ namespace PlaylistManager.UI
                     selectedPlaylist.RaisePlaylistChanged();
                     parentManager.StorePlaylist(selectedPlaylist);
                     popupModalsController.ShowOkModal(modalTransform, string.Format("Song successfully added to {0}", selectedPlaylist.Title), null, animateParentCanvas: false);
+                    // TODO: Doesn't refresh the sprite.
                     Events.RaisePlaylistSongAdded(playlistSong, selectedPlaylist);
                 }
                 catch (Exception e)

@@ -28,6 +28,7 @@ namespace PlaylistManager.UI
         private readonly PopupModalsController popupModalsController;
         private readonly HoverHintController hoverHintController;
         private readonly BeatmapLevelsModel beatmapLevelsModel;
+        private readonly PlaylistUpdater playlistUpdater;
         private readonly PluginMetadata pluginMetadata;
         private readonly BSMLParser bsmlParser;
 
@@ -72,9 +73,9 @@ namespace PlaylistManager.UI
         [UIComponent("folder-list")]
         public CustomListTableData customListTableData;
 
-        public FoldersViewController(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, MainFlowCoordinator mainFlowCoordinator,
+        private FoldersViewController(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, MainFlowCoordinator mainFlowCoordinator,
             LevelSelectionNavigationController levelSelectionNavigationController, PopupModalsController popupModalsController, HoverHintController hoverHintController,
-            BeatmapLevelsModel beatmapLevelsModel, UBinder<Plugin, PluginMetadata> pluginMetadata, BSMLParser bsmlParser)
+            BeatmapLevelsModel beatmapLevelsModel, PlaylistUpdater playlistUpdater, UBinder<Plugin, PluginMetadata> pluginMetadata, BSMLParser bsmlParser)
         {
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
             this.mainFlowCoordinator = mainFlowCoordinator;
@@ -82,6 +83,7 @@ namespace PlaylistManager.UI
             this.popupModalsController = popupModalsController;
             this.hoverHintController = hoverHintController;
             this.beatmapLevelsModel = beatmapLevelsModel;
+            this.playlistUpdater = playlistUpdater;
             this.pluginMetadata = pluginMetadata.Value;
             this.bsmlParser = bsmlParser;
 
@@ -404,7 +406,9 @@ namespace PlaylistManager.UI
 
             if (folderMode == FolderMode.AllPacks)
             {
-                var annotatedBeatmapLevelCollections = beatmapLevelsModel._customLevelsRepository.beatmapLevelPacks.Concat(PlaylistLibUtils.TryGetAllPlaylistsAsLevelPacks()).ToArray();
+                var playlistLevelPacks = PlaylistLibUtils.TryGetAllPlaylistsAsLevelPacks();
+                playlistUpdater.RefreshPlaylistChangedListeners(playlistLevelPacks);
+                var annotatedBeatmapLevelCollections = beatmapLevelsModel._customLevelsRepository.beatmapLevelPacks.Concat(playlistLevelPacks).ToArray();
                 var indexToSelect = Array.FindIndex(annotatedBeatmapLevelCollections, (pack) => pack.packID == annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelPack.packID);
                 if (indexToSelect != -1)
                 {
@@ -414,6 +418,7 @@ namespace PlaylistManager.UI
             else if (folderMode == FolderMode.Playlists)
             {
                 var annotatedBeatmapLevelCollections = PlaylistLibUtils.TryGetAllPlaylistsAsLevelPacks();
+                playlistUpdater.RefreshPlaylistChangedListeners(annotatedBeatmapLevelCollections);
                 var indexToSelect = Array.FindIndex(annotatedBeatmapLevelCollections, (pack) => pack.packID == annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelPack.packID);
                 if (indexToSelect != -1)
                 {
@@ -423,6 +428,7 @@ namespace PlaylistManager.UI
             else if (folderMode == FolderMode.Folders)
             {
                 var annotatedBeatmapLevelCollections = CurrentParentManager.GetAllPlaylists(false).Select(p => p.PlaylistLevelPack).ToArray();
+                playlistUpdater.RefreshPlaylistChangedListeners(annotatedBeatmapLevelCollections);
                 var indexToSelect = Array.FindIndex(annotatedBeatmapLevelCollections, (pack) => pack.packID == annotatedBeatmapLevelCollectionsViewController.selectedAnnotatedBeatmapLevelPack.packID);
                 if (indexToSelect != -1)
                 {
