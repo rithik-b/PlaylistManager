@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Reflection.Emit;
 using HarmonyLib;
 using SiraUtil.Affinity;
-using SiraUtil.Logging;
 using SongCore.Utilities;
 using UnityEngine;
 
@@ -11,17 +10,17 @@ namespace PlaylistManager.AffinityPatches
 {
     internal class AnnotatedBeatmapLevelCollectionsUIPatches : IAffinity
     {
+        private readonly AnnotatedBeatmapLevelCollectionsViewController _annotatedBeatmapLevelCollectionsViewController;
         private readonly SelectLevelCategoryViewController _selectLevelCategoryViewController;
-        private readonly SiraLog _logger;
 
         private int _originalColumnCount;
         private Vector2 _originalScreenSize;
         private bool _isGridResized;
 
-        private AnnotatedBeatmapLevelCollectionsUIPatches(SelectLevelCategoryViewController selectLevelCategoryViewController, SiraLog logger)
+        private AnnotatedBeatmapLevelCollectionsUIPatches(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, SelectLevelCategoryViewController selectLevelCategoryViewController)
         {
+            _annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
             _selectLevelCategoryViewController = selectLevelCategoryViewController;
-            _logger = logger;
         }
 
         [AffinityPatch(typeof(AnnotatedBeatmapLevelCollectionsGridView), nameof(AnnotatedBeatmapLevelCollectionsGridView.SetData))]
@@ -37,7 +36,7 @@ namespace PlaylistManager.AffinityPatches
             if (selectedLevelCategory == SelectLevelCategoryViewController.LevelCategory.CustomSongs)
             {
                 // Number of columns for max visible row count before it starts clipping with the ground.
-                __instance._gridView._columnCount = Mathf.CeilToInt((annotatedBeatmapLevelCollections?.Count ?? 0) / 5f);
+                __instance._gridView._columnCount = Math.Max(Mathf.CeilToInt((annotatedBeatmapLevelCollections?.Count ?? 0) / 5f), _originalColumnCount);
 
                 // Remove one column to make room for our buttons.
                 if (!_isGridResized)
@@ -70,21 +69,60 @@ namespace PlaylistManager.AffinityPatches
         }
 
         [AffinityPatch(typeof(AnnotatedBeatmapLevelCollectionsGridView), nameof(AnnotatedBeatmapLevelCollectionsGridView.OnPointerEnter))]
+        [AffinityTranspiler]
+        private IEnumerable<CodeInstruction> ChangeInteractableConditionOnEnter(IEnumerable<CodeInstruction> instructions, ILGenerator il)
+        {
+            return ChangeInteractableCondition(instructions, il);
+        }
+
         [AffinityPatch(typeof(AnnotatedBeatmapLevelCollectionsGridView), nameof(AnnotatedBeatmapLevelCollectionsGridView.OnPointerExit))]
+        [AffinityTranspiler]
+        private IEnumerable<CodeInstruction> ChangeInteractableConditionOnExit(IEnumerable<CodeInstruction> instructions, ILGenerator il)
+        {
+            return ChangeInteractableCondition(instructions, il);
+        }
+
         [AffinityPatch(typeof(AnnotatedBeatmapLevelCollectionsGridView), nameof(AnnotatedBeatmapLevelCollectionsGridView.HandleCellSelectionDidChange))]
         [AffinityTranspiler]
-        private IEnumerable<CodeInstruction> MakeGridInteractableWithOneRow(IEnumerable<CodeInstruction> instructions)
+        private IEnumerable<CodeInstruction> ChangeInteractableConditionOnSelect(IEnumerable<CodeInstruction> instructions, ILGenerator il)
         {
-            return new CodeMatcher(instructions)
+            return ChangeInteractableCondition(instructions, il);
+        }
+
+        private static IEnumerable<CodeInstruction> ChangeInteractableCondition(IEnumerable<CodeInstruction> instructions, ILGenerator il)
+        {
+            // Makes the grid interactable when there's 1 row or more, and when there's more collections to display than the number of visible columns.
+            var codeMatcher = new CodeMatcher(instructions, il)
                 .MatchStartForward(new CodeMatch(OpCodes.Ldc_I4_1))
                 .ThrowIfInvalid()
-                .SetOpcodeAndAdvance(OpCodes.Ldc_I4_0)
+                .SetOpcodeAndAdvance(OpCodes.Ldc_I4_0);
+            return codeMatcher
+                .InsertBranchAndAdvance(OpCodes.Ble_S, codeMatcher.Pos + 1)
+                .Insert(
+                    new CodeInstruction(OpCodes.Ldarg_0),
+                    new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(AnnotatedBeatmapLevelCollectionsGridView), nameof(AnnotatedBeatmapLevelCollectionsGridView._annotatedBeatmapLevelCollections))),
+                    new CodeInstruction(OpCodes.Callvirt, AccessTools.PropertyGetter(typeof(IReadOnlyCollection<>).MakeGenericType(typeof(BeatmapLevelPack)), nameof(IReadOnlyList<BeatmapLevelPack>.Count))),
+                    new CodeInstruction(OpCodes.Ldarg_0),
+                    new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(AnnotatedBeatmapLevelCollectionsGridView), nameof(AnnotatedBeatmapLevelCollectionsGridView._gridView))),
+                    new CodeInstruction(OpCodes.Callvirt, AccessTools.PropertyGetter(typeof(GridView), nameof(GridView.visibleColumnCount))))
                 .InstructionEnumeration();
         }
 
         [AffinityPatch(typeof(AnnotatedBeatmapLevelCollectionsGridViewAnimator), nameof(AnnotatedBeatmapLevelCollectionsGridViewAnimator.GetContentXOffset))]
         private void RecalculateContentXOffsetBasedOnColumnCount(AnnotatedBeatmapLevelCollectionsGridViewAnimator __instance, ref float __result)
         {
+            if (_annotatedBeatmapLevelCollectionsViewController._annotatedBeatmapLevelCollectionsGridView._annotatedBeatmapLevelCollections == null)
+            {
+                return;
+            }
+
+            if (_annotatedBeatmapLevelCollectionsViewController._annotatedBeatmapLevelCollectionsGridView._annotatedBeatmapLevelCollections.Count <= __instance._visibleColumnCount)
+            {
+                __result = __instance._columnWidth;
+
+                return;
+            }
+
             var zeroOffset = (__instance._columnCount - 1) / 2f;
             var maxMove = (__instance._columnCount - __instance._visibleColumnCount) / 2f;
             var toMove = zeroOffset - __instance._selectedColumn;
@@ -92,9 +130,6 @@ namespace PlaylistManager.AffinityPatches
             {
                 toMove -= 0.5f;
             }
-
-            // TODO: Remove.
-            _logger.Debug($"_columnCount: {__instance._columnCount}, _visibleColumnCount: {__instance._visibleColumnCount}");
 
             __result = Math.Clamp(toMove, -maxMove, maxMove) * __instance._columnWidth;
         }
