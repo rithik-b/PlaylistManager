@@ -33,10 +33,6 @@
           <HintPath>$(BeatSaberDir)\Libs\0Harmony.dll</HintPath>
           <Private>False</Private>
       </Reference>
-      <Reference Include="AdditionalContentModel.Interfaces">
-          <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\AdditionalContentModel.Interfaces.dll</HintPath>
-          <Private>false</Private>
-      </Reference>
       <Reference Include="BeatmapCore">
           <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BeatmapCore.dll</HintPath>
           <Private>False</Private>
@@ -53,9 +49,18 @@
           <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BGLib.DotnetExtension.dll</HintPath>
           <Private>false</Private>
       </Reference>
+      <Reference Include="BGLib.UnityExtension">
+        <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BGLib.UnityExtension.dll</HintPath>
+        <Private>false</Private>
+      </Reference>
       <Reference Include="BSML">
           <HintPath>$(BeatSaberDir)\Plugins\BSML.dll</HintPath>
           <Private>False</Private>
+      </Reference>
+      <Reference Include="DataModels">
+          <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\DataModels.dll</HintPath>
+          <Private>False</Private>
+          <Publicize>True</Publicize>
       </Reference>
       <Reference Include="Hive.Versioning">
           <HintPath>$(BeatSaberDir)\Libs\Hive.Versioning.dll</HintPath>
@@ -64,6 +69,10 @@
       <Reference Include="HMLib">
           <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\HMLib.dll</HintPath>
           <Private>False</Private>
+      </Reference>
+      <Reference Include="HMRendering">
+        <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\HMRendering.dll</HintPath>
+        <Private>false</Private>
       </Reference>
       <Reference Include="HMUI">
           <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\HMUI.dll</HintPath>

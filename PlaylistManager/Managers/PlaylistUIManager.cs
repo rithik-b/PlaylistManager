@@ -14,31 +14,29 @@ namespace PlaylistManager.Managers
 {
     internal class PlaylistUIManager : IInitializable, IDisposable, ILevelCollectionsTableUpdater
     {
-        private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
+        private readonly AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
         private readonly LevelCollectionNavigationController levelCollectionNavigationController;
         private readonly SelectLevelCategoryViewController selectLevelCategoryViewController;
-        private readonly StandardLevelDetailViewController standardLevelDetailViewController;
         private readonly SettingsViewController settingsViewController;
         private readonly PlaylistSequentialDownloader playlistDownloader;
 
         private int downloadingBeatmapCollectionIdx;
-        private IAnnotatedBeatmapLevelCollection[] downloadingBeatmapLevelCollections;
-        private IPreviewBeatmapLevel downloadingBeatmap;
+        private BeatmapLevelPack[] downloadingBeatmapLevelCollections;
+        private BeatmapLevel downloadingBeatmap;
 
         private readonly List<ILevelCategoryUpdater> levelCategoryUpdaters;
         private readonly IPMRefreshable refreshable;
         private readonly IPlatformUserModel platformUserModel;
 
-        public event Action<IAnnotatedBeatmapLevelCollection[], int> LevelCollectionTableViewUpdatedEvent;
+        public event Action<IReadOnlyList<BeatmapLevelPack>, int> LevelCollectionTableViewUpdatedEvent;
 
         internal PlaylistUIManager(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, LevelCollectionNavigationController levelCollectionNavigationController,
-            SelectLevelCategoryViewController selectLevelCategoryViewController, StandardLevelDetailViewController standardLevelDetailViewController, SettingsViewController settingsViewController,
-            PlaylistSequentialDownloader playlistDownloader, List<ILevelCategoryUpdater> levelCategoryUpdaters, IPMRefreshable refreshable, IPlatformUserModel platformUserModel)
+            SelectLevelCategoryViewController selectLevelCategoryViewController, SettingsViewController settingsViewController, PlaylistSequentialDownloader playlistDownloader,
+            List<ILevelCategoryUpdater> levelCategoryUpdaters, IPMRefreshable refreshable, IPlatformUserModel platformUserModel)
         {
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
             this.levelCollectionNavigationController = levelCollectionNavigationController;
             this.selectLevelCategoryViewController = selectLevelCategoryViewController;
-            this.standardLevelDetailViewController = standardLevelDetailViewController;
             this.settingsViewController = settingsViewController;
             this.playlistDownloader = playlistDownloader;
 
@@ -123,7 +121,7 @@ namespace PlaylistManager.Managers
                     downloadingBeatmapLevelCollections = annotatedBeatmapLevelCollectionsViewController._annotatedBeatmapLevelCollections.ToArray();
                     downloadingBeatmapCollectionIdx = annotatedBeatmapLevelCollectionsViewController.selectedItemIndex;
                 }
-                downloadingBeatmap = levelCollectionNavigationController.selectedBeatmapLevel;
+                downloadingBeatmap = levelCollectionNavigationController.beatmapLevel;
                 LevelFilteringNavigationController_UpdateSecondChildControllerContent.SecondChildControllerUpdatedEvent += LevelFilteringNavigationController_SecondChildControllerUpdatedEvent;
             }
         }

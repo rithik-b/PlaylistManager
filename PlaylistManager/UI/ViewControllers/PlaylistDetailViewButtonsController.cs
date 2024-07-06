@@ -11,13 +11,13 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using IPA.Loader;
 using PlaylistManager.Downloaders;
+using SiraUtil.Zenject;
 using UnityEngine;
 using Zenject;
-using Accessors = PlaylistManager.Utilities.Accessors;
 
 namespace PlaylistManager.UI
 {
@@ -28,14 +28,16 @@ namespace PlaylistManager.UI
         private readonly LevelPackDetailViewController levelPackDetailViewController;
         private readonly PopupModalsController popupModalsController;
         private readonly PlaylistDetailsViewController playlistDetailsViewController;
-        private AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
+        private readonly AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
+        private readonly PluginMetadata pluginMetadata;
+        private readonly BSMLParser bsmlParser;
 
         private IPlaylist selectedPlaylist;
         private BeatSaberPlaylistsLib.PlaylistManager parentManager;
         private List<IPlaylistSong> _missingSongs;
         private DownloadQueueEntry _downloadQueueEntry;
 
-        public event Action<IAnnotatedBeatmapLevelCollection[], int> LevelCollectionTableViewUpdatedEvent;
+        public event Action<IReadOnlyList<BeatmapLevelPack>, int> LevelCollectionTableViewUpdatedEvent;
         public event PropertyChangedEventHandler PropertyChanged;
 
         [UIComponent("root")]
@@ -45,7 +47,7 @@ namespace PlaylistManager.UI
         private readonly Transform syncButtonTransform;
 
         internal PlaylistDetailViewButtonsController(IHttpService siraHttpService, PlaylistSequentialDownloader playlistDownloader, LevelPackDetailViewController levelPackDetailViewController,
-            PopupModalsController popupModalsController, PlaylistDetailsViewController playlistDetailsViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController)
+            PopupModalsController popupModalsController, PlaylistDetailsViewController playlistDetailsViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, UBinder<Plugin, PluginMetadata> pluginMetadata, BSMLParser bsmlParser)
         {
             this.siraHttpService = siraHttpService;
             this.playlistDownloader = playlistDownloader;
@@ -53,11 +55,13 @@ namespace PlaylistManager.UI
             this.popupModalsController = popupModalsController;
             this.playlistDetailsViewController = playlistDetailsViewController;
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
+            this.pluginMetadata = pluginMetadata.Value;
+            this.bsmlParser = bsmlParser;
         }
 
         public void Initialize()
         {
-            BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.PlaylistDetailViewButtons.bsml"), levelPackDetailViewController.transform.Find("Detail").gameObject, this);
+            bsmlParser.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(pluginMetadata.Assembly, "PlaylistManager.UI.Views.PlaylistDetailViewButtons.bsml"), levelPackDetailViewController._detailWrapper.gameObject, this);
             syncButtonTransform.transform.localScale *= 0.6f;
             syncButtonTransform.gameObject.SetActive(false);
             rootTransform.gameObject.SetActive(false);
@@ -87,9 +91,9 @@ namespace PlaylistManager.UI
         [UIAction("delete-click")]
         private void OnDelete()
         {
-            var numberOfSongs = selectedPlaylist.beatmapLevelCollection.beatmapLevels.Count;
+            var numberOfSongs = selectedPlaylist.PlaylistLevelPack.beatmapLevels.Length;
             var checkboxText = numberOfSongs > 0 ? $"Also delete all {numberOfSongs} songs from the game." : "";
-            popupModalsController.ShowYesNoModal(rootTransform, $"Are you sure you would like to delete the playlist \"{selectedPlaylist.packName}\"?", DeleteButtonPressed, checkboxText: checkboxText);
+            popupModalsController.ShowYesNoModal(rootTransform, $"Are you sure you would like to delete the playlist \"{selectedPlaylist.Title}\"?", DeleteButtonPressed, checkboxText: checkboxText);
         }
 
         private void DeleteButtonPressed()
@@ -113,12 +117,10 @@ namespace PlaylistManager.UI
         {
             popupModalsController.ShowLoadingModal(rootTransform, "Deleting Playlist & Songs");
 
-            var beatmapLevels = selectedPlaylist.beatmapLevelCollection.beatmapLevels;
-            var levelPaths = new List<string>();
-            foreach (var beatmapLevel in beatmapLevels.OfType<CustomPreviewBeatmapLevel>())
-            {
-                levelPaths.Add(beatmapLevel.customLevelPath);
-            }
+            var levelPaths = selectedPlaylist.BeatmapLevels
+                .Where(l => !l.hasPrecalculatedData)
+                .Select(l => SongCore.Collections.GetCustomLevelPath(l.levelID))
+                .ToList();
             await SongCore.Loader.Instance.DeleteSongsAsync(levelPaths);
 
             popupModalsController.DismissLoadingModal();
@@ -143,7 +145,7 @@ namespace PlaylistManager.UI
         {
             DownloadQueueEntry = new DownloadQueueEntry(selectedPlaylist, parentManager);
             playlistDownloader.QueuePlaylist(DownloadQueueEntry);
-            popupModalsController.ShowOkModal(rootTransform, $"{selectedPlaylist.collectionName} has been added to the download queue!", null);
+            popupModalsController.ShowOkModal(rootTransform, $"{selectedPlaylist.Title} has been added to the download queue!", null);
         }
 
         private void OnQueueUpdated()
@@ -247,6 +249,7 @@ namespace PlaylistManager.UI
                 {
                     selectedPlaylist.Clear(); // Clear all songs
                     PlaylistLibUtils.playlistManager.DefaultHandler.Populate(await httpResponse.ReadAsStreamAsync(), selectedPlaylist);
+                    selectedPlaylist.RaisePlaylistChanged();
                     parentManager.StorePlaylist(selectedPlaylist);
                 }
                 else
@@ -306,17 +309,17 @@ namespace PlaylistManager.UI
             }
         }
 
-        public void LevelCollectionUpdated(IAnnotatedBeatmapLevelCollection selectedBeatmapLevelCollection, BeatSaberPlaylistsLib.PlaylistManager parentManager)
+        public void LevelCollectionUpdated(BeatmapLevelPack selectedBeatmapLevelCollection, BeatSaberPlaylistsLib.PlaylistManager parentManager)
         {
-            if (selectedBeatmapLevelCollection is IPlaylist selectedPlaylist)
+            if (selectedBeatmapLevelCollection is PlaylistLevelPack playlistLevelPack)
             {
-                this.selectedPlaylist = selectedPlaylist;
+                selectedPlaylist = playlistLevelPack.playlist;
                 this.parentManager = parentManager;
                 DownloadQueueEntry = PlaylistSequentialDownloader.downloadQueue.OfType<DownloadQueueEntry>().FirstOrDefault(x => x.playlist == selectedPlaylist);
                 UpdateMissingSongs();
 
                 rootTransform.gameObject.SetActive(true);
-                if (selectedPlaylist.TryGetCustomData("syncURL", out var syncURLObj) && syncURLObj is string syncURL && !string.IsNullOrWhiteSpace(syncURL))
+                if (playlistLevelPack.playlist.TryGetCustomData("syncURL", out var syncURLObj) && syncURLObj is string syncURL && !string.IsNullOrWhiteSpace(syncURL))
                 {
                     syncButtonTransform.gameObject.SetActive(true);
                 }
@@ -327,7 +330,7 @@ namespace PlaylistManager.UI
             }
             else
             {
-                this.selectedPlaylist = null;
+                selectedPlaylist = null;
                 this.parentManager = null;
                 MissingSongs = null;
                 rootTransform.gameObject.SetActive(false);

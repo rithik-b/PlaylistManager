@@ -3,7 +3,6 @@ using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using static BeatSaberMarkupLanguage.Components.CustomListTableData;
-using System.Reflection;
 using System.Linq;
 using HMUI;
 using PlaylistManager.Utilities;
@@ -14,6 +13,8 @@ using BeatSaberMarkupLanguage.Parser;
 using System.IO;
 using System.ComponentModel;
 using System.Collections.Generic;
+using IPA.Loader;
+using SiraUtil.Zenject;
 
 namespace PlaylistManager.UI
 {
@@ -21,6 +22,8 @@ namespace PlaylistManager.UI
     {
         private readonly StandardLevelDetailViewController standardLevelDetailViewController;
         private readonly PopupModalsController popupModalsController;
+        private readonly PluginMetadata pluginMetadata;
+        private readonly BSMLParser bsmlParser;
 
         private BeatSaberPlaylistsLib.PlaylistManager parentManager;
         private List<BeatSaberPlaylistsLib.PlaylistManager> childManagers;
@@ -55,10 +58,12 @@ namespace PlaylistManager.UI
         [UIParams]
         private readonly BSMLParserParams parserParams;
 
-        public AddPlaylistModalController(StandardLevelDetailViewController standardLevelDetailViewController, PopupModalsController popupModalsController)
+        public AddPlaylistModalController(StandardLevelDetailViewController standardLevelDetailViewController, PopupModalsController popupModalsController, UBinder<Plugin, PluginMetadata> pluginMetadata, BSMLParser bsmlParser)
         {
             this.standardLevelDetailViewController = standardLevelDetailViewController;
             this.popupModalsController = popupModalsController;
+            this.pluginMetadata = pluginMetadata.Value;
+            this.bsmlParser = bsmlParser;
             folderIcon = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.FolderIcon.png");
             parsed = false;
         }
@@ -67,7 +72,7 @@ namespace PlaylistManager.UI
         {
             if (!parsed)
             {
-                BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.AddPlaylistModal.bsml"), standardLevelDetailViewController.transform.Find("LevelDetail").gameObject, this);
+                bsmlParser.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(pluginMetadata.Assembly, "PlaylistManager.UI.Views.AddPlaylistModal.bsml"), standardLevelDetailViewController._standardLevelDetailView.gameObject, this);
                 modalPosition = modalTransform.localPosition;
                 createModalPosition = createModalTransform.localPosition;
             }
@@ -112,11 +117,11 @@ namespace PlaylistManager.UI
             }
             foreach (var playlist in childPlaylists)
             {
-                if (playlist is IStagedSpriteLoad stagedSpriteLoadPlaylist && !stagedSpriteLoadPlaylist.SmallSpriteWasLoaded)
+                if (!playlist.SmallSpriteWasLoaded)
                 {
-                    stagedSpriteLoadPlaylist.SpriteLoaded -= StagedSpriteLoadPlaylist_SpriteLoaded;
-                    stagedSpriteLoadPlaylist.SpriteLoaded += StagedSpriteLoadPlaylist_SpriteLoaded;
-                    _ = playlist.smallCoverImage;
+                    playlist.SpriteLoaded -= StagedSpriteLoadPlaylist_SpriteLoaded;
+                    playlist.SpriteLoaded += StagedSpriteLoadPlaylist_SpriteLoaded;
+                    _ = playlist.SmallSprite;
                 }
                 else
                 {
@@ -138,14 +143,14 @@ namespace PlaylistManager.UI
                     ShowPlaylist((IPlaylist)stagedSpriteLoadPlaylist);
                 }
                 playlistTableData.tableView.ReloadDataKeepingPosition();
-                (stagedSpriteLoadPlaylist).SpriteLoaded -= StagedSpriteLoadPlaylist_SpriteLoaded;
+                stagedSpriteLoadPlaylist.SpriteLoaded -= StagedSpriteLoadPlaylist_SpriteLoaded;
             }
         }
 
         private void ShowPlaylist(IPlaylist playlist)
         {
-            var subName = string.Format("{0} songs", playlist.beatmapLevelCollection.beatmapLevels.Count);
-            if (playlist.beatmapLevelCollection.beatmapLevels.Any(level => level.levelID == standardLevelDetailViewController.selectedDifficultyBeatmap.level.levelID))
+            var subName = string.Format("{0} songs", playlist.BeatmapLevels.Length);
+            if (playlist.BeatmapLevels.Any(level => level.levelID == standardLevelDetailViewController.beatmapKey.levelId))
             {
                 if (!playlist.AllowDuplicates)
                 {
@@ -154,7 +159,7 @@ namespace PlaylistManager.UI
                 }
                 subName += " (contains song)";
             }
-            playlistTableData.data.Add(new CustomCellInfo(playlist.collectionName, subName, playlist.smallCoverImage));
+            playlistTableData.data.Add(new CustomCellInfo(playlist.Title, subName, playlist.SmallSprite));
         }
 
         [UIAction("select-cell")]
@@ -173,16 +178,18 @@ namespace PlaylistManager.UI
                 IPlaylistSong playlistSong;
                 if (HighlightDifficulty)
                 {
-                    playlistSong = selectedPlaylist.Add(standardLevelDetailViewController.selectedDifficultyBeatmap);
+                    playlistSong = selectedPlaylist.Add(standardLevelDetailViewController.beatmapLevel, standardLevelDetailViewController.beatmapKey);
                 }
                 else
                 {
-                    playlistSong = selectedPlaylist.Add(standardLevelDetailViewController.selectedDifficultyBeatmap.level);
+                    playlistSong = selectedPlaylist.Add(standardLevelDetailViewController.beatmapLevel);
                 }
                 try
                 {
+                    selectedPlaylist.RaisePlaylistChanged();
                     parentManager.StorePlaylist(selectedPlaylist);
-                    popupModalsController.ShowOkModal(modalTransform, string.Format("Song successfully added to {0}", selectedPlaylist.collectionName), null, animateParentCanvas: false);
+                    popupModalsController.ShowOkModal(modalTransform, string.Format("Song successfully added to {0}", selectedPlaylist.Title), null, animateParentCanvas: false);
+                    // TODO: Doesn't refresh the sprite.
                     Events.RaisePlaylistSongAdded(playlistSong, selectedPlaylist);
                 }
                 catch (Exception e)
@@ -251,7 +258,7 @@ namespace PlaylistManager.UI
             {
                 deferredSpriteLoadPlaylist.SpriteLoaded -= StagedSpriteLoadPlaylist_SpriteLoaded;
                 deferredSpriteLoadPlaylist.SpriteLoaded += StagedSpriteLoadPlaylist_SpriteLoaded;
-                _ = playlist.coverImage;
+                _ = playlist.Sprite;
             }
 
             childPlaylists.Add(playlist);

@@ -1,23 +1,16 @@
-﻿using BeatSaberPlaylistsLib.Types;
-using HarmonyLib;
-using HMUI;
+﻿using HarmonyLib;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Reflection.Emit;
 
 namespace PlaylistManager.HarmonyPatches
 {
-    [HarmonyPatch(typeof(LevelCollectionTableView), "HandleDidSelectRowEvent",
-        new Type[] {
-        typeof(TableView), typeof(int)})]
+    [HarmonyPatch(typeof(LevelCollectionTableView), nameof(LevelCollectionTableView.HandleDidSelectRowEvent))]
     public class LevelCollectionTableView_HandleDidSelectRowEvent
     {
-        internal static event Action<IPreviewBeatmapLevel> DidSelectLevelEvent;
-        internal static void Prefix(int row, bool ____showLevelPackHeader)
+        internal static event Action<BeatmapLevel> DidSelectLevelEvent;
+        internal static void Prefix(LevelCollectionTableView __instance, int row)
         {
-            if (____showLevelPackHeader)
+            if (__instance._showLevelPackHeader)
             {
                 row--;
             }

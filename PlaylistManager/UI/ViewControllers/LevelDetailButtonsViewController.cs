@@ -1,18 +1,19 @@
 ﻿using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
 using PlaylistManager.Interfaces;
-using System.Reflection;
 using Zenject;
 using BeatSaberPlaylistsLib.Types;
 using UnityEngine;
 using System.ComponentModel;
 using PlaylistManager.Utilities;
 using System;
+using IPA.Loader;
 using PlaylistManager.Configuration;
+using SiraUtil.Zenject;
 
 namespace PlaylistManager.UI
 {
-    public class LevelDetailButtonsViewController : IInitializable, IDisposable, IPreviewBeatmapLevelUpdater, ILevelCollectionUpdater, INotifyPropertyChanged
+    public class LevelDetailButtonsViewController : IInitializable, IDisposable, IBeatmapLevelUpdater, ILevelCollectionUpdater, INotifyPropertyChanged
     {
         private StandardLevelDetailViewController standardLevelDetailViewController;
         private LevelCollectionTableView levelCollectionTableView;
@@ -20,9 +21,11 @@ namespace PlaylistManager.UI
         private readonly AddPlaylistModalController addPlaylistController;
         private readonly PopupModalsController popupModalsController;
         private readonly DifficultyHighlighter difficultyHighlighter;
+        private readonly PluginMetadata pluginMetadata;
+        private readonly BSMLParser bsmlParser;
 
         public event PropertyChangedEventHandler PropertyChanged;
-        private IPreviewBeatmapLevel selectedBeatmapLevel;
+        private BeatmapLevel selectedBeatmapLevel;
         private IPlaylist selectedPlaylist;
         private BeatSaberPlaylistsLib.PlaylistManager parentManager;
         private bool _addActive;
@@ -33,7 +36,7 @@ namespace PlaylistManager.UI
         private RectTransform rootTransform;
 
         public LevelDetailButtonsViewController(StandardLevelDetailViewController standardLevelDetailViewController, LevelCollectionViewController levelCollectionViewController, LevelCollectionNavigationController levelCollectionNavigationController,
-               AddPlaylistModalController addPlaylistController, PopupModalsController popupModalsController, DifficultyHighlighter difficultyHighlighter)
+               AddPlaylistModalController addPlaylistController, PopupModalsController popupModalsController, DifficultyHighlighter difficultyHighlighter, UBinder<Plugin, PluginMetadata> pluginMetadata, BSMLParser bsmlParser)
         {
             this.standardLevelDetailViewController = standardLevelDetailViewController;
             levelCollectionTableView = levelCollectionViewController._levelCollectionTableView;
@@ -41,11 +44,13 @@ namespace PlaylistManager.UI
             this.addPlaylistController = addPlaylistController;
             this.popupModalsController = popupModalsController;
             this.difficultyHighlighter = difficultyHighlighter;
+            this.pluginMetadata = pluginMetadata.Value;
+            this.bsmlParser = bsmlParser;
         }
 
         public void Initialize()
         {
-            BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.LevelDetailButtonsView.bsml"), standardLevelDetailViewController.transform.Find("LevelDetail").gameObject, this);
+            bsmlParser.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(pluginMetadata.Assembly, "PlaylistManager.UI.Views.LevelDetailButtonsView.bsml"), standardLevelDetailViewController._standardLevelDetailView.gameObject, this);
             rootTransform.transform.localScale *= 0.7f;
             AddActive = false;
             difficultyHighlighter.selectedDifficultyChanged += DifficultyHighlighter_selectedDifficultyChanged;
@@ -82,7 +87,7 @@ namespace PlaylistManager.UI
         [UIAction("remove-button-click")]
         private void DisplayRemoveWarning()
         {
-            if (selectedBeatmapLevel is IPlaylistSong)
+            if (selectedBeatmapLevel is PlaylistLevel)
             {
                 popupModalsController.ShowYesNoModal(standardLevelDetailViewController.transform, string.Format("Are you sure you would like to remove {0} from the playlist?", selectedBeatmapLevel.songName), RemoveSong);
             }
@@ -94,11 +99,15 @@ namespace PlaylistManager.UI
 
         private void RemoveSong()
         {
-            selectedPlaylist.Remove((IPlaylistSong)selectedBeatmapLevel);
+            var playlistLevel = (PlaylistLevel)selectedBeatmapLevel;
+
+            selectedPlaylist.Remove(playlistLevel.playlistSong);
+
             try
             {
+                selectedPlaylist.RaisePlaylistChanged();
                 parentManager.StorePlaylist(selectedPlaylist);
-                Events.RaisePlaylistSongRemoved((IPlaylistSong)selectedBeatmapLevel, selectedPlaylist);
+                Events.RaisePlaylistSongRemoved(playlistLevel.playlistSong, selectedPlaylist);
             }
             catch (Exception e)
             {
@@ -112,15 +121,15 @@ namespace PlaylistManager.UI
             if ((PluginConfig.Instance.AuthorName.IndexOf("GOOBIE", StringComparison.OrdinalIgnoreCase) >= 0 || PluginConfig.Instance.AuthorName.IndexOf("ERIS", StringComparison.OrdinalIgnoreCase) >= 0 ||
                  PluginConfig.Instance.AuthorName.IndexOf("PINK", StringComparison.OrdinalIgnoreCase) >= 0 || PluginConfig.Instance.AuthorName.IndexOf("CANDL3", StringComparison.OrdinalIgnoreCase) >= 0) && PluginConfig.Instance.EasterEggs)
             {
-                levelCollectionNavigationController.SetDataForPack(selectedPlaylist, true, true, $"{PluginConfig.Instance.AuthorName} Cute", false);
+                levelCollectionNavigationController.SetDataForPack(selectedPlaylist.PlaylistLevelPack, true, true, $"{PluginConfig.Instance.AuthorName} Cute", false);
             }
             else if (PluginConfig.Instance.AuthorName.IndexOf("JOSHABI", StringComparison.OrdinalIgnoreCase) >= 0)
             {
-                levelCollectionNavigationController.SetDataForPack(selectedPlaylist, true, true, $"*Sneeze*", false);
+                levelCollectionNavigationController.SetDataForPack(selectedPlaylist.PlaylistLevelPack, true, true, $"*Sneeze*", false);
             }
             else
             {
-                levelCollectionNavigationController.SetDataForPack(selectedPlaylist, true, true, "Play", false);
+                levelCollectionNavigationController.SetDataForPack(selectedPlaylist.PlaylistLevelPack, true, true, "Play", false);
             }
 
             levelCollectionNavigationController.HideDetailViewController();
@@ -134,6 +143,7 @@ namespace PlaylistManager.UI
         private void HighlightButtonClick()
         {
             difficultyHighlighter.ToggleSelectedDifficultyHighlight();
+            selectedPlaylist.RaisePlaylistChanged();
             parentManager.StorePlaylist(selectedPlaylist);
             selectedDifficultyHighlighted = !selectedDifficultyHighlighted;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(HighlightButtonText)));
@@ -166,15 +176,15 @@ namespace PlaylistManager.UI
             }
         }
 
-        public void PreviewBeatmapLevelUpdated(IPreviewBeatmapLevel beatmapLevel)
+        public void BeatmapLevelUpdated(BeatmapLevel beatmapLevel)
         {
             selectedBeatmapLevel = beatmapLevel;
-            if (beatmapLevel.levelID.EndsWith(" WIP"))
+            if (beatmapLevel.levelID.EndsWith(" WIP", StringComparison.Ordinal))
             {
                 AddActive = false;
                 IsPlaylistSong = false;
             }
-            else if (beatmapLevel is IPlaylistSong && selectedPlaylist is { ReadOnly: false })
+            else if (beatmapLevel is PlaylistLevel && selectedPlaylist is { ReadOnly: false })
             {
                 AddActive = true;
                 IsPlaylistSong = true;
@@ -186,16 +196,16 @@ namespace PlaylistManager.UI
             }
         }
 
-        public void LevelCollectionUpdated(IAnnotatedBeatmapLevelCollection annotatedBeatmapLevelCollection, BeatSaberPlaylistsLib.PlaylistManager parentManager)
+        public void LevelCollectionUpdated(BeatmapLevelPack annotatedBeatmapLevelCollection, BeatSaberPlaylistsLib.PlaylistManager parentManager)
         {
-            if (annotatedBeatmapLevelCollection is IPlaylist selectedPlaylist)
+            if (annotatedBeatmapLevelCollection is PlaylistLevelPack playlistLevelPack)
             {
-                this.selectedPlaylist = selectedPlaylist;
+                selectedPlaylist = playlistLevelPack.playlist;
                 this.parentManager = parentManager;
             }
             else
             {
-                this.selectedPlaylist = null;
+                selectedPlaylist = null;
                 this.parentManager = null;
             }
         }

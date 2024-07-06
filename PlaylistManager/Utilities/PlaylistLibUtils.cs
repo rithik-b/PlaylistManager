@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -16,7 +14,7 @@ using UnityEngine;
 
 namespace PlaylistManager.Utilities
 {
-    public class PlaylistLibUtils
+    public static class PlaylistLibUtils
     {
         private const string ICON_PATH = "PlaylistManager.Icons.DefaultIcon.png";
         private const string EASTER_EGG_URL = "https://raw.githubusercontent.com/rithik-b/PlaylistManager/master/img/easteregg.bplist";
@@ -60,6 +58,7 @@ namespace PlaylistManager.Utilities
                 playlist.SetCustomData("syncURL", EASTER_EGG_URL);
             }
 
+            playlist.RaisePlaylistChanged();
             playlistManager.StorePlaylist(playlist);
             PlaylistLibUtils.playlistManager.RequestRefresh("PlaylistManager (plugin)");
             return playlist;
@@ -86,7 +85,7 @@ namespace PlaylistManager.Utilities
         {
             if (playlist != null)
             {
-                return playlist.Where(s => s.PreviewBeatmapLevel == null && !(ownedHashes?.Contains(s.Hash) ?? false)).Distinct(IPlaylistSongComparer<IPlaylistSong>.Default).ToList();
+                return playlist.Where(s => s.BeatmapLevel == null && !(ownedHashes?.Contains(s.Hash) ?? false)).Distinct(IPlaylistSongComparer<IPlaylistSong>.Default).ToList();
             }
             return new List<IPlaylistSong>();
         }
@@ -104,6 +103,17 @@ namespace PlaylistManager.Utilities
             }
 
             return playlists;
+        }
+
+        public static BeatmapLevelPack[] TryGetAllPlaylistsAsLevelPacks()
+        {
+            IPlaylist[] playlists = TryGetAllPlaylists();
+            BeatmapLevelPack[] levelPacks = new BeatmapLevelPack[playlists.Length];
+            for (int i = 0; i < playlists.Length; ++i)
+            {
+                levelPacks[i] = playlists[i].PlaylistLevelPack;
+            }
+            return levelPacks;
         }
 
         #region Image

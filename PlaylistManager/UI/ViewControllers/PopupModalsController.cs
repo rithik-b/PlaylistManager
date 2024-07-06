@@ -3,10 +3,10 @@ using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Parser;
 using HMUI;
 using PlaylistManager.Types;
-using PlaylistManager.Utilities;
 using System;
 using System.ComponentModel;
-using System.Reflection;
+using IPA.Loader;
+using SiraUtil.Zenject;
 using UnityEngine;
 
 namespace PlaylistManager.UI
@@ -14,6 +14,8 @@ namespace PlaylistManager.UI
     public class PopupModalsController : INotifyPropertyChanged
     {
         private readonly MainMenuViewController mainMenuViewController;
+        private readonly PluginMetadata pluginMetadata;
+        private readonly BSMLParser bsmlParser;
         private bool parsed;
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -74,16 +76,18 @@ namespace PlaylistManager.UI
         [UIParams]
         private readonly BSMLParserParams parserParams;
 
-        public PopupModalsController(MainMenuViewController mainMenuViewController)
+        public PopupModalsController(MainMenuViewController mainMenuViewController, UBinder<Plugin, PluginMetadata> pluginMetadata, BSMLParser bsmlParser)
         {
             this.mainMenuViewController = mainMenuViewController;
+            this.pluginMetadata = pluginMetadata.Value;
+            this.bsmlParser = bsmlParser;
         }
 
         private void Parse()
         {
             if (!parsed)
             {
-                BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "PlaylistManager.UI.Views.PopupModals.bsml"), mainMenuViewController.gameObject, this);
+                bsmlParser.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(pluginMetadata.Assembly, "PlaylistManager.UI.Views.PopupModals.bsml"), mainMenuViewController.gameObject, this);
                 yesNoModalPosition = yesNoModalTransform.localPosition;
                 okModalPosition = okModalTransform.localPosition;
                 loadingModalPosition = loadingModalTransform.localPosition;

@@ -4,7 +4,7 @@ using IPA.Config;
 using IPA.Config.Stores;
 using PlaylistManager.Installers;
 using SiraUtil.Zenject;
-using System.Reflection;
+using IPA.Loader;
 using IPALogger = IPA.Logging.Logger;
 
 namespace PlaylistManager
@@ -12,11 +12,13 @@ namespace PlaylistManager
     [Plugin(RuntimeOptions.DynamicInit)]
     public class Plugin
     {
+        private readonly PluginMetadata _metadata;
+        private readonly Harmony _harmony;
+
         internal static Plugin Instance { get; private set; }
         internal static IPALogger Log { get; private set; }
 
         public const string HarmonyId = "com.github.rithik-b.PlaylistManager";
-        internal static Harmony harmony;
 
         [Init]
         /// <summary>
@@ -24,11 +26,13 @@ namespace PlaylistManager
         /// [Init] methods that use a Constructor or called before regular methods like InitWithConfig.
         /// Only use [Init] with one Constructor.
         /// </summary>
-        public Plugin(IPALogger logger, Zenjector zenjector)
+        public Plugin(IPALogger logger, PluginMetadata metadata, Zenjector zenjector)
         {
             Instance = this;
             Log = logger;
-            harmony = new Harmony(HarmonyId);
+            _metadata = metadata;
+            _harmony = new Harmony(HarmonyId);
+            zenjector.UseLogger(logger);
             zenjector.UseMetadataBinder<Plugin>();
             zenjector.UseHttpService();
             zenjector.UseSiraSync(SiraUtil.Web.SiraSync.SiraSyncServiceType.GitHub, "rithik-b");
@@ -49,13 +53,13 @@ namespace PlaylistManager
         [OnEnable]
         public void OnEnable()
         {
-            harmony.PatchAll(Assembly.GetExecutingAssembly());
+            _harmony.PatchAll(_metadata.Assembly);
         }
 
         [OnDisable]
         public void OnDisable()
         {
-            harmony.UnpatchSelf();
+            _harmony.UnpatchSelf();
         }
     }
 }

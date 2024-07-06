@@ -17,7 +17,6 @@ namespace PlaylistManager.UI
         private string _authorName;
         private bool _automaticAuthorName;
         private bool _playlistHoverHints;
-        private float _playlistScrollSpeed;
         private bool _showDownloadIcon;
         private bool _blurredArt;
         private bool _foldersDisabled;
@@ -45,7 +44,6 @@ namespace PlaylistManager.UI
             AutomaticAuthorName = PluginConfig.Instance.AutomaticAuthorName;
             AuthorName = PluginConfig.Instance.AuthorName;
             PlaylistHoverHints = PluginConfig.Instance.PlaylistHoverHints;
-            PlaylistScrollSpeed = PluginConfig.Instance.PlaylistScrollSpeed;
             ShowDownloadIcon = PluginConfig.Instance.ShowDownloadIcon;
             BlurredArt = PluginConfig.Instance.BlurredArt;
             FoldersDisabled = PluginConfig.Instance.FoldersDisabled;
@@ -70,7 +68,6 @@ namespace PlaylistManager.UI
             PluginConfig.Instance.AutomaticAuthorName = AutomaticAuthorName;
             PluginConfig.Instance.AuthorName = AuthorName;
             PluginConfig.Instance.PlaylistHoverHints = PlaylistHoverHints;
-            PluginConfig.Instance.PlaylistScrollSpeed = PlaylistScrollSpeed;
             PluginConfig.Instance.ShowDownloadIcon = ShowDownloadIcon;
             PluginConfig.Instance.BlurredArt = BlurredArt;
             PluginConfig.Instance.FoldersDisabled = FoldersDisabled;
@@ -165,18 +162,6 @@ namespace PlaylistManager.UI
             }
         }
 
-        [UIValue("scroll-speed")]
-        private float PlaylistScrollSpeed
-        {
-            get => _playlistScrollSpeed;
-            set
-            {
-                _playlistScrollSpeed = value;
-                NotifyPropertyChanged(nameof(PlaylistScrollSpeed));
-                NotifyPropertyChanged(nameof(SoftRestart));
-            }
-        }
-
         [UIValue("download-icon")]
         private bool ShowDownloadIcon
         {
@@ -262,7 +247,7 @@ namespace PlaylistManager.UI
         #endregion
 
         [UIValue("soft-restart")]
-        private bool SoftRestart => PlaylistHoverHints != PluginConfig.Instance.PlaylistHoverHints || PlaylistScrollSpeed != PluginConfig.Instance.PlaylistScrollSpeed ||
+        private bool SoftRestart => PlaylistHoverHints != PluginConfig.Instance.PlaylistHoverHints ||
             FoldersDisabled != PluginConfig.Instance.FoldersDisabled;
     }
 }
