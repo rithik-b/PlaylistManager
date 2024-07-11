@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection.Emit;
-using HarmonyLib;
 using SiraUtil.Affinity;
-using SongCore.Utilities;
 using UnityEngine;
 
 namespace PlaylistManager.AffinityPatches
@@ -66,46 +63,6 @@ namespace PlaylistManager.AffinityPatches
                     _isGridResized = false;
                 }
             }
-        }
-
-        [AffinityPatch(typeof(AnnotatedBeatmapLevelCollectionsGridView), nameof(AnnotatedBeatmapLevelCollectionsGridView.OnPointerEnter))]
-        [AffinityTranspiler]
-        private IEnumerable<CodeInstruction> ChangeInteractableConditionOnEnter(IEnumerable<CodeInstruction> instructions, ILGenerator il)
-        {
-            return ChangeInteractableCondition(instructions, il);
-        }
-
-        [AffinityPatch(typeof(AnnotatedBeatmapLevelCollectionsGridView), nameof(AnnotatedBeatmapLevelCollectionsGridView.OnPointerExit))]
-        [AffinityTranspiler]
-        private IEnumerable<CodeInstruction> ChangeInteractableConditionOnExit(IEnumerable<CodeInstruction> instructions, ILGenerator il)
-        {
-            return ChangeInteractableCondition(instructions, il);
-        }
-
-        [AffinityPatch(typeof(AnnotatedBeatmapLevelCollectionsGridView), nameof(AnnotatedBeatmapLevelCollectionsGridView.HandleCellSelectionDidChange))]
-        [AffinityTranspiler]
-        private IEnumerable<CodeInstruction> ChangeInteractableConditionOnSelect(IEnumerable<CodeInstruction> instructions, ILGenerator il)
-        {
-            return ChangeInteractableCondition(instructions, il);
-        }
-
-        private static IEnumerable<CodeInstruction> ChangeInteractableCondition(IEnumerable<CodeInstruction> instructions, ILGenerator il)
-        {
-            // Makes the grid interactable when there's 1 row or more, and when there's more collections to display than the number of visible columns.
-            var codeMatcher = new CodeMatcher(instructions, il)
-                .MatchStartForward(new CodeMatch(OpCodes.Ldc_I4_1))
-                .ThrowIfInvalid()
-                .SetOpcodeAndAdvance(OpCodes.Ldc_I4_0);
-            return codeMatcher
-                .InsertBranchAndAdvance(OpCodes.Ble_S, codeMatcher.Pos + 1)
-                .Insert(
-                    new CodeInstruction(OpCodes.Ldarg_0),
-                    new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(AnnotatedBeatmapLevelCollectionsGridView), nameof(AnnotatedBeatmapLevelCollectionsGridView._annotatedBeatmapLevelCollections))),
-                    new CodeInstruction(OpCodes.Callvirt, AccessTools.PropertyGetter(typeof(IReadOnlyCollection<>).MakeGenericType(typeof(BeatmapLevelPack)), nameof(IReadOnlyList<BeatmapLevelPack>.Count))),
-                    new CodeInstruction(OpCodes.Ldarg_0),
-                    new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(AnnotatedBeatmapLevelCollectionsGridView), nameof(AnnotatedBeatmapLevelCollectionsGridView._gridView))),
-                    new CodeInstruction(OpCodes.Callvirt, AccessTools.PropertyGetter(typeof(GridView), nameof(GridView.visibleColumnCount))))
-                .InstructionEnumeration();
         }
 
         [AffinityPatch(typeof(AnnotatedBeatmapLevelCollectionsGridViewAnimator), nameof(AnnotatedBeatmapLevelCollectionsGridViewAnimator.GetContentXOffset))]
