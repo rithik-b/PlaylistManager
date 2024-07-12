@@ -12,7 +12,7 @@
     "icon": "PlaylistManager.Icons.Logo.png",
     "dependsOn": {
         "BSIPA": "^4.3.0",
-        "SongCore": "^3.14.5",
+        "SongCore": "^3.14.8",
         "BeatSaberMarkupLanguage": "^1.7.5",
         "SiraUtil": "^3.0.0",
         "BeatSaberPlaylistsLib": "^1.7.0",

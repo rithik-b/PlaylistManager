@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using IPA.Loader;
 using PlaylistManager.Downloaders;
 using SiraUtil.Zenject;
+using SongCore;
 using UnityEngine;
 using Zenject;
 
@@ -29,6 +30,7 @@ namespace PlaylistManager.UI
         private readonly PopupModalsController popupModalsController;
         private readonly PlaylistDetailsViewController playlistDetailsViewController;
         private readonly AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController;
+        private readonly Loader loader;
         private readonly PluginMetadata pluginMetadata;
         private readonly BSMLParser bsmlParser;
 
@@ -47,7 +49,7 @@ namespace PlaylistManager.UI
         private readonly Transform syncButtonTransform;
 
         internal PlaylistDetailViewButtonsController(IHttpService siraHttpService, PlaylistSequentialDownloader playlistDownloader, LevelPackDetailViewController levelPackDetailViewController,
-            PopupModalsController popupModalsController, PlaylistDetailsViewController playlistDetailsViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, UBinder<Plugin, PluginMetadata> pluginMetadata, BSMLParser bsmlParser)
+            PopupModalsController popupModalsController, PlaylistDetailsViewController playlistDetailsViewController, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, Loader loader, UBinder<Plugin, PluginMetadata> pluginMetadata, BSMLParser bsmlParser)
         {
             this.siraHttpService = siraHttpService;
             this.playlistDownloader = playlistDownloader;
@@ -55,6 +57,7 @@ namespace PlaylistManager.UI
             this.popupModalsController = popupModalsController;
             this.playlistDetailsViewController = playlistDetailsViewController;
             this.annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
+            this.loader = loader;
             this.pluginMetadata = pluginMetadata.Value;
             this.bsmlParser = bsmlParser;
         }
@@ -119,9 +122,10 @@ namespace PlaylistManager.UI
 
             var levelPaths = selectedPlaylist.BeatmapLevels
                 .Where(l => !l.hasPrecalculatedData)
-                .Select(l => SongCore.Collections.GetCustomLevelPath(l.levelID))
+                .Select(l => SongCore.Collections.GetLoadedSaveData(l.levelID)?.customLevelFolderInfo.folderPath)
+                .Where(p => p != null)
                 .ToList();
-            await SongCore.Loader.Instance.DeleteSongsAsync(levelPaths);
+            await loader.DeleteSongsAsync(levelPaths);
 
             popupModalsController.DismissLoadingModal();
         }
