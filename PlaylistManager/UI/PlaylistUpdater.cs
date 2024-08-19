@@ -80,7 +80,7 @@ namespace PlaylistManager.UI
             }
 
             _levelPackDetailViewController._pack = playlistLevelPack;
-            _levelPackDetailViewController.ShowContent(LevelPackDetailViewController.ContentType.Owned);
+            _levelPackDetailViewController.ShowContent(LevelPackDetailViewController.ContentType.NonBuyable);
 
             _levelCollectionNavigationController._levelPack = playlistLevelPack;
 
@@ -148,7 +148,7 @@ namespace PlaylistManager.UI
             var texture = _levelPackDetailViewController._kawaseBlurRenderer.Blur(sprite.texture, KawaseBlurRendererSO.KernelSize.Kernel7, 2);
             _levelPackDetailViewController._blurredPackArtwork = Sprite.Create(texture, new Rect(0f, 0f, texture.width, texture.height), new Vector2(0.5f, 0.5f), 256f, 0U, SpriteMeshType.FullRect, new Vector4(0f, 0f, 0f, 0f), false);
             _levelPackDetailViewController._packImage.sprite = sprite;
-            _levelPackDetailViewController.ShowContent(LevelPackDetailViewController.ContentType.Owned);
+            _levelPackDetailViewController.ShowContent(LevelPackDetailViewController.ContentType.NonBuyable);
         }
 
         public void LevelCollectionUpdated(BeatmapLevelPack beatmapLevelPack, BeatSaberPlaylistsLib.PlaylistManager parentManager)

@@ -42,7 +42,7 @@ namespace PlaylistManager
             this.levelCollectionsTableUpdaters = levelCollectionsTableUpdaters;
             this.beatmapLevelUpdaters = beatmapLevelUpdaters;
 
-            emptyBeatmapLevelPack = new BeatmapLevelPack(CustomLevelLoader.kCustomLevelPackPrefixId + "CustomLevels", "Custom Levels", "Custom Levels", BeatSaberMarkupLanguage.Utilities.ImageResources.BlankSprite, BeatSaberMarkupLanguage.Utilities.ImageResources.BlankSprite, Array.Empty<BeatmapLevel>(), PlayerSensitivityFlag.Safe);
+            emptyBeatmapLevelPack = new BeatmapLevelPack(CustomLevelLoader.kCustomLevelPackPrefixId + CustomLevelPathHelper.kCustomLevelsDirectoryName, "Custom Levels", "Custom Levels", BeatSaberMarkupLanguage.Utilities.ImageResources.BlankSprite, BeatSaberMarkupLanguage.Utilities.ImageResources.BlankSprite, PackBuyOption.Default, Array.Empty<BeatmapLevel>(), PlayerSensitivityFlag.Safe);
         }
 
         public void Initialize()

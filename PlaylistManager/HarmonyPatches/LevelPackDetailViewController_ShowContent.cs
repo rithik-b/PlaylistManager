@@ -10,7 +10,7 @@ namespace PlaylistManager.HarmonyPatches
     {
         private static bool Prefix(LevelPackDetailViewController __instance, LevelPackDetailViewController.ContentType contentType)
         {
-            if (contentType == LevelPackDetailViewController.ContentType.Owned && __instance._pack is PlaylistLevelPack)
+            if (contentType == LevelPackDetailViewController.ContentType.NonBuyable && __instance._pack is PlaylistLevelPack)
             {
                 if (PluginConfig.Instance.BlurredArt)
                 {
