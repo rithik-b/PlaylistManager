@@ -5,40 +5,44 @@ using PlaylistManager.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
+using UnityEngine;
 using Zenject;
 
 namespace PlaylistManager.UI
 {
     public class DifficultyHighlighter : IBeatmapLevelUpdater, IDisposable, IInitializable
     {
-        private BeatmapCharacteristicSegmentedControlController beatmapCharacteristicSegmentedControlController;
-        private readonly IconSegmentedControl beatmapCharacteristicSegmentedControl;
-        private BeatmapDifficultySegmentedControlController beatmapDifficultySegmentedControlController;
-        private SegmentedControl beatmapDifficultySegmentedControl;
-        private IPlaylistSong selectedPlaylistSong;
+        private readonly BeatmapCharacteristicSegmentedControlController _beatmapCharacteristicSegmentedControlController;
+        private readonly IconSegmentedControl _beatmapCharacteristicSegmentedControl;
+        private readonly BeatmapDifficultySegmentedControlController _beatmapDifficultySegmentedControlController;
+        private readonly SegmentedControl _beatmapDifficultySegmentedControl;
+
+        private IPlaylistSong _selectedPlaylistSong;
+        private Color32? _originalDifficultyColor = null;
 
         internal event Action<bool> selectedDifficultyChanged;
 
         public DifficultyHighlighter(StandardLevelDetailViewController standardLevelDetailViewController)
         {
             var standardLevelDetailView = standardLevelDetailViewController._standardLevelDetailView;
-            beatmapCharacteristicSegmentedControlController = standardLevelDetailView._beatmapCharacteristicSegmentedControlController;
-            beatmapCharacteristicSegmentedControl = beatmapCharacteristicSegmentedControlController._segmentedControl;
-            beatmapDifficultySegmentedControlController = standardLevelDetailView._beatmapDifficultySegmentedControlController;
-            beatmapDifficultySegmentedControl = beatmapDifficultySegmentedControlController._difficultySegmentedControl;
+            _beatmapCharacteristicSegmentedControlController = standardLevelDetailView._beatmapCharacteristicSegmentedControlController;
+            _beatmapCharacteristicSegmentedControl = _beatmapCharacteristicSegmentedControlController._segmentedControl;
+            _beatmapDifficultySegmentedControlController = standardLevelDetailView._beatmapDifficultySegmentedControlController;
+            _beatmapDifficultySegmentedControl = _beatmapDifficultySegmentedControlController._difficultySegmentedControl;
         }
 
         public void Initialize()
         {
-            beatmapCharacteristicSegmentedControl.didSelectCellEvent += BeatmapCharacteristicSegmentedControl_DidSelectCellEvent;
-            beatmapDifficultySegmentedControl.didSelectCellEvent += BeatmapDifficultySegmentedControl_didSelectCellEvent;
+            _beatmapCharacteristicSegmentedControl.didSelectCellEvent += BeatmapCharacteristicSegmentedControl_DidSelectCellEvent;
+            _beatmapDifficultySegmentedControl.didSelectCellEvent += BeatmapDifficultySegmentedControl_didSelectCellEvent;
             BeatmapDifficultySegmentedControlController_SetData.CharacteristicsSegmentedControllerDataSetEvent += BeatmapDifficultySegmentedControlController_CharacteristicsSegmentedControllerDataSetEvent;
         }
 
         public void Dispose()
         {
-            beatmapCharacteristicSegmentedControl.didSelectCellEvent -= BeatmapCharacteristicSegmentedControl_DidSelectCellEvent;
-            beatmapDifficultySegmentedControl.didSelectCellEvent -= BeatmapDifficultySegmentedControl_didSelectCellEvent;
+            _beatmapCharacteristicSegmentedControl.didSelectCellEvent -= BeatmapCharacteristicSegmentedControl_DidSelectCellEvent;
+            _beatmapDifficultySegmentedControl.didSelectCellEvent -= BeatmapDifficultySegmentedControl_didSelectCellEvent;
             BeatmapDifficultySegmentedControlController_SetData.CharacteristicsSegmentedControllerDataSetEvent -= BeatmapDifficultySegmentedControlController_CharacteristicsSegmentedControllerDataSetEvent;
         }
 
@@ -46,29 +50,42 @@ namespace PlaylistManager.UI
         {
             if (beatmapLevel is PlaylistLevel playlistLevel)
             {
-                selectedPlaylistSong = playlistLevel.playlistSong;
+                _selectedPlaylistSong = playlistLevel.playlistSong;
             }
             else
             {
-                selectedPlaylistSong = null;
+                _selectedPlaylistSong = null;
             }
         }
 
         private void HighlightDifficultiesForSelectedCharacteristic()
         {
-            if (selectedPlaylistSong != null && selectedPlaylistSong.Difficulties != null && selectedPlaylistSong.Difficulties.Count != 0)
+            var difficultyCells = _beatmapDifficultySegmentedControl.cells;
+
+            // TODO: Ugly, see if there's a better way to reset the color.
+            var highlightColor = new Color32(255, 255, 0, 255);
+            foreach (var difficultyCell in difficultyCells)
             {
-                var difficultiesToHighlight = selectedPlaylistSong.Difficulties.FindAll(difficulty => difficulty.Characteristic.Equals(beatmapCharacteristicSegmentedControlController.selectedBeatmapCharacteristic.serializedName, StringComparison.OrdinalIgnoreCase));
-                var availaibleDifficulties = beatmapDifficultySegmentedControlController._difficulties;
-                var difficultyCells = beatmapDifficultySegmentedControl.cells;
+                var text = difficultyCell.GetComponentInChildren<CurvedTextMeshPro>();
+                _originalDifficultyColor ??= text.faceColor;
+                if (text.faceColor.Compare(highlightColor))
+                {
+                    text.faceColor = _originalDifficultyColor.Value;
+                }
+            }
+
+            if (_selectedPlaylistSong != null && _selectedPlaylistSong.Difficulties != null && _selectedPlaylistSong.Difficulties.Count != 0)
+            {
+                var difficultiesToHighlight = _selectedPlaylistSong.Difficulties.FindAll(difficulty => difficulty.Characteristic.Equals(_beatmapCharacteristicSegmentedControlController.selectedBeatmapCharacteristic.serializedName, StringComparison.OrdinalIgnoreCase));
+                var availaibleDifficulties = _beatmapDifficultySegmentedControlController._difficulties;
 
                 foreach (var difficulty in difficultiesToHighlight)
                 {
                     if (availaibleDifficulties.Contains(difficulty.BeatmapDifficulty))
                     {
-                        var cellToHighlight = difficultyCells[beatmapDifficultySegmentedControlController.GetClosestDifficultyIndex(difficulty.BeatmapDifficulty)];
+                        var cellToHighlight = difficultyCells[_beatmapDifficultySegmentedControlController.GetClosestDifficultyIndex(difficulty.BeatmapDifficulty)];
                         var textToHighlight = cellToHighlight.GetComponentInChildren<CurvedTextMeshPro>();
-                        textToHighlight.faceColor = new UnityEngine.Color32(255, 255, 0, 255);
+                        textToHighlight.faceColor = highlightColor;
                     }
                 }
             }
@@ -78,28 +95,28 @@ namespace PlaylistManager.UI
 
         internal void ToggleSelectedDifficultyHighlight()
         {
-            if (selectedPlaylistSong != null)
+            if (_selectedPlaylistSong != null)
             {
-                var difficultyCells = beatmapDifficultySegmentedControl.cells;
+                var difficultyCells = _beatmapDifficultySegmentedControl.cells;
                 if (IsSelectedDifficultyHighlighted)
                 {
-                    selectedPlaylistSong.Difficulties.RemoveAll(d => d.BeatmapDifficulty == beatmapDifficultySegmentedControlController.selectedDifficulty);
-                    var cellToUnhighlight = difficultyCells[beatmapDifficultySegmentedControlController.GetClosestDifficultyIndex(beatmapDifficultySegmentedControlController.selectedDifficulty)];
+                    _selectedPlaylistSong.Difficulties.RemoveAll(d => d.BeatmapDifficulty == _beatmapDifficultySegmentedControlController.selectedDifficulty);
+                    var cellToUnhighlight = difficultyCells[_beatmapDifficultySegmentedControlController.GetClosestDifficultyIndex(_beatmapDifficultySegmentedControlController.selectedDifficulty)];
                     var textToUnhighlight = cellToUnhighlight.GetComponentInChildren<CurvedTextMeshPro>();
                     textToUnhighlight.faceColor = new UnityEngine.Color32(255, 255, 255, 255);
                 }
                 else
                 {
-                    if (selectedPlaylistSong.Difficulties == null)
+                    if (_selectedPlaylistSong.Difficulties == null)
                     {
-                        selectedPlaylistSong.Difficulties = new List<Difficulty>();
+                        _selectedPlaylistSong.Difficulties = new List<Difficulty>();
                     }
                     var difficulty = new Difficulty();
-                    difficulty.BeatmapDifficulty = beatmapDifficultySegmentedControlController.selectedDifficulty;
-                    difficulty.Characteristic = beatmapCharacteristicSegmentedControlController.selectedBeatmapCharacteristic.serializedName;
-                    selectedPlaylistSong.AddDifficulty(difficulty);
+                    difficulty.BeatmapDifficulty = _beatmapDifficultySegmentedControlController.selectedDifficulty;
+                    difficulty.Characteristic = _beatmapCharacteristicSegmentedControlController.selectedBeatmapCharacteristic.serializedName;
+                    _selectedPlaylistSong.AddDifficulty(difficulty);
 
-                    var cellToHighlight = difficultyCells[beatmapDifficultySegmentedControlController.GetClosestDifficultyIndex(beatmapDifficultySegmentedControlController.selectedDifficulty)];
+                    var cellToHighlight = difficultyCells[_beatmapDifficultySegmentedControlController.GetClosestDifficultyIndex(_beatmapDifficultySegmentedControlController.selectedDifficulty)];
                     var textToHighlight = cellToHighlight.GetComponentInChildren<CurvedTextMeshPro>();
                     textToHighlight.faceColor = new UnityEngine.Color32(255, 255, 0, 255);
                 }
@@ -127,10 +144,10 @@ namespace PlaylistManager.UI
         {
             get
             {
-                if (selectedPlaylistSong != null && selectedPlaylistSong.Difficulties != null && selectedPlaylistSong.Difficulties.Count != 0)
+                if (_selectedPlaylistSong != null && _selectedPlaylistSong.Difficulties != null && _selectedPlaylistSong.Difficulties.Count != 0)
                 {
-                    var difficulties = selectedPlaylistSong.Difficulties.FindAll(difficulty => difficulty.Characteristic.Equals(beatmapCharacteristicSegmentedControlController.selectedBeatmapCharacteristic.serializedName, StringComparison.OrdinalIgnoreCase));
-                    return difficulties.Select(d => d.BeatmapDifficulty).Contains(beatmapDifficultySegmentedControlController.selectedDifficulty);
+                    var difficulties = _selectedPlaylistSong.Difficulties.FindAll(difficulty => difficulty.Characteristic.Equals(_beatmapCharacteristicSegmentedControlController.selectedBeatmapCharacteristic.serializedName, StringComparison.OrdinalIgnoreCase));
+                    return difficulties.Select(d => d.BeatmapDifficulty).Contains(_beatmapDifficultySegmentedControlController.selectedDifficulty);
                 }
                 return false;
             }
