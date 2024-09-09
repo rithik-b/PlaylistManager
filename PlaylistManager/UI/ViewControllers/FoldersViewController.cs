@@ -491,16 +491,11 @@ namespace PlaylistManager.UI
             return folderCell ? folderCell : tableCell.GetComponent<FolderCell>();
         }
 
-        public float CellSize() => 15;
+        public float CellSize(int idx) => 15;
 
         public int NumberOfCells() => tableCells.Count;
 
         public TableCell CellForIdx(TableView tableView, int idx) => GetCell().PopulateCell(tableCells[idx].Icon, tableCells[idx].Text);
-
-        public float CellSize(int idx)
-        {
-            return 1f;
-        }
 
         #endregion
     }
