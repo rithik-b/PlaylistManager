@@ -8,7 +8,7 @@
         "#![PlaylistManager.Description.md]",
         "Load, Create, Edit, Organize Playlists and Download their Songs in Beat Saber."
     ],
-    "gameVersion": "1.37.3",
+    "gameVersion": "1.37.5",
     "icon": "PlaylistManager.Icons.Logo.png",
     "dependsOn": {
         "BSIPA": "^4.3.0",

@@ -52,9 +52,9 @@ namespace PlaylistManager.UI
         [UIAction("#post-parse")]
         private void PostParse()
         {
-            customListTableData.data.Clear();
-            customListTableData.data = contributors;
-            customListTableData.tableView.ReloadData();
+            customListTableData.Data.Clear();
+            customListTableData.Data = contributors;
+            customListTableData.TableView.ReloadData();
         }
 
         private void URLRequested(string url)

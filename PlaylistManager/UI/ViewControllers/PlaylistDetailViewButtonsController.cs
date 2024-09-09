@@ -94,7 +94,7 @@ namespace PlaylistManager.UI
         [UIAction("delete-click")]
         private void OnDelete()
         {
-            var numberOfSongs = selectedPlaylist.PlaylistLevelPack.beatmapLevels.Length;
+            var numberOfSongs = selectedPlaylist.PlaylistLevelPack._beatmapLevels.Length;
             var checkboxText = numberOfSongs > 0 ? $"Also delete all {numberOfSongs} songs from the game." : "";
             popupModalsController.ShowYesNoModal(rootTransform, $"Are you sure you would like to delete the playlist \"{selectedPlaylist.Title}\"?", DeleteButtonPressed, checkboxText: checkboxText);
         }

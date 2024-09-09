@@ -17,6 +17,7 @@ using SiraUtil.Zenject;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
+using System.Reflection;
 
 namespace PlaylistManager.UI
 {
@@ -119,7 +120,7 @@ namespace PlaylistManager.UI
             var gameObject = rootTransform.gameObject;
             gameObject.SetActive(false);
             gameObject.name = "PlaylistManagerFoldersView";
-            customListTableData.tableView.SetDataSource(this, false);
+            customListTableData.TableView.SetDataSource(this, false);
         }
 
         public void SetupDimensions()
@@ -144,7 +145,7 @@ namespace PlaylistManager.UI
 
         private void SetupList(BeatSaberPlaylistsLib.PlaylistManager currentParentManager, bool setBeatmapLevelCollections = true)
         {
-            customListTableData.tableView.ClearSelection();
+            customListTableData.TableView.ClearSelection();
             tableCells.Clear();
             CurrentParentManager = currentParentManager;
 
@@ -196,14 +197,14 @@ namespace PlaylistManager.UI
                 }
             }
 
-            customListTableData.tableView.ReloadData();
-            customListTableData.tableView.ScrollToCellWithIdx(0, TableView.ScrollPositionType.Beginning, false);
+            customListTableData.TableView.ReloadData();
+            customListTableData.TableView.ScrollToCellWithIdx(0, TableView.ScrollPositionType.Beginning, false);
             if (currentParentManager == null)
             {
-                customListTableData.tableView.SelectCellWithIdx(0);
+                customListTableData.TableView.SelectCellWithIdx(0);
 
                 // Add hover hint
-                var visibleCells = customListTableData.tableView.visibleCells.ToArray();
+                var visibleCells = customListTableData.TableView.visibleCells.ToArray();
                 for (var i = 0; i < visibleCells.Length; i++)
                 {
                     var hoverHint = visibleCells[i].GetComponent<HoverHint>();
@@ -216,18 +217,18 @@ namespace PlaylistManager.UI
                     {
                         hoverHint.enabled = true;
                     }
-                    hoverHint.text = tableCells[i].subtext;
+                    hoverHint.text = tableCells[i].Subtext;
                 }
 
                 if (setBeatmapLevelCollections)
                 {
-                    Select(customListTableData.tableView, 0);
+                    Select(customListTableData.TableView, 0);
                 }
             }
             else
             {
                 // Disable hover hint
-                var visibleCells = customListTableData.tableView.visibleCells.ToArray();
+                var visibleCells = customListTableData.TableView.visibleCells.ToArray();
                 for (var i = 0; i < visibleCells.Length; i++)
                 {
                     var hoverHint = visibleCells[i].GetComponent<HoverHint>();
@@ -316,8 +317,8 @@ namespace PlaylistManager.UI
                 {
                     var customCellInfo = new CustomListTableData.CustomCellInfo(folderName, icon: BeatSaberMarkupLanguage.Utilities.ImageResources.BlankSprite);
                     tableCells.Add(customCellInfo);
-                    customListTableData.tableView.ReloadData();
-                    customListTableData.tableView.ClearSelection();
+                    customListTableData.TableView.ReloadData();
+                    customListTableData.TableView.ClearSelection();
                     currentManagers.Add(childManager);
                 }
             }
@@ -477,7 +478,7 @@ namespace PlaylistManager.UI
 
         private FolderCell GetCell()
         {
-            var tableCell = customListTableData.tableView.DequeueReusableCellForIdentifier(kReuseIdentifier);
+            var tableCell = customListTableData.TableView.DequeueReusableCellForIdentifier(kReuseIdentifier);
             FolderCell? folderCell = null;
 
             if (tableCell == null)
@@ -494,7 +495,12 @@ namespace PlaylistManager.UI
 
         public int NumberOfCells() => tableCells.Count;
 
-        public TableCell CellForIdx(TableView tableView, int idx) => GetCell().PopulateCell(tableCells[idx].icon, tableCells[idx].text);
+        public TableCell CellForIdx(TableView tableView, int idx) => GetCell().PopulateCell(tableCells[idx].Icon, tableCells[idx].Text);
+
+        public float CellSize(int idx)
+        {
+            return 1f;
+        }
 
         #endregion
     }
