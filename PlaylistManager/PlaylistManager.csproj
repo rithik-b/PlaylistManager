@@ -168,7 +168,7 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1">
+        <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.2">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
