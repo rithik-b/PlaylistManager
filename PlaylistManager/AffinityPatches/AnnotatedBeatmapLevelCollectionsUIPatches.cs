@@ -7,15 +7,18 @@ namespace PlaylistManager.AffinityPatches
 {
     internal class AnnotatedBeatmapLevelCollectionsUIPatches : IAffinity
     {
+        private readonly MainFlowCoordinator _mainFlowCoordinator;
         private readonly AnnotatedBeatmapLevelCollectionsViewController _annotatedBeatmapLevelCollectionsViewController;
         private readonly SelectLevelCategoryViewController _selectLevelCategoryViewController;
 
         private int _originalColumnCount;
         private Vector2 _originalScreenSize;
         private bool _isGridResized;
+        private bool _isScreenResized;
 
-        private AnnotatedBeatmapLevelCollectionsUIPatches(AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, SelectLevelCategoryViewController selectLevelCategoryViewController)
+        private AnnotatedBeatmapLevelCollectionsUIPatches(MainFlowCoordinator mainFlowCoordinator, AnnotatedBeatmapLevelCollectionsViewController annotatedBeatmapLevelCollectionsViewController, SelectLevelCategoryViewController selectLevelCategoryViewController)
         {
+            _mainFlowCoordinator = mainFlowCoordinator;
             _annotatedBeatmapLevelCollectionsViewController = annotatedBeatmapLevelCollectionsViewController;
             _selectLevelCategoryViewController = selectLevelCategoryViewController;
         }
@@ -117,7 +120,7 @@ namespace PlaylistManager.AffinityPatches
                     rectTransform.localPosition = localPosition;
                 }
 
-                rectTransform = (RectTransform)__instance.gameObject.GetComponentInParent<HMUI.Screen>().transform;
+                rectTransform = (RectTransform)_mainFlowCoordinator._screenSystem.mainScreen.transform;
 
                 if (_originalScreenSize == default)
                 {
@@ -126,6 +129,20 @@ namespace PlaylistManager.AffinityPatches
 
                 // Resizing Screen is needed to allow the hover hint to be shown when the GridView is larger.
                 rectTransform.sizeDelta = new Vector2(_originalScreenSize.x + (__instance._columnCount - __instance._visibleColumnCount - 1) * __instance._columnWidth * 2, _originalScreenSize.y);
+
+                _isScreenResized = true;
+            }
+        }
+
+        [AffinityPatch(typeof(AnnotatedBeatmapLevelCollectionsGridViewAnimator), nameof(AnnotatedBeatmapLevelCollectionsGridViewAnimator.AnimateClose))]
+        private void RestoreScreenSize(AnnotatedBeatmapLevelCollectionsGridViewAnimator __instance)
+        {
+            if (_isScreenResized)
+            {
+                var rectTransform = (RectTransform)_mainFlowCoordinator._screenSystem.mainScreen.transform;
+                rectTransform.sizeDelta = _originalScreenSize;
+
+                _isScreenResized = false;
             }
         }
     }
