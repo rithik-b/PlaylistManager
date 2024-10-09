@@ -74,8 +74,8 @@ namespace PlaylistManager.UI
         {
             parsed = true;
             transform.SetParent(rootTransform);
-            customListTableData.data = PlaylistSequentialDownloader.downloadQueue;
-            customListTableData.tableView.ReloadDataKeepingPosition();
+            customListTableData.Data = PlaylistSequentialDownloader.downloadQueue;
+            customListTableData.TableView.ReloadDataKeepingPosition();
         }
 
         private void OnPopupRequested()
@@ -100,7 +100,7 @@ namespace PlaylistManager.UI
         {
             if (customListTableData != null)
             {
-                customListTableData.tableView.ReloadDataKeepingPosition();
+                customListTableData.TableView.ReloadDataKeepingPosition();
             }
 
             if (PlaylistSequentialDownloader.downloadQueue.Count == 0)

@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using BeatSaberMarkupLanguage.Attributes;
 using HMUI;
-using UnityEngine;
 
 namespace PlaylistManager.Types
 {

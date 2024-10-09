@@ -115,15 +115,15 @@ namespace PlaylistManager.UI
 
         private async void ShowImages(BeatSaberPlaylistsLib.Types.IPlaylist playlist)
         {
-            await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() => customListTableData.data.Clear());
+            await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() => customListTableData.Data.Clear());
 
             IsLoading = true;
 
             // Add clear image
-            customListTableData.data.Add(new CustomCellInfo("Clear Icon", "Clear", await PlaylistLibUtils.GeneratePlaylistIcon(playlist)));
+            customListTableData.Data.Add(new CustomCellInfo("Clear Icon", "Clear", await PlaylistLibUtils.GeneratePlaylistIcon(playlist)));
 
             // Add default image
-            customListTableData.data.Add(new CustomCellInfo("PlaylistManager Icon", "Default", playlistManagerIcon));
+            customListTableData.Data.Add(new CustomCellInfo("PlaylistManager Icon", "Default", playlistManagerIcon));
 
             LoadImages();
             foreach (var coverImage in coverImages)
@@ -135,12 +135,12 @@ namespace PlaylistManager.UI
                 }
                 else if(coverImage.Value.SpriteWasLoaded)
                 {
-                    customListTableData.data.Add(new CustomCellInfo(Path.GetFileName(coverImage.Key), coverImage.Key, coverImage.Value.Sprite));
+                    customListTableData.Data.Add(new CustomCellInfo(Path.GetFileName(coverImage.Key), coverImage.Key, coverImage.Value.Sprite));
                 }
             }
 
-            await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() => customListTableData.tableView.ReloadData());
-            customListTableData.tableView.ScrollToCellWithIdx(0, TableView.ScrollPositionType.Beginning, false);
+            await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() => customListTableData.TableView.ReloadData());
+            customListTableData.TableView.ScrollToCellWithIdx(0, TableView.ScrollPositionType.Beginning, false);
             _ = ViewControllerMonkeyCleanup();
         }
 
@@ -150,12 +150,12 @@ namespace PlaylistManager.UI
             {
                 if (coverImage.SpriteWasLoaded)
                 {
-                    customListTableData.data.Add(new CustomCellInfo(Path.GetFileName(coverImage.Path), coverImage.Path, coverImage.Sprite));
-                    customListTableData.tableView.ReloadDataKeepingPosition();
+                    customListTableData.Data.Add(new CustomCellInfo(Path.GetFileName(coverImage.Path), coverImage.Path, coverImage.Sprite));
+                    customListTableData.TableView.ReloadDataKeepingPosition();
 
-                    if (customListTableData.data.Count == 4)
+                    if (customListTableData.Data.Count == 4)
                     {
-                        customListTableData.tableView.AddCellToReusableCells(customListTableData.tableView.dataSource.CellForIdx(customListTableData.tableView, 3));
+                        customListTableData.TableView.AddCellToReusableCells(customListTableData.TableView.dataSource.CellForIdx(customListTableData.TableView, 3));
                     }
                     _ = ViewControllerMonkeyCleanup();
                 }
@@ -166,7 +166,7 @@ namespace PlaylistManager.UI
         [UIAction("select-cell")]
         private void OnCellSelect(TableView tableView, int index)
         {
-            customListTableData.tableView.ClearSelection();
+            customListTableData.TableView.ClearSelection();
             selectedIndex = index;
             popupModalsController.ShowYesNoModal(modalTransform, "Are you sure you want to change the image of the playlist? This cannot be reverted.", ChangeImage, animateParentCanvas: false);
         }
@@ -190,7 +190,7 @@ namespace PlaylistManager.UI
             }
             else
             {
-                var selectedImagePath = customListTableData.data[selectedIndex].subtext;
+                var selectedImagePath = customListTableData.Data[selectedIndex].Subtext;
                 try
                 {
                     using (var imageStream = File.Open(selectedImagePath, FileMode.Open))
@@ -212,7 +212,7 @@ namespace PlaylistManager.UI
         private async Task ViewControllerMonkeyCleanup()
         {
             await SiraUtil.Extras.Utilities.PauseChamp;
-            var imageViews = customListTableData.tableView.GetComponentsInChildren<ImageView>(true);
+            var imageViews = customListTableData.TableView.GetComponentsInChildren<ImageView>(true);
             for (var i = 0; i < imageViews.Length; i++)
             {
                 imageViews[i]._skew = 0f;

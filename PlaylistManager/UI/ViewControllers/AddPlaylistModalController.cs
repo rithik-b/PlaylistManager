@@ -87,9 +87,9 @@ namespace PlaylistManager.UI
             highlightCheckboxTransform.transform.localScale *= 0.5f;
 
             createModal._animateParentCanvas = false;
-            dropdownTableData.data.Add(new CustomCellInfo("Playlist"));
-            dropdownTableData.data.Add(new CustomCellInfo("Folder"));
-            dropdownTableData.tableView.ReloadData();
+            dropdownTableData.Data.Add(new CustomCellInfo("Playlist"));
+            dropdownTableData.Data.Add(new CustomCellInfo("Folder"));
+            dropdownTableData.TableView.ReloadData();
         }
 
         #region Show Playlists
@@ -104,7 +104,7 @@ namespace PlaylistManager.UI
 
         internal void ShowPlaylistsForManager(BeatSaberPlaylistsLib.PlaylistManager parentManager)
         {
-            playlistTableData.data.Clear();
+            playlistTableData.Data.Clear();
 
             this.parentManager = parentManager;
             childManagers = parentManager.GetChildManagers().ToList();
@@ -113,7 +113,7 @@ namespace PlaylistManager.UI
 
             foreach (var playlistManager in childManagers)
             {
-                playlistTableData.data.Add(new CustomCellInfo(Path.GetFileName(playlistManager.PlaylistPath), "Folder", folderIcon));
+                playlistTableData.Data.Add(new CustomCellInfo(Path.GetFileName(playlistManager.PlaylistPath), "Folder", folderIcon));
             }
             foreach (var playlist in childPlaylists)
             {
@@ -128,7 +128,7 @@ namespace PlaylistManager.UI
                     ShowPlaylist(playlist);
                 }
             }
-            playlistTableData.tableView.ReloadData();
+            playlistTableData.TableView.ReloadData();
 
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(BackActive)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FolderText)));
@@ -142,7 +142,7 @@ namespace PlaylistManager.UI
                 {
                     ShowPlaylist((IPlaylist)stagedSpriteLoadPlaylist);
                 }
-                playlistTableData.tableView.ReloadDataKeepingPosition();
+                playlistTableData.TableView.ReloadDataKeepingPosition();
                 stagedSpriteLoadPlaylist.SpriteLoaded -= StagedSpriteLoadPlaylist_SpriteLoaded;
             }
         }
@@ -159,13 +159,13 @@ namespace PlaylistManager.UI
                 }
                 subName += " (contains song)";
             }
-            playlistTableData.data.Add(new CustomCellInfo(playlist.Title, subName, playlist.SmallSprite));
+            playlistTableData.Data.Add(new CustomCellInfo(playlist.Title, subName, playlist.SmallSprite));
         }
 
         [UIAction("select-cell")]
         private void OnCellSelect(TableView tableView, int index)
         {
-            playlistTableData.tableView.ClearSelection();
+            playlistTableData.TableView.ClearSelection();
             // Folder Selected
             if (index < childManagers.Count)
             {
@@ -262,7 +262,7 @@ namespace PlaylistManager.UI
             }
 
             childPlaylists.Add(playlist);
-            playlistTableData.tableView.ReloadDataKeepingPosition();
+            playlistTableData.TableView.ReloadDataKeepingPosition();
         }
 
         private void CreateFolder(string folderName)
@@ -278,8 +278,8 @@ namespace PlaylistManager.UI
                 }
                 else
                 {
-                    playlistTableData.data.Insert(childManagers.Count, new CustomCellInfo(Path.GetFileName(childManager.PlaylistPath), "Folder", folderIcon));
-                    playlistTableData.tableView.ReloadDataKeepingPosition();
+                    playlistTableData.Data.Insert(childManagers.Count, new CustomCellInfo(Path.GetFileName(childManager.PlaylistPath), "Folder", folderIcon));
+                    playlistTableData.TableView.ReloadDataKeepingPosition();
                     childManagers.Add(childManager);
                     PlaylistLibUtils.playlistManager.RequestRefresh("PlaylistManager (plugin)");
                 }

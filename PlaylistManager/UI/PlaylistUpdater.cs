@@ -106,8 +106,8 @@ namespace PlaylistManager.UI
             _annotatedBeatmapLevelCollectionsViewController._annotatedBeatmapLevelCollectionsGridView._annotatedBeatmapLevelCollections = annotatedBeatmapLevelCollections;
 
             var gridView = _annotatedBeatmapLevelCollectionsViewController._annotatedBeatmapLevelCollectionsGridView._gridView;
-            var cellWidth = gridView._dataSource.GetCellWidth();
-            var cellHeight = gridView._dataSource.GetCellHeight();
+            var cellWidth = gridView._dataSource.cellWidth;
+            var cellHeight = gridView._dataSource.cellHeight;
             foreach (var prefab in gridView._spawnedCellsPerPrefabDictionary.Keys)
             {
                 var spawnedCells = gridView._spawnedCellsPerPrefabDictionary[prefab];

@@ -37,6 +37,10 @@
           <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BeatmapCore.dll</HintPath>
           <Private>False</Private>
       </Reference>
+      <Reference Include="BeatSaber.ViewSystem">
+        <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BeatSaber.ViewSystem.dll</HintPath>
+	    <Publicize>True</Publicize>
+      </Reference>
       <Reference Include="BeatSaberPlaylistsLib">
           <HintPath>$(BeatSaberDir)\Libs\BeatSaberPlaylistsLib.dll</HintPath>
           <Private>False</Private>
@@ -77,7 +81,10 @@
       <Reference Include="HMUI">
           <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\HMUI.dll</HintPath>
           <Private>False</Private>
-          <Publicize>True</Publicize>
+		  <Publicize>True</Publicize>
+      </Reference>
+      <Reference Include="Interactable">
+        <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Interactable.dll</HintPath>
       </Reference>
       <Reference Include="IPA.Loader">
           <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\IPA.Loader.dll</HintPath>
@@ -95,6 +102,9 @@
       <Reference Include="PlatformUserModel">
           <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\PlatformUserModel.dll</HintPath>
           <Private>false</Private>
+      </Reference>
+      <Reference Include="SegmentedControl">
+        <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\SegmentedControl.dll</HintPath>
       </Reference>
       <Reference Include="SiraUtil">
           <HintPath>$(BeatSaberDir)\Plugins\SiraUtil.dll</HintPath>
@@ -161,8 +171,8 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.2">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
     </ItemGroup>
 </Project>
