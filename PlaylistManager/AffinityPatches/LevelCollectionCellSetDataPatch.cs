@@ -14,6 +14,8 @@ using SiraUtil.Affinity;
 
 namespace PlaylistManager.AffinityPatches
 {
+    // TODO: Fix lag when loading covers.
+    // TODO: Don't load covers that have no size.
     internal class LevelCollectionCellSetDataPatch : IAffinity
     {
         private readonly Dictionary<IPlaylist, AnnotatedBeatmapLevelCollectionCell> eventTable = new();

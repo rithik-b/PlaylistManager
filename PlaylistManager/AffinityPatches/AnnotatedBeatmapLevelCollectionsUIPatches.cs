@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace PlaylistManager.AffinityPatches
 {
+    // TODO: When UI is overlapping other view controllers, blur them.
     internal class AnnotatedBeatmapLevelCollectionsUIPatches : IAffinity
     {
         private readonly MainFlowCoordinator _mainFlowCoordinator;
