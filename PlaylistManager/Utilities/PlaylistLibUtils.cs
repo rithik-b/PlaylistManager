@@ -127,8 +127,7 @@ namespace PlaylistManager.Utilities
             using var coverStream = await playlist.GetDefaultCoverStream();
             if (coverStream != null)
             {
-                Sprite? sprite = null;
-                await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() => sprite = BeatSaberMarkupLanguage.Utilities.LoadSpriteRaw(coverStream.ToArray()));
+                var sprite = await BeatSaberMarkupLanguage.Utilities.LoadSpriteAsync(coverStream.ToArray());
                 return sprite ? sprite : BeatSaberPlaylistsLib.Utilities.DefaultSprite;
             }
             return BeatSaberPlaylistsLib.Utilities.DefaultSprite;

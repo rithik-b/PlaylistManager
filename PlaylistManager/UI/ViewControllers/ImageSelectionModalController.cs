@@ -65,7 +65,7 @@ namespace PlaylistManager.UI
             }
 
             coverImages = new Dictionary<string, CoverImage>();
-            playlistManagerIcon = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.DefaultIcon.png");
+            playlistManagerIcon = SpriteUtils.LoadSpriteFromAssembly("PlaylistManager.Icons.DefaultIcon.png");
             parsed = false;
         }
 

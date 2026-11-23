@@ -57,7 +57,7 @@ namespace PlaylistManager.Types
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(name)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(role)));
-            iconImage.sprite = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly(iconPath);
+            iconImage.sprite = PlaylistManager.Utilities.SpriteUtils.LoadSpriteFromAssembly(iconPath);
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(YoutubeActive)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TwitchActive)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(GithubActive)));

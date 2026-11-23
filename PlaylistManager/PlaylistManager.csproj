@@ -99,8 +99,16 @@
           <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\mscorlib.dll</HintPath>
           <Private>false</Private>
       </Reference>
-      <Reference Include="PlatformUserModel">
-          <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\PlatformUserModel.dll</HintPath>
+      <Reference Include="UnityEngine.ImageConversionModule">
+          <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.ImageConversionModule.dll</HintPath>
+          <Private>False</Private>
+      </Reference>
+      <Reference Include="netstandard">
+          <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\netstandard.dll</HintPath>
+          <Private>false</Private>
+      </Reference>
+      <Reference Include="OculusStudios.Platform.Core">
+          <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\OculusStudios.Platform.Core.dll</HintPath>
           <Private>false</Private>
       </Reference>
       <Reference Include="SegmentedControl">

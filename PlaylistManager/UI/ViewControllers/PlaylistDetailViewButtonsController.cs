@@ -122,7 +122,7 @@ namespace PlaylistManager.UI
 
             var levelPaths = selectedPlaylist.BeatmapLevels
                 .Where(l => !l.hasPrecalculatedData)
-                .Select(l => SongCore.Collections.GetLoadedSaveData(l.levelID)?.customLevelFolderInfo.folderPath)
+                .Select(l => SongCore.Loader.CustomLevelLoader._loadedBeatmapSaveData.TryGetValue(l.levelID, out var loadedSaveData) ? loadedSaveData.customLevelFolderInfo.folderPath : null)
                 .Where(p => p != null)
                 .ToList();
             await loader.DeleteSongsAsync(levelPaths);

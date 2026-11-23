@@ -64,7 +64,7 @@ namespace PlaylistManager.UI
             this.popupModalsController = popupModalsController;
             this.pluginMetadata = pluginMetadata.Value;
             this.bsmlParser = bsmlParser;
-            folderIcon = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.FolderIcon.png");
+            folderIcon = SpriteUtils.LoadSpriteFromAssembly("PlaylistManager.Icons.FolderIcon.png");
             parsed = false;
         }
 

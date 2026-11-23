@@ -87,11 +87,11 @@ namespace PlaylistManager.UI
             this.pluginMetadata = pluginMetadata.Value;
             this.bsmlParser = bsmlParser;
 
-            levelPacksSprite = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.LevelPacks.png");
-            customPacksSprite = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.CustomPacks.png");
-            playlistsSprite = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.Playlists.png");
-            foldersSprite = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.Folders.png");
-            folderIcon = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("PlaylistManager.Icons.FolderIcon.png");
+            levelPacksSprite = SpriteUtils.LoadSpriteFromAssembly("PlaylistManager.Icons.LevelPacks.png");
+            customPacksSprite = SpriteUtils.LoadSpriteFromAssembly("PlaylistManager.Icons.CustomPacks.png");
+            playlistsSprite = SpriteUtils.LoadSpriteFromAssembly("PlaylistManager.Icons.Playlists.png");
+            foldersSprite = SpriteUtils.LoadSpriteFromAssembly("PlaylistManager.Icons.Folders.png");
+            folderIcon = SpriteUtils.LoadSpriteFromAssembly("PlaylistManager.Icons.FolderIcon.png");
 
             tableCells = new List<CustomListTableData.CustomCellInfo>();
             folderMode = FolderMode.None;
