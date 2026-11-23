@@ -79,7 +79,7 @@ namespace PlaylistManager.AffinityPatches
 
             if (_annotatedBeatmapLevelCollectionsViewController._annotatedBeatmapLevelCollectionsGridView._annotatedBeatmapLevelCollections.Count <= __instance._visibleColumnCount)
             {
-                __result = __instance._columnWidth;
+                __result = (__instance._columnCount - __instance._visibleColumnCount) * 0.5f * __instance._columnWidth;
 
                 return;
             }
